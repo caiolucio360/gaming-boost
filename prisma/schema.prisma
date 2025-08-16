@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Service {
+  id          String      @id @default(cuid())
+  game        Game
+  type        ServiceType
+  name        String
+  description String
+  price       Float
+  duration    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orders      Order[]
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  serviceId String
+  status    OrderStatus @default(PENDING)
+  total     Float
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  service   Service     @relation(fields: [serviceId], references: [id])
+}
+
+enum Role {
+  CLIENT
+  BOOSTER
+  ADMIN
+}
+
+enum Game {
+  LOL
+  CS2
+  VALORANT
+}
+
+enum ServiceType {
+  RANK_BOOST
+  PLACEMENT
+  COACHING
+  ACCOUNT_LEVELING
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
