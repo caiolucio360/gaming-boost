@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { 
   ShieldIcon, 
   UserIcon, 
@@ -143,43 +142,47 @@ export function ElojobHeader() {
           {/* Auth Section */}
           <div className="flex items-center space-x-6">
             {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-12 w-12 rounded-full hover:bg-purple-600 border-2 border-purple-500/40"
-                  >
-                    <Avatar>
-                      <AvatarFallback className="bg-purple-500 text-white font-bold">U</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 ml-4 bg-black/90 backdrop-blur-md border border-purple-500/40 z-[70]" align="end">
-                  <DropdownMenuItem className="hover:bg-purple-600 hover:text-white text-white">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                  asChild
+                >
+                  <Link href="/profile">
                     <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Perfil</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-purple-600 hover:text-white text-white">
+                    Perfil
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                  asChild
+                >
+                  <Link href="/settings">
                     <SettingsIcon className="mr-2 h-4 w-4" />
-                    <span>Configurações</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-purple-600 hover:text-white text-white">
-                    <LogOutIcon className="mr-2 h-4 w-4" />
-                    <span>Sair</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    Configurações
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                  onClick={() => setIsAuthenticated(false)}
+                >
+                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  Sair
+                </Button>
+              </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
-                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/20 px-4 py-2 rounded-lg transition-all duration-500 text-lg hover:scale-105"
+                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
                   asChild
                 >
                   <Link href="/login">Entrar</Link>
                 </Button>
                 <Button
-                  className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-6 py-2 border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 shadow-lg shadow-purple-500/40 hover:shadow-xl hover:shadow-purple-500/50 hover:scale-105 text-lg"
+                  className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-6 py-2 border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 shadow-lg shadow-purple-500/40 hover:shadow-xl hover:shadow-purple-500/50 text-lg"
                   asChild
                 >
                   <Link href="/register">Cadastrar</Link>
