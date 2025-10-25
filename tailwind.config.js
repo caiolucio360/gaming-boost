@@ -8,7 +8,40 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'orbitron': ['var(--font-orbitron)', 'sans-serif'],
+        'rajdhani': ['var(--font-rajdhani)', 'sans-serif'],
+      },
       colors: {
+        // Esquema de cores personalizado
+        brand: {
+          black: '#0A0A0A',
+          'black-light': '#1A1A1A',
+          red: {
+            DEFAULT: '#DC2626',
+            light: '#EF4444',
+            dark: '#B91C1C',
+          },
+          purple: {
+            dark: '#4C1D95',
+            DEFAULT: '#7C3AED',
+            light: '#A855F7',
+            lighter: '#C084FC',
+          },
+          white: '#FFFFFF',
+          gray: {
+            50: '#F9FAFB',
+            100: '#F3F4F6',
+            200: '#E5E7EB',
+            300: '#D1D5DB',
+            400: '#9CA3AF',
+            500: '#6B7280',
+            600: '#4B5563',
+            700: '#374151',
+            800: '#1F2937',
+            900: '#111827',
+          }
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

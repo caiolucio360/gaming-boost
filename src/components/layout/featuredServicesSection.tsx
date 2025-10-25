@@ -9,10 +9,12 @@ export default function FeaturedServicesSection() {
     const featuredServices = services.slice(0, 6)
   
     return (
-      <section id="services" className="py-20 bg-gray-50">
+      <section id="services" className="py-20 bg-black">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
-            Serviços em Destaque
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
+            <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+              Serviços em Destaque
+            </span>
           </h2>
   
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

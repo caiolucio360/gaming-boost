@@ -17,10 +17,10 @@ export function ServiceCard({ service }: ServiceCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="bg-gray-900 border-purple-600/50 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{service.name}</CardTitle>
+          <CardTitle className="text-lg text-white">{service.name}</CardTitle>
           <Badge 
             className={`${gameColors[service.game]} text-white`}
             variant="secondary"
@@ -28,22 +28,22 @@ export function ServiceCard({ service }: ServiceCardProps) {
             {service.game}
           </Badge>
         </div>
-        <p className="text-gray-600 text-sm">{service.description}</p>
+        <p className="text-gray-400 text-sm">{service.description}</p>
       </CardHeader>
       
       <CardContent>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-1">
-            <ClockIcon className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{service.duration}</span>
+            <ClockIcon className="h-4 w-4 text-purple-400" />
+            <span className="text-sm text-gray-400">{service.duration}</span>
           </div>
           <div className="flex items-center space-x-1">
             <StarIcon className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-            <span className="text-sm text-gray-600">4.9</span>
+            <span className="text-sm text-gray-400">4.9</span>
           </div>
         </div>
         
-        <div className="text-2xl font-bold text-blue-600">
+        <div className="text-2xl font-bold text-purple-400">
           {formatPrice(service.price)}
         </div>
       </CardContent>

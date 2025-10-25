@@ -53,10 +53,10 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section className="py-20 bg-gradient-to-b from-blue-950 to-blue-900 text-white">
+    <section className="py-20 bg-black text-white">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
-          Por que escolher a <span className="text-blue-400">GameBoost Pro</span>?
+          Por que escolher a <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">GameBoost Pro</span>?
         </h2>
 
         {/* Grid se adapta automaticamente para menos ou mais itens */}
@@ -65,16 +65,16 @@ export default function FeaturesSection() {
             <Card
               key={i}
               className={cn(
-                "flex flex-col items-center justify-center p-8 text-center transition-shadow",
-                "bg-blue-900/50 border-blue-800 shadow-md hover:shadow-lg"
+                "flex flex-col items-center justify-center p-8 text-center transition-all duration-300",
+                "bg-gray-900/50 border-purple-600/50 shadow-lg hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 backdrop-blur-sm"
               )}
             >
               <CardContent className="flex flex-col items-center p-0">
                 <feature.icon
                   className={cn("w-12 h-12 mb-4", feature.iconColor)}
                 />
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                <p className="text-blue-200 text-sm">{feature.subtitle}</p>
+                <h3 className="text-xl font-bold mb-2 text-white">{feature.title}</h3>
+                <p className="text-gray-400 text-sm">{feature.subtitle}</p>
               </CardContent>
             </Card>
           ))}
