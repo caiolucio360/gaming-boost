@@ -20,7 +20,3 @@
 - Componentização adequada
 - Tipagem completa
 - Padrões de desenvolvimento
-
-## 📝 Licença
-
-Este projeto é privado e proprietário.
