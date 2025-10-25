@@ -4,8 +4,6 @@ export default function ServicesPage() {
       title: "BOOST DE RANK",
       description: "Subimos seu rank de forma segura e profissional",
       features: [
-        "CS2 Premier Mode",
-        "Gamers Club",
         "Entrega rápida",
         "Conta 100% segura",
         "Suporte 24/7"
@@ -19,16 +17,16 @@ export default function ServicesPage() {
         "Sessões personalizadas",
         "Análise de gameplay",
         "Estratégias avançadas",
-        "Mentoria individual",
-        "Relatórios detalhados"
+        "Mentoria individual"
       ],
-      icon: "🎖️"
+      icon: "🎖️",
+      comingSoon: true
     }
   ]
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-6 py-32">
+      <div className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
             <span className="text-purple-300">NOSSOS</span>
@@ -49,6 +47,9 @@ export default function ServicesPage() {
                 <div className="text-6xl mb-4">{service.icon}</div>
                 <h2 className="text-3xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
                   {service.title}
+                  {service.comingSoon && (
+                    <span className="text-sm text-purple-400 font-semibold ml-2">(em breve)</span>
+                  )}
                 </h2>
                 <p className="text-gray-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
                   {service.description}
@@ -64,9 +65,6 @@ export default function ServicesPage() {
                 ))}
               </ul>
 
-              <button className="w-full py-3 px-6 rounded-lg font-bold font-rajdhani transition-all duration-300 bg-transparent border-2 border-purple-500 text-purple-300 hover:bg-purple-500 hover:text-white hover:shadow-lg hover:shadow-purple-500/30" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                SABER MAIS
-              </button>
             </div>
           ))}
         </div>

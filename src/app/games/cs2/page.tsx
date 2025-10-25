@@ -1,90 +1,125 @@
 'use client'
 
-import { useState } from 'react'
-import { ServiceCard } from '@/components/games/service-card'
-import { RankSelector } from '@/components/games/rank-selector'
-import { services, cs2Ranks } from '@/lib/data'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { formatPrice } from '@/lib/utils'
+import Link from 'next/link'
 
 export default function CS2Page() {
-  const cs2Services = services.filter(s => s.game === 'CS2')
-  const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null)
-
-  const handleRankSelection = (from: any, to: any) => {
-    if (from && to) {
-      const fromIndex = cs2Ranks.findIndex(r => r.id === from.id)
-      const toIndex = cs2Ranks.findIndex(r => r.id === to.id)
-      const difference = toIndex - fromIndex
-      
-      if (difference > 0) {
-        const basePrice = 29.90
-        const calculatedPrice = basePrice * difference * 1.4
-        setCalculatedPrice(calculatedPrice)
-      }
-    } else {
-      setCalculatedPrice(null)
+  const services = [
+    {
+      title: "BOOST DE RANK",
+      description: "Subimos seu rank de forma segura e profissional",
+      features: [
+        "CS2 Premier Mode",
+        "Gamers Club", 
+        "Entrega rápida",
+        "Conta 100% segura",
+        "Suporte 24/7"
+      ],
+      icon: "⚡",
+      href: "/games/cs2/pricing",
+      available: true
+    },
+    {
+      title: "COACHING",
+      description: "Aprenda com jogadores experientes",
+      features: [
+        "Sessões personalizadas",
+        "Análise de gameplay",
+        "Estratégias avançadas",
+        "Mentoria individual"
+      ],
+      icon: "🎖️",
+      href: "#",
+      available: false
     }
-  }
+  ]
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
-          Counter-Strike 2
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Boost Prime no CS2 com os melhores players. Alcance Global Elite 
-          com nossos boosters experientes.
-        </p>
-      </div>
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-6 py-20">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+            <span className="text-purple-300">COUNTER-STRIKE 2</span>
+          </h1>
+          <p className="text-xl text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            Escolha o serviço que melhor atende suas necessidades
+          </p>
+        </div>
 
-      <Tabs defaultValue="calculator" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-          <TabsTrigger value="calculator">Calculadora de Preços</TabsTrigger>
-          <TabsTrigger value="services">Todos os Serviços</TabsTrigger>
-        </TabsList>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {services.map((service, index) => (
+              <div
+                key={index}
+                className={`bg-black/30 backdrop-blur-md border rounded-lg p-8 transition-all duration-300 ${
+                  service.available
+                    ? 'border-purple-500/50 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 cursor-pointer'
+                    : 'border-gray-500/30 opacity-60 cursor-not-allowed'
+                }`}
+              >
+                {service.available ? (
+                  <Link href={service.href} className="block">
+                    <div className="text-center mb-6">
+                      <div className="text-6xl mb-4">{service.icon}</div>
+                      <h2 className="text-3xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                        {service.title}
+                      </h2>
+                      <p className="text-gray-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                        {service.description}
+                      </p>
+                    </div>
 
-        <TabsContent value="calculator" className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Calculadora de Boost</CardTitle>
-              <CardDescription>
-                Selecione seu rank atual e o rank desejado
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RankSelector
-                ranks={cs2Ranks}
-                title="Prime Boost - Counter-Strike 2"
-                onSelectionChange={handleRankSelection}
-              />
-              
-              {calculatedPrice && (
-                <div className="mt-8 p-6 bg-orange-50 rounded-lg text-center">
-                  <h3 className="text-xl font-semibold mb-2">Preço Calculado</h3>
-                  <div className="text-3xl font-bold text-orange-600 mb-4">
-                    {formatPrice(calculatedPrice)}
+                    <ul className="space-y-3 mb-8">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="text-center">
+                      <div className="inline-flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                        <span>Continuar</span>
+                        <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div>
+                    <div className="text-center mb-6">
+                      <div className="text-6xl mb-4">{service.icon}</div>
+                      <h2 className="text-3xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                        {service.title}
+                      </h2>
+                      <p className="text-gray-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                        {service.description}
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 mb-8">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                        <span className="text-sm text-purple-400 font-semibold mr-2">(em breve)</span>
+                        <span>Em desenvolvimento</span>
+                      </div>
+                    </div>
                   </div>
-                  <Button size="lg" className="bg-orange-600 hover:bg-orange-700">
-                    Contratar Boost
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="services" className="space-y-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cs2Services.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+                )}
+              </div>
             ))}
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }

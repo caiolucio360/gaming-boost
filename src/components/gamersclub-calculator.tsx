@@ -101,8 +101,8 @@ export function GamersClubCalculator() {
                     onClick={() => handleCurrentSelect(levelInfo.level)}
                     className={`p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
                       selectedCurrent === levelInfo.level.toString()
-                        ? 'ring-2 ring-purple-400 ring-opacity-50'
-                        : ''
+                        ? 'ring-4 ring-yellow-400 ring-opacity-90 shadow-lg shadow-yellow-400/60 scale-105 bg-yellow-500/90'
+                        : 'hover:ring-2 hover:ring-purple-300 hover:ring-opacity-40'
                     } ${levelInfo.color}`}
                   >
                     <span className="text-white font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
@@ -125,8 +125,8 @@ export function GamersClubCalculator() {
                     onClick={() => handleTargetSelect(levelInfo.level)}
                     className={`p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
                       selectedTarget === levelInfo.level.toString()
-                        ? 'ring-2 ring-purple-400 ring-opacity-50'
-                        : ''
+                        ? 'ring-4 ring-yellow-400 ring-opacity-90 shadow-lg shadow-yellow-400/60 scale-105 bg-yellow-500/90'
+                        : 'hover:ring-2 hover:ring-purple-300 hover:ring-opacity-40'
                     } ${levelInfo.color}`}
                   >
                     <span className="text-white font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>

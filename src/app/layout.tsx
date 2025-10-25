@@ -29,9 +29,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col overflow-x-hidden">
           <ElojobHeader />
-          <main className="flex-1">
+          <main className="flex-1 pt-16">
             {children}
           </main>
           <Footer />

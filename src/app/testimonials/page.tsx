@@ -1,58 +1,58 @@
 export default function TestimonialsPage() {
   const testimonials = [
     {
-      name: "João Silva",
+      name: "João",
       game: "Counter-Strike 2",
       rank: "Global Elite",
-      text: "Serviço excepcional! Conseguiu meu boost em apenas 2 dias. Profissionais e confiáveis.",
+      text: "Cara q serviço foda! Conseguiram meu boost em 2 dias só nem acreditei. Valeu cada real gasto!",
       rating: 5,
-      avatar: "JS"
+      avatar: "J"
     },
     {
-      name: "Maria Santos",
-      game: "League of Legends",
-      rank: "Challenger",
-      text: "Melhor serviço de boost que já usei. Suporte 24/7 e entrega rápida. Recomendo!",
-      rating: 5,
-      avatar: "MS"
-    },
-    {
-      name: "Pedro Costa",
-      game: "Valorant",
-      rank: "Radiant",
-      text: "Profissionais de verdade! Meu boost foi feito com segurança total. Vale cada centavo.",
-      rating: 5,
-      avatar: "PC"
-    },
-    {
-      name: "Ana Oliveira",
+      name: "Ana",
       game: "Counter-Strike 2",
       rank: "Supreme",
-      text: "Serviço rápido e eficiente. Conseguiu meu objetivo em tempo recorde. Parabéns!",
-      rating: 5,
-      avatar: "AO"
+      text: "Mto bom mesmo! Rapido e eficiente conseguiram meu objetivo super rapido. Parabéns pela qualidade!",
+      rating: 4,
+      avatar: "A"
     },
     {
-      name: "Carlos Lima",
-      game: "League of Legends",
-      rank: "Master",
-      text: "Atendimento de primeira! Resolveram todas minhas dúvidas e entregaram no prazo.",
+      name: "Carlos",
+      game: "Counter-Strike 2",
+      rank: "Legendary Eagle Master",
+      text: "Atendimento top! Tiraram todas minhas duvidas e entregaram certinho no prazo. Recomendo dmss!",
       rating: 5,
-      avatar: "CL"
+      avatar: "C"
     },
     {
-      name: "Fernanda Rocha",
-      game: "Valorant",
-      rank: "Immortal",
-      text: "Experiência incrível! Profissionais dedicados e resultados excepcionais. Super recomendo!",
+      name: "Fernanda",
+      game: "Counter-Strike 2",
+      rank: "Distinguished Master Guardian",
+      text: "Experiencia incrivel! Profissionais de verdade resultados excepcionais. Super recomendo pra td mundo!",
       rating: 5,
-      avatar: "FR"
+      avatar: "F"
+    },
+    {
+      name: "Rafa",
+      game: "Counter-Strike 2",
+      rank: "Master Guardian Elite",
+      text: "Melhor serviço q ja usei! Suporte 24/7 e entrega rapida demais. Recomendo pra todos os amigos!",
+      rating: 4,
+      avatar: "R"
+    },
+    {
+      name: "Lucas",
+      game: "Counter-Strike 2",
+      rank: "Gold Nova Master",
+      text: "Bom serviço! Fizeram o boost certinho mas demorou um pouco mais q o esperado. Mesmo assim recomendo!",
+      rating: 3,
+      avatar: "L"
     }
   ]
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-6 py-32">
+      <div className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
             <span className="text-purple-300">DEPOIMENTOS</span>
@@ -78,7 +78,7 @@ export default function TestimonialsPage() {
                     {testimonial.name}
                   </h3>
                   <p className="text-purple-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                    {testimonial.game} - {testimonial.rank}
+                    {testimonial.game}
                   </p>
                 </div>
               </div>

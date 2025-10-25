@@ -24,7 +24,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-6 py-32">
+      <div className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
             <span className="text-purple-300">SOBRE</span>
@@ -72,40 +72,6 @@ export default function AboutPage() {
           ))}
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-purple-600/20 to-purple-800/20 border border-purple-500/50 rounded-lg p-8">
-            <h2 className="text-3xl font-bold text-white font-orbitron mb-6 text-center" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-              <span className="text-purple-300">NOSSOS</span>
-              <span className="text-white"> VALORES</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div>
-                <h3 className="text-xl font-bold text-purple-300 font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  TRANSPARÊNCIA
-                </h3>
-                <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Comunicação clara e honesta em todos os nossos serviços
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-purple-300 font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  QUALIDADE
-                </h3>
-                <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Excelência em cada projeto e compromisso com resultados
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-purple-300 font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  INOVAÇÃO
-                </h3>
-                <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Sempre buscando novas tecnologias e métodos eficientes
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
