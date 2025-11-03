@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { 
   ShieldIcon, 
   UserIcon, 
@@ -9,14 +11,27 @@ import {
   SettingsIcon,
   MenuIcon,
   XIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ShoppingCartIcon,
+  PackageIcon
 } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/auth-context'
+import { useCart } from '@/contexts/cart-context'
+import { getEnabledGames } from '@/lib/games-config'
 
 export function ElojobHeader() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const router = useRouter()
+  const { user, logout, loading: authLoading } = useAuth()
+  const { items } = useCart()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isGamesMenuOpen, setIsGamesMenuOpen] = useState(false)
+
+  const cartItemsCount = items.length
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   const navigationItems = [
     { name: 'Início', href: '/' },
@@ -25,9 +40,12 @@ export function ElojobHeader() {
     { name: 'Sobre', href: '/about' },
   ]
 
-  const gamesItems = [
-    { name: 'Counter-Strike 2', href: '/games/cs2' },
-  ]
+  // Gerar links de jogos dinamicamente baseado nos jogos habilitados
+  const enabledGames = getEnabledGames()
+  const gamesItems = enabledGames.map((game) => ({
+    name: game.displayName,
+    href: game.href,
+  }))
 
   // Fechar menu quando clicar fora
   const handleClickOutside = () => {
@@ -44,18 +62,6 @@ export function ElojobHeader() {
         />
       )}
 
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-[60]">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-black/50 backdrop-blur-md text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/40 border border-purple-500/60 h-10 w-10 rounded-lg"
-        >
-          {isMobileMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
-        </Button>
-      </div>
-
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -66,16 +72,31 @@ export function ElojobHeader() {
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/50">
-        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 py-2 md:py-3 flex items-center justify-between">
+          {/* Mobile menu button */}
+          <div className="lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="bg-black/50 backdrop-blur-md text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/40 border border-purple-500/60 h-10 w-10 rounded-lg"
+            >
+              {isMobileMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
+            </Button>
+          </div>
+
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex items-center group flex-shrink-0 mx-auto lg:mx-0">
             <div>
-              <h1 className="text-3xl font-black text-white drop-shadow-2xl font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+              <h1 className="text-lg md:text-3xl font-black text-white drop-shadow-2xl font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
                 <span className="text-purple-300 drop-shadow-2xl group-hover:text-purple-200 transition-colors duration-300">GAME</span>
                 <span className="text-white drop-shadow-2xl">BOOST</span>
               </h1>
             </div>
           </Link>
+
+          {/* Spacer para centralizar logo no mobile */}
+          <div className="lg:hidden w-10"></div>
 
                   {/* Desktop Navigation */}
                   <nav className="hidden lg:flex items-center space-x-8">
@@ -93,36 +114,40 @@ export function ElojobHeader() {
                       Serviços
                     </Link>
                     
-                    {/* Games Menu - Custom Implementation */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setIsGamesMenuOpen(!isGamesMenuOpen)}
-                        className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10 flex items-center space-x-1"
+                    {/* Links de jogos dinâmicos */}
+                    {gamesItems.length > 0 && gamesItems.length === 1 ? (
+                      <Link
+                        href={gamesItems[0].href}
+                        className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10"
                       >
-                        <span>Jogos</span>
-                        <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${isGamesMenuOpen ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {/* Custom Games Menu */}
-                      {isGamesMenuOpen && (
-                        <div className="absolute top-full left-0 mt-2 w-56 bg-black/95 backdrop-blur-xl border border-purple-500/30 shadow-2xl shadow-purple-500/20 rounded-xl p-2 z-50">
-                          <div className="px-3 py-2">
-                            <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">Escolha o jogo</p>
+                        {gamesItems[0].name}
+                      </Link>
+                    ) : gamesItems.length > 1 ? (
+                      <div className="relative">
+                        <Button
+                          variant="ghost"
+                          className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10 flex items-center"
+                          onClick={() => setIsGamesMenuOpen(!isGamesMenuOpen)}
+                        >
+                          Jogos
+                          <ChevronDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                        {isGamesMenuOpen && (
+                          <div className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-md border border-purple-500/50 rounded-lg shadow-lg z-50">
+                            {gamesItems.map((game) => (
+                              <Link
+                                key={game.href}
+                                href={game.href}
+                                onClick={() => setIsGamesMenuOpen(false)}
+                                className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-base tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
+                              >
+                                {game.name}
+                              </Link>
+                            ))}
                           </div>
-                          {gamesItems.map((game) => (
-                            <Link
-                              key={game.name}
-                              href={game.href}
-                              className="flex items-center space-x-3 text-white hover:bg-purple-500/20 hover:text-purple-200 transition-colors duration-200 rounded-lg px-3 py-3 cursor-pointer group"
-                              onClick={() => setIsGamesMenuOpen(false)}
-                            >
-                              <div className="w-2 h-2 bg-purple-400 rounded-full group-hover:bg-purple-300 transition-colors"></div>
-                              <span className="font-medium">{game.name}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    ) : null}
                     
                     <Link
                       href="/testimonials"
@@ -139,41 +164,146 @@ export function ElojobHeader() {
                     </Link>
                   </nav>
 
-          {/* Auth Section */}
-          <div className="flex items-center space-x-6">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="ghost"
-                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                  asChild
-                >
-                  <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Perfil
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                  asChild
-                >
-                  <Link href="/settings">
-                    <SettingsIcon className="mr-2 h-4 w-4" />
-                    Configurações
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                  onClick={() => setIsAuthenticated(false)}
-                >
-                  <LogOutIcon className="mr-2 h-4 w-4" />
-                  Sair
-                </Button>
+          {/* Auth Section - Hidden on mobile */}
+          <div className="hidden lg:flex items-center space-x-4">
+            {!authLoading && user ? (
+              <div className="flex items-center space-x-3">
+                {/* ADMIN: Admin, Perfil e Logout */}
+                {user.role === 'ADMIN' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg border border-purple-500/30"
+                      asChild
+                    >
+                      <Link href="/admin">
+                        <ShieldIcon className="mr-2 h-4 w-4" />
+                        Admin
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      asChild
+                    >
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Perfil
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      onClick={handleLogout}
+                    >
+                      <LogOutIcon className="mr-2 h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
+                )}
+
+                {/* CLIENT: Carrinho, Meus Pedidos, Perfil e Logout */}
+                {user.role === 'CLIENT' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300"
+                      asChild
+                    >
+                      <Link href="/cart">
+                        <ShoppingCartIcon className="h-5 w-5" />
+                        {cartItemsCount > 0 && (
+                          <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black rounded-full">
+                            {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                          </Badge>
+                        )}
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      asChild
+                    >
+                      <Link href="/dashboard">
+                        <PackageIcon className="mr-2 h-4 w-4" />
+                        Meus Pedidos
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      asChild
+                    >
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Perfil
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      onClick={handleLogout}
+                    >
+                      <LogOutIcon className="mr-2 h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
+                )}
+
+                {/* BOOSTER: Meus Trabalhos, Perfil e Logout */}
+                {user.role === 'BOOSTER' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      asChild
+                    >
+                      <Link href="/booster">
+                        <PackageIcon className="mr-2 h-4 w-4" />
+                        Meus Trabalhos
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      asChild
+                    >
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Perfil
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      onClick={handleLogout}
+                    >
+                      <LogOutIcon className="mr-2 h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="flex items-center space-x-4">
+                {/* Carrinho - visível mesmo sem login */}
+                {!authLoading && cartItemsCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300"
+                    asChild
+                  >
+                    <Link href="/cart">
+                      <ShoppingCartIcon className="h-5 w-5" />
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black">
+                        {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                      </Badge>
+                    </Link>
+                  </Button>
+                )}
+
                 <Button
                   variant="ghost"
                   className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
@@ -194,60 +324,222 @@ export function ElojobHeader() {
 
                 {/* Mobile Navigation */}
                 {isMobileMenuOpen && (
-                  <div className="lg:hidden absolute top-full left-0 right-0 bg-black/90 backdrop-blur-md border-t border-purple-500/60 z-[60]">
+                  <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-t border-purple-500/60 z-[60]">
                     <nav className="px-6 py-6 space-y-4">
                       <Link
                         href="/"
-                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                         onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                       >
                         Início
                       </Link>
                       
                       <Link
                         href="/services"
-                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                         onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                       >
                         Serviços
                       </Link>
                       
-                      {/* Mobile Games Section - Professional Design */}
-                      <div className="border-t border-purple-500/30 pt-4 mt-4">
-                        <h3 className="text-purple-300 font-bold text-lg mb-3 flex items-center">
-                          <span>Jogos</span>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full ml-2"></div>
-                        </h3>
-                        <div className="space-y-2">
+                      {/* Links de jogos dinâmicos no mobile */}
+                      {gamesItems.length > 0 && gamesItems.length === 1 ? (
+                        <Link
+                          href={gamesItems[0].href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
+                        >
+                          {gamesItems[0].name}
+                        </Link>
+                      ) : gamesItems.length > 1 ? (
+                        <>
+                          <div className="block text-white font-bold text-lg tracking-wide py-3 px-4">
+                            Jogos:
+                          </div>
                           {gamesItems.map((game) => (
                             <Link
-                              key={game.name}
+                              key={game.href}
                               href={game.href}
-                              className="block text-white hover:text-purple-300 transition-colors duration-300 text-base py-3 px-6 rounded-lg hover:bg-purple-500/10 flex items-center space-x-3 group"
                               onClick={() => setIsMobileMenuOpen(false)}
+                              className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-base tracking-wide py-2 px-8 rounded-lg hover:bg-purple-500/10"
                             >
-                              <div className="w-2 h-2 bg-purple-400 rounded-full group-hover:bg-purple-300 transition-colors"></div>
-                              <span className="font-medium">{game.name}</span>
+                              {game.name}
                             </Link>
                           ))}
-                        </div>
-                      </div>
+                        </>
+                      ) : null}
                       
                       <Link
                         href="/testimonials"
-                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                         onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                       >
                         Depoimentos
                       </Link>
                       
                       <Link
                         href="/about"
-                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                         onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                       >
                         Sobre
                       </Link>
+
+                      {/* Auth links in mobile menu */}
+                      {!authLoading && (
+                        <div className="border-t border-purple-500/30 pt-4 mt-4">
+                          {user ? (
+                            <div className="space-y-2">
+                              {/* ADMIN no mobile: Admin, Perfil e Logout */}
+                              {user.role === 'ADMIN' && (
+                                <>
+                                  <Link
+                                    href="/admin"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300 border border-purple-500/30"
+                                  >
+                                    <ShieldIcon className="h-5 w-5" />
+                                    <span>Admin</span>
+                                  </Link>
+                                  <Link
+                                    href="/profile"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <UserIcon className="h-5 w-5" />
+                                    <span>Perfil</span>
+                                  </Link>
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full text-white font-bold hover:text-red-300 hover:bg-red-500/10 py-3 rounded-lg transition-colors duration-300 justify-start"
+                                    onClick={() => {
+                                      setIsMobileMenuOpen(false)
+                                      handleLogout()
+                                    }}
+                                  >
+                                    <LogOutIcon className="mr-2 h-5 w-5" />
+                                    Sair
+                                  </Button>
+                                </>
+                              )}
+
+                              {/* CLIENT no mobile: Carrinho, Meus Pedidos, Perfil e Logout */}
+                              {user.role === 'CLIENT' && (
+                                <>
+                                  <Link
+                                    href="/cart"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center justify-between text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <ShoppingCartIcon className="h-5 w-5" />
+                                      <span>Carrinho</span>
+                                    </div>
+                                    {cartItemsCount > 0 && (
+                                      <Badge className="bg-purple-500 text-white text-xs font-bold min-w-[24px] flex items-center justify-center">
+                                        {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                                      </Badge>
+                                    )}
+                                  </Link>
+                                  <Link
+                                    href="/dashboard"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <PackageIcon className="h-5 w-5" />
+                                    <span>Meus Pedidos</span>
+                                  </Link>
+                                  <Link
+                                    href="/profile"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <UserIcon className="h-5 w-5" />
+                                    <span>Perfil</span>
+                                  </Link>
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full text-white font-bold hover:text-red-300 hover:bg-red-500/10 py-3 rounded-lg transition-colors duration-300 justify-start"
+                                    onClick={() => {
+                                      setIsMobileMenuOpen(false)
+                                      handleLogout()
+                                    }}
+                                  >
+                                    <LogOutIcon className="mr-2 h-5 w-5" />
+                                    Sair
+                                  </Button>
+                                </>
+                              )}
+
+                              {/* BOOSTER no mobile: Meus Trabalhos, Perfil e Logout */}
+                              {user.role === 'BOOSTER' && (
+                                <>
+                                  <Link
+                                    href="/booster"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <PackageIcon className="h-5 w-5" />
+                                    <span>Meus Trabalhos</span>
+                                  </Link>
+                                  <Link
+                                    href="/profile"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <UserIcon className="h-5 w-5" />
+                                    <span>Perfil</span>
+                                  </Link>
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full text-white font-bold hover:text-red-300 hover:bg-red-500/10 py-3 rounded-lg transition-colors duration-300 justify-start"
+                                    onClick={() => {
+                                      setIsMobileMenuOpen(false)
+                                      handleLogout()
+                                    }}
+                                  >
+                                    <LogOutIcon className="mr-2 h-5 w-5" />
+                                    Sair
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-2">
+                              {/* Carrinho no mobile (sem login) */}
+                              {cartItemsCount > 0 && (
+                                <Link
+                                  href="/cart"
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="flex items-center justify-between text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                >
+                                  <div className="flex items-center space-x-2">
+                                    <ShoppingCartIcon className="h-5 w-5" />
+                                    <span>Carrinho</span>
+                                  </div>
+                                  <Badge className="bg-purple-500 text-white text-xs font-bold">
+                                    {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                                  </Badge>
+                                </Link>
+                              )}
+
+                              <Button
+                                variant="ghost"
+                                className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 rounded-lg transition-colors duration-300 justify-start"
+                                asChild
+                              >
+                                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Entrar</Link>
+                              </Button>
+                              <Button
+                                className="bg-purple-500 hover:bg-purple-400 text-white font-bold py-3 rounded-lg transition-all duration-300 border-2 border-purple-500"
+                                asChild
+                              >
+                                <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>Cadastrar</Link>
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </nav>
                   </div>
                 )}

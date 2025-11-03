@@ -3,32 +3,33 @@
 import Link from "next/link"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { getEnabledGames } from "@/lib/games-config"
 import { Trophy, Gamepad2, Users } from "lucide-react"
 
+// Mapeamento de ícones por jogo
+const gameIcons: Record<string, any> = {
+  CS2: Users,
+  LOL: Trophy,
+  VALORANT: Gamepad2,
+}
+
+// Mapeamento de gradientes por jogo
+const gameGradients: Record<string, string> = {
+  CS2: "from-orange-600 to-orange-800",
+  LOL: "from-blue-600 to-blue-800",
+  VALORANT: "from-red-600 to-red-800",
+}
+
 export default function GamesSection() {
-    const games = [
-      {
-        name: "League of Legends",
-        href: "/games/lol",
-        description: "Boost de elo, MD10, coaching e mais",
-        icon: Gamepad2,
-        gradient: "from-blue-600 to-blue-800",
-      },
-      {
-        name: "Valorant",
-        href: "/games/valorant",
-        description: "Rank boost, placement, coaching",
-        icon: Trophy,
-        gradient: "from-red-600 to-red-800",
-      },
-      {
-        name: "Counter-Strike 2",
-        href: "/games/cs2",
-        description: "Prime boost, demo review, treinos",
-        icon: Users,
-        gradient: "from-orange-600 to-orange-800",
-      },
-    ]
+    const enabledGames = getEnabledGames()
+    
+    const games = enabledGames.map((game) => ({
+      name: game.name,
+      href: game.href,
+      description: game.description,
+      icon: gameIcons[game.id] || Users,
+      gradient: gameGradients[game.id] || "from-purple-600 to-purple-800",
+    }))
   
     return (
       <section className="py-20 bg-black">

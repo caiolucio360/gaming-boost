@@ -1,3 +1,17 @@
+import { generateMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Depoimentos - GameBoost Pro',
+  description: 'Veja o que nossos clientes dizem sobre nossos serviços de boost. Mais de 10.000 clientes satisfeitos com boost de rank em Counter-Strike 2.',
+  keywords: [
+    'depoimentos boost',
+    'avaliações gameboost',
+    'feedback clientes',
+    'testimonials boost cs2',
+  ],
+})
+
 export default function TestimonialsPage() {
   const testimonials = [
     {

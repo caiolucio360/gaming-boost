@@ -1,19 +1,60 @@
-import { Service } from '@/types'
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { Service, CartItem } from '@/types'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatPrice } from '@/lib/utils'
 import { ClockIcon, StarIcon } from 'lucide-react'
+import { useAuth } from '@/contexts/auth-context'
+import { useCart } from '@/contexts/cart-context'
+import { handleServiceHire } from '@/lib/cart-utils'
+import { GameId } from '@/lib/games-config'
 
 interface ServiceCardProps {
   service: Service
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
-  const gameColors = {
+  const { user } = useAuth()
+  const { addItem } = useCart()
+  const router = useRouter()
+
+  const gameColors: Record<GameId, string> = {
+    CS2: 'bg-orange-500',
     LOL: 'bg-blue-500',
     VALORANT: 'bg-red-500',
-    CS2: 'bg-orange-500'
+  }
+
+  const handleHire = async () => {
+    const cartItem: CartItem = {
+      serviceId: service.id,
+      game: service.game,
+      serviceName: service.name,
+      description: service.description,
+      price: service.price,
+      duration: service.duration,
+    }
+
+    try {
+      const orderCreated = await handleServiceHire(
+        cartItem,
+        !!user,
+        addItem,
+        () => {
+          router.push('/login')
+        }
+      )
+
+      // Se o pedido foi criado, redirecionar para dashboard
+      if (orderCreated) {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      console.error('Erro ao contratar serviço:', error)
+      alert('Erro ao contratar serviço. Tente novamente.')
+    }
   }
 
   return (
@@ -22,7 +63,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg text-white">{service.name}</CardTitle>
           <Badge 
-            className={`${gameColors[service.game]} text-white`}
+            className={`${gameColors[service.game] || 'bg-gray-500'} text-white`}
             variant="secondary"
           >
             {service.game}
@@ -49,7 +90,11 @@ export function ServiceCard({ service }: ServiceCardProps) {
       </CardContent>
       
       <CardFooter>
-        <Button className="w-full" size="lg">
+        <Button 
+          onClick={handleHire}
+          className="w-full" 
+          size="lg"
+        >
           Contratar Agora
         </Button>
       </CardFooter>

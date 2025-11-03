@@ -15,14 +15,19 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
-  role      Role     @default(CLIENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String
+  role          Role     @default(CLIENT)
+  avatar        String? // URL do avatar do usuário
+  phone         String? // Telefone de contato
+  active        Boolean  @default(true) // Se a conta está ativa
+  metadata      String? // JSON com metadados adicionais
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  orders        Order[] // Pedidos como cliente
+  boosterOrders Order[]  @relation("BoosterOrders") // Pedidos como booster
 }
 
 model Service {
@@ -33,21 +38,43 @@ model Service {
   description String
   price       Float
   duration    String
+  enabled     Boolean     @default(true) // Se o serviço está ativo
+  image       String? // URL da imagem do serviço
+  metadata    String? // JSON com metadados adicionais
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orders      Order[]
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  userId    String
-  serviceId String
-  status    OrderStatus @default(PENDING)
-  total     Float
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  service   Service     @relation(fields: [serviceId], references: [id])
+  id            String      @id @default(cuid())
+  userId        String
+  serviceId     String
+  boosterId     String? // Booster atribuído ao pedido
+  status        OrderStatus @default(PENDING)
+  total         Float
+  // Metadados do pedido
+  currentRank   String? // Rank/pontuação atual (ex: "10K", "Nível 5")
+  targetRank    String? // Rank/pontuação desejada (ex: "15K", "Nível 10")
+  currentRating Int? // Pontuação atual numérica (ex: 10000)
+  targetRating  Int? // Pontuação desejada numérica (ex: 15000)
+  gameMode      String? // Modo do jogo (ex: "PREMIER", "GAMERS_CLUB")
+  gameType      String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
+  metadata      String? // JSON com metadados adicionais
+  notes         String? // Notas adicionais do cliente ou booster
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id])
+  service       Service     @relation(fields: [serviceId], references: [id])
+  booster       User?       @relation("BoosterOrders", fields: [boosterId], references: [id])
+  payments      Payment[] // Pagamentos associados ao pedido
+
+  // Índices para otimizar queries
+  @@index([userId, gameMode, status]) // Para validação de modalidade duplicada (buscar pedidos ativos por modalidade)
+  @@index([userId, status]) // Para buscar pedidos do usuário por status
+  @@index([boosterId, status]) // Para buscar pedidos do booster por status
+  @@index([serviceId]) // Para joins com Service
+  @@index([status]) // Para filtros por status (admin/booster dashboards)
 }
 
 enum Role {
@@ -57,16 +84,26 @@ enum Role {
 }
 
 enum Game {
-  LOL
   CS2
-  VALORANT
 }
 
 enum ServiceType {
   RANK_BOOST
-  PLACEMENT
-  COACHING
-  ACCOUNT_LEVELING
+}
+
+model Payment {
+  id        String    @id @default(cuid())
+  orderId   String
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method    String    @default("PIX") // Método de pagamento
+  pixCode   String? // Código PIX
+  qrCode    String? // Base64 do QR Code
+  status    String    @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
+  total     Float
+  expiresAt DateTime?
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 enum OrderStatus {

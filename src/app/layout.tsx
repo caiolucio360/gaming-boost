@@ -3,6 +3,7 @@ import { Orbitron, Rajdhani } from 'next/font/google'
 import './globals.css'
 import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
+import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -16,10 +17,24 @@ const rajdhani = Rajdhani({
   weight: ['300', '400', '500', '600', '700']
 })
 
-export const metadata: Metadata = {
+import { generateMetadata } from '@/lib/seo'
+
+export const metadata: Metadata = generateMetadata({
   title: 'GameBoost Pro - Serviços de Boost para Jogos',
-  description: 'Plataforma profissional para serviços de boost em League of Legends, Valorant e Counter-Strike 2',
-}
+  description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura.',
+  keywords: [
+    'boost cs2',
+    'boost counter strike 2',
+    'elo job cs2',
+    'rank boost cs2',
+    'boost premier cs2',
+    'boost gamers club',
+    'serviço de boost',
+    'boost profissional',
+    'boost seguro cs2',
+  ],
+  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+})
 
 export default function RootLayout({
   children,
@@ -29,13 +44,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
-        <div className="min-h-screen flex flex-col overflow-x-hidden">
-          <ElojobHeader />
-          <main className="flex-1 pt-16">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <AuthProviderWrapper>
+          <div className="min-h-screen flex flex-col overflow-x-hidden">
+            <ElojobHeader />
+            <main className="flex-1 pt-16">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </AuthProviderWrapper>
       </body>
     </html>
   )

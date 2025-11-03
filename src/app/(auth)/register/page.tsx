@@ -2,26 +2,40 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useAuth } from '@/contexts/auth-context'
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { register } = useAuth()
+  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+    setError(null)
     
-    // Simular registro
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const formData = new FormData(e.currentTarget)
+    const name = formData.get('name') as string
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
     
-    setIsLoading(false)
-    // Redirect após registro bem-sucedido
+    try {
+      // O AuthContext já faz o redirecionamento, não precisa fazer aqui
+      await register(name, email, password)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar conta')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -38,10 +52,17 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg text-sm font-rajdhani">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="name" className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>Nome Completo</Label>
             <Input
               id="name"
+              name="name"
               type="text"
               placeholder="Seu nome"
               required
@@ -53,6 +74,7 @@ export default function RegisterPage() {
             <Label htmlFor="email" className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="seu@email.com"
               required
@@ -65,6 +87,7 @@ export default function RegisterPage() {
             <div className="relative">
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Sua senha"
                 required

@@ -1,14 +1,16 @@
+import { GameId, ServiceType } from '@/lib/games-config'
+
 export interface User {
     id: string;
     email: string;
     name?: string;
     role: 'CLIENT' | 'BOOSTER' | 'ADMIN';
   }
-  
-  export interface Service {
+
+export interface Service {
     id: string;
-    game: 'LOL' | 'CS2' | 'VALORANT';
-    type: 'RANK_BOOST' | 'PLACEMENT' | 'COACHING' | 'ACCOUNT_LEVELING';
+    game: GameId;
+    type: ServiceType;
     name: string;
     description: string;
     price: number;
@@ -21,8 +23,9 @@ export interface User {
     name: string;
     image: string;
     tier?: string;
+    gameId?: GameId; // Jogo ao qual o rank pertence
   }
-  
+
   export interface Order {
     id: string;
     userId: string;
@@ -30,4 +33,28 @@ export interface User {
     status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
     total: number;
     createdAt: Date;
+    updatedAt?: Date;
+    service?: Service;
+  }
+
+  export interface Payment {
+    id: string;
+    orderId: string;
+    total: number;
+    pixCode: string;
+    qrCode?: string;
+    expiresAt: Date;
+  }
+
+  // Item do carrinho
+  export interface CartItem {
+    serviceId?: string; // ID do serviço do banco (se existir)
+    game: GameId;
+    serviceName: string;
+    description?: string;
+    currentRank?: string;
+    targetRank?: string;
+    price: number;
+    duration?: string;
+    metadata?: Record<string, any>; // Dados adicionais específicos do jogo
   }

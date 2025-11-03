@@ -1,6 +1,18 @@
-'use client'
-
+import { generateMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
 import { CS2Calculator } from '@/components/cs2-calculator'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Preços CS2 - Calculadora de Boost',
+  description: 'Calcule o preço do seu boost de rank para Counter-Strike 2. Modos Premier e Gamers Club disponíveis. Preços transparentes e competitivos.',
+  keywords: [
+    'preços boost cs2',
+    'calculadora boost cs2',
+    'quanto custa boost cs2',
+    'preço boost premier',
+    'preço boost gamers club',
+  ],
+})
 
 export default function CS2PricingPage() {
   return (

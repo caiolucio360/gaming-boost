@@ -1,3 +1,19 @@
+import { generateMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Serviços - Boost de Rank CS2',
+  description: 'Oferecemos boost de rank para Counter-Strike 2 em modos Premier e Gamers Club. Serviço profissional, seguro e rápido com boosters verificados.',
+  keywords: [
+    'serviços boost cs2',
+    'boost de rank cs2',
+    'boost premier cs2',
+    'boost gamers club',
+    'serviço boost profissional',
+    'elo job cs2',
+  ],
+})
+
 export default function ServicesPage() {
   const services = [
     {
