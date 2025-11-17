@@ -5,6 +5,7 @@ import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
+import { Analytics } from '@vercel/analytics/next';
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -51,6 +52,7 @@ export default function RootLayout({
             <ElojobHeader />
             <main className="flex-1 pt-16">
               {children}
+              <Analytics />
             </main>
             <Footer />
           </div>

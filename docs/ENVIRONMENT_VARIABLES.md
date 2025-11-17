@@ -126,6 +126,19 @@ NODE_ENV="production"
 3. **NUNCA** compartilhe secrets em canais públicos
 4. Use variáveis de ambiente do seu provedor de hospedagem (Vercel, Railway, etc.)
 
+## 🚀 Deploy na Vercel
+
+Para instruções detalhadas sobre como configurar variáveis de ambiente na Vercel, consulte:
+
+**[📖 Guia de Deploy na Vercel](./VERCEL_DEPLOYMENT.md)**
+
+**Resumo rápido:**
+- ❌ **NUNCA** commite arquivos `.env` no Git
+- ✅ Configure variáveis via Dashboard da Vercel (Settings → Environment Variables)
+- ✅ Adicione todas as variáveis obrigatórias
+- ✅ Configure para os ambientes corretos (Production, Preview, Development)
+- ✅ Faça redeploy após adicionar/modificar variáveis
+
 ## 📝 Notas
 
 - Variáveis com prefixo `NEXT_PUBLIC_` são expostas ao cliente (browser)
