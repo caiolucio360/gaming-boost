@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -19,17 +20,12 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { OrdersListSkeleton, StatsGridSkeleton } from '@/components/common/loading-skeletons'
+import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { ActionButton } from '@/components/common/action-button'
+import { RefreshingBanner } from '@/components/common/refreshing-banner'
+import { OrderInfoItem } from '@/components/common/order-info-item'
+import { formatPrice, formatDate } from '@/lib/utils'
 import {
   Alert,
   AlertDescription,
@@ -76,8 +72,7 @@ export default function BoosterDashboardPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [activeTab, setActiveTab] = useState('available')
   const [orderToAction, setOrderToAction] = useState<string | null>(null)
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false)
@@ -115,13 +110,7 @@ export default function BoosterDashboardPage() {
   }, [activeTab])
 
   const fetchOrders = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true)
-      } else {
-        setLoading(true)
-      }
-
+    await withLoading(async () => {
       const params = new URLSearchParams()
       if (activeTab === 'available') {
         params.append('type', 'available')
@@ -137,12 +126,7 @@ export default function BoosterDashboardPage() {
         setOrders(data.orders || [])
         setStats(data.stats || null)
       }
-    } catch (error) {
-      console.error('Erro ao buscar pedidos:', error)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
+    }, isRefresh)
   }
 
   const handleAcceptOrderClick = (orderId: string) => {
@@ -235,24 +219,8 @@ export default function BoosterDashboardPage() {
     }
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  if (authLoading || (loading && !stats)) {
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -263,14 +231,7 @@ export default function BoosterDashboardPage() {
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {refreshing && (
-          <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-            <p className="text-sm text-purple-300 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              <Loader2 className="h-4 w-4 inline-block mr-2 animate-spin" />
-              Atualizando...
-            </p>
-          </div>
-        )}
+        {refreshing && <RefreshingBanner />}
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -284,7 +245,9 @@ export default function BoosterDashboardPage() {
         />
 
         {/* Cards de Estatísticas */}
-        {stats && (
+        {loading && !stats ? (
+          <StatsGridSkeleton count={4} />
+        ) : stats ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               title="Disponíveis"
@@ -333,7 +296,9 @@ export default function BoosterDashboardPage() {
 
           {/* Pedidos Disponíveis */}
           <TabsContent value="available" className="mt-6">
-            {orders.length === 0 ? (
+            {loading && !refreshing ? (
+              <OrdersListSkeleton count={3} />
+            ) : orders.length === 0 ? (
               <EmptyState
                 icon={Package}
                 title="Nenhum pedido disponível"
@@ -363,66 +328,30 @@ export default function BoosterDashboardPage() {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Valor Total
-                              </p>
-                              <p className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                {formatPrice(order.total)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Cliente
-                              </p>
-                              <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                {order.user.name || order.user.email}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Jogo
-                              </p>
-                              <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                {order.service.game}
-                              </p>
-                            </div>
+                            <OrderInfoItem
+                              label="Valor Total"
+                              value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                            />
+                            <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
+                            <OrderInfoItem label="Jogo" value={order.service.game} />
                           </div>
 
-                          <AlertDialog open={acceptDialogOpen && orderToAction === order.id} onOpenChange={setAcceptDialogOpen}>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                onClick={() => handleAcceptOrderClick(order.id)}
-                                className="w-full bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
-                            style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                          <ActionButton
+                            onClick={() => handleAcceptOrderClick(order.id)}
+                            icon={Check}
+                            className="w-full"
                           >
-                            <Check className="mr-2 h-4 w-4" />
                             Aceitar Pedido
-                          </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-black/90 border-purple-500/50">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                  Aceitar Pedido
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Tem certeza que deseja aceitar este pedido? Você será responsável por completar o serviço.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Cancelar
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleAcceptOrder}
-                                  className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
-                                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                                >
-                                  Aceitar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          </ActionButton>
+                          <ConfirmDialog
+                            open={acceptDialogOpen && orderToAction === order.id}
+                            onOpenChange={setAcceptDialogOpen}
+                            title="Aceitar Pedido"
+                            description="Tem certeza que deseja aceitar este pedido? Você será responsável por completar o serviço."
+                            confirmLabel="Aceitar"
+                            cancelLabel="Cancelar"
+                            onConfirm={handleAcceptOrder}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -434,7 +363,9 @@ export default function BoosterDashboardPage() {
 
           {/* Pedidos em Andamento */}
           <TabsContent value="assigned" className="mt-6">
-            {orders.length === 0 ? (
+            {loading && !refreshing ? (
+              <OrdersListSkeleton count={3} />
+            ) : orders.length === 0 ? (
               <EmptyState
                 icon={Loader2}
                 title="Nenhum pedido em andamento"
@@ -464,66 +395,32 @@ export default function BoosterDashboardPage() {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Valor Total
-                              </p>
-                              <p className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                {formatPrice(order.total)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Cliente
-                              </p>
-                              <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                {order.user.name || order.user.email}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Data do Pedido
-                              </p>
-                              <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                {formatDate(order.createdAt)}
-                              </p>
-                            </div>
+                            <OrderInfoItem
+                              label="Valor Total"
+                              value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                            />
+                            <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
+                            <OrderInfoItem label="Data do Pedido" value={formatDate(order.createdAt)} />
                           </div>
 
-                          <AlertDialog open={completeDialogOpen && orderToAction === order.id} onOpenChange={setCompleteDialogOpen}>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                onClick={() => handleCompleteOrderClick(order.id)}
-                                className="w-full bg-green-500 hover:bg-green-400 text-white font-rajdhani"
-                            style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                          <ActionButton
+                            onClick={() => handleCompleteOrderClick(order.id)}
+                            variant="success"
+                            icon={CheckCircle2}
+                            className="w-full"
                           >
-                            <CheckCircle2 className="mr-2 h-4 w-4" />
                             Marcar como Concluído
-                          </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-black/90 border-purple-500/50">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                  Concluir Pedido
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Tem certeza que deseja marcar este pedido como concluído? Esta ação finaliza o serviço.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Cancelar
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleCompleteOrder}
-                                  className="bg-green-500 hover:bg-green-400 text-white font-rajdhani"
-                                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                                >
-                                  Concluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          </ActionButton>
+                          <ConfirmDialog
+                            open={completeDialogOpen && orderToAction === order.id}
+                            onOpenChange={setCompleteDialogOpen}
+                            title="Concluir Pedido"
+                            description="Tem certeza que deseja marcar este pedido como concluído? Esta ação finaliza o serviço."
+                            confirmLabel="Concluir"
+                            cancelLabel="Cancelar"
+                            onConfirm={handleCompleteOrder}
+                            variant="success"
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -535,7 +432,9 @@ export default function BoosterDashboardPage() {
 
           {/* Pedidos Concluídos */}
           <TabsContent value="completed" className="mt-6">
-            {orders.length === 0 ? (
+            {loading && !refreshing ? (
+              <OrdersListSkeleton count={3} />
+            ) : orders.length === 0 ? (
               <EmptyState
                 icon={CheckCircle2}
                 title="Nenhum pedido concluído"
@@ -564,30 +463,12 @@ export default function BoosterDashboardPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              Valor Total
-                            </p>
-                            <p className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                              {formatPrice(order.total)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              Cliente
-                            </p>
-                            <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              {order.user.name || order.user.email}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              Data de Conclusão
-                            </p>
-                            <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              {formatDate(order.createdAt)}
-                            </p>
-                          </div>
+                          <OrderInfoItem
+                            label="Valor Total"
+                            value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                          />
+                          <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
+                          <OrderInfoItem label="Data de Conclusão" value={formatDate(order.createdAt)} />
                         </div>
                       </CardContent>
                     </Card>

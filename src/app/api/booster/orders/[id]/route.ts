@@ -1,30 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
-
-async function checkBooster() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get('userId')?.value
-
-  if (!userId) {
-    return { error: 'Não autenticado', status: 401, user: null }
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'BOOSTER') {
-    return {
-      error: 'Acesso negado. Apenas boosters.',
-      status: 403,
-      user: null,
-    }
-  }
-
-  return { error: null, status: null, user: { id: userId } }
-}
+import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // POST - Aceitar um pedido disponível
 export async function POST(
@@ -32,20 +8,29 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const boosterCheck = await checkBooster()
-    if (boosterCheck.error) {
-      return NextResponse.json(
-        { message: boosterCheck.error },
-        { status: boosterCheck.status! }
+    const authResult = await verifyBooster(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
-    const boosterId = boosterCheck.user!.id
+    const boosterId = authResult.user.id
+
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
 
     // Verificar se o pedido existe e está disponível
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: {
         user: {
           select: {
@@ -81,7 +66,7 @@ export async function POST(
 
     // Atribuir pedido ao booster e mudar status para IN_PROGRESS
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { id: orderId },
       data: {
         boosterId,
         status: 'IN_PROGRESS',
@@ -124,18 +109,27 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const boosterCheck = await checkBooster()
-    if (boosterCheck.error) {
-      return NextResponse.json(
-        { message: boosterCheck.error },
-        { status: boosterCheck.status! }
+    const authResult = await verifyBooster(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
-    const boosterId = boosterCheck.user!.id
+    const boosterId = authResult.user.id
     const body = await request.json()
     const { status } = body
+
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
 
     if (!status || !['IN_PROGRESS', 'COMPLETED'].includes(status)) {
       return NextResponse.json(
@@ -146,7 +140,7 @@ export async function PUT(
 
     // Verificar se o pedido pertence ao booster
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
     })
 
     if (!order) {
@@ -172,7 +166,7 @@ export async function PUT(
 
     // Atualizar status
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { id: orderId },
       data: { status },
       include: {
         user: {

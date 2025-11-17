@@ -64,14 +64,14 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         }
       )
 
-      // Se o pedido foi criado ou adicionado ao carrinho com sucesso, redirecionar
+      // Se o pedido foi criado ou adicionado ao carrinho com sucesso, redirecionar para o carrinho
       // Usar router.push em vez de window.location.href para evitar reload completo
       if (orderCreated) {
-        // Pedido criado com sucesso - redirecionar para dashboard
-        router.push('/dashboard')
+        // Pedido criado com sucesso - redirecionar para carrinho
+        router.push('/cart')
       } else if (user) {
-        // Adicionado ao carrinho (usuário logado mas sem serviceId) - redirecionar para dashboard
-        router.push('/dashboard')
+        // Adicionado ao carrinho (usuário logado mas sem serviceId) - redirecionar para carrinho
+        router.push('/cart')
       }
       // Se não estiver logado, o redirecionamento já foi feito dentro de handleServiceHire
     } catch (error) {
@@ -92,18 +92,33 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   }
 
   // Obter pontos de rating baseado no modo
-  const getRatingPoints = () => {
+  const getRatingPoints = (isTarget: boolean = false) => {
     if (!modeConfig) return []
     
     if (modeConfig.ratingPoints) {
-      return modeConfig.ratingPoints.map(value => {
+      // Filtrar pontos baseado nos limites
+      let filteredPoints = modeConfig.ratingPoints
+      
+      if (selectedMode === 'PREMIER') {
+        // Current: até 25K, Target: até 26K
+        filteredPoints = isTarget 
+          ? modeConfig.ratingPoints // Target pode ir até 26K
+          : modeConfig.ratingPoints.filter(p => p <= 25000) // Current até 25K
+      } else if (selectedMode === 'GAMERS_CLUB') {
+        // Current: até 19, Target: até 20
+        filteredPoints = isTarget
+          ? modeConfig.ratingPoints // Target pode ir até 20
+          : modeConfig.ratingPoints.filter(p => p <= 19) // Current até 19
+      }
+      
+      return filteredPoints.map(value => {
         // Cores baseadas em faixas para Premier
         if (selectedMode === 'PREMIER') {
           if (value <= 4000) return { value, color: 'bg-gray-500 border-gray-400', display: `${value / 1000}K` }
           if (value <= 10000) return { value, color: 'bg-blue-400 border-blue-300', display: `${value / 1000}K` }
           if (value <= 15000) return { value, color: 'bg-blue-600 border-blue-500', display: `${value / 1000}K` }
           if (value <= 25000) return { value, color: 'bg-purple-600 border-purple-500', display: `${value / 1000}K` }
-          return { value, color: 'bg-red-500 border-red-400', display: `${value / 1000}K` }
+          return { value, color: 'bg-red-500 border-red-400', display: `${value / 1000}K` } // 26K
         }
         
         // Cores baseadas em faixas para Gamers Club
@@ -113,8 +128,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           if (value <= 11) return { value, color: 'bg-blue-600 border-blue-500', display: value.toString() }
           if (value <= 15) return { value, color: 'bg-purple-600 border-purple-500', display: value.toString() }
           if (value <= 19) return { value, color: 'bg-purple-800 border-purple-700', display: value.toString() }
-          if (value <= 23) return { value, color: 'bg-red-500 border-red-400', display: value.toString() }
-          return { value, color: 'bg-red-700 border-red-600', display: value.toString() }
+          return { value, color: 'bg-red-500 border-red-400', display: value.toString() } // Level 20
         }
         
         return { value, color: 'bg-gray-500 border-gray-400', display: value.toString() }
@@ -124,7 +138,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     return []
   }
 
-  const ratingPoints = getRatingPoints()
+  const currentRatingPoints = getRatingPoints(false) // Current: Premier até 25K, GC até 19
+  const targetRatingPoints = getRatingPoints(true) // Target: Premier até 26K, GC até 20
 
   const calculatePrice = () => {
     if (!selectedCurrent || !selectedTarget || !modeConfig) {
@@ -218,7 +233,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   </>
                 ) : (
                   <>
-                    <p><span className="text-purple-300">• Níveis:</span> 1 a 27</p>
+                    <p><span className="text-purple-300">• Níveis:</span> 1 a 20</p>
                     <p><span className="text-purple-300">• Ranqueamento:</span> Sistema Gamers Club</p>
                     <p><span className="text-purple-300">• Preço:</span> R$ {modeConfig.pricingRules.basePrice} por {modeConfig.pricingRules.unit}</p>
                   </>
@@ -236,7 +251,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                 {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
               </h3>
               <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                {ratingPoints.map((point) => {
+                {currentRatingPoints.map((point) => {
                   const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
                   const isSelected = selectedCurrent === displayValue
                   
@@ -266,7 +281,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                 {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
               </h3>
               <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                {ratingPoints.map((point) => {
+                {targetRatingPoints.map((point) => {
                   const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
                   const isSelected = selectedTarget === displayValue
                   

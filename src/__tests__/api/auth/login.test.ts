@@ -16,12 +16,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(),
-    set: jest.fn(),
-  })),
+// Mock do JWT
+jest.mock('@/lib/jwt', () => ({
+  generateToken: jest.fn((payload) => `mock-token-${payload.userId}`),
+  verifyToken: jest.fn(),
+  decodeToken: jest.fn(),
+  extractTokenFromHeader: jest.fn(),
 }))
 
 describe('POST /api/auth/login', () => {
@@ -33,11 +33,12 @@ describe('POST /api/auth/login', () => {
     const hashedPassword = await bcrypt.hash('123456', 10)
     
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 1,
       email: 'teste@teste.com',
       name: 'Teste',
       password: hashedPassword,
       role: 'CLIENT',
+      active: true, // Conta ativa
     })
 
     const request = new NextRequest('http://localhost:3000/api/auth/login', {
@@ -55,13 +56,45 @@ describe('POST /api/auth/login', () => {
     const data = await response.json()
 
     expect(response.status).toBe(200)
+    expect(data.token).toBeDefined()
     expect(data.user).toBeDefined()
     expect(data.user.email).toBe('teste@teste.com')
     expect(data.user.role).toBe('CLIENT')
     expect(data.user.password).toBeUndefined() // Senha não deve ser retornada
+    expect(data.redirectPath).toBe('/dashboard')
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { email: 'teste@teste.com' },
     })
+  })
+
+  it('deve retornar erro 403 para conta desativada', async () => {
+    const hashedPassword = await bcrypt.hash('123456', 10)
+    
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 1,
+      email: 'teste@teste.com',
+      name: 'Teste',
+      password: hashedPassword,
+      role: 'CLIENT',
+      active: false, // Conta desativada
+    })
+
+    const request = new NextRequest('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: 'teste@teste.com',
+        password: '123456',
+      }),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(data.message).toContain('desativada')
   })
 
   it('deve retornar erro 401 para credenciais inválidas', async () => {
@@ -90,11 +123,12 @@ describe('POST /api/auth/login', () => {
     const hashedPassword = await bcrypt.hash('123456', 10)
     
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 1,
       email: 'teste@teste.com',
       name: 'Teste',
       password: hashedPassword,
       role: 'CLIENT',
+      active: true, // Conta ativa
     })
 
     const request = new NextRequest('http://localhost:3000/api/auth/login', {

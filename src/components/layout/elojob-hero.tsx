@@ -50,7 +50,7 @@ export default function ElojobHero() {
               className="px-6 md:px-12 py-3 md:py-6 text-sm md:text-lg font-bold bg-purple-600/20 backdrop-blur-md border-2 border-purple-500 text-purple-200 hover:bg-purple-600 hover:text-white hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 group"
               asChild
             >
-              <Link href="#services" className="flex items-center space-x-3">
+              <Link href="/games/cs2" className="flex items-center space-x-3">
                 <span>CONTRATE JÁ!</span>
                 <ArrowRightIcon className="h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-2 transition-transform" />
               </Link>

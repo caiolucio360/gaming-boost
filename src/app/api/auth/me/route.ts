@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
+    // Buscar dados completos do usuário no banco
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: authResult.user.id },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        phone: true,
+        active: true,
+        createdAt: true,
       },
     })
 
@@ -28,6 +32,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
         { status: 404 }
+      )
+    }
+
+    // Verificar se o usuário está ativo
+    if (!user.active) {
+      return NextResponse.json(
+        { message: 'Conta desativada' },
+        { status: 403 }
       )
     }
 

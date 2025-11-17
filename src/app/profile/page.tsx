@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +21,8 @@ import {
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { formatDate } from '@/lib/utils'
+import { ProfileSkeleton } from '@/components/common/loading-skeletons'
 
 interface UserProfile {
   id: string
@@ -39,7 +42,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const { user: authUser, loading: authLoading, refreshUser } = useAuth()
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
+  const { loading, withLoading } = useLoading({ initialLoading: true })
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [alert, setAlert] = useState<{ 
@@ -65,8 +68,7 @@ export default function ProfilePage() {
   }, [authUser, authLoading, router])
 
   const fetchProfile = async () => {
-    try {
-      setLoading(true)
+    await withLoading(async () => {
       const response = await fetch('/api/user/profile')
       if (response.ok) {
         const data = await response.json()
@@ -80,16 +82,7 @@ export default function ProfilePage() {
           variant: 'destructive',
         })
       }
-    } catch (error) {
-      console.error('Erro ao buscar perfil:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao carregar o perfil',
-        variant: 'destructive',
-      })
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const handleSave = async () => {
@@ -179,19 +172,12 @@ export default function ProfilePage() {
     }
   }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
-  if (!authUser || !profile) {
+  if (!authUser) {
     return null
   }
 
@@ -203,6 +189,17 @@ export default function ProfilePage() {
           title="PERFIL"
           description="Gerencie suas informações pessoais e configurações da conta"
         />
+
+        {loading ? (
+          <ProfileSkeleton />
+        ) : !profile ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              Erro ao carregar perfil
+            </p>
+          </div>
+        ) : (
+          <>
 
         {alert && (
           <Alert 
@@ -397,6 +394,8 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   )

@@ -1,31 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
 import bcrypt from 'bcryptjs'
-
-async function checkAdmin() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get('userId')?.value
-
-  if (!userId) {
-    return { error: 'Não autenticado', status: 401, user: null }
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'ADMIN') {
-    return {
-      error: 'Acesso negado. Apenas administradores.',
-      status: 403,
-      user: null,
-    }
-  }
-
-  return { error: null, status: null, user: null }
-}
 
 // GET - Buscar usuário específico
 export async function GET(
@@ -33,18 +9,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
 
+    // Converter id para número
+    const userId = parseInt(id, 10)
+    if (isNaN(userId)) {
+      return NextResponse.json(
+        { message: 'ID do usuário inválido' },
+        { status: 400 }
+      )
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -81,11 +66,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
@@ -93,9 +78,18 @@ export async function PUT(
     const body = await request.json()
     const { name, email, role, password } = body
 
+    // Converter id para número
+    const userId = parseInt(id, 10)
+    if (isNaN(userId)) {
+      return NextResponse.json(
+        { message: 'ID do usuário inválido' },
+        { status: 400 }
+      )
+    }
+
     // Verificar se usuário existe
     const existingUser = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
     })
 
     if (!existingUser) {
@@ -114,7 +108,7 @@ export async function PUT(
       const emailExists = await prisma.user.findUnique({
         where: { email },
       })
-      if (emailExists && emailExists.id !== id) {
+      if (emailExists && emailExists.id !== userId) {
         return NextResponse.json(
           { message: 'Email já está em uso' },
           { status: 400 }
@@ -130,7 +124,7 @@ export async function PUT(
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id },
+      where: { id: userId },
       data: updateData,
       select: {
         id: true,
@@ -161,19 +155,28 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
 
+    // Converter id para número
+    const userId = parseInt(id, 10)
+    if (isNaN(userId)) {
+      return NextResponse.json(
+        { message: 'ID do usuário inválido' },
+        { status: 400 }
+      )
+    }
+
     // Verificar se usuário existe
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
     })
 
     if (!user) {
@@ -184,9 +187,8 @@ export async function DELETE(
     }
 
     // Não permitir deletar o próprio admin
-    const cookieStore = await cookies()
-    const currentUserId = cookieStore.get('userId')?.value
-    if (currentUserId === id) {
+    const currentUserId = authResult.user.id
+    if (currentUserId === userId) {
       return NextResponse.json(
         { message: 'Não é possível deletar seu próprio usuário' },
         { status: 400 }
@@ -195,7 +197,7 @@ export async function DELETE(
 
     // Deletar usuário (pedidos serão deletados em cascade se configurado)
     await prisma.user.delete({
-      where: { id },
+      where: { id: userId },
     })
 
     return NextResponse.json(

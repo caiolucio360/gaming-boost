@@ -1,8 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext } from 'react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 import { User } from '@/types'
-import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
   user: User | null
@@ -11,76 +11,57 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
-  onLoginSuccess?: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
-  const [onLoginSuccess, setOnLoginSuccess] = useState<(() => Promise<void>) | undefined>()
+  const { data: session, status, update } = useSession()
 
-  // Verificar sessão ao carregar
-  useEffect(() => {
-    checkSession()
-  }, [])
-
-  const checkSession = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/me')
-      if (response.ok) {
-        const data = await response.json()
-        setUser(data.user)
-      } else {
-        setUser(null)
+  const loading = status === 'loading'
+  const user: User | null = session?.user
+    ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name || undefined,
+        role: session.user.role,
       }
-    } catch (error) {
-      console.error('Erro ao verificar sessão:', error)
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    : null
 
-  const login = useCallback(async (email: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
+  const login = async (email: string, password: string) => {
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
     })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Erro ao fazer login')
+    if (result?.error) {
+      throw new Error(result.error)
     }
 
-    const data = await response.json()
-    setUser(data.user)
-    
-    // Processar carrinho após login bem-sucedido se a função estiver definida
-    if (onLoginSuccess) {
-      try {
-        await onLoginSuccess()
-      } catch (error) {
-        console.error('Erro ao processar após login:', error)
+    // Atualizar sessão após login
+    await update()
+
+    // Aguardar um pouco para a sessão ser atualizada
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Redirecionar baseado no role
+    if (typeof window !== 'undefined') {
+      const currentSession = await update()
+      const userRole = currentSession?.user?.role || session?.user?.role
+      
+      if (userRole === 'ADMIN') {
+        window.location.href = '/admin'
+      } else if (userRole === 'BOOSTER') {
+        window.location.href = '/booster'
+      } else {
+        window.location.href = '/dashboard'
       }
     }
-    
-    // Redirecionar baseado no role usando replace para não adicionar ao histórico
-    if (data.user.role === 'ADMIN') {
-      router.replace('/admin')
-    } else if (data.user.role === 'BOOSTER') {
-      router.replace('/booster')
-    } else {
-      router.replace('/dashboard')
-    }
-  }, [router, onLoginSuccess])
+  }
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string) => {
+    // Criar conta via API
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
@@ -94,47 +75,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(error.message || 'Erro ao criar conta')
     }
 
-    const data = await response.json()
-    setUser(data.user)
-    
-    // Processar carrinho após registro bem-sucedido se a função estiver definida
-    if (onLoginSuccess) {
-      try {
-        await onLoginSuccess()
-      } catch (error) {
-        console.error('Erro ao processar após registro:', error)
-      }
-    }
+    // Após criar conta, fazer login automaticamente
+    await login(email, password)
     
     // Registro sempre cria como CLIENT, então redireciona para dashboard
-    // Usar replace para não adicionar ao histórico
-    router.replace('/dashboard')
-  }, [router, onLoginSuccess])
-
-  const logout = useCallback(async () => {
-    const response = await fetch('/api/auth/logout', {
-      method: 'POST',
-    })
-
-    if (response.ok) {
-      setUser(null)
-      // Usar replace para não adicionar ao histórico
-      router.replace('/login')
-    }
-  }, [router])
-
-  const refreshUser = useCallback(async () => {
-    await checkSession()
-  }, [checkSession])
-
-  // Expor função para configurar o callback de login via window
-  useEffect(() => {
     if (typeof window !== 'undefined') {
-      (window as any).__setAuthLoginCallback = (callback: () => Promise<void>) => {
-        setOnLoginSuccess(() => callback)
-      }
+      window.location.href = '/dashboard'
     }
-  }, [])
+  }
+
+  const logout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/login' })
+  }
+
+  const refreshUser = async () => {
+    await update()
+  }
 
   return (
     <AuthContext.Provider
@@ -145,7 +101,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         refreshUser,
-        onLoginSuccess,
       }}
     >
       {children}

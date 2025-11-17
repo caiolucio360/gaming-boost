@@ -17,50 +17,107 @@ import {
   CreditCard
 } from 'lucide-react'
 import { CartItem } from '@/types'
+import { showSuccess, showError, showWarning, showLoading, updateToSuccess, updateToError, handleApiError } from '@/lib/toast'
+import { apiPost } from '@/lib/api-client'
+import { formatPrice } from '@/lib/utils'
 
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth()
   const { items, removeItem, clearCart } = useCart()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
 
   const total = items.reduce((sum, item) => sum + item.price, 0)
 
   const handleFinalizePurchase = async () => {
     if (!user) {
+      showWarning('Login necessário', 'Faça login para finalizar sua compra')
       router.push('/login')
       return
     }
 
     if (items.length === 0) {
-      setError('Seu carrinho está vazio')
+      showWarning('Carrinho vazio', 'Adicione serviços ao carrinho antes de finalizar')
       return
     }
 
     setIsProcessing(true)
-    setError(null)
+    const toastId = showLoading(`Processando ${items.length} ${items.length === 1 ? 'pedido' : 'pedidos'}...`)
 
     try {
       // Criar orders para cada item do carrinho
-      const createdOrders: string[] = []
+      const createdOrders: number[] = []
+      const failedItems: string[] = []
 
       for (const item of items) {
-        if (!item.serviceId) {
-          console.warn('Item sem serviceId, pulando:', item)
-          continue
+        let serviceIdToUse = item.serviceId
+
+        // Se o item não tiver serviceId, buscar um serviço apropriado de RANK_BOOST para o jogo
+        if (!serviceIdToUse) {
+          try {
+            const servicesResponse = await fetch(`/api/services?game=${item.game}&type=RANK_BOOST`)
+            if (servicesResponse.ok) {
+              const servicesData = await servicesResponse.json()
+              if (servicesData.services && servicesData.services.length > 0) {
+                // Tentar encontrar um serviço que corresponda ao modo do item
+                const itemMode = item.metadata?.mode // 'PREMIER' ou 'GAMERS_CLUB'
+                let selectedService = null
+
+                if (itemMode) {
+                  // Prioridade 1: Buscar serviço "Customizado" para o modo específico
+                  const customServiceName = itemMode === 'PREMIER' 
+                    ? 'Premier Customizado'
+                    : 'Gamers Club Customizado'
+                  
+                  selectedService = servicesData.services.find((service: any) => 
+                    service.name.includes(customServiceName)
+                  )
+
+                  // Prioridade 2: Se não encontrou customizado, buscar qualquer serviço do modo
+                  if (!selectedService) {
+                    const modeKeywords: Record<string, string[]> = {
+                      'PREMIER': ['Premier', 'premier'],
+                      'GAMERS_CLUB': ['Gamers Club', 'gamers club', 'GamersClub']
+                    }
+                    
+                    const keywords = modeKeywords[itemMode] || []
+                    
+                    selectedService = servicesData.services.find((service: any) => 
+                      keywords.some(keyword => 
+                        service.name.includes(keyword) || service.description?.includes(keyword)
+                      )
+                    )
+                  }
+                }
+
+                // Prioridade 3: Se não encontrou por modo, usar o primeiro serviço disponível
+                if (!selectedService) {
+                  selectedService = servicesData.services[0]
+                }
+
+                serviceIdToUse = selectedService.id
+                console.log(`Usando serviço ${serviceIdToUse} (${selectedService.name}) para item sem serviceId:`, item.serviceName)
+              } else {
+                console.warn('Nenhum serviço RANK_BOOST encontrado para o jogo:', item.game)
+                failedItems.push(item.serviceName || 'Item sem nome')
+                continue
+              }
+            } else {
+              console.warn('Erro ao buscar serviços:', servicesResponse.status)
+              failedItems.push(item.serviceName || 'Item sem nome')
+              continue
+            }
+          } catch (error) {
+            console.error('Erro ao buscar serviço genérico:', error)
+            failedItems.push(item.serviceName || 'Item sem nome')
+            continue
+          }
         }
 
         try {
           const body: any = {
-            serviceId: item.serviceId,
+            serviceId: serviceIdToUse,
             total: item.price,
           }
 
@@ -68,48 +125,105 @@ export default function CartPage() {
           if (item.currentRank) body.currentRank = item.currentRank
           if (item.targetRank) body.targetRank = item.targetRank
           if (item.metadata) {
-            if (item.metadata.currentRating !== undefined) body.currentRating = item.metadata.currentRating
-            if (item.metadata.targetRating !== undefined) body.targetRating = item.metadata.targetRating
+            if (item.metadata.currentRating !== undefined) {
+              body.currentRating = typeof item.metadata.currentRating === 'number' 
+                ? item.metadata.currentRating 
+                : parseInt(item.metadata.currentRating)
+            }
+            if (item.metadata.targetRating !== undefined) {
+              body.targetRating = typeof item.metadata.targetRating === 'number'
+                ? item.metadata.targetRating
+                : parseInt(item.metadata.targetRating)
+            }
             if (item.metadata.mode) body.gameMode = item.metadata.mode
             if (item.metadata.gameType) body.gameType = item.metadata.gameType
-            body.metadata = JSON.stringify(item.metadata)
+            body.metadata = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata)
           }
 
-          const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-          })
-
-          if (response.ok) {
-            const data = await response.json()
+          // Usar apiPost para incluir automaticamente o token de autenticação
+          const data = await apiPost<{ order: { id: number } }>('/api/orders', body)
+          
+          if (data && data.order) {
             createdOrders.push(data.order.id)
           } else {
-            const errorData = await response.json()
-            throw new Error(errorData.message || 'Erro ao criar pedido')
+            failedItems.push(item.serviceName || 'Item sem nome')
+            console.error('Erro ao criar order para item: resposta inválida', item)
           }
-        } catch (error) {
-          console.error('Erro ao criar order para item:', item, error)
-          // Continuar com os outros itens mesmo se um falhar
+        } catch (error: any) {
+          const errorMessage = error?.message || 'Erro desconhecido ao criar pedido'
+          console.error('Erro ao criar order para item:', item, errorMessage)
+          
+          // Adicionar item à lista de falhas com mensagem específica se disponível
+          const itemName = item.serviceName || 'Item sem nome'
+          if (errorMessage.includes('já possui') || errorMessage.includes('modalidade')) {
+            // Mensagem específica de validação - manter no failedItems para mostrar ao usuário
+            failedItems.push(`${itemName} (${errorMessage})`)
+          } else {
+            failedItems.push(itemName)
+          }
         }
       }
 
       // Se pelo menos uma order foi criada, limpar carrinho e redirecionar para pagamento
       if (createdOrders.length > 0) {
+        // Limpar carrinho completamente (itens criados com sucesso)
         clearCart()
-        // Redirecionar para a primeira order criada
-        router.push(`/payment?orderId=${createdOrders[0]}`)
+        
+        if (createdOrders.length === items.length) {
+          // Todos os pedidos foram criados com sucesso
+          updateToSuccess(
+            toastId,
+            `${createdOrders.length} ${createdOrders.length === 1 ? 'pedido criado' : 'pedidos criados'} com sucesso!`,
+            'Redirecionando para pagamento...'
+          )
+          
+          // Aguardar um pouco para o usuário ver a mensagem de sucesso
+          setTimeout(() => {
+            router.push(`/payment?orderId=${createdOrders[0]}`)
+          }, 1500)
+        } else {
+          // Alguns pedidos foram criados, mas alguns falharam
+          updateToSuccess(
+            toastId,
+            `${createdOrders.length} de ${items.length} pedidos criados`,
+            failedItems.length > 0 
+              ? `Não foi possível criar: ${failedItems.join(', ')}. Verifique se você já possui pedidos ativos para a mesma modalidade.`
+              : 'Redirecionando para pagamento...'
+          )
+          
+          // Redirecionar para pagamento do primeiro pedido criado
+          setTimeout(() => {
+            router.push(`/payment?orderId=${createdOrders[0]}`)
+          }, 2000)
+        }
       } else {
-        setError('Não foi possível criar nenhum pedido. Verifique se você já possui pedidos ativos para a mesma modalidade.')
+        // Nenhum pedido foi criado - manter itens no carrinho
+        const errorMessage = failedItems.length > 0
+          ? `Não foi possível criar os pedidos: ${failedItems.join(', ')}. Verifique se você já possui pedidos ativos para a mesma modalidade.`
+          : 'Não foi possível criar nenhum pedido. Verifique se você já possui pedidos ativos para a mesma modalidade ou tente novamente.'
+        
+        updateToError(
+          toastId,
+          'Erro ao criar pedidos',
+          errorMessage
+        )
       }
     } catch (error) {
       console.error('Erro ao finalizar compra:', error)
-      setError(error instanceof Error ? error.message : 'Erro ao finalizar compra. Tente novamente.')
+      updateToError(
+        toastId,
+        'Erro ao finalizar compra',
+        error instanceof Error ? error.message : 'Tente novamente mais tarde'
+      )
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const handleRemoveItem = (index: number) => {
+    const item = items[index]
+    removeItem(index)
+    showSuccess('Item removido', `${item.serviceName || 'Item'} foi removido do carrinho`)
   }
 
   if (authLoading) {
@@ -149,7 +263,7 @@ export default function CartPage() {
                   className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
                   style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
                 >
-                  <Link href="/services">Explorar Serviços</Link>
+                  <Link href="/games/cs2">Explorar Jogos</Link>
                 </Button>
               </div>
             </CardContent>
@@ -185,7 +299,7 @@ export default function CartPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(index)}
+                        onClick={() => handleRemoveItem(index)}
                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       >
                         <X className="h-5 w-5" />
@@ -241,14 +355,6 @@ export default function CartPage() {
                     {formatPrice(total)}
                   </p>
                 </div>
-
-                {error && (
-                  <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
-                    <p className="text-red-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                      {error}
-                    </p>
-                  </div>
-                )}
                 
                 {user ? (
                   <div className="space-y-2 mt-4">

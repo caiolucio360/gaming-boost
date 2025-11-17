@@ -15,10 +15,11 @@ import {
   ShoppingCartIcon,
   PackageIcon
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { getEnabledGames } from '@/lib/games-config'
+import { getAuthToken } from '@/lib/api-client'
 
 export function ElojobHeader() {
   const router = useRouter()
@@ -26,6 +27,24 @@ export function ElojobHeader() {
   const { items } = useCart()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isGamesMenuOpen, setIsGamesMenuOpen] = useState(false)
+  const [hasToken, setHasToken] = useState(false)
+
+  // Verificar se há token no localStorage para evitar flash de "deslogado"
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = getAuthToken()
+      setHasToken(!!token)
+    }
+  }, [])
+
+  // Atualizar hasToken quando o user mudar (logout, etc)
+  useEffect(() => {
+    if (!user && !authLoading) {
+      setHasToken(false)
+    } else if (user) {
+      setHasToken(true)
+    }
+  }, [user, authLoading])
 
   const cartItemsCount = items.length
 
@@ -35,7 +54,6 @@ export function ElojobHeader() {
 
   const navigationItems = [
     { name: 'Início', href: '/' },
-    { name: 'Serviços', href: '/services' },
     { name: 'Depoimentos', href: '/testimonials' },
     { name: 'Sobre', href: '/about' },
   ]
@@ -107,13 +125,6 @@ export function ElojobHeader() {
                       Início
                     </Link>
                     
-                    <Link
-                      href="/services"
-                      className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10"
-                    >
-                      Serviços
-                    </Link>
-                    
                     {/* Links de jogos dinâmicos */}
                     {gamesItems.length > 0 && gamesItems.length === 1 ? (
                       <Link
@@ -166,10 +177,24 @@ export function ElojobHeader() {
 
           {/* Auth Section - Hidden on mobile */}
           <div className="hidden lg:flex items-center space-x-4">
-            {!authLoading && user ? (
+            {(authLoading && hasToken) || (!authLoading && user) ? (
               <div className="flex items-center space-x-3">
-                {/* ADMIN: Admin, Perfil e Logout */}
-                {user.role === 'ADMIN' && (
+                {/* Se está carregando e há token mas ainda não há user, mostrar botões genéricos */}
+                {authLoading && hasToken && !user ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                      disabled
+                    >
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Carregando...
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {/* ADMIN: Admin, Perfil e Logout */}
+                    {user && user.role === 'ADMIN' && (
                   <>
                     <Button
                       variant="ghost"
@@ -203,7 +228,7 @@ export function ElojobHeader() {
                 )}
 
                 {/* CLIENT: Carrinho, Meus Pedidos, Perfil e Logout */}
-                {user.role === 'CLIENT' && (
+                {user && user.role === 'CLIENT' && (
                   <>
                     <Button
                       variant="ghost"
@@ -252,7 +277,7 @@ export function ElojobHeader() {
                 )}
 
                 {/* BOOSTER: Meus Trabalhos, Perfil e Logout */}
-                {user.role === 'BOOSTER' && (
+                {user && user.role === 'BOOSTER' && (
                   <>
                     <Button
                       variant="ghost"
@@ -284,11 +309,13 @@ export function ElojobHeader() {
                     </Button>
                   </>
                 )}
+                  </>
+                )}
               </div>
-            ) : (
+            ) : !authLoading ? (
               <div className="flex items-center space-x-4">
                 {/* Carrinho - visível mesmo sem login */}
-                {!authLoading && cartItemsCount > 0 && (
+                {cartItemsCount > 0 && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -318,7 +345,7 @@ export function ElojobHeader() {
                   <Link href="/register">Cadastrar</Link>
                 </Button>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -332,14 +359,6 @@ export function ElojobHeader() {
                         className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
                       >
                         Início
-                      </Link>
-                      
-                      <Link
-                        href="/services"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
-                      >
-                        Serviços
                       </Link>
                       
                       {/* Links de jogos dinâmicos no mobile */}
@@ -386,12 +405,24 @@ export function ElojobHeader() {
                       </Link>
 
                       {/* Auth links in mobile menu */}
-                      {!authLoading && (
+                      {(!authLoading || hasToken) && (
                         <div className="border-t border-purple-500/30 pt-4 mt-4">
-                          {user ? (
+                          {(authLoading && hasToken) || (!authLoading && user) ? (
                             <div className="space-y-2">
-                              {/* ADMIN no mobile: Admin, Perfil e Logout */}
-                              {user.role === 'ADMIN' && (
+                              {/* Se está carregando e há token mas ainda não há user, mostrar botão genérico */}
+                              {authLoading && hasToken && !user ? (
+                                <Button
+                                  variant="ghost"
+                                  className="w-full text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 rounded-lg transition-colors duration-300 justify-start"
+                                  disabled
+                                >
+                                  <UserIcon className="mr-2 h-5 w-5" />
+                                  Carregando...
+                                </Button>
+                              ) : (
+                                <>
+                                  {/* ADMIN no mobile: Admin, Perfil e Logout */}
+                                  {user && user.role === 'ADMIN' && (
                                 <>
                                   <Link
                                     href="/admin"
@@ -424,7 +455,7 @@ export function ElojobHeader() {
                               )}
 
                               {/* CLIENT no mobile: Carrinho, Meus Pedidos, Perfil e Logout */}
-                              {user.role === 'CLIENT' && (
+                              {user && user.role === 'CLIENT' && (
                                 <>
                                   <Link
                                     href="/cart"
@@ -472,7 +503,7 @@ export function ElojobHeader() {
                               )}
 
                               {/* BOOSTER no mobile: Meus Trabalhos, Perfil e Logout */}
-                              {user.role === 'BOOSTER' && (
+                              {user && user.role === 'BOOSTER' && (
                                 <>
                                   <Link
                                     href="/booster"
@@ -501,6 +532,8 @@ export function ElojobHeader() {
                                     <LogOutIcon className="mr-2 h-5 w-5" />
                                     Sair
                                   </Button>
+                                </>
+                              )}
                                 </>
                               )}
                             </div>

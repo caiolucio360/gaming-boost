@@ -103,6 +103,15 @@ npm run lint             # Verificar código
 npm run lint:fix         # Corrigir problemas automaticamente
 ```
 
+## 📚 Documentação
+
+Toda a documentação técnica do projeto está disponível na pasta [`docs/`](./docs/):
+
+- **[Schema do Banco de Dados](./docs/DATABASE_SCHEMA.md)** - Estrutura completa do banco de dados
+- **[Guia de Autenticação](./docs/AUTHENTICATION_GUIDE.md)** - Sistema de autenticação JWT
+- **[Guia de Migração](./docs/MIGRATION_GUIDE.md)** - Configuração e migração do banco de dados
+- **[Árvore de Rotas](./docs/ROUTES.md)** - Todas as rotas da aplicação (frontend e API)
+
 ## 📄 Licença
 
 Este projeto é privado e de propriedade da GameBoost Pro.

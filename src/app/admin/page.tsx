@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
   Users, 
@@ -25,6 +26,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/empty-state'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { StatsGridSkeleton } from '@/components/common/loading-skeletons'
+import { formatPrice, formatDate } from '@/lib/utils'
 
 interface Stats {
   users: {
@@ -60,9 +63,8 @@ export default function AdminDashboardPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [error, setError] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -84,54 +86,31 @@ export default function AdminDashboardPage() {
 
   const fetchStats = async (isRefresh = false) => {
     try {
-      if (isRefresh) {
-        setRefreshing(true)
-      } else {
-        setLoading(true)
-      }
       setError(null)
-      
-      const response = await fetch('/api/admin/stats', {
-        cache: 'no-store',
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data.stats)
-        setError(null)
-      } else {
-        const errorData = await response.json().catch(() => ({ message: 'Erro ao buscar estatísticas' }))
-        setError(errorData.message || 'Erro ao buscar estatísticas')
-        console.error('Erro ao buscar estatísticas:', errorData.message)
-      }
+      await withLoading(async () => {
+        const response = await fetch('/api/admin/stats', {
+          cache: 'no-store',
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data.stats)
+          setError(null)
+        } else {
+          const errorData = await response.json().catch(() => ({ message: 'Erro ao buscar estatísticas' }))
+          setError(errorData.message || 'Erro ao buscar estatísticas')
+          console.error('Erro ao buscar estatísticas:', errorData.message)
+        }
+      }, isRefresh)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao buscar estatísticas'
       setError(errorMessage)
       console.error('Erro ao buscar estatísticas:', error)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
     }
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  if (authLoading || loading) {
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -139,66 +118,35 @@ export default function AdminDashboardPage() {
     return null
   }
 
-  if (!stats) {
-    return (
-      <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <PageHeader
-            highlight="PAINEL"
-            title="ADMINISTRATIVO"
-            description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma GameBoost Pro.`}
-          />
-          <Card className="bg-black/30 backdrop-blur-md border-red-500/50">
-            <CardContent className="p-6 text-center">
-              <p className="text-red-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                Erro ao carregar estatísticas. Por favor, tente novamente.
-              </p>
-              <Button
-                onClick={() => fetchStats()}
-                className="mt-4 bg-purple-500 hover:bg-purple-400 text-white"
-              >
-                Tentar Novamente
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <PageHeader
-            highlight="PAINEL"
-            title="ADMINISTRATIVO"
-            description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma GameBoost Pro.`}
-          />
-          <Button
-            onClick={() => fetchStats(true)}
-            disabled={refreshing || loading}
-            variant="outline"
-            className="bg-black/30 border-purple-500/50 hover:border-purple-400 text-white"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Atualizar
-          </Button>
-        </div>
-
+        {refreshing && (
+          <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+            <p className="text-sm text-purple-300 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <RefreshCw className="h-4 w-4 inline-block mr-2 animate-spin" />
+              Atualizando...
+            </p>
+          </div>
+        )}
         {error && (
-          <Alert className="mb-6 bg-red-500/20 border-red-500/50">
-            <AlertTitle className="text-red-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              Erro
-            </AlertTitle>
-            <AlertDescription className="text-red-200 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              {error}
-            </AlertDescription>
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Erro</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+        <PageHeader
+          highlight="PAINEL"
+          title="ADMINISTRATIVO"
+          description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma GameBoost Pro.`}
+        />
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {loading && !stats ? (
+          <StatsGridSkeleton count={4} />
+        ) : stats ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total de Usuários"
             value={stats.users.total}
@@ -365,6 +313,8 @@ export default function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+          </>
+        ) : null}
       </div>
     </div>
   )

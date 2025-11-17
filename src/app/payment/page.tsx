@@ -1,11 +1,13 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { Payment } from '@/types'
+import { useLoading } from '@/hooks/use-loading'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +16,6 @@ import {
   Copy,
   CheckCircle2,
   Clock,
-  Loader2,
   ArrowLeft
 } from 'lucide-react'
 
@@ -27,7 +28,7 @@ function PaymentContent() {
 
   const [payment, setPayment] = useState<Payment | null>(null)
   const [order, setOrder] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const { loading, withLoading } = useLoading()
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -49,45 +50,43 @@ function PaymentContent() {
   const generatePayment = async () => {
     if (!orderId) return
 
-    setLoading(true)
     setError(null)
-
     try {
-      // Buscar informações da order para pegar o serviceId
-      const orderResponse = await fetch(`/api/orders`)
-      let foundOrder: any = null
-      if (orderResponse.ok) {
-        const ordersData = await orderResponse.json()
-        foundOrder = ordersData.orders?.find((o: any) => o.id === orderId)
-        if (foundOrder) {
-          setOrder(foundOrder)
+      await withLoading(async () => {
+        // Buscar informações da order para pegar o serviceId
+        const orderResponse = await fetch(`/api/orders`)
+        let foundOrder: any = null
+        if (orderResponse.ok) {
+          const ordersData = await orderResponse.json()
+          foundOrder = ordersData.orders?.find((o: any) => o.id === orderId)
+          if (foundOrder) {
+            setOrder(foundOrder)
+          }
         }
-      }
 
-      const response = await fetch('/api/payment/pix', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ orderId }),
+        const response = await fetch('/api/payment/pix', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ orderId }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Erro ao gerar código PIX')
+        }
+
+        const data = await response.json()
+        setPayment(data.payment)
+
+        // Remover item do carrinho quando o pagamento é gerado
+        if (foundOrder?.serviceId) {
+          removeItemByServiceId(foundOrder.serviceId)
+        }
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erro ao gerar código PIX')
-      }
-
-      const data = await response.json()
-      setPayment(data.payment)
-
-      // Remover item do carrinho quando o pagamento é gerado
-      if (foundOrder?.serviceId) {
-        removeItemByServiceId(foundOrder.serviceId)
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao gerar código PIX')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -101,29 +100,9 @@ function PaymentContent() {
     }
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
-
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!user || !orderId) {
@@ -257,14 +236,6 @@ function PaymentContent() {
 }
 
 export default function PaymentPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    }>
-      <PaymentContent />
-    </Suspense>
-  )
+  return <PaymentContent />
 }
 

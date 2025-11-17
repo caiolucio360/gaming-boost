@@ -5,6 +5,7 @@
 import { GET } from '@/app/api/auth/me/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAuth } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -15,16 +16,23 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'user123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAuth: jest.fn(),
+  verifyRole: jest.fn(),
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message, status) => {
+    const { NextResponse } = require('next/server')
+    return NextResponse.json({ message }, { status })
+  }),
+}))
+
+// Mock do JWT
+jest.mock('@/lib/jwt', () => ({
+  generateToken: jest.fn(),
+  verifyToken: jest.fn(),
+  decodeToken: jest.fn(),
+  extractTokenFromHeader: jest.fn(),
 }))
 
 describe('GET /api/auth/me', () => {
@@ -34,17 +42,32 @@ describe('GET /api/auth/me', () => {
 
   it('deve retornar dados do usuário autenticado', async () => {
     const mockUser = {
-      id: 'user123',
+      id: 1,
       email: 'teste@teste.com',
       name: 'Teste',
       role: 'CLIENT',
-      // Não incluir password, pois o select não inclui
+      phone: null,
+      active: true,
+      createdAt: new Date(),
     }
+
+    // Mock do verifyAuth retornando autenticação válida (agora é async)
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
 
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
 
     const request = new NextRequest('http://localhost:3000/api/auth/me', {
       method: 'GET',
+      headers: {
+        Authorization: 'Bearer mock-token',
+      },
     })
 
     const response = await GET(request)
@@ -54,24 +77,30 @@ describe('GET /api/auth/me', () => {
     expect(data.user).toBeDefined()
     expect(data.user.email).toBe('teste@teste.com')
     expect(data.user.role).toBe('CLIENT')
-    expect(data.user.id).toBe('user123')
+    expect(data.user.id).toBe(1)
+    expect(data.user.active).toBe(true)
     // A senha não é retornada pois não está no select
     expect(data.user).not.toHaveProperty('password')
+    expect(verifyAuth).toHaveBeenCalled()
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { id: 'user123' },
+      where: { id: 1 },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        phone: true,
+        active: true,
+        createdAt: true,
       },
     })
   })
 
   it('deve retornar erro 401 se o usuário não estiver autenticado', async () => {
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null), // Sem userId
+    // Mock do verifyAuth retornando não autenticado (agora é async)
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
     })
 
     const request = new NextRequest('http://localhost:3000/api/auth/me', {
@@ -82,15 +111,28 @@ describe('GET /api/auth/me', () => {
     const data = await response.json()
 
     expect(response.status).toBe(401)
-    expect(data.message).toContain('Não autenticado')
+    expect(data.message).toContain('Token não fornecido')
+    expect(verifyAuth).toHaveBeenCalled()
     expect(prisma.user.findUnique).not.toHaveBeenCalled()
   })
 
   it('deve retornar erro 404 se o usuário não for encontrado', async () => {
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
     const request = new NextRequest('http://localhost:3000/api/auth/me', {
       method: 'GET',
+      headers: {
+        Authorization: 'Bearer mock-token',
+      },
     })
 
     const response = await GET(request)
@@ -98,6 +140,40 @@ describe('GET /api/auth/me', () => {
 
     expect(response.status).toBe(404)
     expect(data.message).toContain('não encontrado')
+  })
+
+  it('deve retornar erro 403 se a conta estiver desativada', async () => {
+    const mockUser = {
+      id: 1,
+      email: 'teste@teste.com',
+      name: 'Teste',
+      role: 'CLIENT',
+      active: false, // Conta desativada
+    }
+
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
+
+    const request = new NextRequest('http://localhost:3000/api/auth/me', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer mock-token',
+      },
+    })
+
+    const response = await GET(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(data.message).toContain('desativada')
   })
 })
 

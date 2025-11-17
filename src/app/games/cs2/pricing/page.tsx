@@ -1,6 +1,6 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
-import { CS2Calculator } from '@/components/cs2-calculator'
+import { CS2Calculator } from '@/components/games/cs2-calculator'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Preços CS2 - Calculadora de Boost',

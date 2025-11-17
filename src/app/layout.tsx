@@ -4,6 +4,7 @@ import './globals.css'
 import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
+import { ToastProvider } from '@/components/providers/toast-provider'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -45,6 +46,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
         <AuthProviderWrapper>
+          <ToastProvider />
           <div className="min-h-screen flex flex-col overflow-x-hidden">
             <ElojobHeader />
             <main className="flex-1 pt-16">

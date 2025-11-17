@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,9 @@ import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { EmptyState } from '@/components/common/empty-state'
+import { OrdersListSkeleton } from '@/components/common/loading-skeletons'
+import { OrderInfoItem } from '@/components/common/order-info-item'
+import { formatPrice, formatDate } from '@/lib/utils'
 
 interface Order {
   id: string
@@ -51,7 +55,7 @@ export default function AdminOrdersPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
+  const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
@@ -65,7 +69,7 @@ export default function AdminOrdersPage() {
   }, [user, authLoading, router, filterStatus])
 
   const fetchOrders = async () => {
-    try {
+    await withLoading(async () => {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
 
@@ -74,11 +78,7 @@ export default function AdminOrdersPage() {
         const data = await response.json()
         setOrders(data.orders || [])
       }
-    } catch (error) {
-      console.error('Erro ao buscar pedidos:', error)
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
@@ -119,24 +119,8 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  if (authLoading || loading) {
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -184,7 +168,9 @@ export default function AdminOrdersPage() {
         </Card>
 
         {/* Lista de Pedidos */}
-        {orders.length === 0 ? (
+        {loading ? (
+          <OrdersListSkeleton count={5} />
+        ) : orders.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}
             title="Nenhum pedido encontrado"
@@ -214,39 +200,18 @@ export default function AdminOrdersPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            Valor Total
-                          </p>
-                          <p className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                            {formatPrice(order.total)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            Data da Solicitação
-                          </p>
-                          <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            {formatDate(order.createdAt)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            Tipo de Serviço
-                          </p>
-                          <p className="text-sm text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            {order.service.type}
-                          </p>
-                        </div>
+                        <OrderInfoItem
+                          label="Valor Total"
+                          value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                        />
+                        <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
+                        <OrderInfoItem label="Tipo de Serviço" value={order.service.type} />
                         {order.booster && (
-                          <div>
-                            <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              Booster Atribuído
-                            </p>
-                            <p className="text-sm text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              {order.booster.name || order.booster.email}
-                            </p>
-                          </div>
+                          <OrderInfoItem
+                            label="Booster Atribuído"
+                            value={order.booster.name || order.booster.email}
+                            valueClassName="text-purple-300"
+                          />
                         )}
                       </div>
 

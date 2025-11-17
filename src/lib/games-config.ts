@@ -63,11 +63,49 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
         displayName: 'Premier',
         description: 'Sistema de rating Premier do CS2',
         pricingRules: {
-          basePrice: 50,
+          basePrice: 25,
           unit: '1000 pontos',
           calculation: (current: number, target: number) => {
-            const difference = target - current
-            return Math.ceil(difference / 1000) * 50
+            // Preços progressivos por faixa (mercado brasileiro)
+            // Baseado em pesquisa de concorrentes: DFGames, Desapego Games
+            const getPricePer1000 = (rating: number): number => {
+              if (rating < 5000) return 25 // 1K-4.999: R$ 25/1000
+              if (rating < 10000) return 35 // 5K-9.999: R$ 35/1000
+              if (rating < 15000) return 45 // 10K-14.999: R$ 45/1000
+              if (rating < 20000) return 50 // 15K-19.999: R$ 50/1000
+              if (rating < 25000) return 60 // 20K-24.999: R$ 60/1000
+              return 90 // 25K-26K: R$ 90/1000
+            }
+
+            let total = 0
+            let currentRating = current
+
+            // Calcular por faixas progressivas, do current para o target
+            while (currentRating < target) {
+              const pricePer1000 = getPricePer1000(currentRating)
+              
+              // Determinar o próximo limite de faixa
+              const nextThreshold = 
+                currentRating < 5000 ? 5000 :
+                currentRating < 10000 ? 10000 :
+                currentRating < 15000 ? 15000 :
+                currentRating < 20000 ? 20000 :
+                currentRating < 25000 ? 25000 :
+                Infinity
+
+              // Calcular quantos pontos podemos processar nesta faixa
+              const maxPointsInRange = Math.min(target, nextThreshold) - currentRating
+              const pointsToProcess = Math.min(maxPointsInRange, target - currentRating)
+              
+              // Calcular preço para esses pontos
+              const thousands = Math.ceil(pointsToProcess / 1000)
+              total += thousands * pricePer1000
+              
+              // Avançar para a próxima faixa
+              currentRating += pointsToProcess
+            }
+
+            return total
           },
         },
         ratingPoints: [
@@ -82,11 +120,25 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
         displayName: 'Gamers Club',
         description: 'Sistema de ranqueamento do Gamers Club',
         pricingRules: {
-          basePrice: 45,
+          basePrice: 20,
           unit: '1 nível',
           calculation: (current: number, target: number) => {
-            const difference = target - current
-            return difference * 45 // R$ 45 por nível
+            // Preços progressivos por faixa (mercado brasileiro)
+            // Baseado em pesquisa de concorrentes: DFGames
+            const getPricePerLevel = (level: number): number => {
+              if (level <= 10) return 20 // Level 1-10: R$ 20/nível
+              if (level <= 14) return 40 // Level 11-14: R$ 40/nível
+              if (level <= 17) return 50 // Level 15-17: R$ 50/nível
+              if (level <= 19) return 70 // Level 18-19: R$ 70/nível
+              return 120 // Level 20: R$ 120/nível
+            }
+
+            let total = 0
+            for (let level = current + 1; level <= target; level++) {
+              total += getPricePerLevel(level)
+            }
+
+            return total
           },
         },
         ranks: [
@@ -95,10 +147,9 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
           { id: 'avançado', name: 'Avançado', minPoints: 8, maxPoints: 11 },
           { id: 'expert', name: 'Expert', minPoints: 12, maxPoints: 15 },
           { id: 'master', name: 'Master', minPoints: 16, maxPoints: 19 },
-          { id: 'supremo', name: 'Supremo', minPoints: 20, maxPoints: 23 },
-          { id: 'lendário', name: 'Lendário', minPoints: 24, maxPoints: 27 },
+          { id: 'supremo', name: 'Supremo', minPoints: 20, maxPoints: 20 },
         ],
-        ratingPoints: Array.from({ length: 27 }, (_, i) => i + 1), // Níveis de 1 a 27
+        ratingPoints: Array.from({ length: 20 }, (_, i) => i + 1), // Níveis de 1 a 20
       },
     },
   },

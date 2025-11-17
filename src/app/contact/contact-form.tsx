@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { MailIcon, PhoneIcon, ClockIcon } from 'lucide-react'
+import { ButtonLoading } from '@/components/common/button-loading'
 
 export default function ContactForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -97,14 +97,15 @@ export default function ContactForm() {
                 />
               </div>
 
-              <Button 
+              <ButtonLoading 
                 type="submit" 
+                loading={isLoading}
+                loadingText="Enviando..."
                 className="w-full bg-purple-500 hover:bg-purple-400 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 font-rajdhani" 
                 style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
-                disabled={isLoading}
               >
-                {isLoading ? 'Enviando...' : 'ENVIAR MENSAGEM'}
-              </Button>
+                ENVIAR MENSAGEM
+              </ButtonLoading>
             </form>
           </div>
 

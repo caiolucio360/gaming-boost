@@ -46,7 +46,6 @@ describe('sitemap', () => {
     const result = sitemap()
     const urls = result.map((entry) => entry.url)
 
-    expect(urls.some((url) => url.includes('/services'))).toBe(true)
     expect(urls.some((url) => url.includes('/games/cs2'))).toBe(true)
     expect(urls.some((url) => url.includes('/about'))).toBe(true)
     expect(urls.some((url) => url.includes('/contact'))).toBe(true)
@@ -76,7 +75,7 @@ describe('sitemap', () => {
     const homePage = result.find((entry) => entry.url === 'https://gameboostpro.com.br' || entry.url === 'https://gameboostpro.com.br/')
     expect(homePage?.priority).toBe(1)
 
-    const servicePage = result.find((entry) => entry.url.includes('/services'))
+    const servicePage = result.find((entry) => entry.url.includes('/games/cs2'))
     expect(servicePage?.priority).toBeGreaterThan(0)
     expect(servicePage?.priority).toBeLessThanOrEqual(1)
   })

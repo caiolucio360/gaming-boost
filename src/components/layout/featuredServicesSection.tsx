@@ -19,7 +19,7 @@ export default function FeaturedServicesSection() {
       description: "Aprenda com jogadores experientes e melhore seu gameplay",
       icon: GraduationCap,
       available: false,
-      href: "/services"
+      href: "/games/cs2"
     }
   ]
 
@@ -70,7 +70,7 @@ export default function FeaturedServicesSection() {
 
         <div className="text-center">
           <Button size="lg" variant="outline" className="px-10 py-6" asChild>
-            <Link href="/services">Ver Todos os Serviços</Link>
+            <Link href="/games/cs2">Ver Jogos Disponíveis</Link>
           </Button>
         </div>
       </div>

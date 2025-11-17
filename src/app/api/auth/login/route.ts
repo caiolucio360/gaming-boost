@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { generateToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +27,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar se o usuário está ativo
+    if (!user.active) {
+      return NextResponse.json(
+        { message: 'Conta desativada. Entre em contato com o suporte.' },
+        { status: 403 }
+      )
+    }
+
     // Verificar senha
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
@@ -36,6 +45,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Gerar token JWT
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    })
+
     // Redirecionar baseado no role após login
     let redirectPath = '/dashboard'
     if (user.role === 'ADMIN') {
@@ -44,11 +60,10 @@ export async function POST(request: NextRequest) {
       redirectPath = '/booster'
     }
 
-    // Criar sessão (aqui você pode usar cookies ou JWT)
-    // Por enquanto, vamos usar uma abordagem simples com cookies
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         message: 'Login realizado com sucesso',
+        token,
         user: {
           id: user.id,
           email: user.email,
@@ -59,15 +74,6 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     )
-
-    // Armazenar ID do usuário em cookie (em produção, usar httpOnly e secure)
-    response.cookies.set('userId', user.id, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
-    })
-
-    return response
   } catch (error) {
     console.error('Erro ao fazer login:', error)
     return NextResponse.json(

@@ -1,30 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // GET - Listar todos os usuários
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
-
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
-      )
-    }
-
     // Verificar se é admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
+    const authResult = await verifyAdmin(request)
 
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { message: 'Acesso negado. Apenas administradores.' },
-        { status: 403 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 

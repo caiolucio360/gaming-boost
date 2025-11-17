@@ -5,6 +5,7 @@
 import { GET, POST } from '@/app/api/orders/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAuth } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -20,16 +21,16 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'user123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAuth: jest.fn(),
+  verifyRole: jest.fn(),
+  verifyAdmin: jest.fn(),
+  verifyBooster: jest.fn(),
+  createAuthErrorResponse: jest.fn((message, status) => {
+    const { NextResponse } = require('next/server')
+    return NextResponse.json({ message }, { status })
+  }),
 }))
 
 describe('GET /api/orders', () => {
@@ -38,16 +39,25 @@ describe('GET /api/orders', () => {
   })
 
   it('deve retornar lista de pedidos do usuário autenticado', async () => {
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
     const mockOrders = [
       {
-        id: 'order1',
-        userId: 'user123',
-        serviceId: 'service1',
+        id: 1,
+        userId: 1,
+        serviceId: 1,
         status: 'PENDING',
         total: 89.90,
         createdAt: new Date(),
         service: {
-          id: 'service1',
+          id: 1,
           name: 'Boost CS2 Premier: 10K → 15K',
           game: 'CS2',
         },
@@ -70,9 +80,9 @@ describe('GET /api/orders', () => {
   })
 
   it('deve retornar erro 401 se o usuário não estiver autenticado', async () => {
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null), // Sem userId
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
     })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
@@ -95,16 +105,25 @@ describe('POST /api/orders', () => {
   })
 
   it('deve criar um novo pedido com sucesso', async () => {
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
     const mockService = {
-      id: 'service1',
+      id: 1,
       name: 'Boost CS2 Premier: 10K → 15K',
       price: 89.90,
     }
 
     const mockOrder = {
-      id: 'order1',
-      userId: 'user123',
-      serviceId: 'service1',
+      id: 1,
+      userId: 1,
+      serviceId: 1,
       status: 'PENDING',
         total: 89.90,
       createdAt: new Date(),
@@ -118,7 +137,7 @@ describe('POST /api/orders', () => {
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        serviceId: 'service1',
+        serviceId: 1,
         total: 89.90,
       }),
     })
@@ -133,16 +152,25 @@ describe('POST /api/orders', () => {
   })
 
   it('deve retornar erro 400 se já existir um pedido ativo (PENDING ou IN_PROGRESS) para a mesma modalidade', async () => {
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
     const mockService = {
-      id: 'service1',
+      id: 1,
       name: 'Boost CS2 Premier: 10K → 15K',
       price: 89.90,
       type: 'RANK_BOOST',
     }
 
     const existingOrder = {
-      id: 'existing-order',
-      userId: 'user123',
+      id: 2,
+      userId: 1,
       status: 'PENDING',
       gameMode: 'PREMIER',
     }
@@ -153,7 +181,7 @@ describe('POST /api/orders', () => {
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        serviceId: 'service1',
+        serviceId: 1,
         total: 89.90,
         gameMode: 'PREMIER',
       }),
@@ -168,17 +196,26 @@ describe('POST /api/orders', () => {
   })
 
   it('deve permitir criar novo pedido se o anterior for COMPLETED', async () => {
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'teste@teste.com',
+        role: 'CLIENT',
+      },
+    })
+
     const mockService = {
-      id: 'service1',
+      id: 1,
       name: 'Boost CS2 Premier: 10K → 15K',
       price: 89.90,
       type: 'RANK_BOOST',
     }
 
     const mockOrder = {
-      id: 'order1',
-      userId: 'user123',
-      serviceId: 'service1',
+      id: 1,
+      userId: 1,
+      serviceId: 1,
       status: 'PENDING',
       total: 89.90,
       createdAt: new Date(),
@@ -192,7 +229,7 @@ describe('POST /api/orders', () => {
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        serviceId: 'service1',
+        serviceId: 1,
         total: 89.90,
         gameMode: 'PREMIER',
       }),
@@ -212,7 +249,7 @@ describe('POST /api/orders', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serviceId: 'service1',
+        serviceId: 1,
         // total faltando
       }),
     })
@@ -233,7 +270,7 @@ describe('POST /api/orders', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serviceId: 'servicoinexistente',
+        serviceId: 999,
         total: 89.90,
       }),
     })
@@ -246,9 +283,9 @@ describe('POST /api/orders', () => {
   })
 
   it('deve retornar erro 401 se o usuário não estiver autenticado', async () => {
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null), // Sem userId
+    ;(verifyAuth as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
     })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
@@ -257,7 +294,7 @@ describe('POST /api/orders', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serviceId: 'service1',
+        serviceId: 1,
         total: 89.90,
       }),
     })

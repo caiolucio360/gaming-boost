@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // GET - Buscar pedido específico
 export async function GET(
@@ -8,20 +8,30 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
+    const userId = authResult.user.id
     const { id } = await params
 
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
+
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: {
         service: true,
         booster: {
@@ -65,21 +75,31 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
+    const userId = authResult.user.id
     const { id } = await params
+
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
 
     // Buscar o pedido
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: {
         service: true,
       },
@@ -113,7 +133,7 @@ export async function PUT(
 
     // Cancelar o pedido
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { id: orderId },
       data: {
         status: 'CANCELLED',
       },

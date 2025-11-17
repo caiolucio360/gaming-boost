@@ -1,30 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
-
-async function checkAdmin() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get('userId')?.value
-
-  if (!userId) {
-    return { error: 'Não autenticado', status: 401, user: null }
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'ADMIN') {
-    return {
-      error: 'Acesso negado. Apenas administradores.',
-      status: 403,
-      user: null,
-    }
-  }
-
-  return { error: null, status: null, user: null }
-}
+import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // GET - Buscar pedido específico
 export async function GET(
@@ -32,18 +8,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
 
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
+
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: {
         user: {
           select: {
@@ -86,17 +71,26 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
     const body = await request.json()
     const { status, boosterId } = body
+
+    // Converter id para número
+    const orderId = parseInt(id, 10)
+    if (isNaN(orderId)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
 
     const updateData: any = {}
 
@@ -108,9 +102,18 @@ export async function PUT(
       if (boosterId === null || boosterId === '') {
         updateData.boosterId = null
       } else {
+        // Converter boosterId para número
+        const boosterIdNum = typeof boosterId === 'string' ? parseInt(boosterId, 10) : boosterId
+        if (isNaN(boosterIdNum)) {
+          return NextResponse.json(
+            { message: 'ID do booster inválido' },
+            { status: 400 }
+          )
+        }
+
         // Verificar se o booster existe e tem role BOOSTER
         const booster = await prisma.user.findUnique({
-          where: { id: boosterId },
+          where: { id: boosterIdNum },
           select: { role: true },
         })
 
@@ -128,7 +131,7 @@ export async function PUT(
           )
         }
 
-        updateData.boosterId = boosterId
+        updateData.boosterId = boosterIdNum
       }
     }
 
@@ -140,7 +143,7 @@ export async function PUT(
     }
 
     const order = await prisma.order.update({
-      where: { id },
+      where: { id: orderId },
       data: updateData,
       include: {
         user: {

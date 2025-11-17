@@ -19,6 +19,20 @@ export default function CS2Page() {
       icon: "⚡",
       href: "/games/cs2/pricing",
       available: true
+    },
+    {
+      title: "COACHING",
+      description: "Aprenda com jogadores experientes e melhore seu gameplay",
+      features: [
+        "Sessões personalizadas",
+        "Análise de gameplay",
+        "Estratégias avançadas",
+        "Mentoria individual",
+        "Feedback em tempo real"
+      ],
+      icon: "🎖️",
+      href: "/games/cs2/pricing",
+      available: false
     }
   ]
 

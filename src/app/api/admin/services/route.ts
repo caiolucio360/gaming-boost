@@ -1,40 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { isGameEnabled, isServiceTypeSupported, GameId, ServiceType } from '@/lib/games-config'
-
-async function checkAdmin() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get('userId')?.value
-
-  if (!userId) {
-    return { error: 'Não autenticado', status: 401, user: null }
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'ADMIN') {
-    return {
-      error: 'Acesso negado. Apenas administradores.',
-      status: 403,
-      user: null,
-    }
-  }
-
-  return { error: null, status: null, user: null }
-}
 
 // GET - Listar todos os serviços
 export async function GET(request: NextRequest) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
@@ -75,11 +51,11 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo serviço
 export async function POST(request: NextRequest) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 

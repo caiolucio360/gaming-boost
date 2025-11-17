@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,17 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import {
   Alert,
   AlertDescription,
@@ -43,6 +33,10 @@ import {
   Crown,
 } from 'lucide-react'
 import Link from 'next/link'
+import { TableSkeleton } from '@/components/common/loading-skeletons'
+import { formatDate } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { ActionButton } from '@/components/common/action-button'
 
 interface AdminUser {
   id: string
@@ -59,8 +53,7 @@ export default function AdminUsersPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [users, setUsers] = useState<AdminUser[]>([])
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -86,28 +79,25 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async (isRefresh = false) => {
     try {
-      if (isRefresh) {
-        setRefreshing(true)
-      } else {
-        setLoading(true)
-      }
-      const params = new URLSearchParams()
-      if (filterRole) params.append('role', filterRole)
-      if (searchTerm) params.append('search', searchTerm)
+      await withLoading(async () => {
+        const params = new URLSearchParams()
+        if (filterRole) params.append('role', filterRole)
+        if (searchTerm) params.append('search', searchTerm)
 
-      const response = await fetch(`/api/admin/users?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data.users || [])
-      } else {
-        const errorData = await response.json().catch(() => ({ message: 'Erro ao buscar usuários' }))
-        setAlert({
-          title: 'Erro',
-          description: errorData.message || 'Erro ao buscar usuários',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 5000)
-      }
+        const response = await fetch(`/api/admin/users?${params.toString()}`)
+        if (response.ok) {
+          const data = await response.json()
+          setUsers(data.users || [])
+        } else {
+          const errorData = await response.json().catch(() => ({ message: 'Erro ao buscar usuários' }))
+          setAlert({
+            title: 'Erro',
+            description: errorData.message || 'Erro ao buscar usuários',
+            variant: 'destructive',
+          })
+          setTimeout(() => setAlert(null), 5000)
+        }
+      }, isRefresh)
     } catch (error) {
       console.error('Erro ao buscar usuários:', error)
       setAlert({
@@ -116,9 +106,6 @@ export default function AdminUsersPage() {
         variant: 'destructive',
       })
       setTimeout(() => setAlert(null), 5000)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
     }
   }
 
@@ -191,15 +178,8 @@ export default function AdminUsersPage() {
     return configs[role] || configs.CLIENT
   }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
@@ -288,7 +268,9 @@ export default function AdminUsersPage() {
         </Card>
 
         {/* Lista de Usuários */}
-        {users.length === 0 ? (
+        {loading ? (
+          <TableSkeleton rows={8} cols={5} />
+        ) : users.length === 0 ? (
           <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -349,41 +331,24 @@ export default function AdminUsersPage() {
                           </Link>
                         </Button>
                         {adminUser.id !== user.id && (
-                          <AlertDialog open={deleteDialogOpen && userToDelete?.id === adminUser.id} onOpenChange={setDeleteDialogOpen}>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteClick(adminUser.id, adminUser.email)}
-                                className="border-red-500/50 text-red-300 hover:bg-red-500/10 font-rajdhani"
-                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-black/90 border-purple-500/50">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                  Deletar Usuário
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Tem certeza que deseja deletar o usuário {adminUser.email}? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Cancelar
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleDelete}
-                                  className="bg-red-500 hover:bg-red-400 text-white font-rajdhani"
-                                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                                >
-                                  Deletar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <>
+                            <ActionButton
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteClick(adminUser.id, adminUser.email)}
+                              icon={Trash2}
+                            />
+                            <ConfirmDialog
+                              open={deleteDialogOpen && userToDelete?.id === adminUser.id}
+                              onOpenChange={setDeleteDialogOpen}
+                              title="Deletar Usuário"
+                              description={`Tem certeza que deseja deletar o usuário ${adminUser.email}? Esta ação não pode ser desfeita.`}
+                              confirmLabel="Deletar"
+                              cancelLabel="Cancelar"
+                              onConfirm={handleDelete}
+                              variant="destructive"
+                            />
+                          </>
                         )}
                       </div>
                     </div>

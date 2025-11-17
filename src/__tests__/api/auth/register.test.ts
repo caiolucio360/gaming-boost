@@ -7,6 +7,14 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
+// Mock do JWT
+jest.mock('@/lib/jwt', () => ({
+  generateToken: jest.fn((payload) => `mock-token-${payload.userId}`),
+  verifyToken: jest.fn(),
+  decodeToken: jest.fn(),
+  extractTokenFromHeader: jest.fn(),
+}))
+
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
   prisma: {
@@ -28,7 +36,7 @@ describe('POST /api/auth/register', () => {
     
     // Mock: criação bem-sucedida
     ;(prisma.user.create as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 1,
       email: 'novo@teste.com',
       name: 'Novo Usuário',
       role: 'CLIENT',
@@ -51,6 +59,7 @@ describe('POST /api/auth/register', () => {
     const data = await response.json()
 
     expect(response.status).toBe(201)
+    expect(data.token).toBeDefined()
     expect(data.user).toBeDefined()
     expect(data.user.email).toBe('novo@teste.com')
     expect(data.user.role).toBe('CLIENT')
@@ -60,7 +69,7 @@ describe('POST /api/auth/register', () => {
 
   it('deve retornar erro 400 se o email já existe', async () => {
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 1,
       email: 'existente@teste.com',
     })
 
@@ -104,6 +113,28 @@ describe('POST /api/auth/register', () => {
 
     expect(response.status).toBe(400)
     expect(data.message).toContain('6 caracteres')
+  })
+
+  it('deve retornar erro 400 para email inválido', async () => {
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const request = new NextRequest('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Usuário',
+        email: 'email-invalido', // Email inválido
+        password: '123456',
+      }),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('inválido')
   })
 
   it('deve retornar erro 400 para campos faltando', async () => {

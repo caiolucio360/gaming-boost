@@ -1,14 +1,14 @@
 import { GameId, ServiceType } from '@/lib/games-config'
 
 export interface User {
-    id: string;
+    id: number;
     email: string;
     name?: string;
     role: 'CLIENT' | 'BOOSTER' | 'ADMIN';
   }
 
 export interface Service {
-    id: string;
+    id: number;
     game: GameId;
     type: ServiceType;
     name: string;
@@ -27,9 +27,10 @@ export interface Service {
   }
 
   export interface Order {
-    id: string;
-    userId: string;
-    serviceId: string;
+    id: number;
+    userId: number;
+    serviceId: number;
+    boosterId?: number | null;
     status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
     total: number;
     createdAt: Date;
@@ -38,8 +39,8 @@ export interface Service {
   }
 
   export interface Payment {
-    id: string;
-    orderId: string;
+    id: number;
+    orderId: number;
     total: number;
     pixCode: string;
     qrCode?: string;
@@ -48,7 +49,7 @@ export interface Service {
 
   // Item do carrinho
   export interface CartItem {
-    serviceId?: string; // ID do serviço do banco (se existir)
+    serviceId?: number; // ID do serviço do banco (se existir)
     game: GameId;
     serviceName: string;
     description?: string;

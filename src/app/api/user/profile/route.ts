@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import bcrypt from 'bcryptjs'
 
 // GET - Buscar perfil do usuário autenticado
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -56,15 +58,17 @@ export async function GET(request: NextRequest) {
 // PUT - Atualizar perfil do usuário autenticado
 export async function PUT(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     const body = await request.json()
     const { name, phone, currentPassword, newPassword } = body

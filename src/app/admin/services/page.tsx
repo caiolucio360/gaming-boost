@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,17 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import {
   Alert,
   AlertDescription,
@@ -57,7 +47,7 @@ export default function AdminServicesPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
+  const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterGame, setFilterGame] = useState<string>('')
   const [filterType, setFilterType] = useState<string>('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -74,7 +64,7 @@ export default function AdminServicesPage() {
   }, [user, authLoading, router, filterGame, filterType])
 
   const fetchServices = async () => {
-    try {
+    await withLoading(async () => {
       const params = new URLSearchParams()
       if (filterGame) params.append('game', filterGame)
       if (filterType) params.append('type', filterType)
@@ -84,11 +74,7 @@ export default function AdminServicesPage() {
         const data = await response.json()
         setServices(data.services || [])
       }
-    } catch (error) {
-      console.error('Erro ao buscar serviços:', error)
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const handleDeleteClick = (serviceId: string, serviceName: string) => {
@@ -134,12 +120,6 @@ export default function AdminServicesPage() {
     }
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
 
   const getGameBadge = (game: string) => {
     const configs: Record<string, { label: string; color: string }> = {
@@ -336,41 +316,24 @@ export default function AdminServicesPage() {
                           </Link>
                         </Button>
                         {service._count.orders === 0 && (
-                          <AlertDialog open={deleteDialogOpen && serviceToDelete?.id === service.id} onOpenChange={setDeleteDialogOpen}>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteClick(service.id, service.name)}
-                                className="border-red-500/50 text-red-300 hover:bg-red-500/10 font-rajdhani"
-                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-black/90 border-purple-500/50">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                  Deletar Serviço
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Tem certeza que deseja deletar o serviço "{service.name}"? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Cancelar
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleDelete}
-                                  className="bg-red-500 hover:bg-red-400 text-white font-rajdhani"
-                                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                                >
-                                  Deletar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <>
+                            <ActionButton
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteClick(service.id, service.name)}
+                              icon={Trash2}
+                            />
+                            <ConfirmDialog
+                              open={deleteDialogOpen && serviceToDelete?.id === service.id}
+                              onOpenChange={setDeleteDialogOpen}
+                              title="Deletar Serviço"
+                              description={`Tem certeza que deseja deletar o serviço "${service.name}"? Esta ação não pode ser desfeita.`}
+                              confirmLabel="Deletar"
+                              cancelLabel="Cancelar"
+                              onConfirm={handleDelete}
+                              variant="destructive"
+                            />
+                          </>
                         )}
                       </div>
                     </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { generateToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,15 @@ export async function POST(request: NextRequest) {
     if (password.length < 6) {
       return NextResponse.json(
         { message: 'A senha deve ter pelo menos 6 caracteres' },
+        { status: 400 }
+      )
+    }
+
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { message: 'Email inválido' },
         { status: 400 }
       )
     }
@@ -52,9 +62,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Gerar token JWT
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    })
+
     return NextResponse.json(
       {
         message: 'Conta criada com sucesso',
+        token,
         user: {
           id: user.id,
           email: user.email,

@@ -1,32 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // GET - Listar pedidos disponíveis e atribuídos ao booster
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
-
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
-      )
-    }
-
     // Verificar se é booster
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!user || user.role !== 'BOOSTER') {
-      return NextResponse.json(
-        { message: 'Acesso negado. Apenas boosters.' },
-        { status: 403 }
+    const authResult = await verifyBooster(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     // Buscar parâmetros de query
     const { searchParams } = new URL(request.url)

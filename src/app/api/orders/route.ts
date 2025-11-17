@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     // Buscar orders do usuário com informações do serviço
     const orders = await prisma.order.findMany({
@@ -42,15 +44,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     const { 
       serviceId, 
@@ -72,9 +76,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Converter serviceId para número
+    const serviceIdNum = typeof serviceId === 'string' ? parseInt(serviceId, 10) : serviceId
+    if (isNaN(serviceIdNum)) {
+      return NextResponse.json(
+        { message: 'serviceId inválido' },
+        { status: 400 }
+      )
+    }
+
     // Verificar se o serviço existe
     const service = await prisma.service.findUnique({
-      where: { id: serviceId },
+      where: { id: serviceIdNum },
     })
 
     if (!service) {
@@ -115,7 +128,7 @@ export async function POST(request: NextRequest) {
     // Preparar dados do pedido
     const orderData: any = {
       userId,
-      serviceId,
+      serviceId: serviceIdNum,
       total: parseFloat(total),
       status: 'PENDING',
     }

@@ -81,41 +81,55 @@ async function main() {
     if (game.supportedServiceTypes.includes('RANK_BOOST')) {
       // Serviços padrão para rank boost (podem ser customizados por jogo)
       const gameServices = [
+        // Serviços específicos Premier (preços alinhados ao mercado brasileiro)
         {
-          id: `boost-${game.id.toLowerCase()}-premier-5k-10k`,
           game: game.id as any,
-      type: 'RANK_BOOST' as const,
+          type: 'RANK_BOOST' as const,
           name: `Boost ${game.displayName} Premier: 5K → 10K`,
           description: `Boost profissional no ${game.name} Premier de 5.000 para 10.000 pontos. Serviço rápido e seguro.`,
-          price: 59.90,
-      duration: '2-4 dias',
-    },
-    {
-          id: `boost-${game.id.toLowerCase()}-premier-10k-15k`,
+          price: 175.00, // 5K-9.999: R$ 35/1000 × 5 = R$ 175
+          duration: '2-4 dias',
+        },
+        {
           game: game.id as any,
           type: 'RANK_BOOST' as const,
           name: `Boost ${game.displayName} Premier: 10K → 15K`,
           description: `Boost profissional no ${game.name} Premier de 10.000 para 15.000 pontos. Boost garantido.`,
-          price: 89.90,
+          price: 225.00, // 10K-14.999: R$ 45/1000 × 5 = R$ 225
           duration: '3-6 dias',
         },
         {
-          id: `boost-${game.id.toLowerCase()}-premier-15k-20k`,
           game: game.id as any,
           type: 'RANK_BOOST' as const,
           name: `Boost ${game.displayName} Premier: 15K → 20K`,
           description: `Boost profissional no ${game.name} Premier de 15.000 para 20.000 pontos. Serviço premium.`,
-          price: 129.90,
+          price: 250.00, // 15K-19.999: R$ 50/1000 × 5 = R$ 250
           duration: '4-7 dias',
         },
         {
-          id: `boost-${game.id.toLowerCase()}-premier-20k-25k`,
           game: game.id as any,
-      type: 'RANK_BOOST' as const,
+          type: 'RANK_BOOST' as const,
           name: `Boost ${game.displayName} Premier: 20K → 25K`,
           description: `Boost profissional no ${game.name} Premier de 20.000 para 25.000 pontos. Para jogadores avançados.`,
-          price: 159.90,
+          price: 300.00, // 20K-24.999: R$ 60/1000 × 5 = R$ 300
           duration: '5-8 dias',
+        },
+        // Serviços genéricos para boosts customizados (calculados dinamicamente)
+        {
+          game: game.id as any,
+          type: 'RANK_BOOST' as const,
+          name: `Boost ${game.displayName} Premier Customizado`,
+          description: `Boost profissional no ${game.name} Premier com faixa personalizada. Preço calculado dinamicamente.`,
+          price: 0, // Preço será definido no pedido
+          duration: '2-7 dias',
+        },
+        {
+          game: game.id as any,
+          type: 'RANK_BOOST' as const,
+          name: `Boost ${game.displayName} Gamers Club Customizado`,
+          description: `Boost profissional no ${game.name} Gamers Club com faixa personalizada. Preço calculado dinamicamente.`,
+          price: 0, // Preço será definido no pedido
+          duration: '2-7 dias',
         },
       ]
       services.push(...gameServices)
@@ -137,26 +151,41 @@ async function main() {
   }
 
         // Criar serviços no banco de dados
-        const createdServices: Array<{ id: string; game: string; type: string; name: string; description: string; price: number; duration: string }> = []
+        const createdServices: Array<{ id: number; game: string; type: string; name: string; description: string; price: number; duration: string }> = []
         for (const serviceData of services) {
           try {
-            const service = await prisma.service.upsert({
-        where: { id: serviceData.id },
-        update: {
-          // Atualizar dados se o serviço já existir
-          name: serviceData.name,
-          description: serviceData.description,
-          price: serviceData.price,
-          duration: serviceData.duration,
-        },
-        create: serviceData,
-      })
-      createdServices.push(service)
-      console.log(`✅ Serviço criado: ${service.name} (${service.game})`)
-    } catch (error) {
-      console.error(`❌ Erro ao criar serviço ${serviceData.id}:`, error)
-    }
-  }
+            // Verificar se o serviço já existe pelo nome e jogo
+            const existingService = await prisma.service.findFirst({
+              where: {
+                name: serviceData.name,
+                game: serviceData.game,
+              },
+            })
+
+            let service
+            if (existingService) {
+              // Atualizar se já existir
+              service = await prisma.service.update({
+                where: { id: existingService.id },
+                data: {
+                  name: serviceData.name,
+                  description: serviceData.description,
+                  price: serviceData.price,
+                  duration: serviceData.duration,
+                },
+              })
+            } else {
+              // Criar novo serviço
+              service = await prisma.service.create({
+                data: serviceData,
+              })
+            }
+            createdServices.push(service)
+            console.log(`✅ Serviço criado: ${service.name} (${service.game})`)
+          } catch (error) {
+            console.error(`❌ Erro ao criar serviço ${serviceData.name}:`, error)
+          }
+        }
 
   console.log(`✅ Total de ${createdServices.length} serviços criados`)
 

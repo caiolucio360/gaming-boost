@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
+import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const userId = cookieStore.get('userId')?.value
+    // Verificar autenticação via NextAuth
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'Não autenticado' },
-        { status: 401 }
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
+
+    const userId = authResult.user.id
 
     const { orderId } = await request.json()
 
@@ -23,9 +25,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Converter orderId para número
+    const orderIdNum = typeof orderId === 'string' ? parseInt(orderId, 10) : orderId
+    if (isNaN(orderIdNum)) {
+      return NextResponse.json(
+        { message: 'ID do pedido inválido' },
+        { status: 400 }
+      )
+    }
+
     // Buscar order
     const order = await prisma.order.findUnique({
-      where: { id: orderId },
+      where: { id: orderIdNum },
       include: {
         service: true,
       },
@@ -48,14 +59,12 @@ export async function POST(request: NextRequest) {
 
     // Gerar código PIX (simulado - em produção, integrar com gateway de pagamento)
     const pixCode = generatePixCode(order.total)
-    const paymentId = `pix_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000) // 30 minutos
     const qrCodeBase64 = generateQRCodeBase64(pixCode)
 
     // Salvar informação de pagamento no banco
     const payment = await prisma.payment.create({
       data: {
-        id: paymentId,
         orderId: order.id,
         method: 'PIX',
         pixCode,

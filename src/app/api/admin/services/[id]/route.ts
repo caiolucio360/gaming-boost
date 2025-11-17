@@ -1,30 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { cookies } from 'next/headers'
-
-async function checkAdmin() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get('userId')?.value
-
-  if (!userId) {
-    return { error: 'Não autenticado', status: 401, user: null }
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'ADMIN') {
-    return {
-      error: 'Acesso negado. Apenas administradores.',
-      status: 403,
-      user: null,
-    }
-  }
-
-  return { error: null, status: null, user: null }
-}
+import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
 
 // GET - Buscar serviço específico
 export async function GET(
@@ -32,18 +8,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
 
+    // Converter id para número
+    const serviceId = parseInt(id, 10)
+    if (isNaN(serviceId)) {
+      return NextResponse.json(
+        { message: 'ID do serviço inválido' },
+        { status: 400 }
+      )
+    }
+
     const service = await prisma.service.findUnique({
-      where: { id },
+      where: { id: serviceId },
       include: {
         _count: {
           select: { orders: true },
@@ -74,17 +59,26 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
     const body = await request.json()
     const { game, type, name, description, price, duration } = body
+
+    // Converter id para número
+    const serviceId = parseInt(id, 10)
+    if (isNaN(serviceId)) {
+      return NextResponse.json(
+        { message: 'ID do serviço inválido' },
+        { status: 400 }
+      )
+    }
 
     const updateData: any = {}
 
@@ -100,7 +94,7 @@ export async function PUT(
     if (duration !== undefined) updateData.duration = duration
 
     const service = await prisma.service.update({
-      where: { id },
+      where: { id: serviceId },
       data: updateData,
     })
 
@@ -123,19 +117,28 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await checkAdmin()
-    if (adminCheck.error) {
-      return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status! }
+    const authResult = await verifyAdmin(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(
+        authResult.error || 'Não autenticado',
+        401
       )
     }
 
     const { id } = await params
 
+    // Converter id para número
+    const serviceId = parseInt(id, 10)
+    if (isNaN(serviceId)) {
+      return NextResponse.json(
+        { message: 'ID do serviço inválido' },
+        { status: 400 }
+      )
+    }
+
     // Verificar se serviço existe
     const service = await prisma.service.findUnique({
-      where: { id },
+      where: { id: serviceId },
       include: {
         _count: {
           select: { orders: true },
@@ -159,7 +162,7 @@ export async function DELETE(
     }
 
     await prisma.service.delete({
-      where: { id },
+      where: { id: serviceId },
     })
 
     return NextResponse.json(

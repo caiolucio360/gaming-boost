@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useAuth } from '@/contexts/auth-context'
+import { ButtonLoading } from '@/components/common/button-loading'
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -121,14 +120,15 @@ export default function RegisterPage() {
             </Label>
           </div>
 
-          <Button 
+          <ButtonLoading 
             type="submit" 
+            loading={isLoading}
+            loadingText="Criando conta..."
             className="w-full bg-purple-500 hover:bg-purple-400 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 font-rajdhani" 
             style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
-            disabled={isLoading}
           >
-            {isLoading ? 'Criando conta...' : 'CRIAR CONTA'}
-          </Button>
+            CRIAR CONTA
+          </ButtonLoading>
 
           <div className="text-center text-sm">
             <span className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>Já tem uma conta? </span>
