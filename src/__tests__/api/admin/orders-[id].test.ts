@@ -5,6 +5,7 @@
 import { GET, PUT } from '@/app/api/admin/orders/[id]/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -19,16 +20,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'admin123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/admin/orders/[id]', () => {
@@ -37,25 +34,29 @@ describe('GET /api/admin/orders/[id]', () => {
   })
 
   it('deve retornar pedido específico para admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const mockOrder = {
-      id: 'order1',
-      userId: 'user1',
-      serviceId: 'service1',
+      id: 1,
+      userId: 1,
+      serviceId: 1,
       status: 'PENDING',
       total: 100,
       createdAt: new Date(),
       user: {
-        id: 'user1',
+        id: 1,
         email: 'user1@test.com',
         name: 'User 1',
       },
       service: {
-        id: 'service1',
+        id: 1,
         name: 'Boost CS2',
         game: 'CS2',
       },
@@ -63,32 +64,36 @@ describe('GET /api/admin/orders/[id]', () => {
 
     ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/orders/order1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/orders/1', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'order1' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(200)
     expect(data.order).toBeDefined()
-    expect(data.order.id).toBe('order1')
+    expect(data.order.id).toBe(1)
     expect(data.order.status).toBe('PENDING')
   })
 
   it('deve retornar erro 404 se pedido não existir', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/orders/orderinexistente', {
+    const request = new NextRequest('http://localhost:3000/api/admin/orders/999', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'orderinexistente' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '999' }) })
     const data = await response.json()
 
     expect(response.status).toBe(404)
@@ -102,15 +107,19 @@ describe('PUT /api/admin/orders/[id]', () => {
   })
 
   it('deve atualizar status do pedido com sucesso', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const existingOrder = {
-      id: 'order1',
-      userId: 'user1',
-      serviceId: 'service1',
+      id: 1,
+      userId: 1,
+      serviceId: 1,
       status: 'PENDING',
       total: 100,
     }
@@ -123,21 +132,21 @@ describe('PUT /api/admin/orders/[id]', () => {
     ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
     ;(prisma.order.update as jest.Mock).mockResolvedValue(updatedOrder)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/orders/order1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/orders/1', {
       method: 'PUT',
       body: JSON.stringify({
         status: 'IN_PROGRESS',
       }),
     })
 
-    const response = await PUT(request, { params: Promise.resolve({ id: 'order1' }) })
+    const response = await PUT(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(200)
     expect(data.order).toBeDefined()
     expect(data.order.status).toBe('IN_PROGRESS')
     expect(prisma.order.update).toHaveBeenCalledWith({
-      where: { id: 'order1' },
+      where: { id: 1 },
       data: { status: 'IN_PROGRESS' },
       include: {
         user: { select: { id: true, email: true, name: true } },
@@ -159,14 +168,24 @@ describe('PUT /api/admin/orders/[id]', () => {
       new Error('Record to update not found')
     )
 
-    const request = new NextRequest('http://localhost:3000/api/admin/orders/orderinexistente', {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const request = new NextRequest('http://localhost:3000/api/admin/orders/999', {
       method: 'PUT',
       body: JSON.stringify({
         status: 'IN_PROGRESS',
       }),
     })
 
-    const response = await PUT(request, { params: Promise.resolve({ id: 'orderinexistente' }) })
+    const response = await PUT(request, { params: Promise.resolve({ id: '999' }) })
     
     // A API retorna erro 500 quando o update falha
     expect(response.status).toBeGreaterThanOrEqual(400)

@@ -34,7 +34,7 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
-  const [orderToCancel, setOrderToCancel] = useState<string | null>(null)
+  const [orderToCancel, setOrderToCancel] = useState<number | null>(null)
   const [alert, setAlert] = useState<{ 
     title: string
     description: string
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   }
 
   const handleCancelClick = (orderId: number) => {
-    setOrderToCancel(orderId.toString())
+    setOrderToCancel(orderId)
     setCancelDialogOpen(true)
   }
 
@@ -82,13 +82,7 @@ export default function DashboardPage() {
     if (!orderToCancel) return
 
     try {
-      const orderId = parseInt(orderToCancel, 10)
-      if (isNaN(orderId)) {
-        showError('Erro', 'ID do pedido inválido')
-        return
-      }
-
-      const response = await fetch(`/api/orders/${orderId}`, {
+      const response = await fetch(`/api/orders/${orderToCancel}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

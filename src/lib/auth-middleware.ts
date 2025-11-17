@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-config'
 
 /**
  * Resultado da verificação de autenticação
@@ -76,6 +76,21 @@ export function createAuthErrorResponse(message: string, status: number = 401): 
   return NextResponse.json(
     { message },
     { status }
+  )
+}
+
+/**
+ * Helper para criar resposta de erro baseado no resultado de autenticação
+ * Retorna 403 se for erro de permissão, 401 caso contrário
+ */
+export function createAuthErrorResponseFromResult(authResult: AuthResult): NextResponse {
+  const isPermissionError = authResult.error?.includes('Acesso negado') || 
+                           authResult.error?.includes('Permissão') ||
+                           authResult.error?.includes('insuficiente')
+  const status = isPermissionError ? 403 : 401
+  return createAuthErrorResponse(
+    authResult.error || 'Não autenticado',
+    status
   )
 }
 

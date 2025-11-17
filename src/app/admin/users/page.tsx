@@ -39,7 +39,7 @@ import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
 
 interface AdminUser {
-  id: string
+  id: number
   email: string
   name?: string
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null)
+  const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function AdminUsersPage() {
     fetchUsers(true)
   }
 
-  const handleDeleteClick = (userId: string, userEmail: string) => {
+  const handleDeleteClick = (userId: number, userEmail: string) => {
     setUserToDelete({ id: userId, email: userEmail })
     setDeleteDialogOpen(true)
   }

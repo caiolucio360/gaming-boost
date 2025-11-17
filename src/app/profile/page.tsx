@@ -25,7 +25,7 @@ import { formatDate } from '@/lib/utils'
 import { ProfileSkeleton } from '@/components/common/loading-skeletons'
 
 interface UserProfile {
-  id: string
+  id: number
   email: string
   name: string | null
   role: string

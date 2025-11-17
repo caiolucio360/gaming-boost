@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
+import { formatPrice } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { ActionButton } from '@/components/common/action-button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +33,7 @@ import {
 import Link from 'next/link'
 
 interface Service {
-  id: string
+  id: number
   name: string
   description: string
   game: 'CS2'
@@ -51,7 +54,7 @@ export default function AdminServicesPage() {
   const [filterGame, setFilterGame] = useState<string>('')
   const [filterType, setFilterType] = useState<string>('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [serviceToDelete, setServiceToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [serviceToDelete, setServiceToDelete] = useState<{ id: number; name: string } | null>(null)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export default function AdminServicesPage() {
     })
   }
 
-  const handleDeleteClick = (serviceId: string, serviceName: string) => {
+  const handleDeleteClick = (serviceId: number, serviceName: string) => {
     setServiceToDelete({ id: serviceId, name: serviceName })
     setDeleteDialogOpen(true)
   }

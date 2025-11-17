@@ -93,8 +93,8 @@ describe('games-config', () => {
       const cs2Config = GAMES_CONFIG.CS2
       expect(cs2Config?.modes?.PREMIER?.pricingRules).toBeDefined()
       expect(cs2Config?.modes?.GAMERS_CLUB?.pricingRules).toBeDefined()
-      expect(cs2Config?.modes?.PREMIER?.pricingRules.basePrice).toBe(50)
-      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingRules.basePrice).toBe(45)
+      expect(cs2Config?.modes?.PREMIER?.pricingRules.basePrice).toBe(25)
+      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingRules.basePrice).toBe(20)
     })
 
     it('deve ter ratingPoints ou ranks para cada modo', () => {

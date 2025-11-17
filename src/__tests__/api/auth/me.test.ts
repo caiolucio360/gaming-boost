@@ -111,7 +111,7 @@ describe('GET /api/auth/me', () => {
     const data = await response.json()
 
     expect(response.status).toBe(401)
-    expect(data.message).toContain('Token não fornecido')
+    expect(data.message).toContain('Não autenticado')
     expect(verifyAuth).toHaveBeenCalled()
     expect(prisma.user.findUnique).not.toHaveBeenCalled()
   })

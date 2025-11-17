@@ -50,7 +50,7 @@ interface Stats {
     total: number
   }
   recentOrders: Array<{
-    id: string
+    id: number
     status: string
     total: number
     createdAt: string

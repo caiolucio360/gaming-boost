@@ -7,7 +7,7 @@ interface CartContextType {
   items: CartItem[]
   addItem: (item: CartItem) => { success: boolean; error?: string }
   removeItem: (index: number) => void
-  removeItemByServiceId: (serviceId: string) => void
+  removeItemByServiceId: (serviceId: string | number) => void
   clearCart: () => void
   processCartAfterLogin: () => Promise<void>
 }
@@ -68,8 +68,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((_, i) => i !== index))
   }, [])
 
-  const removeItemByServiceId = useCallback((serviceId: string) => {
-    setItems((prev) => prev.filter((item) => item.serviceId !== serviceId))
+  const removeItemByServiceId = useCallback((serviceId: string | number) => {
+    setItems((prev) => prev.filter((item) => {
+      if (item.serviceId === undefined) return true
+      return item.serviceId.toString() !== serviceId.toString()
+    }))
   }, [])
 
   const clearCart = useCallback(() => {

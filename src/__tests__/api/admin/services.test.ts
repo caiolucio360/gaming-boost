@@ -5,6 +5,7 @@
 import { GET, POST } from '@/app/api/admin/services/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -20,16 +21,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'admin123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/admin/services', () => {
@@ -38,14 +35,18 @@ describe('GET /api/admin/services', () => {
   })
 
   it('deve retornar lista de serviços para admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const mockServices = [
       {
-        id: 'service1',
+        id: 1,
         name: 'Boost CS2 Premier: 10K → 15K',
         game: 'CS2',
         type: 'RANK_BOOST',
@@ -54,7 +55,7 @@ describe('GET /api/admin/services', () => {
         duration: '2-5 dias',
       },
       {
-        id: 'service2',
+        id: 2,
         name: 'Boost CS2 Premier: 15K → 20K',
         game: 'CS2',
         type: 'RANK_BOOST',
@@ -80,9 +81,9 @@ describe('GET /api/admin/services', () => {
   })
 
   it('deve retornar erro 401 se não autenticado', async () => {
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null),
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
     })
 
     const request = new NextRequest('http://localhost:3000/api/admin/services', {
@@ -97,9 +98,9 @@ describe('GET /api/admin/services', () => {
   })
 
   it('deve retornar erro 403 se não for admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
-      role: 'CLIENT',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Acesso negado. Permissão insuficiente.',
     })
 
     const request = new NextRequest('http://localhost:3000/api/admin/services', {
@@ -120,13 +121,17 @@ describe('POST /api/admin/services', () => {
   })
 
   it('deve criar serviço com sucesso', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const newService = {
-      id: 'service3',
+      id: 3,
       name: 'Boost CS2 Premier: 20K → 25K',
       game: 'CS2',
       type: 'RANK_BOOST',
@@ -159,9 +164,13 @@ describe('POST /api/admin/services', () => {
   })
 
   it('deve retornar erro 400 se campos obrigatórios faltarem', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const request = new NextRequest('http://localhost:3000/api/admin/services', {

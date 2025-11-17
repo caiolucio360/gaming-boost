@@ -28,24 +28,24 @@ import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 
 interface Order {
-  id: string
+  id: number
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   total: number
   createdAt: string
-  boosterId?: string | null
+  boosterId?: number | null
   user: {
-    id: string
+    id: number
     email: string
     name?: string
   }
   service: {
-    id: string
+    id: number
     name: string
     game: string
     type: string
   }
   booster?: {
-    id: string
+    id: number
     email: string
     name?: string
   }
@@ -81,7 +81,7 @@ export default function AdminOrdersPage() {
     })
   }
 
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',

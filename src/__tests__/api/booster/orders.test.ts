@@ -5,6 +5,7 @@
 import { GET } from '@/app/api/booster/orders/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyBooster } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -20,16 +21,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'booster123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyBooster: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/booster/orders', () => {
@@ -38,23 +35,27 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar pedidos disponíveis para booster', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'booster123',
-      role: 'BOOSTER',
+    ;(verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'booster@test.com',
+        role: 'BOOSTER',
+      },
     })
 
     const mockOrders = [
       {
-        id: 'order1',
-        userId: 'user1',
-        serviceId: 'service1',
+        id: 1,
+        userId: 1,
+        serviceId: 1,
         boosterId: null,
         status: 'PENDING',
         total: 100,
         createdAt: new Date(),
-        user: { id: 'user1', email: 'user1@test.com', name: 'User 1' },
+        user: { id: 1, email: 'user1@test.com', name: 'User 1' },
         service: {
-          id: 'service1',
+          id: 1,
           name: 'Boost CS2',
           game: 'CS2',
           type: 'RANK_BOOST',
@@ -87,23 +88,27 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar pedidos atribuídos ao booster', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'booster123',
-      role: 'BOOSTER',
+    ;(verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'booster@test.com',
+        role: 'BOOSTER',
+      },
     })
 
     const mockOrders = [
       {
-        id: 'order2',
-        userId: 'user1',
-        serviceId: 'service1',
-        boosterId: 'booster123',
+        id: 2,
+        userId: 1,
+        serviceId: 1,
+        boosterId: 1,
         status: 'IN_PROGRESS',
         total: 100,
         createdAt: new Date(),
-        user: { id: 'user1', email: 'user1@test.com', name: 'User 1' },
+        user: { id: 1, email: 'user1@test.com', name: 'User 1' },
         service: {
-          id: 'service1',
+          id: 1,
           name: 'Boost CS2',
           game: 'CS2',
           type: 'RANK_BOOST',
@@ -130,7 +135,7 @@ describe('GET /api/booster/orders', () => {
 
     expect(response.status).toBe(200)
     expect(data.orders).toBeDefined()
-    expect(data.orders[0].boosterId).toBe('booster123')
+    expect(data.orders[0].boosterId).toBe(1)
     expect(data.orders[0].status).toBe('IN_PROGRESS')
   })
 
@@ -152,9 +157,9 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar erro 403 se não for booster', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
-      role: 'CLIENT',
+    ;(verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: createAuthErrorResponse('Acesso negado', 403),
     })
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders', {

@@ -5,6 +5,7 @@
 import { GET } from '@/app/api/admin/users/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -16,16 +17,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'admin123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/admin/users', () => {
@@ -34,14 +31,18 @@ describe('GET /api/admin/users', () => {
   })
 
   it('deve retornar lista de usuários para admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const mockUsers = [
       {
-        id: 'user1',
+        id: 1,
         email: 'user1@test.com',
         name: 'User 1',
         role: 'CLIENT',
@@ -50,7 +51,7 @@ describe('GET /api/admin/users', () => {
         _count: { orders: 5 },
       },
       {
-        id: 'user2',
+        id: 2,
         email: 'user2@test.com',
         name: 'User 2',
         role: 'BOOSTER',
@@ -76,14 +77,18 @@ describe('GET /api/admin/users', () => {
   })
 
   it('deve filtrar por role', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const mockUsers = [
       {
-        id: 'user1',
+        id: 1,
         email: 'user1@test.com',
         name: 'User 1',
         role: 'CLIENT',
@@ -116,6 +121,10 @@ describe('GET /api/admin/users', () => {
   })
 
   it('deve retornar erro 401 se não autenticado', async () => {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
+    })
     const { cookies } = require('next/headers')
     cookies.mockReturnValueOnce({
       get: jest.fn(() => null),
@@ -133,8 +142,12 @@ describe('GET /api/admin/users', () => {
   })
 
   it('deve retornar erro 403 se não for admin', async () => {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Acesso negado. Permissão insuficiente.',
+    })
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 123,
       role: 'CLIENT',
     })
 

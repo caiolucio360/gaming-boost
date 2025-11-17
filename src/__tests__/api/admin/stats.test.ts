@@ -5,6 +5,7 @@
 import { GET } from '@/app/api/admin/stats/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -24,16 +25,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'admin123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/admin/stats', () => {
@@ -43,9 +40,13 @@ describe('GET /api/admin/stats', () => {
 
   it('deve retornar estatísticas do admin', async () => {
     // Mock admin user
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     // Mock counts
@@ -70,7 +71,7 @@ describe('GET /api/admin/stats', () => {
 
     ;(prisma.order.findMany as jest.Mock).mockResolvedValue([
       {
-        id: 'order1',
+        id: 1,
         status: 'PENDING',
         total: 100,
         createdAt: new Date('2024-01-01'),
@@ -98,6 +99,10 @@ describe('GET /api/admin/stats', () => {
   })
 
   it('deve retornar erro 401 se o usuário não estiver autenticado', async () => {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
+    })
     const { cookies } = require('next/headers')
     cookies.mockReturnValueOnce({
       get: jest.fn(() => null),
@@ -115,8 +120,12 @@ describe('GET /api/admin/stats', () => {
   })
 
   it('deve retornar erro 403 se o usuário não for admin', async () => {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Acesso negado. Permissão insuficiente.',
+    })
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
+      id: 123,
       role: 'CLIENT',
     })
 

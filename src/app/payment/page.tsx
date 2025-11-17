@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/cart-context'
 import { Payment } from '@/types'
 import { useLoading } from '@/hooks/use-loading'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { formatPrice, formatDate } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +17,8 @@ import {
   Copy,
   CheckCircle2,
   Clock,
-  ArrowLeft
+  ArrowLeft,
+  Loader2
 } from 'lucide-react'
 
 function PaymentContent() {
@@ -236,6 +238,10 @@ function PaymentContent() {
 }
 
 export default function PaymentPage() {
-  return <PaymentContent />
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <PaymentContent />
+    </Suspense>
+  )
 }
 

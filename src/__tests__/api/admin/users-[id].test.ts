@@ -5,6 +5,7 @@
 import { GET, PUT, DELETE } from '@/app/api/admin/users/[id]/route'
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin } from '@/lib/auth-middleware'
 
 // Mock do prisma
 jest.mock('@/lib/db', () => ({
@@ -17,16 +18,12 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
-// Mock de cookies do Next.js
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((key: string) => {
-      if (key === 'userId') {
-        return { value: 'admin123' }
-      }
-      return null
-    }),
-  })),
+// Mock do auth-middleware
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAdmin: jest.fn(),
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
+    return new Response(JSON.stringify({ message }), { status })
+  }),
 }))
 
 describe('GET /api/admin/users/[id]', () => {
@@ -35,13 +32,17 @@ describe('GET /api/admin/users/[id]', () => {
   })
 
   it('deve retornar usuário específico para admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'admin123',
-      role: 'ADMIN',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
     })
 
     const mockUser = {
-      id: 'user1',
+      id: 1,
       email: 'user1@test.com',
       name: 'User 1',
       role: 'CLIENT',
@@ -50,35 +51,32 @@ describe('GET /api/admin/users/[id]', () => {
       _count: { orders: 5 },
     }
 
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValueOnce({
-      id: 'admin123',
-      role: 'ADMIN',
-    }).mockResolvedValueOnce(mockUser)
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/user1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/1', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'user1' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(200)
     expect(data.user).toBeDefined()
-    expect(data.user.id).toBe('user1')
+    expect(data.user.id).toBe(1)
     expect(data.user.email).toBe('user1@test.com')
   })
 
   it('deve retornar erro 401 se não autenticado', async () => {
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null),
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Não autenticado',
     })
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/user1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/1', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'user1' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(401)
@@ -86,16 +84,16 @@ describe('GET /api/admin/users/[id]', () => {
   })
 
   it('deve retornar erro 403 se não for admin', async () => {
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: 'user123',
-      role: 'CLIENT',
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: false,
+      error: 'Apenas administradores podem acessar esta rota',
     })
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/user1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/1', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'user1' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(403)
@@ -103,15 +101,21 @@ describe('GET /api/admin/users/[id]', () => {
   })
 
   it('deve retornar erro 404 se usuário não existir', async () => {
-    ;(prisma.user.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 'admin123', role: 'ADMIN' })
-      .mockResolvedValueOnce(null)
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/userinexistente', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/999', {
       method: 'GET',
     })
 
-    const response = await GET(request, { params: Promise.resolve({ id: 'userinexistente' }) })
+    const response = await GET(request, { params: Promise.resolve({ id: '999' }) })
     const data = await response.json()
 
     expect(response.status).toBe(404)
@@ -125,20 +129,25 @@ describe('PUT /api/admin/users/[id]', () => {
   })
 
   it('deve atualizar usuário com sucesso', async () => {
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+
     const existingUser = {
-      id: 'user1',
+      id: 1,
       email: 'user1@test.com',
       name: 'User 1',
       role: 'CLIENT',
     }
 
-    // Primeiro check de admin
     ;(prisma.user.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 'admin123', role: 'ADMIN' })
-      // Segundo check para verificar se usuário existe
       .mockResolvedValueOnce(existingUser)
-      // Terceiro check para verificar se email já existe (caso seja necessário)
-      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null) // Verificar se email já existe
 
     const updatedUser = {
       ...existingUser,
@@ -149,7 +158,7 @@ describe('PUT /api/admin/users/[id]', () => {
 
     ;(prisma.user.update as jest.Mock).mockResolvedValue(updatedUser)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/user1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/1', {
       method: 'PUT',
       body: JSON.stringify({
         email: 'updated@test.com',
@@ -158,7 +167,7 @@ describe('PUT /api/admin/users/[id]', () => {
       }),
     })
 
-    const response = await PUT(request, { params: Promise.resolve({ id: 'user1' }) })
+    const response = await PUT(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -169,18 +178,24 @@ describe('PUT /api/admin/users/[id]', () => {
   })
 
   it('deve retornar erro 404 se usuário não existir', async () => {
-    ;(prisma.user.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 'admin123', role: 'ADMIN' })
-      .mockResolvedValueOnce(null)
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/userinexistente', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/999', {
       method: 'PUT',
       body: JSON.stringify({
         email: 'updated@test.com',
       }),
     })
 
-    const response = await PUT(request, { params: Promise.resolve({ id: 'userinexistente' }) })
+    const response = await PUT(request, { params: Promise.resolve({ id: '999' }) })
     const data = await response.json()
 
     expect(response.status).toBe(404)
@@ -194,37 +209,54 @@ describe('DELETE /api/admin/users/[id]', () => {
   })
 
   it('deve deletar usuário com sucesso', async () => {
-    ;(prisma.user.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 'admin123', role: 'ADMIN' })
-      .mockResolvedValueOnce({ id: 'user1', email: 'user1@test.com', role: 'CLIENT' })
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 2,
+      email: 'user1@test.com',
+      role: 'CLIENT',
+    })
 
     ;(prisma.user.delete as jest.Mock).mockResolvedValue({
-      id: 'user1',
+      id: 2,
       email: 'user1@test.com',
     })
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/user1', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/2', {
       method: 'DELETE',
     })
 
-    const response = await DELETE(request, { params: Promise.resolve({ id: 'user1' }) })
+    const response = await DELETE(request, { params: Promise.resolve({ id: '2' }) })
     const data = await response.json()
 
     expect(response.status).toBe(200)
     expect(data.message).toContain('deletado')
-    expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'user1' } })
+    expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 2 } })
   })
 
   it('deve retornar erro 404 se usuário não existir', async () => {
-    ;(prisma.user.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 'admin123', role: 'ADMIN' })
-      .mockResolvedValueOnce(null)
+    ;(verifyAdmin as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+      },
+    })
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
-    const request = new NextRequest('http://localhost:3000/api/admin/users/userinexistente', {
+    const request = new NextRequest('http://localhost:3000/api/admin/users/999', {
       method: 'DELETE',
     })
 
-    const response = await DELETE(request, { params: Promise.resolve({ id: 'userinexistente' }) })
+    const response = await DELETE(request, { params: Promise.resolve({ id: '999' }) })
     const data = await response.json()
 
     expect(response.status).toBe(404)

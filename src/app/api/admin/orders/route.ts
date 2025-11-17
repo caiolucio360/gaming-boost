@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
     // Verificar se é admin
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     // Buscar parâmetros de query

@@ -151,7 +151,7 @@ describe('AdminDashboardPage', () => {
     render(<AdminDashboardPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Erro ao carregar estatísticas/i)).toBeInTheDocument()
+      expect(screen.getByText(/Erro ao buscar estatísticas/i)).toBeInTheDocument()
       expect(screen.getByText(/Tentar Novamente/i)).toBeInTheDocument()
     })
   })

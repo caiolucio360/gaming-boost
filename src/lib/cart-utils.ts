@@ -95,7 +95,7 @@ export async function handleServiceHire(
  * Função auxiliar para criar uma order
  */
 export async function createOrder(
-  serviceId: string, 
+  serviceId: number, 
   total: number,
   metadata?: {
     currentRank?: string

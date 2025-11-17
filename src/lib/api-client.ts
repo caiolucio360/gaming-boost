@@ -58,9 +58,9 @@ export async function authenticatedFetch(
   const { requireAuth = true, headers = {}, ...restOptions } = options
 
   // Preparar headers
-  const requestHeaders: HeadersInit = {
+  const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...headers,
+    ...(headers as Record<string, string>),
   }
 
   // Adicionar token se necessário

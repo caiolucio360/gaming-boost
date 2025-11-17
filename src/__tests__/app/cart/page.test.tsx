@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import CartPage from '@/app/cart/page'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
+import { apiPost } from '@/lib/api-client'
 
 // Mock dos contextos e hooks
 jest.mock('@/contexts/auth-context', () => ({
@@ -23,6 +24,22 @@ jest.mock('next/navigation', () => ({
 
 // Mock do fetch
 global.fetch = jest.fn()
+
+// Mock do api-client
+jest.mock('@/lib/api-client', () => ({
+  apiPost: jest.fn(),
+}))
+
+// Mock do toast
+jest.mock('@/lib/toast', () => ({
+  showSuccess: jest.fn(),
+  showError: jest.fn(),
+  showWarning: jest.fn(),
+  showLoading: jest.fn(() => 'toast-id'),
+  updateToSuccess: jest.fn(),
+  updateToError: jest.fn(),
+  handleApiError: jest.fn(),
+}))
 
 describe('CartPage', () => {
   const mockPush = jest.fn()
@@ -50,18 +67,18 @@ describe('CartPage', () => {
     render(<CartPage />)
 
     expect(screen.getByText('Carrinho vazio')).toBeInTheDocument()
-    expect(screen.getByText('Explorar Serviços')).toBeInTheDocument()
+    expect(screen.getByText('Explorar Jogos')).toBeInTheDocument()
   })
 
   it('deve renderizar itens do carrinho quando há itens', () => {
     ;(useAuth as jest.Mock).mockReturnValue({
-      user: { id: 'user1', email: 'test@test.com', role: 'CLIENT' },
+      user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
       loading: false,
     })
     ;(useCart as jest.Mock).mockReturnValue({
       items: [
         {
-          serviceId: 'service123',
+          serviceId: 123,
           game: 'CS2',
           serviceName: 'Boost CS2 Premier: 10K → 15K',
           description: 'Boost profissional',
@@ -94,7 +111,7 @@ describe('CartPage', () => {
     ;(useCart as jest.Mock).mockReturnValue({
       items: [
         {
-          serviceId: 'service123',
+          serviceId: 123,
           game: 'CS2',
           serviceName: 'Boost CS2 Premier',
           price: 89.90,
@@ -113,13 +130,13 @@ describe('CartPage', () => {
 
   it('deve criar orders e redirecionar para pagamento quando finalizar compra estando logado', async () => {
     ;(useAuth as jest.Mock).mockReturnValue({
-      user: { id: 'user1', email: 'test@test.com', role: 'CLIENT' },
+      user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
       loading: false,
     })
     ;(useCart as jest.Mock).mockReturnValue({
       items: [
         {
-          serviceId: 'service123',
+          serviceId: 123,
           game: 'CS2',
           serviceName: 'Boost CS2 Premier: 10K → 15K',
           price: 89.90,
@@ -136,18 +153,18 @@ describe('CartPage', () => {
       clearCart: mockClearCart,
     })
 
-    // Mock fetch para criar order
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        message: 'Solicitação criada com sucesso',
-        order: {
-          id: 'order123',
-          serviceId: 'service123',
-          total: 89.90,
-        },
-      }),
+    // Mock apiPost para criar order
+    ;(apiPost as jest.Mock).mockResolvedValueOnce({
+      message: 'Solicitação criada com sucesso',
+      order: {
+        id: 123,
+        serviceId: 123,
+        total: 89.90,
+      },
     })
+
+    // Mock setTimeout para executar imediatamente
+    jest.useFakeTimers()
 
     render(<CartPage />)
 
@@ -155,36 +172,37 @@ describe('CartPage', () => {
     fireEvent.click(button)
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          serviceId: 'service123',
-          total: 89.90,
-          currentRank: '10K',
-          targetRank: '15K',
-          currentRating: 10000,
-          targetRating: 15000,
-          gameMode: 'PREMIER',
-          metadata: '{"mode":"PREMIER","currentRating":10000,"targetRating":15000}',
-        }),
-      })
-      expect(mockClearCart).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/payment?orderId=order123')
+      expect(apiPost).toHaveBeenCalledWith('/api/orders', expect.objectContaining({
+        serviceId: 123,
+        total: 89.90,
+        currentRank: '10K',
+        targetRank: '15K',
+        currentRating: 10000,
+        targetRating: 15000,
+        gameMode: 'PREMIER',
+      }))
     })
+
+    // Avançar o timer para executar o setTimeout
+    jest.advanceTimersByTime(1500)
+
+    await waitFor(() => {
+      expect(mockClearCart).toHaveBeenCalled()
+      expect(mockPush).toHaveBeenCalledWith('/payment?orderId=123')
+    })
+
+    jest.useRealTimers()
   })
 
   it('deve exibir erro se não conseguir criar orders', async () => {
     ;(useAuth as jest.Mock).mockReturnValue({
-      user: { id: 'user1', email: 'test@test.com', role: 'CLIENT' },
+      user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
       loading: false,
     })
     ;(useCart as jest.Mock).mockReturnValue({
       items: [
         {
-          serviceId: 'service123',
+          serviceId: 123,
           game: 'CS2',
           serviceName: 'Boost CS2 Premier',
           price: 89.90,
@@ -208,7 +226,7 @@ describe('CartPage', () => {
     fireEvent.click(button)
 
     await waitFor(() => {
-      expect(screen.getByText(/Erro ao criar pedido|não foi possível criar/i)).toBeInTheDocument()
+      expect(screen.getByText(/Erro ao criar pedidos|não foi possível criar/i)).toBeInTheDocument()
     })
   })
 })

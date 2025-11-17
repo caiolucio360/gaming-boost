@@ -23,7 +23,7 @@ describe('GET /api/services', () => {
   it('deve retornar lista de serviços públicos', async () => {
     const mockServices = [
       {
-        id: 'service1',
+        id: 1,
         name: 'Boost CS2 Premier: 5K → 10K',
         game: 'CS2',
         type: 'RANK_BOOST',
@@ -33,7 +33,7 @@ describe('GET /api/services', () => {
         createdAt: new Date(),
       },
       {
-        id: 'service2',
+        id: 2,
         name: 'Boost CS2 Premier: 10K → 15K',
         game: 'CS2',
         type: 'RANK_BOOST',
@@ -64,7 +64,7 @@ describe('GET /api/services', () => {
   it('deve filtrar por jogo', async () => {
     const mockServices = [
       {
-        id: 'service1',
+        id: 1,
         name: 'Boost CS2 Premier: 5K → 10K',
         game: 'CS2',
         type: 'RANK_BOOST',
@@ -97,7 +97,7 @@ describe('GET /api/services', () => {
   it('deve filtrar por tipo de serviço', async () => {
     const mockServices = [
       {
-        id: 'service1',
+        id: 1,
         name: 'Boost CS2 Premier: 5K → 10K',
         game: 'CS2',
         type: 'RANK_BOOST',

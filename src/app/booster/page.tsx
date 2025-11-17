@@ -33,25 +33,25 @@ import {
 } from '@/components/ui/alert'
 
 interface Order {
-  id: string
+  id: number
   status: OrderStatus
   total: number
   createdAt: string
-  boosterId?: string | null
+  boosterId?: number | null
   user: {
-    id: string
+    id: number
     email: string
     name?: string
   }
   service: {
-    id: string
+    id: number
     name: string
     game: string
     type: string
     description: string
   }
   booster?: {
-    id: string
+    id: number
     email: string
     name?: string
   }
@@ -74,7 +74,7 @@ export default function BoosterDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [activeTab, setActiveTab] = useState('available')
-  const [orderToAction, setOrderToAction] = useState<string | null>(null)
+  const [orderToAction, setOrderToAction] = useState<number | null>(null)
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false)
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false)
   const [alert, setAlert] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null)
@@ -129,7 +129,7 @@ export default function BoosterDashboardPage() {
     }, isRefresh)
   }
 
-  const handleAcceptOrderClick = (orderId: string) => {
+  const handleAcceptOrderClick = (orderId: number) => {
     setOrderToAction(orderId)
     setAcceptDialogOpen(true)
   }
@@ -172,7 +172,7 @@ export default function BoosterDashboardPage() {
     }
   }
 
-  const handleCompleteOrderClick = (orderId: string) => {
+  const handleCompleteOrderClick = (orderId: number) => {
     setOrderToAction(orderId)
     setCompleteDialogOpen(true)
   }
@@ -278,7 +278,7 @@ export default function BoosterDashboardPage() {
               valueColor="text-purple-300"
             />
           </div>
-        )}
+        ) : null}
 
         {/* Tabs de Pedidos */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 
 // GET - Buscar serviço específico
 export async function GET(
@@ -10,10 +10,7 @@ export async function GET(
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const { id } = await params
@@ -61,10 +58,7 @@ export async function PUT(
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const { id } = await params
@@ -119,10 +113,7 @@ export async function DELETE(
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const { id } = await params

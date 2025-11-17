@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAdmin, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { isGameEnabled, isServiceTypeSupported, GameId, ServiceType } from '@/lib/games-config'
 
 // GET - Listar todos os serviços
@@ -8,10 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const { searchParams } = new URL(request.url)
@@ -53,10 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const body = await request.json()
