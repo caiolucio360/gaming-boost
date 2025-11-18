@@ -11,6 +11,7 @@ export const metadata: Metadata = generateMetadata({
     'boost profissional',
     'boost seguro',
   ],
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/about`,
 })
 
 export default function AboutPage() {

@@ -7,32 +7,42 @@ export interface SEOConfig {
   ogImage?: string
   canonical?: string
   noindex?: boolean
+  type?: 'website' | 'article'
+  publishedTime?: string
+  modifiedTime?: string
 }
+
+const DEFAULT_SITE_URL = 'https://gameboostpro.com.br'
+const DEFAULT_OG_IMAGE = '/principal.png'
 
 export function generateMetadata({
   title,
   description,
   keywords = [],
-  ogImage = '/principal.png',
+  ogImage = DEFAULT_OG_IMAGE,
   canonical,
   noindex = false,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
 }: SEOConfig): Metadata {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'
-  const fullTitle = `${title} | GameBoost Pro`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL
+  const fullTitle = title.includes('GameBoost Pro') ? title : `${title} | GameBoost Pro`
   const fullImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`
+  const canonicalUrl = canonical || siteUrl
 
-  return {
+  const metadata: Metadata = {
     title: fullTitle,
     description,
     keywords: keywords.length > 0 ? keywords.join(', ') : undefined,
     authors: [{ name: 'GameBoost Pro' }],
     creator: 'GameBoost Pro',
     publisher: 'GameBoost Pro',
-    robots: noindex ? 'noindex, nofollow' : 'index, follow',
+    robots: noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     openGraph: {
-      type: 'website',
+      type,
       locale: 'pt_BR',
-      url: canonical || siteUrl,
+      url: canonicalUrl,
       siteName: 'GameBoost Pro',
       title: fullTitle,
       description,
@@ -42,8 +52,11 @@ export function generateMetadata({
           width: 1200,
           height: 630,
           alt: title,
+          type: 'image/png',
         },
       ],
+      ...(publishedTime && { publishedTime }),
+      ...(modifiedTime && { modifiedTime }),
     },
     twitter: {
       card: 'summary_large_image',
@@ -51,11 +64,16 @@ export function generateMetadata({
       description,
       images: [fullImage],
       creator: '@gameboostpro',
+      site: '@gameboostpro',
     },
     alternates: {
-      canonical: canonical || siteUrl,
+      canonical: canonicalUrl,
     },
     metadataBase: new URL(siteUrl),
+    category: 'Gaming Services',
+    classification: 'Gaming Boost Services',
   }
+
+  return metadata
 }
 

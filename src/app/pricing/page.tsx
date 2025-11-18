@@ -1,6 +1,21 @@
-'use client'
-
+import { generateMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Calculadora de Preços - GameBoost Pro',
+  description: 'Calcule o preço do seu boost de rank para Counter-Strike 2. Modos Premier e Gamers Club disponíveis. Preços transparentes e competitivos. Simule seu boost agora.',
+  keywords: [
+    'preços boost cs2',
+    'calculadora boost cs2',
+    'quanto custa boost cs2',
+    'preço boost premier',
+    'preço boost gamers club',
+    'calculadora preço boost',
+    'simulador preço boost',
+  ],
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/pricing`,
+})
 
 export default function PricingPage() {
   const games = [

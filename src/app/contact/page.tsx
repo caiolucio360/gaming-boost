@@ -11,6 +11,7 @@ export const metadata: Metadata = generateMetadata({
     'atendimento boost cs2',
     'fale conosco',
   ],
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/contact`,
 })
 
 export default function ContactPage() {

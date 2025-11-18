@@ -22,8 +22,8 @@ const rajdhani = Rajdhani({
 import { generateMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'GameBoost - Serviços de Boost para Jogos',
-  description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura.',
+  title: 'GameBoost Pro - Serviços de Boost para Jogos',
+  description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura. Mais de 10.000 clientes satisfeitos.',
   keywords: [
     'counter strike 2',
     'cs2',
@@ -36,9 +36,6 @@ export const metadata: Metadata = generateMetadata({
     'cs2 boost profissional',
     'cs2 boost seguro',
     'cs2 boost rapido',
-    'cs2 boost rapido e seguro',
-    'cs2 boost rapido e seguro',
-    'cs2 boost rapido e seguro',
     'boost cs2',
     'boost counter strike 2',
     'elo job cs2',
@@ -49,18 +46,12 @@ export const metadata: Metadata = generateMetadata({
     'boost profissional',
     'boost seguro cs2',
     'elo job',
-    'elo job cs2',
     'elojob',
     'elojob cs2',
-    'elojob cs',
-    'elojob cs2 boost',
-    'elojob cs2 rank boost',
-    'elojob cs2 premier boost',
-    'elojob cs2 gamers club boost',
-    'elojob cs2 boost profissional',
-    'elojob cs2 boost seguro',
+    'gameboost pro',
+    'gameboost',
   ],
-  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gaming-boost.vercel.app',
+  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
 })
 
 export default function RootLayout({
@@ -77,11 +68,11 @@ export default function RootLayout({
             <ElojobHeader />
             <main className="flex-1 pt-16">
               {children}
-              <Analytics />
             </main>
             <Footer />
           </div>
         </AuthProviderWrapper>
+        <Analytics />
       </body>
     </html>
   )

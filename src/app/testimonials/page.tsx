@@ -10,6 +10,7 @@ export const metadata: Metadata = generateMetadata({
     'feedback clientes',
     'testimonials boost cs2',
   ],
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/testimonials`,
 })
 
 export default function TestimonialsPage() {
