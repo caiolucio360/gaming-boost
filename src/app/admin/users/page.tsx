@@ -189,7 +189,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {refreshing && (
           <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">

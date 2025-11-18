@@ -12,8 +12,8 @@ export const metadata: Metadata = generateMetadata({
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto text-center">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12">
+      <div className="max-w-3xl xl:max-w-4xl mx-auto text-center">
         {/* Número 404 Grande */}
         <div className="mb-8">
           <h1 className="text-9xl md:text-[12rem] font-bold font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '900' }}>

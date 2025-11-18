@@ -58,7 +58,7 @@ export default function CS2Page() {
         }}
       />
       <div className="min-h-screen bg-black">
-        <div className="container mx-auto px-6 py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
               <span className="text-purple-300">COUNTER-STRIKE 2</span>
@@ -68,8 +68,8 @@ export default function CS2Page() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-5xl xl:max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {services.map((service, index) => (
                 <Card
                   key={index}

@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {refreshing && (
           <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
           <StatsGridSkeleton count={4} />
         ) : stats ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <StatCard
             title="Total de Usuários"
             value={stats.users.total}
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Cards de Ações Rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <Link href="/admin/users">
             <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
               <CardHeader>

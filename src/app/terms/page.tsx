@@ -36,7 +36,7 @@ export default function TermsPage() {
         }}
       />
       <div className="min-h-screen bg-black">
-        <div className="container mx-auto px-6 py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
               <span className="text-purple-300">TERMOS</span>

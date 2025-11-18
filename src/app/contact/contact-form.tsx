@@ -34,7 +34,7 @@ export default function ContactForm() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl xl:max-w-7xl mx-auto">
           
           {/* Formulário de Contato */}
           <div className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-8">

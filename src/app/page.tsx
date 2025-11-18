@@ -96,7 +96,7 @@ export default function HomePage() {
           __html: JSON.stringify(serviceSchema),
         }}
       />
-      <div className="h-full">
+      <div className="min-h-screen">
         <ElojobHero />
       </div>
     </>

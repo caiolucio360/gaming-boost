@@ -229,7 +229,7 @@ export default function BoosterDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {refreshing && <RefreshingBanner />}
         {alert && (
@@ -248,7 +248,7 @@ export default function BoosterDashboardPage() {
         {loading && !stats ? (
           <StatsGridSkeleton count={4} />
         ) : stats ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <StatCard
               title="Disponíveis"
               value={stats.available}

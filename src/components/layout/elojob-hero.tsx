@@ -22,7 +22,7 @@ export default function ElojobHero() {
       </div>
 
       {/* Content - Layout Profissional com Hierarquia Visual */}
-      <div className="relative z-10 container mx-auto px-4 md:px-6 py-12 md:py-20 flex flex-col justify-center items-center min-h-screen">
+      <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-12 md:py-16 lg:py-20 flex flex-col justify-center items-center min-h-screen pb-24 md:pb-32">
         
         {/* Seção Superior - Título Principal com Espaçamento Adequado */}
         <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8 transform translate-y-8 md:translate-y-16">
@@ -59,7 +59,7 @@ export default function ElojobHero() {
         </div>
 
         {/* Seção Inferior - Features e Stats com Layout Equilibrado */}
-        <div className="w-full mt-8 md:mt-16 transform translate-y-12 md:translate-y-24 px-4">
+        <div className="w-full mt-8 md:mt-16 mb-8 md:mb-12 px-4">
           {/* Features - Layout Horizontal Compacto */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
