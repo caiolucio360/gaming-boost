@@ -31,6 +31,7 @@ import {
   Plus,
 } from 'lucide-react'
 import Link from 'next/link'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 
 interface Service {
   id: number
@@ -145,11 +146,7 @@ export default function AdminServicesPage() {
   }
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!user || user.role !== 'ADMIN') {

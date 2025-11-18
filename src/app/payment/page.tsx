@@ -103,7 +103,7 @@ function PaymentContent() {
   }
 
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -136,7 +136,15 @@ function PaymentContent() {
           </Card>
         )}
 
-        {payment ? (
+        {loading ? (
+          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+            <CardContent className="pt-6">
+              <div className="text-center py-12">
+                <LoadingSpinner size="lg" text="Gerando código PIX..." fullScreen={false} />
+              </div>
+            </CardContent>
+          </Card>
+        ) : payment ? (
           <div className="space-y-6">
             <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
               <CardHeader>
@@ -220,18 +228,7 @@ function PaymentContent() {
               </CardContent>
             </Card>
           </div>
-        ) : (
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
-            <CardContent className="pt-6">
-              <div className="text-center py-12">
-                <Loader2 className="h-12 w-12 text-purple-500 animate-spin mx-auto mb-4" />
-                <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                  Gerando código PIX...
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        ) : null}
       </div>
     </div>
   )

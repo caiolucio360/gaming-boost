@@ -20,12 +20,14 @@ import { CartItem } from '@/types'
 import { showSuccess, showError, showWarning, showLoading, updateToSuccess, updateToError, handleApiError } from '@/lib/toast'
 import { apiPost } from '@/lib/api-client'
 import { formatPrice } from '@/lib/utils'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth()
   const { items, removeItem, clearCart } = useCart()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
 
   const total = items.reduce((sum, item) => sum + item.price, 0)
@@ -166,9 +168,6 @@ export default function CartPage() {
 
       // Se pelo menos uma order foi criada, limpar carrinho e redirecionar para pagamento
       if (createdOrders.length > 0) {
-        // Limpar carrinho completamente (itens criados com sucesso)
-        clearCart()
-        
         if (createdOrders.length === items.length) {
           // Todos os pedidos foram criados com sucesso
           updateToSuccess(
@@ -176,11 +175,6 @@ export default function CartPage() {
             `${createdOrders.length} ${createdOrders.length === 1 ? 'pedido criado' : 'pedidos criados'} com sucesso!`,
             'Redirecionando para pagamento...'
           )
-          
-          // Aguardar um pouco para o usuário ver a mensagem de sucesso
-          setTimeout(() => {
-            router.push(`/payment?orderId=${createdOrders[0]}`)
-          }, 1500)
         } else {
           // Alguns pedidos foram criados, mas alguns falharam
           updateToSuccess(
@@ -190,12 +184,19 @@ export default function CartPage() {
               ? `Não foi possível criar: ${failedItems.join(', ')}. Verifique se você já possui pedidos ativos para a mesma modalidade.`
               : 'Redirecionando para pagamento...'
           )
-          
-          // Redirecionar para pagamento do primeiro pedido criado
-          setTimeout(() => {
-            router.push(`/payment?orderId=${createdOrders[0]}`)
-          }, 2000)
         }
+        
+        // Marcar como redirecionando para evitar mostrar carrinho vazio
+        setIsRedirecting(true)
+        
+        // Pequeno delay para mostrar a animação de transição antes de limpar e redirecionar
+        setTimeout(() => {
+          // Limpar carrinho antes do redirecionamento (mas o estado isRedirecting previne a renderização do vazio)
+          clearCart()
+          
+          // Redirecionar para pagamento (usar replace para evitar voltar ao carrinho vazio)
+          router.replace(`/payment?orderId=${createdOrders[0]}`)
+        }, 200)
       } else {
         // Nenhum pedido foi criado - manter itens no carrinho
         const errorMessage = failedItems.length > 0
@@ -227,11 +228,7 @@ export default function CartPage() {
   }
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   return (
@@ -247,7 +244,7 @@ export default function CartPage() {
           </p>
         </div>
 
-        {items.length === 0 ? (
+        {items.length === 0 && !isRedirecting ? (
           <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -268,13 +265,21 @@ export default function CartPage() {
               </div>
             </CardContent>
           </Card>
+        ) : isRedirecting ? (
+          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+            <CardContent className="pt-6">
+              <div className="text-center py-12">
+                <LoadingSpinner size="lg" text="Redirecionando para pagamento..." fullScreen={false} />
+              </div>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 transition-opacity duration-300">
             <div className="space-y-4">
               {items.map((item: CartItem, index: number) => (
                 <Card
                   key={index}
-                  className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                  className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all duration-300"
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">

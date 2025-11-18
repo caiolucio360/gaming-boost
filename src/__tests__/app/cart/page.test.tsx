@@ -43,6 +43,7 @@ jest.mock('@/lib/toast', () => ({
 
 describe('CartPage', () => {
   const mockPush = jest.fn()
+  const mockReplace = jest.fn()
   const mockRemoveItem = jest.fn()
   const mockClearCart = jest.fn()
 
@@ -50,6 +51,7 @@ describe('CartPage', () => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
+      replace: mockReplace,
     })
     ;(useCart as jest.Mock).mockReturnValue({
       items: [],
@@ -163,9 +165,6 @@ describe('CartPage', () => {
       },
     })
 
-    // Mock setTimeout para executar imediatamente
-    jest.useFakeTimers()
-
     render(<CartPage />)
 
     const button = screen.getByText('Finalizar Compra')
@@ -183,18 +182,88 @@ describe('CartPage', () => {
       }))
     })
 
-    // Avançar o timer para executar o setTimeout
-    jest.advanceTimersByTime(1500)
-
     await waitFor(() => {
       expect(mockClearCart).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/payment?orderId=123')
+      expect(mockReplace).toHaveBeenCalledWith('/payment?orderId=123')
+    })
+  })
+
+  it('não deve mostrar carrinho vazio quando está redirecionando após finalizar compra', async () => {
+    ;(useAuth as jest.Mock).mockReturnValue({
+      user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
+      loading: false,
+    })
+    
+    const items = [
+      {
+        serviceId: 123,
+        game: 'CS2',
+        serviceName: 'Boost CS2 Premier: 10K → 15K',
+        price: 89.90,
+        currentRank: '10K',
+        targetRank: '15K',
+        metadata: {
+          mode: 'PREMIER',
+          currentRating: 10000,
+          targetRating: 15000,
+        },
+      },
+    ]
+
+    ;(useCart as jest.Mock).mockReturnValue({
+      items,
+      removeItem: mockRemoveItem,
+      clearCart: mockClearCart,
     })
 
-    jest.useRealTimers()
+    // Mock apiPost para criar order
+    ;(apiPost as jest.Mock).mockResolvedValueOnce({
+      message: 'Solicitação criada com sucesso',
+      order: {
+        id: 123,
+        serviceId: 123,
+        total: 89.90,
+      },
+    })
+
+    render(<CartPage />)
+
+    const button = screen.getByText('Finalizar Compra')
+    fireEvent.click(button)
+
+    // Após clicar, deve mostrar a tela de redirecionamento, não o carrinho vazio
+    await waitFor(() => {
+      expect(screen.getByText('Redirecionando para pagamento...')).toBeInTheDocument()
+      expect(screen.queryByText('Carrinho vazio')).not.toBeInTheDocument()
+    })
+
+    // Verificar que replace foi chamado (não push)
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/payment?orderId=123')
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  it('deve mostrar carrinho vazio apenas quando não há itens E não está redirecionando', () => {
+    ;(useAuth as jest.Mock).mockReturnValue({
+      user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
+      loading: false,
+    })
+    ;(useCart as jest.Mock).mockReturnValue({
+      items: [],
+      removeItem: mockRemoveItem,
+      clearCart: mockClearCart,
+    })
+
+    render(<CartPage />)
+
+    expect(screen.getByText('Carrinho vazio')).toBeInTheDocument()
+    expect(screen.queryByText('Redirecionando para pagamento...')).not.toBeInTheDocument()
   })
 
   it('deve exibir erro se não conseguir criar orders', async () => {
+    const { updateToError } = require('@/lib/toast')
+    
     ;(useAuth as jest.Mock).mockReturnValue({
       user: { id: 1, email: 'test@test.com', role: 'CLIENT' },
       loading: false,
@@ -212,13 +281,8 @@ describe('CartPage', () => {
       clearCart: mockClearCart,
     })
 
-    // Mock fetch para retornar erro
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({
-        message: 'Erro ao criar pedido',
-      }),
-    })
+    // Mock apiPost para retornar erro
+    ;(apiPost as jest.Mock).mockRejectedValueOnce(new Error('Erro ao criar pedido'))
 
     render(<CartPage />)
 
@@ -226,7 +290,14 @@ describe('CartPage', () => {
     fireEvent.click(button)
 
     await waitFor(() => {
-      expect(screen.getByText(/Erro ao criar pedidos|não foi possível criar/i)).toBeInTheDocument()
+      expect(updateToError).toHaveBeenCalledWith(
+        'toast-id',
+        expect.stringMatching(/Erro ao criar pedidos|Erro ao finalizar compra/),
+        expect.any(String)
+      )
+      // Não deve limpar o carrinho nem redirecionar quando há erro
+      expect(mockClearCart).not.toHaveBeenCalled()
+      expect(mockReplace).not.toHaveBeenCalled()
     })
   })
 })

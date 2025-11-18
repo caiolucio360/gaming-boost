@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { TableSkeleton } from '@/components/common/loading-skeletons'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -180,11 +181,7 @@ export default function AdminUsersPage() {
 
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!user || user.role !== 'ADMIN') {

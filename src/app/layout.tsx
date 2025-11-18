@@ -22,9 +22,23 @@ const rajdhani = Rajdhani({
 import { generateMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'GameBoost Pro - Serviços de Boost para Jogos',
+  title: 'GameBoost - Serviços de Boost para Jogos',
   description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura.',
   keywords: [
+    'counter strike 2',
+    'cs2',
+    'counter strike',
+    'cs',
+    'cs2 boost',
+    'cs2 rank boost',
+    'cs2 premier boost',
+    'cs2 gamers club boost',
+    'cs2 boost profissional',
+    'cs2 boost seguro',
+    'cs2 boost rapido',
+    'cs2 boost rapido e seguro',
+    'cs2 boost rapido e seguro',
+    'cs2 boost rapido e seguro',
     'boost cs2',
     'boost counter strike 2',
     'elo job cs2',
@@ -34,8 +48,19 @@ export const metadata: Metadata = generateMetadata({
     'serviço de boost',
     'boost profissional',
     'boost seguro cs2',
+    'elo job',
+    'elo job cs2',
+    'elojob',
+    'elojob cs2',
+    'elojob cs',
+    'elojob cs2 boost',
+    'elojob cs2 rank boost',
+    'elojob cs2 premier boost',
+    'elojob cs2 gamers club boost',
+    'elojob cs2 boost profissional',
+    'elojob cs2 boost seguro',
   ],
-  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gaming-boost.vercel.app',
 })
 
 export default function RootLayout({
