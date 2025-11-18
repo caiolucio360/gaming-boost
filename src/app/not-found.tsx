@@ -42,7 +42,7 @@ export default function NotFound() {
           </div>
 
           {/* Links Rápidos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
             <Link href="/games/cs2">
               <div className="bg-black/50 border border-purple-500/30 rounded-lg p-4 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
                 <h3 className="text-white font-bold font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
@@ -50,16 +50,6 @@ export default function NotFound() {
                 </h3>
                 <p className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Ver serviços de boost
-                </p>
-              </div>
-            </Link>
-            <Link href="/pricing">
-              <div className="bg-black/50 border border-purple-500/30 rounded-lg p-4 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
-                <h3 className="text-white font-bold font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="text-purple-300">PREÇOS</span>
-                </h3>
-                <p className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Calcular preços
                 </p>
               </div>
             </Link>

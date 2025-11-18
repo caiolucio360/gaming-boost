@@ -34,7 +34,6 @@ Rotas acessíveis sem necessidade de autenticação.
 /
 ├── /                    → Página inicial (Home)
 ├── /about               → Sobre a plataforma
-├── /pricing             → Tabela de preços
 ├── /testimonials        → Depoimentos de clientes
 ├── /contact             → Formulário de contato
 ├── /privacy             → Política de privacidade
@@ -362,7 +361,6 @@ Rotas especiais do Next.js para SEO e configuração.
 /
 ├── /                          [PÚBLICO] Home
 ├── /about                     [PÚBLICO] Sobre
-├── /pricing                   [PÚBLICO] Preços
 ├── /testimonials              [PÚBLICO] Depoimentos
 ├── /contact                   [PÚBLICO] Contato
 ├── /privacy                   [PÚBLICO] Privacidade
