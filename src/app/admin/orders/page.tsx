@@ -49,6 +49,10 @@ interface Order {
     email: string
     name?: string
   }
+  payments?: {
+    id: number
+    status: string
+  }[]
 }
 
 export default function AdminOrdersPage() {
@@ -118,6 +122,7 @@ export default function AdminOrdersPage() {
       setTimeout(() => setAlert(null), 5000)
     }
   }
+
 
 
   if (authLoading) {
@@ -215,6 +220,24 @@ export default function AdminOrdersPage() {
                         )}
                       </div>
 
+                      {/* Informações de Pagamento */}
+                      {order.payments && order.payments.length > 0 && (
+                        <div className="pt-2 border-t border-purple-500/20">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400">Status do Pagamento:</span>
+                            {order.payments.some(p => p.status === 'PAID') ? (
+                              <Badge className="bg-green-500/20 text-green-300 border-green-500/50">
+                                Pago
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">
+                                Pendente
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Atualizar Status */}
                       <div className="flex flex-wrap gap-2 pt-4 border-t border-purple-500/20">
                         <Select value={order.status} onValueChange={(value) => handleStatusUpdate(order.id, value)}>
@@ -228,6 +251,8 @@ export default function AdminOrdersPage() {
                             <SelectItem value="CANCELLED">Cancelado</SelectItem>
                           </SelectContent>
                         </Select>
+                        
+                        
                         <Button
                           asChild
                           variant="outline"

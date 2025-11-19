@@ -125,12 +125,52 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Buscar um admin ativo para atribuir a receita (ou usar o primeiro admin disponível)
+    const admin = await prisma.user.findFirst({
+      where: {
+        role: 'ADMIN',
+        active: true,
+      },
+    })
+
+    if (!admin) {
+      return NextResponse.json(
+        { message: 'Nenhum administrador ativo encontrado' },
+        { status: 400 }
+      )
+    }
+
+    // Buscar configuração de comissão ativa
+    let commissionConfig = await prisma.commissionConfig.findFirst({
+      where: { enabled: true },
+    })
+
+    // Se não houver configuração, criar uma padrão
+    if (!commissionConfig) {
+      commissionConfig = await prisma.commissionConfig.create({
+        data: {
+          boosterPercentage: 0.70,
+          adminPercentage: 0.30,
+          enabled: true,
+        },
+      })
+    }
+
+    const boosterPercentage = commissionConfig.boosterPercentage
+    const adminPercentage = commissionConfig.adminPercentage
+    const orderTotal = parseFloat(total)
+    const adminRevenue = orderTotal * adminPercentage
+
     // Preparar dados do pedido
     const orderData: any = {
       userId,
       serviceId: serviceIdNum,
-      total: parseFloat(total),
+      adminId: admin.id,
+      total: orderTotal,
       status: 'PENDING',
+      adminRevenue,
+      adminPercentage,
+      boosterPercentage,
     }
 
     // Adicionar metadados se fornecidos
@@ -143,12 +183,28 @@ export async function POST(request: NextRequest) {
     if (metadata) orderData.metadata = typeof metadata === 'string' ? metadata : JSON.stringify(metadata)
     if (notes) orderData.notes = notes
 
-    // Criar order
-    const order = await prisma.order.create({
-      data: orderData,
-      include: {
-        service: true,
-      },
+    // Criar order e receita do admin em uma transação
+    const order = await prisma.$transaction(async (tx) => {
+      const newOrder = await tx.order.create({
+        data: orderData,
+        include: {
+          service: true,
+        },
+      })
+
+      // Criar receita do admin
+      await tx.adminRevenue.create({
+        data: {
+          orderId: newOrder.id,
+          adminId: admin.id,
+          orderTotal: orderTotal,
+          percentage: adminPercentage,
+          amount: adminRevenue,
+          status: 'PENDING',
+        },
+      })
+
+      return newOrder
     })
 
     return NextResponse.json(

@@ -38,12 +38,23 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 interface AdminUser {
   id: number
   email: string
   name?: string
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
+  boosterCommissionPercentage?: number | null
   createdAt: string
   _count: {
     orders: number
@@ -60,6 +71,13 @@ export default function AdminUsersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
+  const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
+  const [commissionPercentage, setCommissionPercentage] = useState<string>('')
+  const [commissionReason, setCommissionReason] = useState<string>('')
+  const [commissionHistory, setCommissionHistory] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -313,8 +331,65 @@ export default function AdminUsersPage() {
                         <p className="text-xs text-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                           Criado em {formatDate(adminUser.createdAt)} • {adminUser._count.orders} pedidos
                         </p>
+                        {adminUser.role === 'BOOSTER' && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              Comissão: {adminUser.boosterCommissionPercentage !== null && adminUser.boosterCommissionPercentage !== undefined
+                                ? `${(adminUser.boosterCommissionPercentage * 100).toFixed(0)}%`
+                                : 'Padrão (70%)'}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
+                        {adminUser.role === 'BOOSTER' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-green-500/50 text-green-300 hover:bg-green-500/10 font-rajdhani"
+                              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                              onClick={() => {
+                                setSelectedUser(adminUser)
+                                setCommissionPercentage(
+                                  adminUser.boosterCommissionPercentage !== null && adminUser.boosterCommissionPercentage !== undefined
+                                    ? (adminUser.boosterCommissionPercentage * 100).toString()
+                                    : '70'
+                                )
+                                setCommissionReason('')
+                                setCommissionDialogOpen(true)
+                              }}
+                            >
+                              <DollarSign className="h-4 w-4 mr-2" />
+                              Comissão
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10 font-rajdhani"
+                              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                              onClick={async () => {
+                                setSelectedUser(adminUser)
+                                setLoadingHistory(true)
+                                setHistoryDialogOpen(true)
+                                try {
+                                  const response = await fetch(`/api/admin/users/${adminUser.id}/commission-history`)
+                                  if (response.ok) {
+                                    const data = await response.json()
+                                    setCommissionHistory(data.history || [])
+                                  }
+                                } catch (error) {
+                                  console.error('Erro ao buscar histórico:', error)
+                                } finally {
+                                  setLoadingHistory(false)
+                                }
+                              }}
+                            >
+                              <History className="h-4 w-4 mr-2" />
+                              Histórico
+                            </Button>
+                          </>
+                        )}
                         <Button
                           asChild
                           variant="outline"
@@ -362,6 +437,183 @@ export default function AdminUsersPage() {
           </p>
         </div>
       </div>
+
+      {/* Dialog para configurar comissão */}
+      <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>
+        <DialogContent className="bg-black border-purple-500/50">
+          <DialogHeader>
+            <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              Configurar Comissão
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              {selectedUser?.name || selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Porcentagem de Comissão (%)
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={commissionPercentage}
+                onChange={(e) => setCommissionPercentage(e.target.value)}
+                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                placeholder="70"
+              />
+              <p className="text-xs text-gray-400 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Valor entre 0 e 100 (ex: 75 para 75%)
+              </p>
+            </div>
+            <div>
+              <Label className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Motivo da Mudança (Opcional)
+              </Label>
+              <Textarea
+                value={commissionReason}
+                onChange={(e) => setCommissionReason(e.target.value)}
+                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                placeholder="Ex: Ajuste por desempenho excepcional"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCommissionDialogOpen(false)}
+              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  const percentage = parseFloat(commissionPercentage) / 100
+                  if (isNaN(percentage) || percentage < 0 || percentage > 1) {
+                    setAlert({
+                      title: 'Erro',
+                      description: 'Porcentagem deve ser um número entre 0 e 100',
+                      variant: 'destructive',
+                    })
+                    setTimeout(() => setAlert(null), 5000)
+                    return
+                  }
+
+                  const response = await fetch(`/api/admin/users/${selectedUser?.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      boosterCommissionPercentage: percentage,
+                      reason: commissionReason || undefined,
+                    }),
+                  })
+
+                  if (response.ok) {
+                    setAlert({
+                      title: 'Sucesso',
+                      description: 'Comissão atualizada com sucesso!',
+                      variant: 'default',
+                    })
+                    setCommissionDialogOpen(false)
+                    fetchUsers(false)
+                    setTimeout(() => setAlert(null), 5000)
+                  } else {
+                    const data = await response.json()
+                    setAlert({
+                      title: 'Erro',
+                      description: data.message || 'Erro ao atualizar comissão',
+                      variant: 'destructive',
+                    })
+                    setTimeout(() => setAlert(null), 5000)
+                  }
+                } catch (error) {
+                  console.error('Erro ao atualizar comissão:', error)
+                  setAlert({
+                    title: 'Erro',
+                    description: 'Erro ao atualizar comissão',
+                    variant: 'destructive',
+                  })
+                  setTimeout(() => setAlert(null), 5000)
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para histórico de comissão */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="bg-black border-purple-500/50 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              Histórico de Comissão
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              {selectedUser?.name || selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            {loadingHistory ? (
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-500 mx-auto" />
+              </div>
+            ) : commissionHistory.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Nenhuma mudança registrada
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {commissionHistory.map((item: any) => (
+                  <Card key={item.id} className="bg-black/30 border-purple-500/50">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              {item.previousPercentage !== null
+                                ? `${(item.previousPercentage * 100).toFixed(0)}%`
+                                : 'N/A'} → {(item.newPercentage * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          {item.reason && (
+                            <p className="text-xs text-gray-500 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              {item.reason}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            Alterado por {item.changedByUser?.name || item.changedByUser?.email} em {formatDate(item.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setHistoryDialogOpen(false)}
+              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

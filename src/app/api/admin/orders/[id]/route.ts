@@ -78,8 +78,8 @@ export async function PUT(
     const { status, boosterId } = body
 
     // Converter id para número
-    const orderId = parseInt(id, 10)
-    if (isNaN(orderId)) {
+    const orderIdNum = parseInt(id, 10)
+    if (isNaN(orderIdNum)) {
       return NextResponse.json(
         { message: 'ID do pedido inválido' },
         { status: 400 }
@@ -90,6 +90,33 @@ export async function PUT(
 
     if (status && ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
       updateData.status = status
+      
+      // Se estiver marcando como COMPLETED, liberar automaticamente as comissões/receitas
+      if (status === 'COMPLETED') {
+        // Liberar automaticamente comissão do booster (disponível para saque)
+        await prisma.boosterCommission.updateMany({
+          where: {
+            orderId: orderIdNum,
+            status: 'PENDING',
+          },
+          data: {
+            status: 'PAID',
+            paidAt: new Date(),
+          },
+        })
+
+        // Liberar automaticamente receita do admin (disponível para saque)
+        await prisma.adminRevenue.updateMany({
+          where: {
+            orderId: orderIdNum,
+            status: 'PENDING',
+          },
+          data: {
+            status: 'PAID',
+            paidAt: new Date(),
+          },
+        })
+      }
     }
 
     if (boosterId !== undefined) {
@@ -137,7 +164,7 @@ export async function PUT(
     }
 
     const order = await prisma.order.update({
-      where: { id: orderId },
+      where: { id: orderIdNum },
       data: updateData,
       include: {
         user: {

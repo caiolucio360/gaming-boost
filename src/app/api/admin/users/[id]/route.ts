@@ -32,6 +32,7 @@ export async function GET(
         email: true,
         name: true,
         role: true,
+        boosterCommissionPercentage: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -70,7 +71,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { name, email, role, password } = body
+    const { name, email, role, password, boosterCommissionPercentage } = body
 
     // Converter id para número
     const userId = parseInt(id, 10)
@@ -116,6 +117,49 @@ export async function PUT(
     if (password !== undefined && password.length >= 6) {
       updateData.password = await bcrypt.hash(password, 10)
     }
+    
+    // Permitir atualizar comissão do booster (apenas para usuários com role BOOSTER)
+    if (boosterCommissionPercentage !== undefined) {
+      // Validar se é um número entre 0 e 1
+      const percentage = parseFloat(boosterCommissionPercentage)
+      if (isNaN(percentage) || percentage < 0 || percentage > 1) {
+        return NextResponse.json(
+          { message: 'Porcentagem de comissão deve ser um número entre 0 e 1 (ex: 0.75 para 75%)' },
+          { status: 400 }
+        )
+      }
+      
+      // Verificar se o usuário é um booster
+      if (existingUser.role !== 'BOOSTER') {
+        return NextResponse.json(
+          { message: 'Apenas boosters podem ter comissão personalizada' },
+          { status: 400 }
+        )
+      }
+      
+      const previousPercentage = existingUser.boosterCommissionPercentage
+      
+      // Registrar histórico se a comissão mudou
+      // Comparar valores numéricos para evitar problemas de comparação
+      const hasChanged = previousPercentage === null || previousPercentage === undefined 
+        ? true 
+        : Math.abs(previousPercentage - percentage) > 0.0001
+      
+      if (hasChanged) {
+        const { reason } = body
+        await prisma.boosterCommissionHistory.create({
+          data: {
+            boosterId: userId,
+            previousPercentage: previousPercentage ?? null,
+            newPercentage: percentage,
+            changedBy: authResult.user.id,
+            reason: reason || null,
+          },
+        })
+      }
+      
+      updateData.boosterCommissionPercentage = percentage
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -125,6 +169,7 @@ export async function PUT(
         email: true,
         name: true,
         role: true,
+        boosterCommissionPercentage: true,
         createdAt: true,
         updatedAt: true,
       },

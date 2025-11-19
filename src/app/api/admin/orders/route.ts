@@ -44,6 +44,12 @@ export async function GET(request: NextRequest) {
               name: true,
             },
           },
+          payments: {
+            select: {
+              id: true,
+              status: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
         take: limit,

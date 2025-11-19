@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
+import Link from 'next/link'
 import { OrdersListSkeleton, StatsGridSkeleton } from '@/components/common/loading-skeletons'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -36,6 +37,8 @@ interface Order {
   id: number
   status: OrderStatus
   total: number
+  boosterCommission?: number | null
+  boosterPercentage?: number | null
   createdAt: string
   boosterId?: number | null
   user: {
@@ -55,15 +58,21 @@ interface Order {
     email: string
     name?: string
   }
+  commission?: {
+    id: number
+    amount: number
+    percentage: number
+    status: string
+    paidAt?: string | null
+  } | null
 }
 
 interface Stats {
   available: number
   assigned: number
   completed: number
-  totalEarnings: {
-    total: number | null
-  }
+  totalEarnings: number
+  pendingEarnings: number
 }
 
 
@@ -244,11 +253,21 @@ export default function BoosterDashboardPage() {
           description={`Olá, ${user.name || user.email}! Gerencie seus pedidos e ganhos.`}
         />
 
+        {/* Link para Pagamentos */}
+        <div className="mb-6">
+          <Link href="/booster/payments">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Ver Meus Pagamentos
+            </Button>
+          </Link>
+        </div>
+
         {/* Cards de Estatísticas */}
         {loading && !stats ? (
-          <StatsGridSkeleton count={4} />
+          <StatsGridSkeleton count={5} />
         ) : stats ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <StatCard
               title="Disponíveis"
               value={stats.available}
@@ -272,10 +291,17 @@ export default function BoosterDashboardPage() {
             />
             <StatCard
               title="Ganhos Totais"
-              value={formatPrice(stats.totalEarnings.total || 0)}
-              description="Pedidos concluídos"
+              value={formatPrice(stats.totalEarnings)}
+              description="Total recebido"
               icon={DollarSign}
               valueColor="text-purple-300"
+            />
+            <StatCard
+              title="Ganhos Pendentes"
+              value={formatPrice(stats.pendingEarnings)}
+              description="Aguardando pagamento"
+              icon={DollarSign}
+              valueColor="text-yellow-300"
             />
           </div>
         ) : null}
@@ -328,10 +354,22 @@ export default function BoosterDashboardPage() {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem
-                              label="Valor Total"
+                            <OrderInfoItem 
+                              label="Valor Total" 
                               value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                             />
+                            {order.commission && (
+                              <OrderInfoItem 
+                                label="Sua Comissão" 
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
+                              />
+                            )}
+                            {order.boosterCommission && !order.commission && (
+                              <OrderInfoItem 
+                                label="Sua Comissão" 
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                              />
+                            )}
                             <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
                             <OrderInfoItem label="Jogo" value={order.service.game} />
                           </div>
@@ -395,10 +433,22 @@ export default function BoosterDashboardPage() {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem
-                              label="Valor Total"
+                            <OrderInfoItem 
+                              label="Valor Total" 
                               value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                             />
+                            {order.commission && (
+                              <OrderInfoItem 
+                                label="Sua Comissão" 
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
+                              />
+                            )}
+                            {order.boosterCommission && !order.commission && (
+                              <OrderInfoItem 
+                                label="Sua Comissão" 
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                              />
+                            )}
                             <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
                             <OrderInfoItem label="Data do Pedido" value={formatDate(order.createdAt)} />
                           </div>
@@ -463,10 +513,22 @@ export default function BoosterDashboardPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <OrderInfoItem
-                            label="Valor Total"
+                          <OrderInfoItem 
+                            label="Valor Total" 
                             value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                           />
+                          {order.commission && (
+                            <OrderInfoItem 
+                              label="Sua Comissão" 
+                              value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%) {order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}</span>}
+                            />
+                          )}
+                          {order.boosterCommission && !order.commission && (
+                            <OrderInfoItem 
+                              label="Sua Comissão" 
+                              value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                            />
+                          )}
                           <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
                           <OrderInfoItem label="Data de Conclusão" value={formatDate(order.createdAt)} />
                         </div>

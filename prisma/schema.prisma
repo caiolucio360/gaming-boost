@@ -15,18 +15,27 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  name          String?
-  password      String
-  role          Role     @default(CLIENT)
-  phone         String? // Telefone de contato
-  active        Boolean  @default(true) // Se a conta está ativa
-  metadata      String? // JSON com metadados adicionais
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  orders        Order[] // Pedidos como cliente
-  boosterOrders Order[]  @relation("BoosterOrders") // Pedidos como booster
+  id                 Int                 @id @default(autoincrement())
+  email              String              @unique
+  name               String?
+  password           String
+  role               Role                @default(CLIENT)
+  phone              String? // Telefone de contato
+  active             Boolean             @default(true) // Se a conta está ativa
+  metadata           String? // JSON com metadados adicionais
+  // Chave PIX (para BOOSTER e ADMIN)
+  pixKey             String? // Chave PIX para recebimento
+  // Comissão personalizada do booster (opcional, usa config global se não definida)
+  boosterCommissionPercentage Float? // Porcentagem de comissão personalizada (ex: 0.75 = 75%)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  orders             Order[] // Pedidos como cliente
+  boosterOrders      Order[]             @relation("BoosterOrders") // Pedidos como booster
+  adminOrders        Order[]             @relation("AdminOrders") // Pedidos como admin
+  boosterCommissions BoosterCommission[] // Comissões como booster
+  adminRevenues      AdminRevenue[] // Receitas como admin
+  commissionHistory  BoosterCommissionHistory[] // Histórico de mudanças de comissão (como booster)
+  commissionChanges   BoosterCommissionHistory[] @relation("CommissionChanges") // Mudanças feitas (como admin)
 }
 
 model Service {
@@ -46,32 +55,42 @@ model Service {
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  userId        Int
-  serviceId     Int
-  boosterId     Int? // Booster atribuído ao pedido
-  status        OrderStatus @default(PENDING)
-  total         Float
+  id                Int                @id @default(autoincrement())
+  userId            Int
+  serviceId         Int
+  boosterId         Int? // Booster atribuído ao pedido
+  adminId           Int? // Admin responsável pelo pedido (quem recebe a receita)
+  status            OrderStatus        @default(PENDING)
+  total             Float
+  // Valores de comissão e receita calculados
+  boosterCommission Float? // Valor que o booster vai receber (calculado quando pedido é aceito)
+  adminRevenue      Float? // Valor que o admin vai receber (calculado quando pedido é criado)
+  boosterPercentage Float? // Porcentagem de comissão do booster (ex: 0.70 = 70%)
+  adminPercentage   Float? // Porcentagem de receita do admin (ex: 0.30 = 30%)
   // Metadados do pedido
-  currentRank   String? // Rank/pontuação atual (ex: "10K", "Nível 5")
-  targetRank    String? // Rank/pontuação desejada (ex: "15K", "Nível 10")
-  currentRating Int? // Pontuação atual numérica (ex: 10000)
-  targetRating  Int? // Pontuação desejada numérica (ex: 15000)
-  gameMode      String? // Modo do jogo (ex: "PREMIER", "GAMERS_CLUB")
-  gameType      String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
-  metadata      String? // JSON com metadados adicionais
-  notes         String? // Notas adicionais do cliente ou booster
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service       Service     @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  booster       User?       @relation("BoosterOrders", fields: [boosterId], references: [id], onDelete: SetNull)
-  payments      Payment[] // Pagamentos associados ao pedido
+  currentRank       String? // Rank/pontuação atual (ex: "10K", "Nível 5")
+  targetRank        String? // Rank/pontuação desejada (ex: "15K", "Nível 10")
+  currentRating     Int? // Pontuação atual numérica (ex: 10000)
+  targetRating      Int? // Pontuação desejada numérica (ex: 15000)
+  gameMode          String? // Modo do jogo (ex: "PREMIER", "GAMERS_CLUB")
+  gameType          String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
+  metadata          String? // JSON com metadados adicionais
+  notes             String? // Notas adicionais do cliente ou booster
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service           Service            @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  booster           User?              @relation("BoosterOrders", fields: [boosterId], references: [id], onDelete: SetNull)
+  admin             User?              @relation("AdminOrders", fields: [adminId], references: [id], onDelete: SetNull)
+  payments          Payment[] // Pagamentos associados ao pedido
+  commission        BoosterCommission? // Comissão do booster
+  revenue           AdminRevenue? // Receita do admin
 
   // Índices para otimizar queries
   @@index([userId, gameMode, status]) // Para validação de modalidade duplicada (buscar pedidos ativos por modalidade)
   @@index([userId, status]) // Para buscar pedidos do usuário por status
   @@index([boosterId, status]) // Para buscar pedidos do booster por status
+  @@index([adminId, status]) // Para buscar pedidos do admin por status
   @@index([serviceId]) // Para joins com Service
   @@index([status]) // Para filtros por status (admin/booster dashboards)
 }
@@ -110,4 +129,81 @@ enum OrderStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+// Comissão do booster - criada quando pedido é aceito
+model BoosterCommission {
+  id         Int              @id @default(autoincrement())
+  orderId    Int              @unique
+  boosterId  Int
+  orderTotal Float // Valor total do pedido
+  percentage Float // Porcentagem de comissão (ex: 0.70 = 70%)
+  amount     Float // Valor da comissão calculada
+  status     CommissionStatus @default(PENDING) // PENDING, PAID, CANCELLED
+  paidAt     DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  order      Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  booster    User             @relation(fields: [boosterId], references: [id], onDelete: Cascade)
+
+  @@index([boosterId, status])
+  @@index([status])
+}
+
+enum CommissionStatus {
+  PENDING // Aguardando pagamento
+  PAID // Pago
+  CANCELLED // Cancelado
+}
+
+// Receita do admin - criada quando pedido é criado
+model AdminRevenue {
+  id         Int           @id @default(autoincrement())
+  orderId    Int           @unique
+  adminId    Int
+  orderTotal Float // Valor total do pedido
+  percentage Float // Porcentagem de receita (ex: 0.30 = 30%)
+  amount     Float // Valor da receita calculada
+  status     RevenueStatus @default(PENDING) // PENDING, PAID, CANCELLED
+  paidAt     DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  admin      User          @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, status])
+  @@index([status])
+}
+
+enum RevenueStatus {
+  PENDING // Aguardando pagamento
+  PAID // Pago
+  CANCELLED // Cancelado
+}
+
+// Configuração de comissões (porcentagens)
+model CommissionConfig {
+  id                Int      @id @default(autoincrement())
+  boosterPercentage Float    @default(0.70) // Porcentagem do booster (70% padrão)
+  adminPercentage   Float    @default(0.30) // Porcentagem do admin (30% padrão)
+  enabled           Boolean  @default(true) // Se a configuração está ativa
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Histórico de mudanças de comissão dos boosters
+model BoosterCommissionHistory {
+  id                    Int      @id @default(autoincrement())
+  boosterId             Int
+  booster               User     @relation(fields: [boosterId], references: [id], onDelete: Cascade)
+  previousPercentage    Float?   // Porcentagem anterior (null se primeira vez)
+  newPercentage         Float    // Nova porcentagem
+  changedBy             Int      // ID do admin que fez a mudança
+  changedByUser         User     @relation("CommissionChanges", fields: [changedBy], references: [id], onDelete: Restrict)
+  reason                String?  // Motivo da mudança (opcional)
+  createdAt             DateTime @default(now())
+
+  @@index([boosterId])
+  @@index([changedBy])
+  @@index([createdAt])
 }

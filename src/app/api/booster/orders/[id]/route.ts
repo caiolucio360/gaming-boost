@@ -64,30 +64,107 @@ export async function POST(
       )
     }
 
-    // Atribuir pedido ao booster e mudar status para IN_PROGRESS
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        boosterId,
-        status: 'IN_PROGRESS',
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+    // Buscar o booster para verificar se tem comissão personalizada
+    const booster = await prisma.user.findUnique({
+      where: { id: boosterId },
+      select: { boosterCommissionPercentage: true },
+    })
+
+    let boosterPercentage: number
+
+    // Se o booster tem comissão personalizada, usar ela
+    if (booster?.boosterCommissionPercentage !== null && booster?.boosterCommissionPercentage !== undefined) {
+      boosterPercentage = booster.boosterCommissionPercentage
+    } else {
+      // Caso contrário, usar a configuração global
+      let commissionConfig = await prisma.commissionConfig.findFirst({
+        where: { enabled: true },
+      })
+
+      // Se não houver configuração, criar uma padrão
+      if (!commissionConfig) {
+        commissionConfig = await prisma.commissionConfig.create({
+          data: {
+            boosterPercentage: 0.70,
+            adminPercentage: 0.30,
+            enabled: true,
+          },
+        })
+      }
+
+      boosterPercentage = commissionConfig.boosterPercentage
+    }
+
+    const boosterCommission = order.total * boosterPercentage
+
+    // Calcular a receita do admin baseada na comissão do booster
+    // Se o booster tem comissão personalizada, a receita do admin será o restante
+    const adminRevenue = order.total - boosterCommission
+    const adminPercentage = 1 - boosterPercentage
+
+    // Atribuir pedido ao booster, calcular comissão e mudar status para IN_PROGRESS
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      // Buscar o admin do pedido
+      const orderWithAdmin = await tx.order.findUnique({
+        where: { id: orderId },
+        select: { adminId: true },
+      })
+
+      const updated = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          boosterId,
+          status: 'IN_PROGRESS',
+          boosterCommission,
+          boosterPercentage,
+          adminRevenue,
+          adminPercentage,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          service: true,
+          booster: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
           },
         },
-        service: true,
-        booster: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
+      })
+
+      // Criar comissão do booster
+      await tx.boosterCommission.create({
+        data: {
+          orderId: orderId,
+          boosterId,
+          orderTotal: order.total,
+          percentage: boosterPercentage,
+          amount: boosterCommission,
+          status: 'PENDING',
         },
-      },
+      })
+
+      // Atualizar receita do admin se já existir
+      if (orderWithAdmin?.adminId) {
+        await tx.adminRevenue.updateMany({
+          where: {
+            orderId: orderId,
+          },
+          data: {
+            amount: adminRevenue,
+            percentage: adminPercentage,
+          },
+        })
+      }
+
+      return updated
     })
 
     return NextResponse.json(
@@ -141,6 +218,13 @@ export async function PUT(
     // Verificar se o pedido pertence ao booster
     const order = await prisma.order.findUnique({
       where: { id: orderId },
+      include: {
+        payments: {
+          where: {
+            status: 'PAID',
+          },
+        },
+      },
     })
 
     if (!order) {
@@ -164,10 +248,39 @@ export async function PUT(
       )
     }
 
-    // Atualizar status
+    // Se estiver marcando como COMPLETED, liberar automaticamente as comissões/receitas
+    const updateData: any = { status }
+
+    if (status === 'COMPLETED') {
+      // Liberar automaticamente comissão do booster (disponível para saque)
+      await prisma.boosterCommission.updateMany({
+        where: {
+          orderId: orderId,
+          status: 'PENDING',
+        },
+        data: {
+          status: 'PAID',
+          paidAt: new Date(),
+        },
+      })
+
+      // Liberar automaticamente receita do admin (disponível para saque)
+      await prisma.adminRevenue.updateMany({
+        where: {
+          orderId: orderId,
+          status: 'PENDING',
+        },
+        data: {
+          status: 'PAID',
+          paidAt: new Date(),
+        },
+      })
+    }
+
+    // Atualizar status do pedido
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { status },
+      data: updateData,
       include: {
         user: {
           select: {

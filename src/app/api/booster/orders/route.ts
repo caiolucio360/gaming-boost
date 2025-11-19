@@ -73,6 +73,15 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        commission: {
+          select: {
+            id: true,
+            amount: true,
+            percentage: true,
+            status: true,
+            paidAt: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -106,22 +115,37 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      totalEarnings: await prisma.order.aggregate({
+      totalEarnings: await prisma.boosterCommission.aggregate({
         where: {
           boosterId: userId,
-          status: 'COMPLETED',
-          service: {
-            game: 'CS2',
-          },
+          status: 'PAID',
         },
         _sum: {
-          total: true,
+          amount: true,
+        },
+      }),
+      pendingEarnings: await prisma.boosterCommission.aggregate({
+        where: {
+          boosterId: userId,
+          status: 'PENDING',
+        },
+        _sum: {
+          amount: true,
         },
       }),
     }
 
     return NextResponse.json(
-      { orders, stats },
+      {
+        orders,
+        stats: {
+          available: stats.available,
+          assigned: stats.assigned,
+          completed: stats.completed,
+          totalEarnings: stats.totalEarnings._sum.amount || 0,
+          pendingEarnings: stats.pendingEarnings._sum.amount || 0,
+        },
+      },
       { status: 200 }
     )
   } catch (error) {

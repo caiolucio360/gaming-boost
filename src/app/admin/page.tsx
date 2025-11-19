@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Settings as SettingsIcon
 } from 'lucide-react'
 import Link from 'next/link'
 import { StatCard } from '@/components/common/stat-card'
@@ -223,6 +224,44 @@ export default function AdminDashboardPage() {
                 </CardTitle>
                 <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Criar, editar e gerenciar serviços
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/payments">
+            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <DollarSign className="h-5 w-5 text-green-500" />
+                  Minhas Receitas
+                </CardTitle>
+                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  Visualizar receitas e pagamentos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/commission-config">
+            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <SettingsIcon className="h-5 w-5 text-purple-500" />
+                  Configurar Comissões
+                </CardTitle>
+                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  Definir porcentagens de comissão
                 </CardDescription>
               </CardHeader>
               <CardContent>

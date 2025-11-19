@@ -17,7 +17,8 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
-  Lock
+  Lock,
+  CreditCard
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -54,6 +55,7 @@ export default function ProfilePage() {
   // Form fields
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [pixKey, setPixKey] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -81,6 +83,19 @@ export default function ProfilePage() {
           description: 'Não foi possível carregar o perfil',
           variant: 'destructive',
         })
+      }
+      
+      // Buscar chave PIX se for booster ou admin
+      if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
+        try {
+          const pixResponse = await fetch('/api/user/bank-account')
+          if (pixResponse.ok) {
+            const pixData = await pixResponse.json()
+            setPixKey(pixData.pixKey || '')
+          }
+        } catch (error) {
+          console.error('Erro ao buscar chave PIX:', error)
+        }
       }
     })
   }
@@ -126,6 +141,7 @@ export default function ProfilePage() {
         body.newPassword = newPassword
       }
 
+      // Atualizar perfil
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
@@ -136,35 +152,49 @@ export default function ProfilePage() {
 
       const data = await response.json()
 
-      if (response.ok) {
-        setAlert({
-          title: 'Sucesso',
-          description: 'Perfil atualizado com sucesso!',
-          variant: 'default',
-        })
-        
-        // Limpar campos de senha
-        setCurrentPassword('')
-        setNewPassword('')
-        setConfirmPassword('')
-        
-        // Atualizar perfil local
-        setProfile(data.user)
-        
-        // Atualizar contexto de autenticação
-        await refreshUser()
-      } else {
-        setAlert({
-          title: 'Erro',
-          description: data.message || 'Erro ao atualizar perfil',
-          variant: 'destructive',
-        })
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao atualizar perfil')
       }
-    } catch (error) {
+
+      // Atualizar chave PIX se for booster ou admin
+      if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
+        const pixResponse = await fetch('/api/user/bank-account', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            pixKey,
+          }),
+        })
+
+        if (!pixResponse.ok) {
+          const pixData = await pixResponse.json()
+          throw new Error(pixData.message || 'Erro ao atualizar chave PIX')
+        }
+      }
+
+      setAlert({
+        title: 'Sucesso',
+        description: 'Perfil atualizado com sucesso!',
+        variant: 'default',
+      })
+      
+      // Limpar campos de senha
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      
+      // Atualizar perfil local
+      setProfile(data.user)
+      
+      // Atualizar contexto de autenticação
+      await refreshUser()
+    } catch (error: any) {
       console.error('Erro ao salvar perfil:', error)
       setAlert({
         title: 'Erro',
-        description: 'Erro ao salvar perfil',
+        description: error.message || 'Erro ao salvar perfil',
         variant: 'destructive',
       })
     } finally {
@@ -276,6 +306,25 @@ export default function ProfilePage() {
                   className="bg-black/50 border-purple-500/50 text-white"
                 />
               </div>
+
+              {/* Chave PIX (apenas para BOOSTER e ADMIN) */}
+              {authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN') && (
+                <div className="space-y-2">
+                  <Label htmlFor="pixKey" className="text-gray-400 flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Chave PIX
+                  </Label>
+                  <Input
+                    id="pixKey"
+                    type="text"
+                    placeholder="email@exemplo.com ou CPF/CNPJ ou telefone"
+                    value={pixKey}
+                    onChange={(e) => setPixKey(e.target.value)}
+                    className="bg-black/50 border-purple-500/50 text-white"
+                  />
+                  <p className="text-xs text-gray-500">Chave PIX para recebimento de pagamentos</p>
+                </div>
+              )}
 
               {/* Informações adicionais */}
               <Separator className="bg-purple-500/30" />
