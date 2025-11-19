@@ -280,6 +280,7 @@ export default function BoosterDashboardPage() {
   }
 
 
+  // Loading de tela inteira apenas para autenticação
   if (authLoading) {
     return <LoadingSpinner />
   }

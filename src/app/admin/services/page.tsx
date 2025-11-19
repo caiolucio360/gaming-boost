@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { OrdersListSkeleton } from '@/components/common/loading-skeletons'
 
 interface Service {
   id: number
@@ -145,7 +146,8 @@ export default function AdminServicesPage() {
     return configs[type] || configs.RANK_BOOST
   }
 
-  if (authLoading || loading) {
+  // Loading de tela inteira apenas para autenticação
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -218,7 +220,9 @@ export default function AdminServicesPage() {
         </Card>
 
         {/* Lista de Serviços */}
-        {services.length === 0 ? (
+        {loading ? (
+          <OrdersListSkeleton count={5} />
+        ) : services.length === 0 ? (
           <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">

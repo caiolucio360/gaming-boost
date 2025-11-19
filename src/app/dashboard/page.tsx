@@ -195,7 +195,8 @@ export default function DashboardPage() {
   }
 
 
-  if (authLoading || loading) {
+  // Loading de tela inteira apenas para autenticação
+  if (authLoading) {
     return <LoadingSpinner />
   }
 

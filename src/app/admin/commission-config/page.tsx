@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { ProfileSkeleton } from '@/components/common/loading-skeletons'
 import { showSuccess, showError } from '@/lib/toast'
 import Link from 'next/link'
 
@@ -170,7 +171,8 @@ export default function CommissionConfigPage() {
     }
   }
 
-  if (authLoading || loading) {
+  // Loading de tela inteira apenas para autenticação
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
@@ -208,7 +210,10 @@ export default function CommissionConfigPage() {
           </Alert>
         )}
 
-        <Card className="bg-black/30 border-purple-500/50">
+        {loading ? (
+          <ProfileSkeleton />
+        ) : (
+          <Card className="bg-black/30 border-purple-500/50">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Settings className="h-5 w-5 text-purple-400" />
@@ -334,6 +339,7 @@ export default function CommissionConfigPage() {
             </Button>
           </CardContent>
         </Card>
+        )}
       </div>
     </div>
   )

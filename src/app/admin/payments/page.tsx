@@ -110,7 +110,8 @@ export default function AdminPaymentsPage() {
     })
   }
 
-  if (authLoading || loading) {
+  // Loading de tela inteira apenas para autenticação
+  if (authLoading) {
     return <LoadingSpinner />
   }
 
