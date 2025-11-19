@@ -129,7 +129,7 @@ export default function BoosterPaymentsPage() {
   return (
     <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
-        {refreshing && <RefreshingBanner />}
+        {/* Removido RefreshingBanner para evitar piscar - atualizações são silenciosas */}
         
         <div className="mb-6">
           <Link href="/booster">

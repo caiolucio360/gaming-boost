@@ -119,26 +119,52 @@ export default function BoosterDashboardPage() {
     }
   }, [activeTab])
 
-  // Atualizações em tempo real via SSE
+  // Função para atualizar apenas os dados sem mostrar banner de refreshing
+  const updateOrdersSilently = async () => {
+    const params = new URLSearchParams()
+    if (activeTab === 'available') {
+      params.append('type', 'available')
+    } else if (activeTab === 'assigned') {
+      params.append('type', 'assigned')
+    } else if (activeTab === 'completed') {
+      params.append('type', 'completed')
+    }
+
+    try {
+      const response = await fetch(`/api/booster/orders?${params.toString()}`)
+      if (response.ok) {
+        const data = await response.json()
+        setOrders(data.orders || [])
+        setStats(data.stats || null)
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar pedidos silenciosamente:', error)
+    }
+  }
+
+  // Atualizações em tempo real via SSE - atualização silenciosa
   useRealtime({
     enabled: user?.role === 'BOOSTER',
     onOrderUpdate: (data) => {
-      // Sempre recarregar quando houver mudanças nos pedidos disponíveis
-      // Isso garante que quando um booster aceita um pedido, outros boosters veem a atualização
+      // Atualizar silenciosamente quando houver mudanças nos pedidos disponíveis
       if (data.available !== undefined) {
         const previousAvailable = stats?.available || 0
         
-        // Recarregar se:
-        // 1. Estiver na aba de disponíveis E o número mudou
-        // 2. O número de pedidos disponíveis diminuiu (pedido foi aceito)
-        // 3. O número de pedidos disponíveis aumentou (novo pedido criado)
-        if (activeTab === 'available' || data.available !== previousAvailable) {
-          fetchOrders(true)
+        // Atualizar apenas quando o número de pedidos disponíveis mudou
+        // Isso evita atualizações desnecessárias
+        if (data.available !== previousAvailable) {
+          // Se estiver na aba de disponíveis, atualizar a lista
+          if (activeTab === 'available') {
+            updateOrdersSilently()
+          } else {
+            // Se não está na aba de disponíveis, apenas atualizar stats
+            updateOrdersSilently()
+          }
         }
       }
-      // Atualizar quando meus pedidos mudarem
-      if (data.myOrders !== undefined) {
-        fetchOrders(true)
+      // Atualizar quando meus pedidos mudarem (se estiver na aba de assigned)
+      if (data.myOrders !== undefined && activeTab === 'assigned') {
+        updateOrdersSilently()
       }
     },
   })

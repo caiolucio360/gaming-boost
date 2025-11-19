@@ -122,14 +122,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
-        {refreshing && (
-          <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-            <p className="text-sm text-purple-300 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              <RefreshCw className="h-4 w-4 inline-block mr-2 animate-spin" />
-              Atualizando...
-            </p>
-          </div>
-        )}
+        {/* Removido banner de refreshing para evitar piscar - atualizações são silenciosas */}
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertTitle>Erro</AlertTitle>

@@ -73,13 +73,23 @@ export default function DashboardPage() {
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
 
-  // Atualizações em tempo real via SSE
+  // Função para atualizar apenas os dados sem mostrar banner de refreshing
+  const updateOrdersSilently = async () => {
+    try {
+      const data = await apiGet<{ orders: Order[] }>('/api/orders')
+      setOrders(data.orders || [])
+    } catch (error) {
+      console.error('Erro ao atualizar pedidos silenciosamente:', error)
+    }
+  }
+
+  // Atualizações em tempo real via SSE - atualização silenciosa
   useRealtime({
     enabled: user?.role === 'CLIENT',
     onOrderUpdate: (data) => {
-      // Quando há atualização de pedidos, recarregar lista
+      // Quando há atualização de pedidos, atualizar silenciosamente
       if (data.pending !== undefined || data.inProgress !== undefined) {
-        fetchOrders(true)
+        updateOrdersSilently()
       }
     },
   })
@@ -202,8 +212,7 @@ export default function DashboardPage() {
           description={`Olá, ${user.name || user.email}! Aqui estão suas solicitações de boost.`}
         />
 
-        {refreshing && <RefreshingBanner />}
-
+        {/* Removido RefreshingBanner para evitar piscar - atualizações são silenciosas */}
         {alert && (
           <Alert 
             variant={alert.variant} 

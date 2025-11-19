@@ -56,6 +56,9 @@ export async function GET(request: NextRequest) {
       // e 2 segundos para outros casos
       let isClosed = false
       let lastAvailableCount = -1
+      let lastPendingCount = -1
+      let lastInProgressCount = -1
+      let lastPendingPayments = -1
       let pollInterval: NodeJS.Timeout | null = null
       let currentPollDelay = 2000 // Delay atual do polling
       
@@ -82,7 +85,8 @@ export async function GET(request: NextRequest) {
               },
             })
 
-            // Enviar evento sempre que houver mudança ou na primeira vez
+            // Enviar evento apenas quando houver mudança real no número de pedidos
+            // Isso evita atualizações desnecessárias e piscar na tela
             if (lastAvailableCount === -1 || availableOrders !== lastAvailableCount) {
               sendEvent('orders-update', {
                 available: availableOrders,
@@ -118,10 +122,16 @@ export async function GET(request: NextRequest) {
               },
             })
 
-            sendEvent('orders-update', {
-              pending: pendingOrders,
-              inProgress: inProgressOrders,
-            })
+            // Enviar evento apenas quando houver mudança real
+            if (lastPendingCount === -1 || lastInProgressCount === -1 ||
+                pendingOrders !== lastPendingCount || inProgressOrders !== lastInProgressCount) {
+              sendEvent('orders-update', {
+                pending: pendingOrders,
+                inProgress: inProgressOrders,
+              })
+              lastPendingCount = pendingOrders
+              lastInProgressCount = inProgressOrders
+            }
           } else if (userRole === 'ADMIN') {
             // Para admins: verificar pedidos pendentes e pagamentos
             const pendingOrders = await prisma.order.count({
@@ -136,10 +146,19 @@ export async function GET(request: NextRequest) {
               },
             })
 
-            sendEvent('admin-update', {
-              pendingOrders,
-              pendingPayments,
-            })
+            // Enviar evento apenas quando houver mudança real
+            const lastAdminPendingOrders = (global as any).lastAdminPendingOrders ?? -1
+            const lastAdminPendingPayments = (global as any).lastAdminPendingPayments ?? -1
+            if (lastAdminPendingOrders === -1 || lastAdminPendingPayments === -1 ||
+                pendingOrders !== lastAdminPendingOrders || 
+                pendingPayments !== lastAdminPendingPayments) {
+              sendEvent('admin-update', {
+                pendingOrders,
+                pendingPayments,
+              })
+              ;(global as any).lastAdminPendingOrders = pendingOrders
+              ;(global as any).lastAdminPendingPayments = pendingPayments
+            }
           }
         } catch (error) {
           if (isClosed) {
