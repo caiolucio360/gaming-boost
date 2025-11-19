@@ -2,7 +2,7 @@
 
 Plataforma web full-stack para serviços de boost em jogos eletrônicos, desenvolvida com Next.js 15 e TypeScript.
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Stack
 
 ### Frontend
 - **Next.js 15.4.6** - Framework React com App Router
