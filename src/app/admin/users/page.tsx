@@ -27,10 +27,11 @@ import {
   Trash2,
   Loader2,
   ArrowLeft,
-  UserPlus,
   Shield,
   User,
   Crown,
+  DollarSign,
+  History,
 } from 'lucide-react'
 import Link from 'next/link'
 import { TableSkeleton } from '@/components/common/loading-skeletons'

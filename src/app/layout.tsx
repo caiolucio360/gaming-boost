@@ -10,13 +10,17 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 const orbitron = Orbitron({ 
   subsets: ['latin'],
   variable: '--font-orbitron',
-  weight: ['400', '500', '600', '700', '800', '900']
+  weight: ['400', '700', '800', '900'], // Apenas pesos utilizados
+  display: 'swap', // Melhora performance de carregamento
+  preload: true,
 })
 
 const rajdhani = Rajdhani({ 
   subsets: ['latin'],
   variable: '--font-rajdhani',
-  weight: ['300', '400', '500', '600', '700']
+  weight: ['300', '400', '500', '600'], // Apenas pesos utilizados
+  display: 'swap', // Melhora performance de carregamento
+  preload: true,
 })
 
 import { generateMetadata } from '@/lib/seo'
