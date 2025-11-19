@@ -23,6 +23,14 @@ jest.mock('@/lib/auth-middleware', () => ({
   createAuthErrorResponse: jest.fn((message: string, status: number) => {
     return new Response(JSON.stringify({ message }), { status })
   }),
+  createAuthErrorResponseFromResult: jest.fn((authResult: any) => {
+    const isPermissionError = authResult.error?.includes('Acesso negado') || 
+                             authResult.error?.includes('Permissão') ||
+                             authResult.error?.includes('insuficiente') ||
+                             authResult.error?.includes('administradores')
+    const status = isPermissionError ? 403 : 401
+    return new Response(JSON.stringify({ message: authResult.error || 'Não autenticado' }), { status })
+  }),
 }))
 
 describe('GET /api/admin/users', () => {
@@ -125,10 +133,6 @@ describe('GET /api/admin/users', () => {
       authenticated: false,
       error: 'Não autenticado',
     })
-    const { cookies } = require('next/headers')
-    cookies.mockReturnValueOnce({
-      get: jest.fn(() => null),
-    })
 
     const request = new NextRequest('http://localhost:3000/api/admin/users', {
       method: 'GET',
@@ -159,7 +163,7 @@ describe('GET /api/admin/users', () => {
     const data = await response.json()
 
     expect(response.status).toBe(403)
-    expect(data.message).toContain('administradores')
+    expect(data.message).toContain('Acesso negado')
   })
 })
 

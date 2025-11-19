@@ -28,19 +28,10 @@ export async function POST(
       )
     }
 
-    // Verificar se o pedido existe e está disponível
+    // Buscar o pedido primeiro para obter o total
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-        service: true,
-      },
+      select: { total: true, status: true, boosterId: true },
     })
 
     if (!order) {
@@ -103,15 +94,16 @@ export async function POST(
     const adminPercentage = 1 - boosterPercentage
 
     // Atribuir pedido ao booster, calcular comissão e mudar status para IN_PROGRESS
+    // Usar transação atômica para evitar race conditions
     const updatedOrder = await prisma.$transaction(async (tx) => {
-      // Buscar o admin do pedido
-      const orderWithAdmin = await tx.order.findUnique({
-        where: { id: orderId },
-        select: { adminId: true },
-      })
-
-      const updated = await tx.order.update({
-        where: { id: orderId },
+      // Verificar e atualizar em uma única operação atômica
+      // Usar updateMany com condições para garantir atomicidade
+      const updateResult = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: 'PENDING',
+          boosterId: null, // Apenas se ainda não tiver booster
+        },
         data: {
           boosterId,
           status: 'IN_PROGRESS',
@@ -120,6 +112,30 @@ export async function POST(
           adminRevenue,
           adminPercentage,
         },
+      })
+
+      // Se nenhuma linha foi atualizada, significa que o pedido já foi pego
+      if (updateResult.count === 0) {
+        // Verificar o estado atual para retornar erro apropriado
+        const currentOrder = await tx.order.findUnique({
+          where: { id: orderId },
+        })
+        
+        if (!currentOrder) {
+          throw new Error('Pedido não encontrado')
+        }
+        if (currentOrder.status !== 'PENDING') {
+          throw new Error('Pedido não está disponível para aceitação')
+        }
+        if (currentOrder.boosterId) {
+          throw new Error('Pedido já foi atribuído a outro booster')
+        }
+        throw new Error('Erro ao aceitar pedido')
+      }
+
+      // Buscar o pedido atualizado com todas as informações
+      const updated = await tx.order.findUnique({
+        where: { id: orderId },
         include: {
           user: {
             select: {
@@ -139,6 +155,10 @@ export async function POST(
         },
       })
 
+      if (!updated) {
+        throw new Error('Erro ao buscar pedido atualizado')
+      }
+
       // Criar comissão do booster
       await tx.boosterCommission.create({
         data: {
@@ -152,7 +172,7 @@ export async function POST(
       })
 
       // Atualizar receita do admin se já existir
-      if (orderWithAdmin?.adminId) {
+      if (updated.adminId) {
         await tx.adminRevenue.updateMany({
           where: {
             orderId: orderId,
@@ -165,7 +185,23 @@ export async function POST(
       }
 
       return updated
+    }).catch((error) => {
+      // Se for erro de validação, retornar erro específico
+      if (error.message.includes('já foi atribuído') || 
+          error.message.includes('não está disponível') ||
+          error.message.includes('não encontrado')) {
+        return NextResponse.json(
+          { message: error.message },
+          { status: error.message.includes('não encontrado') ? 404 : 400 }
+        )
+      }
+      throw error
     })
+
+    // Se retornou erro, retornar resposta de erro
+    if (updatedOrder instanceof NextResponse) {
+      return updatedOrder
+    }
 
     return NextResponse.json(
       { message: 'Pedido aceito com sucesso', order: updatedOrder },

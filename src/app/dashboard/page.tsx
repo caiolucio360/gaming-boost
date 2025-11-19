@@ -34,6 +34,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { GameId } from '@/lib/games-config'
+import { useRealtime } from '@/hooks/use-realtime'
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -71,6 +72,17 @@ export default function DashboardPage() {
       fetchOrders()
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
+
+  // Atualizações em tempo real via SSE
+  useRealtime({
+    enabled: user?.role === 'CLIENT',
+    onOrderUpdate: (data) => {
+      // Quando há atualização de pedidos, recarregar lista
+      if (data.pending !== undefined || data.inProgress !== undefined) {
+        fetchOrders(true)
+      }
+    },
+  })
 
   const fetchOrders = async (isRefresh = false) => {
     await withLoading(async () => {

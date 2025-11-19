@@ -18,6 +18,17 @@ jest.mock('@/lib/db', () => ({
     service: {
       findUnique: jest.fn(),
     },
+    user: {
+      findFirst: jest.fn(),
+    },
+    commissionConfig: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+    },
+    adminRevenue: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
   },
 }))
 
@@ -132,7 +143,29 @@ describe('POST /api/orders', () => {
 
     ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(mockService)
     ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Não há order ativa existente
-    ;(prisma.order.create as jest.Mock).mockResolvedValue(mockOrder)
+    ;(prisma.user.findFirst as jest.Mock).mockResolvedValue({
+      id: 1,
+      email: 'admin@test.com',
+      role: 'ADMIN',
+      active: true,
+    })
+    ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue({
+      id: 1,
+      boosterPercentage: 0.70,
+      adminPercentage: 0.30,
+      enabled: true,
+    })
+    ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      const tx = {
+        order: {
+          create: jest.fn().mockResolvedValue(mockOrder),
+        },
+        adminRevenue: {
+          create: jest.fn().mockResolvedValue({ id: 1 }),
+        },
+      }
+      return await callback(tx)
+    })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
@@ -224,6 +257,13 @@ describe('POST /api/orders', () => {
 
     ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(mockService)
     ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Não há order ativa (a anterior está COMPLETED)
+    ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue({
+      id: 1,
+      boosterPercentage: 0.70,
+      adminPercentage: 0.30,
+      enabled: true,
+    })
+    ;(prisma.adminRevenue.create as jest.Mock).mockResolvedValue({ id: 1 })
     ;(prisma.order.create as jest.Mock).mockResolvedValue(mockOrder)
 
     const request = new NextRequest('http://localhost:3000/api/orders', {

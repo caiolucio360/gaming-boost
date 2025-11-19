@@ -152,7 +152,7 @@ describe('seo', () => {
 
       const metadata = generateMetadata(config)
 
-      expect(metadata.robots).toBe('index, follow')
+      expect(metadata.robots).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1')
     })
   })
 })

@@ -32,6 +32,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/ui/alert'
+import { useRealtime } from '@/hooks/use-realtime'
 
 interface Order {
   id: number
@@ -117,6 +118,21 @@ export default function BoosterDashboardPage() {
       fetchOrders(true)
     }
   }, [activeTab])
+
+  // Atualizações em tempo real via SSE
+  useRealtime({
+    enabled: user?.role === 'BOOSTER',
+    onOrderUpdate: (data) => {
+      // Quando há atualização, recarregar apenas se estiver na aba de disponíveis
+      if (activeTab === 'available' && data.available !== undefined) {
+        fetchOrders(true)
+      }
+      // Atualizar stats se disponível
+      if (data.myOrders !== undefined) {
+        fetchOrders(true)
+      }
+    },
+  })
 
   const fetchOrders = async (isRefresh = false) => {
     await withLoading(async () => {

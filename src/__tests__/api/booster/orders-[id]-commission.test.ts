@@ -22,6 +22,7 @@ jest.mock('@/lib/db', () => ({
     },
     boosterCommission: {
       create: jest.fn(),
+      updateMany: jest.fn(),
     },
     adminRevenue: {
       updateMany: jest.fn(),
@@ -112,8 +113,11 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const tx = {
           order: {
-            findUnique: jest.fn().mockResolvedValue({ adminId: 1 }),
-            update: jest.fn().mockResolvedValue(mockUpdatedOrder),
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            findUnique: jest.fn().mockResolvedValue({
+              ...mockUpdatedOrder,
+              adminId: 1,
+            }),
           },
           boosterCommission: {
             create: jest.fn().mockResolvedValue({
@@ -210,8 +214,11 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const tx = {
           order: {
-            findUnique: jest.fn().mockResolvedValue({ adminId: 1 }),
-            update: jest.fn().mockResolvedValue(mockUpdatedOrder),
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            findUnique: jest.fn().mockResolvedValue({
+              ...mockUpdatedOrder,
+              adminId: 1,
+            }),
           },
           boosterCommission: {
             create: jest.fn().mockResolvedValue({
@@ -308,8 +315,11 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const tx = {
           order: {
-            findUnique: jest.fn().mockResolvedValue({ adminId: 1 }),
-            update: jest.fn().mockResolvedValue(mockUpdatedOrder),
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            findUnique: jest.fn().mockResolvedValue({
+              ...mockUpdatedOrder,
+              adminId: 1,
+            }),
           },
           boosterCommission: {
             create: jest.fn().mockResolvedValue({
