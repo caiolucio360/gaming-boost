@@ -52,11 +52,16 @@ export async function GET(request: NextRequest) {
       // Enviar evento de conexão
       sendEvent('connected', { userId, role: userRole, timestamp: Date.now() })
 
-      // Polling otimizado: verificar mudanças a cada 2 segundos
+      // Polling otimizado: verificar mudanças a cada 1 segundo para boosters (quando há pedidos)
+      // e 2 segundos para outros casos
       let isClosed = false
-      const pollInterval = setInterval(async () => {
+      let lastAvailableCount = -1
+      let pollInterval: NodeJS.Timeout | null = null
+      let currentPollDelay = 2000 // Delay atual do polling
+      
+      const poll = async () => {
         if (isClosed) {
-          clearInterval(pollInterval)
+          if (pollInterval) clearInterval(pollInterval)
           return
         }
         try {
@@ -77,10 +82,26 @@ export async function GET(request: NextRequest) {
               },
             })
 
-            sendEvent('orders-update', {
-              available: availableOrders,
-              myOrders,
-            })
+            // Enviar evento sempre que houver mudança ou na primeira vez
+            if (lastAvailableCount === -1 || availableOrders !== lastAvailableCount) {
+              sendEvent('orders-update', {
+                available: availableOrders,
+                myOrders,
+              })
+              lastAvailableCount = availableOrders
+            }
+
+            // Ajustar intervalo: 1s se há pedidos disponíveis, 2s caso contrário
+            const pollDelay = availableOrders > 0 ? 1000 : 2000
+            
+            // Recriar intervalo apenas se o delay mudou
+            if (pollDelay !== currentPollDelay) {
+              if (pollInterval) {
+                clearInterval(pollInterval)
+              }
+              currentPollDelay = pollDelay
+              pollInterval = setInterval(poll, pollDelay)
+            }
           } else if (userRole === 'CLIENT') {
             // Para clientes: verificar status dos seus pedidos
             const pendingOrders = await prisma.order.count({
@@ -122,7 +143,7 @@ export async function GET(request: NextRequest) {
           }
         } catch (error) {
           if (isClosed) {
-            clearInterval(pollInterval)
+            if (pollInterval) clearInterval(pollInterval)
             return
           }
           try {
@@ -131,10 +152,18 @@ export async function GET(request: NextRequest) {
           } catch (sendError) {
             // Stream pode estar fechado
             isClosed = true
-            clearInterval(pollInterval)
+            if (pollInterval) clearInterval(pollInterval)
           }
         }
-      }, 2000) // Polling a cada 2 segundos
+      }
+      
+      // Iniciar polling imediatamente e depois em intervalos
+      await poll()
+      
+      // Para roles não-BOOSTER, usar intervalo fixo de 2 segundos
+      if (userRole !== 'BOOSTER') {
+        pollInterval = setInterval(poll, 2000)
+      }
 
       // Manter conexão viva com heartbeat
       const heartbeatInterval = setInterval(() => {
@@ -154,7 +183,7 @@ export async function GET(request: NextRequest) {
       // Limpar intervalos quando conexão for fechada
       const cleanup = () => {
         isClosed = true
-        clearInterval(pollInterval)
+        if (pollInterval) clearInterval(pollInterval)
         clearInterval(heartbeatInterval)
         try {
           controller.close()
@@ -185,4 +214,5 @@ export async function GET(request: NextRequest) {
     return new Response('Internal Server Error', { status: 500 })
   }
 }
+
 

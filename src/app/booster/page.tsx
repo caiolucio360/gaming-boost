@@ -123,11 +123,20 @@ export default function BoosterDashboardPage() {
   useRealtime({
     enabled: user?.role === 'BOOSTER',
     onOrderUpdate: (data) => {
-      // Quando há atualização, recarregar apenas se estiver na aba de disponíveis
-      if (activeTab === 'available' && data.available !== undefined) {
-        fetchOrders(true)
+      // Sempre recarregar quando houver mudanças nos pedidos disponíveis
+      // Isso garante que quando um booster aceita um pedido, outros boosters veem a atualização
+      if (data.available !== undefined) {
+        const previousAvailable = stats?.available || 0
+        
+        // Recarregar se:
+        // 1. Estiver na aba de disponíveis E o número mudou
+        // 2. O número de pedidos disponíveis diminuiu (pedido foi aceito)
+        // 3. O número de pedidos disponíveis aumentou (novo pedido criado)
+        if (activeTab === 'available' || data.available !== previousAvailable) {
+          fetchOrders(true)
+        }
       }
-      // Atualizar stats se disponível
+      // Atualizar quando meus pedidos mudarem
       if (data.myOrders !== undefined) {
         fetchOrders(true)
       }
