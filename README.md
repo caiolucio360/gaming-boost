@@ -1,124 +1,132 @@
-# GameBoost Pro 🎮
+# GameBoost Pro
 
-Plataforma profissional para serviços de boost em **Counter-Strike 2**, oferecendo boost de rank em modos Premier e Gamers Club.
+Plataforma web full-stack para serviços de boost em jogos eletrônicos, desenvolvida com Next.js 15 e TypeScript.
 
-## 🚀 Sobre o Projeto
+## 🛠️ Stack Tecnológica
 
-**GameBoost Pro** é uma plataforma web completa para serviços de boost profissional em Counter-Strike 2. A plataforma conecta clientes que desejam melhorar seus ranks com boosters profissionais que realizam os serviços.
-
-## ✨ Funcionalidades Principais
-
-### 🎯 Para Clientes
-- ✅ Navegação livre pelo site sem necessidade de login
-- ✅ Calculadora de preços dinâmica (Premier e Gamers Club)
-- ✅ Sistema de carrinho com persistência
-- ✅ Dashboard pessoal para acompanhamento de pedidos
-- ✅ Sistema de pagamento via PIX
-- ✅ Perfil do usuário com edição de dados
-
-### 👨‍💼 Para Administradores
-- ✅ Dashboard com estatísticas em tempo real
-- ✅ Gerenciamento completo de usuários, serviços e pedidos
-- ✅ Filtros e buscas avançadas
-
-### ⚡ Para Boosters
-- ✅ Visualização de pedidos disponíveis
-- ✅ Aceitar e atualizar status de pedidos
-- ✅ Dashboard com estatísticas de trabalho
-
-## 🛠️ Tecnologias
-
+### Frontend
 - **Next.js 15.4.6** - Framework React com App Router
 - **React 19** - Biblioteca UI
-- **TypeScript** - Type safety
-- **Tailwind CSS 4.0** - Estilização
-- **shadcn/ui** - Componentes UI reutilizáveis
-- **Prisma** - ORM para banco de dados
-- **Jest** - Framework de testes
+- **TypeScript 5.9** - Type safety
+- **Tailwind CSS 4.0** - Estilização utility-first
+- **shadcn/ui** - Componentes acessíveis baseados em Radix UI
+- **React Hook Form + Zod** - Validação de formulários
+- **Lucide React** - Biblioteca de ícones
 
-## 🚀 Instalação
+### Backend
+- **Next.js API Routes** - Endpoints RESTful
+- **Prisma 6.14** - ORM type-safe
+- **PostgreSQL** - Banco de dados relacional
+- **JWT** - Autenticação stateless
+- **bcryptjs** - Hash de senhas
 
-```bash
-# 1. Instalar dependências
-npm install --legacy-peer-deps
+### DevOps & Qualidade
+- **Jest + Testing Library** - Testes unitários e de integração
+- **ESLint** - Linting de código
+- **TypeScript** - Type checking em tempo de compilação
+- **Vercel** - Deploy e hosting
 
-# 2. Gerar Prisma Client
-npm run db:generate
+## 📐 Arquitetura e Padrões
 
-# 3. Configurar banco de dados
-npm run db:push
+### Arquitetura
+- **App Router (Next.js 15)** - Roteamento baseado em sistema de arquivos
+- **Server Components** - Renderização no servidor por padrão
+- **API Routes** - Endpoints RESTful integrados ao framework
+- **Middleware Pattern** - Autenticação e autorização centralizadas
 
-# 4. Iniciar servidor de desenvolvimento
-npm run dev
+### Padrões de Código
+- **Component-Based Architecture** - Componentes React reutilizáveis
+- **Custom Hooks** - Lógica compartilhada (`useAuth`, `useLoading`, `useCart`)
+- **Context API** - Gerenciamento de estado global (Auth, Cart)
+- **Type-Safe APIs** - TypeScript em todo o stack
+- **Separation of Concerns** - Separação clara entre UI, lógica e dados
+
+### Estrutura de Pastas
+```
+src/
+├── app/              # Rotas Next.js (App Router)
+│   ├── (auth)/      # Route Groups
+│   ├── api/         # API Routes
+│   └── [pages]/     # Páginas da aplicação
+├── components/       # Componentes React
+│   ├── ui/          # Componentes base (shadcn/ui)
+│   ├── common/      # Componentes reutilizáveis
+│   └── layout/      # Componentes de layout
+├── contexts/         # React Contexts
+├── hooks/           # Custom Hooks
+├── lib/             # Utilitários e helpers
+└── types/           # TypeScript types
 ```
 
-A aplicação estará disponível em `http://localhost:3000`
+### Padrões de Banco de Dados
+- **Prisma ORM** - Type-safe database access
+- **Migrations** - Versionamento de schema
+- **Indexes** - Otimização de queries
+- **Relations** - Relacionamentos bem definidos
+- **Enums** - Tipos enumerados para consistência
 
-## 🧪 Testes
+## ✨ Destaques Técnicos
 
-O projeto possui **139 testes** cobrindo todas as funcionalidades principais.
+### Performance
+- **Code Splitting** - Lazy loading de componentes pesados
+- **Image Optimization** - Next.js Image com formatos modernos (WebP, AVIF)
+- **Font Optimization** - Google Fonts com `display: swap`
+- **Bundle Optimization** - Tree shaking e minificação
+- **Dynamic Imports** - Carregamento sob demanda de analytics
+
+### SEO
+- **Metadata API** - Metadata dinâmica por página
+- **Open Graph** - Compartilhamento em redes sociais
+- **Sitemap Dinâmico** - Geração automática de sitemap
+- **Robots.txt** - Configuração de crawlers
+
+### Qualidade de Código
+- **TypeScript Strict Mode** - Type safety em todo o projeto
+- **ESLint** - Padrões de código consistentes
+- **139 Testes** - Cobertura de funcionalidades críticas
+- **Error Boundaries** - Tratamento de erros
+
+### UX/UI
+- **Responsive Design** - Mobile-first approach
+- **Loading States** - Feedback visual durante carregamento
+- **Toast Notifications** - Feedback de ações do usuário
+- **Accessibility** - Componentes acessíveis (WCAG 2.1)
+
+## 🔐 Segurança
+
+- **JWT Authentication** - Tokens stateless com expiração
+- **Password Hashing** - bcrypt com salt rounds
+- **Role-Based Access Control** - Autorização por perfil (CLIENT, BOOSTER, ADMIN)
+- **Input Validation** - Validação no frontend e backend
+- **SQL Injection Prevention** - Prisma ORM protege contra SQL injection
+- **XSS Prevention** - Sanitização de inputs
+
+## 📊 Métricas
+
+- **139 Testes** - Cobertura de APIs e componentes
+- **TypeScript** - 100% do código tipado
+- **Build Time** - ~9-16s
+- **Bundle Size** - Otimizado com code splitting
+
+## 🚀 Scripts
 
 ```bash
-# Executar todos os testes
-npm test
-
-# Modo watch (desenvolvimento)
-npm run test:watch
-
-# Com coverage
-npm run test:coverage
-```
-
-## 🎨 Destaques Técnicos
-
-- ✅ **SEO Otimizado**: Metadata, Open Graph, Twitter Cards, Sitemap dinâmico
-- ✅ **Validação de Negócio**: Máximo 1 boost ativo por modalidade
-- ✅ **Navegação Otimizada**: Client-side navigation com Next.js Link
-- ✅ **UX Aprimorada**: Sem "flickering", loading states separados
-- ✅ **Design Responsivo**: Mobile-first, componentes acessíveis
-- ✅ **Testes Abrangentes**: 95%+ de cobertura das APIs
-
-## 📦 Scripts Disponíveis
-
-```bash
-# Desenvolvimento
-npm run dev              # Iniciar servidor de desenvolvimento
-
-# Build e produção
-npm run build            # Criar build de produção
-npm run start            # Iniciar servidor de produção
-
-# Banco de dados
-npm run db:generate      # Gerar Prisma Client
-npm run db:push          # Sincronizar schema com banco
-npm run db:studio        # Abrir Prisma Studio
-
-# Testes
-npm test                 # Executar testes
-npm run test:watch       # Modo watch
-npm run test:coverage    # Com coverage
-
-# Linting
-npm run lint             # Verificar código
-npm run lint:fix         # Corrigir problemas automaticamente
+npm run dev          # Desenvolvimento com Turbopack
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+npm test             # Executar testes
+npm run lint         # Verificar código
 ```
 
 ## 📚 Documentação
 
-Toda a documentação técnica do projeto está disponível na pasta [`docs/`](./docs/):
-
-- **[Schema do Banco de Dados](./docs/DATABASE_SCHEMA.md)** - Estrutura completa do banco de dados
-- **[Variáveis de Ambiente](./docs/ENVIRONMENT_VARIABLES.md)** - Lista completa de variáveis necessárias
-- **[Deploy na Vercel](./docs/VERCEL_DEPLOYMENT.md)** - Guia completo de configuração e deploy
-- **[Guia de Autenticação](./docs/AUTHENTICATION_GUIDE.md)** - Sistema de autenticação JWT
-- **[Guia de Migração](./docs/MIGRATION_GUIDE.md)** - Configuração e migração do banco de dados
-- **[Árvore de Rotas](./docs/ROUTES.md)** - Todas as rotas da aplicação (frontend e API)
-
-## 📄 Licença
-
-Este projeto é privado e de propriedade da GameBoost Pro.
+Documentação técnica completa disponível em [`docs/`](./docs/):
+- Requisitos do projeto
+- Schema do banco de dados
+- Guias de autenticação e rotas
+- Fluxos de pagamento
 
 ---
 
-**Versão**: 1.0.0  
-**Status**: ✅ Produção Ready
+**Status**: ✅ Produção Ready  
+**Versão**: 1.0.0

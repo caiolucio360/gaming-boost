@@ -4,6 +4,17 @@ Esta pasta contém toda a documentação técnica do projeto GameBoost Pro.
 
 ## 📚 Documentos Disponíveis
 
+### [REQUISITOS.md](./REQUISITOS.md)
+**Documento de Requisitos do Projeto** - Documentação completa e abrangente incluindo:
+- Visão geral e objetivos do projeto
+- Perfis de usuário (Cliente, Booster, Administrador)
+- Funcionalidades detalhadas por perfil
+- Regras de negócio completas
+- Fluxos principais de uso
+- Modelo de dados
+- Requisitos técnicos e não-funcionais
+- Segurança e integrações
+
 ### [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
 Documentação completa do schema do banco de dados, incluindo:
 - Todas as entidades (User, Service, Order, Payment)
@@ -59,11 +70,12 @@ Estratégia de precificação e análise de mercado:
 
 ## 📖 Como Usar
 
-1. Para entender a estrutura do banco de dados, consulte `DATABASE_SCHEMA.md`
-2. Para implementar ou entender a autenticação, consulte `AUTHENTICATION_GUIDE.md`
-3. Para migrar ou configurar o banco de dados, consulte `MIGRATION_GUIDE.md`
-4. Para navegar e entender todas as rotas, consulte `ROUTES.md`
-5. Para usar notificações toast e tratamento de erros, consulte `TOAST_USAGE.md`
+1. **Para entender o projeto completo**: Comece com `REQUISITOS.md` - documento principal com todos os requisitos, funcionalidades e regras de negócio
+2. Para entender a estrutura do banco de dados, consulte `DATABASE_SCHEMA.md`
+3. Para implementar ou entender a autenticação, consulte `AUTHENTICATION_GUIDE.md`
+4. Para migrar ou configurar o banco de dados, consulte `MIGRATION_GUIDE.md`
+5. Para navegar e entender todas as rotas, consulte `ROUTES.md`
+6. Para usar notificações toast e tratamento de erros, consulte `TOAST_USAGE.md`
 
 ## 🔄 Atualizações
 
