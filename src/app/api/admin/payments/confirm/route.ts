@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       include: {
         payments: true,
         commission: true,
-        revenue: true,
+        revenues: true,
       },
     })
 
@@ -76,10 +76,11 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // Atualizar receita do admin se existir e estiver pendente
-      if (order.revenue && order.revenue.status === 'PENDING') {
+      // Atualizar receitas dos admins se existirem e estiverem pendentes
+      const pendingRevenues = order.revenues.filter(r => r.status === 'PENDING')
+      for (const revenue of pendingRevenues) {
         await tx.adminRevenue.update({
-          where: { id: order.revenue.id },
+          where: { id: revenue.id },
           data: {
             status: 'PAID',
             paidAt: new Date(),
