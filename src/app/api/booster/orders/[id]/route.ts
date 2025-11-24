@@ -120,7 +120,7 @@ export async function POST(
         const currentOrder = await tx.order.findUnique({
           where: { id: orderId },
         })
-        
+
         if (!currentOrder) {
           throw new Error('Pedido não encontrado')
         }
@@ -171,25 +171,49 @@ export async function POST(
         },
       })
 
-      // Atualizar receita do admin se já existir
-      if (updated.adminId) {
-        await tx.adminRevenue.updateMany({
-          where: {
-            orderId: orderId,
-          },
-          data: {
-            amount: adminRevenue,
-            percentage: adminPercentage,
-          },
-        })
+      // Buscar todos os admins ativos para dividir a receita
+      const admins = await tx.user.findMany({
+        where: { role: 'ADMIN', active: true },
+        select: { id: true, adminProfitShare: true }
+      })
+
+      // Calcular total de shares para normalização (caso a soma não seja 1 ou 100)
+      const totalShares = admins.reduce((sum, admin) => sum + (admin.adminProfitShare || 0), 0)
+
+      // Criar registros de receita para cada admin
+      if (admins.length > 0) {
+        for (const admin of admins) {
+          let sharePercentage = 0
+
+          // Se houver shares definidos, calcular proporcionalmente
+          if (totalShares > 0) {
+            sharePercentage = (admin.adminProfitShare || 0) / totalShares
+          } else {
+            // Se ninguém tiver share definido, dividir igualmente
+            sharePercentage = 1 / admins.length
+          }
+
+          const adminAmount = adminRevenue * sharePercentage
+
+          await tx.adminRevenue.create({
+            data: {
+              orderId: orderId,
+              adminId: admin.id,
+              orderTotal: order.total,
+              percentage: adminPercentage * sharePercentage, // Porcentagem real do total do pedido
+              amount: adminAmount,
+              status: 'PENDING',
+            }
+          })
+        }
       }
 
       return updated
     }).catch((error) => {
       // Se for erro de validação, retornar erro específico
-      if (error.message.includes('já foi atribuído') || 
-          error.message.includes('não está disponível') ||
-          error.message.includes('não encontrado')) {
+      if (error.message.includes('já foi atribuído') ||
+        error.message.includes('não está disponível') ||
+        error.message.includes('não encontrado')) {
         return NextResponse.json(
           { message: error.message },
           { status: error.message.includes('não encontrado') ? 404 : 400 }

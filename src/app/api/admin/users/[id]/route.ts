@@ -117,7 +117,7 @@ export async function PUT(
     if (password !== undefined && password.length >= 6) {
       updateData.password = await bcrypt.hash(password, 10)
     }
-    
+
     // Permitir atualizar comissão do booster (apenas para usuários com role BOOSTER)
     if (boosterCommissionPercentage !== undefined) {
       // Validar se é um número entre 0 e 1
@@ -128,7 +128,7 @@ export async function PUT(
           { status: 400 }
         )
       }
-      
+
       // Verificar se o usuário é um booster
       if (existingUser.role !== 'BOOSTER') {
         return NextResponse.json(
@@ -136,15 +136,15 @@ export async function PUT(
           { status: 400 }
         )
       }
-      
+
       const previousPercentage = existingUser.boosterCommissionPercentage
-      
+
       // Registrar histórico se a comissão mudou
       // Comparar valores numéricos para evitar problemas de comparação
-      const hasChanged = previousPercentage === null || previousPercentage === undefined 
-        ? true 
+      const hasChanged = previousPercentage === null || previousPercentage === undefined
+        ? true
         : Math.abs(previousPercentage - percentage) > 0.0001
-      
+
       if (hasChanged) {
         const { reason } = body
         await prisma.boosterCommissionHistory.create({
@@ -157,8 +157,33 @@ export async function PUT(
           },
         })
       }
-      
+
       updateData.boosterCommissionPercentage = percentage
+    }
+
+    // Permitir atualizar share de lucro do admin (apenas para usuários com role ADMIN)
+    const { adminProfitShare } = body
+    if (adminProfitShare !== undefined) {
+      // Validar se é um número positivo
+      const share = parseFloat(adminProfitShare)
+      if (isNaN(share) || share < 0) {
+        return NextResponse.json(
+          { message: 'Share de lucro deve ser um número positivo' },
+          { status: 400 }
+        )
+      }
+
+      // Verificar se o usuário é um admin
+      // Se estiver mudando o role para ADMIN agora, permite. Se já for ADMIN, permite.
+      const newRole = role || existingUser.role
+      if (newRole !== 'ADMIN') {
+        return NextResponse.json(
+          { message: 'Apenas admins podem ter share de lucro' },
+          { status: 400 }
+        )
+      }
+
+      updateData.adminProfitShare = share
     }
 
     const updatedUser = await prisma.user.update({

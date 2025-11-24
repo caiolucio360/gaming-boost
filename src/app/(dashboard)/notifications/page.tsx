@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react'
 import { NotificationItem, Notification } from '@/components/common/notification-item'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, CheckCheck } from 'lucide-react'
-import { PageHeader } from '@/components/common/page-header'
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -71,13 +70,13 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
+    <div className="container py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <PageHeader 
-          title="Notificações" 
-          description="Acompanhe atualizações dos seus pedidos e mensagens do sistema."
-        />
-        <Button variant="outline" size="sm" onClick={markAllRead}>
+        <div>
+          <h1 className="text-3xl font-bold font-orbitron text-purple-400 mb-2">Notificações</h1>
+          <p className="text-muted-foreground font-rajdhani">Acompanhe atualizações dos seus pedidos e mensagens do sistema.</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={markAllRead} className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 hover:border-purple-400 transition-all duration-300">
           <CheckCheck className="mr-2 h-4 w-4" />
           Marcar tudo como lido
         </Button>
@@ -85,30 +84,31 @@ export default function NotificationsPage() {
 
       <div className="space-y-4">
         {notifications.length === 0 && !loading ? (
-          <Card>
+          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all hover-glow">
             <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <p>Você não tem notificações.</p>
+              <p className="font-rajdhani">Você não tem notificações.</p>
             </CardContent>
           </Card>
         ) : (
           notifications.map((notification) => (
-            <NotificationItem 
-              key={notification.id} 
-              notification={notification} 
-              onRead={markAsRead}
-            />
+            <Card key={notification.id} className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all hover-glow overflow-hidden p-0">
+              <NotificationItem 
+                notification={notification} 
+                onRead={markAsRead}
+              />
+            </Card>
           ))
         )}
 
         {loading && (
           <div className="flex justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
           </div>
         )}
 
         {!loading && hasMore && (
           <div className="flex justify-center pt-4">
-            <Button variant="ghost" onClick={loadMore}>
+            <Button variant="ghost" onClick={loadMore} className="text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all duration-300">
               Carregar mais
             </Button>
           </div>

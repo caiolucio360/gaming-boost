@@ -101,19 +101,19 @@ export function NotificationBell() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-600 border-2 border-background" />
+            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-brand-red border-2 border-background animate-pulse" />
           )}
           <span className="sr-only">Notificações</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold">Notificações</h4>
+      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-purple-500/50 shadow-lg shadow-purple-500/20" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-purple-500/20">
+          <h4 className="font-semibold font-orbitron text-purple-400">Notificações</h4>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-muted-foreground hover:text-primary" onClick={markAllRead}>
+            <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-purple-300 hover:text-purple-200" onClick={markAllRead}>
               Marcar todas como lidas
             </Button>
           )}
@@ -137,10 +137,10 @@ export function NotificationBell() {
             </div>
           )}
         </ScrollArea>
-        <div className="p-2 border-t text-center">
+        <div className="p-2 border-t border-purple-500/20 text-center">
           <Link 
             href="/notifications" 
-            className="text-xs text-muted-foreground hover:text-primary block w-full py-2"
+            className="text-xs text-purple-300 hover:text-purple-200 block w-full py-2 transition-colors duration-300"
             onClick={() => setIsOpen(false)}
           >
             Ver todas as notificações

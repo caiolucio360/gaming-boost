@@ -28,6 +28,8 @@ model User {
   pixKey             String? // Chave PIX para recebimento
   // Comissão personalizada do booster (opcional, usa config global se não definida)
   boosterCommissionPercentage Float? // Porcentagem de comissão personalizada (ex: 0.75 = 75%)
+  // Porcentagem de divisão do lucro para admins (ex: 0.50 = 50% do lucro restante)
+  adminProfitShare   Float?  @default(0) 
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   orders             Order[] // Pedidos como cliente
@@ -92,7 +94,7 @@ model Order {
   admin             User?              @relation("AdminOrders", fields: [adminId], references: [id], onDelete: SetNull)
   payments          Payment[] // Pagamentos associados ao pedido
   commission        BoosterCommission? // Comissão do booster
-  revenue           AdminRevenue? // Receita do admin
+  revenues          AdminRevenue[] // Receitas dos admins (agora múltiplo)
   review            Review? // Avaliação do pedido
   dispute           Dispute? // Disputa do pedido
 
@@ -170,7 +172,7 @@ enum CommissionStatus {
 // Receita do admin - criada quando pedido é criado
 model AdminRevenue {
   id         Int           @id @default(autoincrement())
-  orderId    Int           @unique
+  orderId    Int           // Removido @unique para permitir múltiplos admins
   adminId    Int
   orderTotal Float // Valor total do pedido
   percentage Float // Porcentagem de receita (ex: 0.30 = 30%)

@@ -56,6 +56,7 @@ interface AdminUser {
   name?: string
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
   boosterCommissionPercentage?: number | null
+  adminProfitShare?: number | null
   createdAt: string
   _count: {
     orders: number
@@ -73,9 +74,11 @@ export default function AdminUsersPage() {
   const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
+  const [profitShareDialogOpen, setProfitShareDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [commissionPercentage, setCommissionPercentage] = useState<string>('')
+  const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
   const [commissionHistory, setCommissionHistory] = useState<any[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
@@ -341,6 +344,15 @@ export default function AdminUsersPage() {
                             </p>
                           </div>
                         )}
+                        {adminUser.role === 'ADMIN' && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              Share de Lucro: {adminUser.adminProfitShare !== null && adminUser.adminProfitShare !== undefined
+                                ? adminUser.adminProfitShare
+                                : '0 (Divisão igualitária)'}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         {adminUser.role === 'BOOSTER' && (
@@ -390,6 +402,26 @@ export default function AdminUsersPage() {
                               Histórico
                             </Button>
                           </>
+                        )}
+                        {adminUser.role === 'ADMIN' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/10 font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            onClick={() => {
+                              setSelectedUser(adminUser)
+                              setProfitShareValue(
+                                adminUser.adminProfitShare !== null && adminUser.adminProfitShare !== undefined
+                                  ? adminUser.adminProfitShare.toString()
+                                  : '0'
+                              )
+                              setProfitShareDialogOpen(true)
+                            }}
+                          >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Profit Share
+                          </Button>
                         )}
                         <Button
                           asChild
@@ -539,6 +571,107 @@ export default function AdminUsersPage() {
                   setAlert({
                     title: 'Erro',
                     description: 'Erro ao atualizar comissão',
+                    variant: 'destructive',
+                  })
+                  setTimeout(() => setAlert(null), 5000)
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para configurar Profit Share (Admin) */}
+      <Dialog open={profitShareDialogOpen} onOpenChange={setProfitShareDialogOpen}>
+        <DialogContent className="bg-black border-purple-500/50">
+          <DialogHeader>
+            <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              Configurar Profit Share
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              {selectedUser?.name || selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Peso na Divisão de Lucro
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.1"
+                value={profitShareValue}
+                onChange={(e) => setProfitShareValue(e.target.value)}
+                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                placeholder="Ex: 1.0"
+              />
+              <p className="text-xs text-gray-400 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Valor relativo para divisão do lucro (ex: 1.0, 0.5, 2.0).
+                <br />
+                Se todos tiverem 1.0, a divisão é igualitária.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setProfitShareDialogOpen(false)}
+              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  const share = parseFloat(profitShareValue)
+                  if (isNaN(share) || share < 0) {
+                    setAlert({
+                      title: 'Erro',
+                      description: 'O valor deve ser um número positivo',
+                      variant: 'destructive',
+                    })
+                    setTimeout(() => setAlert(null), 5000)
+                    return
+                  }
+
+                  const response = await fetch(`/api/admin/users/${selectedUser?.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      adminProfitShare: share,
+                    }),
+                  })
+
+                  if (response.ok) {
+                    setAlert({
+                      title: 'Sucesso',
+                      description: 'Profit Share atualizado com sucesso!',
+                      variant: 'default',
+                    })
+                    setProfitShareDialogOpen(false)
+                    fetchUsers(false)
+                    setTimeout(() => setAlert(null), 5000)
+                  } else {
+                    const data = await response.json()
+                    setAlert({
+                      title: 'Erro',
+                      description: data.message || 'Erro ao atualizar Profit Share',
+                      variant: 'destructive',
+                    })
+                    setTimeout(() => setAlert(null), 5000)
+                  }
+                } catch (error) {
+                  console.error('Erro ao atualizar Profit Share:', error)
+                  setAlert({
+                    title: 'Erro',
+                    description: 'Erro ao atualizar Profit Share',
                     variant: 'destructive',
                   })
                   setTimeout(() => setAlert(null), 5000)

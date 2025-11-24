@@ -36,9 +36,12 @@ export function NotificationItem({ notification, onRead, compact = false }: Noti
   const content = (
     <div 
       className={cn(
-        "flex gap-3 p-3 rounded-lg transition-colors relative group",
-        notification.read ? "bg-background hover:bg-muted/50" : "bg-muted/30 hover:bg-muted/60 border-l-2 border-primary",
-        compact ? "text-sm" : ""
+        "flex gap-3 p-4 relative group cursor-pointer",
+        "transition-all duration-300 ease-in-out",
+        notification.read 
+          ? "bg-transparent hover:bg-purple-500/5" 
+          : "bg-gradient-to-r from-purple-500/15 to-purple-500/5 border-l-4 border-purple-500 hover:from-purple-500/20 hover:to-purple-500/10 hover:shadow-[0_0_15px_rgba(124,58,237,0.3)]",
+        compact ? "text-sm p-3" : ""
       )}
       onClick={() => !notification.read && onRead?.(notification.id)}
     >
@@ -64,7 +67,7 @@ export function NotificationItem({ notification, onRead, compact = false }: Noti
       </div>
       
       {!notification.read && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
       )}
     </div>
   )
@@ -94,12 +97,12 @@ function getIcon(type: NotificationType) {
 
 function getIconColor(type: NotificationType) {
   switch (type) {
-    case 'ORDER_UPDATE': return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-    case 'PAYMENT': return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-    case 'SYSTEM': return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-    case 'CHAT': return "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
-    case 'BOOSTER_ASSIGNED': return "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
-    case 'COMMISSION': return "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-    default: return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+    case 'ORDER_UPDATE': return "bg-brand-purple/20 text-brand-purple-light border border-brand-purple/30"
+    case 'PAYMENT': return "bg-brand-purple-light/20 text-brand-purple-lighter border border-brand-purple-light/30"
+    case 'SYSTEM': return "bg-brand-gray-800/50 text-brand-gray-400 border border-brand-gray-700"
+    case 'CHAT': return "bg-brand-purple-lighter/20 text-brand-purple-lighter border border-brand-purple-lighter/30"
+    case 'BOOSTER_ASSIGNED': return "bg-brand-purple-dark/30 text-brand-purple border border-brand-purple-dark/50"
+    case 'COMMISSION': return "bg-brand-red/20 text-brand-red-light border border-brand-red/30"
+    default: return "bg-brand-gray-800/50 text-brand-gray-400 border border-brand-gray-700"
   }
 }

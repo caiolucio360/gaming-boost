@@ -6,18 +6,19 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { eventId, data } = body
 
-        // TODO: Verificar assinatura do webhook se disponível no futuro
-        // Por enquanto, confiamos no ID da transação
+        // Check for event type (AbacatePay standard) or fallback to data.status
+        const eventType = body.event || body.type
 
-        if (data) {
-            const payment = await prisma.payment.findFirst({
-                where: { providerId: data.id },
-                include: { order: true }
-            })
+        console.log('Webhook received:', { eventType, dataId: data?.id })
 
-            if (payment) {
-                // Handle PAID status
-                if (data.status === 'PAID' && payment.status !== 'PAID') {
+        if (eventType === 'billing.paid' || (data && data.status === 'PAID')) {
+            if (data) {
+                const payment = await prisma.payment.findFirst({
+                    where: { providerId: data.id },
+                    include: { order: true }
+                })
+
+                if (payment && payment.status !== 'PAID') {
                     // Atualizar pagamento
                     await prisma.payment.update({
                         where: { id: payment.id },
@@ -45,8 +46,27 @@ export async function POST(request: NextRequest) {
                         })
                     }
                 }
-                // Handle REFUNDED status
-                else if (data.status === 'REFUNDED' && payment.status !== 'REFUNDED') {
+            }
+        }
+        else if (eventType === 'withdraw.done') {
+            console.log('Webhook: Saque realizado com sucesso', data)
+            // TODO: Implementar lógica de atualização de saque quando houver model de Saque/Withdrawal
+            // Ex: await prisma.withdrawal.update({ where: { providerId: data.id }, data: { status: 'COMPLETED' } })
+        }
+        else if (eventType === 'withdraw.failed') {
+            console.log('Webhook: Falha no saque', data)
+            // TODO: Implementar lógica de falha de saque
+            // Ex: await prisma.withdrawal.update({ where: { providerId: data.id }, data: { status: 'FAILED' } })
+        }
+        // Handle other statuses (REFUNDED, EXPIRED, CANCELLED) via data.status fallback if eventType is not specific
+        else if (data) {
+            const payment = await prisma.payment.findFirst({
+                where: { providerId: data.id },
+                include: { order: true }
+            })
+
+            if (payment) {
+                if (data.status === 'REFUNDED' && payment.status !== 'REFUNDED') {
                     await prisma.payment.update({
                         where: { id: payment.id },
                         data: { status: 'REFUNDED' },
@@ -69,16 +89,11 @@ export async function POST(request: NextRequest) {
                         })
                     }
                 }
-                // Handle EXPIRED or CANCELLED status
                 else if ((data.status === 'EXPIRED' || data.status === 'CANCELLED') && payment.status === 'PENDING') {
                     await prisma.payment.update({
                         where: { id: payment.id },
                         data: { status: data.status },
                     })
-
-                    // Se o pedido ainda estiver pendente, podemos cancelar ou apenas notificar
-                    // Por enquanto, mantemos o pedido como PENDING para permitir nova tentativa de pagamento
-                    // ou podemos cancelar se a lógica de negócio exigir
 
                     await prisma.notification.create({
                         data: {
