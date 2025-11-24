@@ -1,6 +1,6 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
-import ElojobHero from "@/components/layout/elojob-hero"
+import { ElojobHero } from "@/components/layout/elojob-hero"
 
 export const metadata: Metadata = generateMetadata({
   title: 'Início - GameBoost Pro',

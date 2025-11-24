@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
         401
       )
     }
-
     const userId = authResult.user.id
 
     // Buscar orders do usuário com informações do serviço
@@ -26,6 +25,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         service: true,
+        review: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
 
     const userId = authResult.user.id
 
-    const { 
-      serviceId, 
+    const {
+      serviceId,
       total,
       currentRank,
       targetRank,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         const modeName = gameMode === 'PREMIER' ? 'Premier' : 'Gamers Club'
         const statusName = existingOrder.status === 'PENDING' ? 'pendente' : 'em andamento'
         return NextResponse.json(
-          { 
+          {
             message: `Você já possui um boost de rank ${modeName} ${statusName}. Finalize ou cancele o pedido anterior antes de criar um novo.`,
           },
           { status: 400 }

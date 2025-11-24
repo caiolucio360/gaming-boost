@@ -3,7 +3,7 @@
  * Esta estrutura permite adicionar novos jogos facilmente
  */
 
-export type GameId = 'CS2' | 'LOL' | 'VALORANT' // Adicione novos jogos aqui conforme necessário
+export type GameId = 'CS2' // Adicione novos jogos aqui conforme necessário
 
 export type ServiceType = 'RANK_BOOST' | 'PLACEMENT' | 'COACHING' | 'ACCOUNT_LEVELING' // Tipos de serviços disponíveis
 
@@ -83,24 +83,24 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
             // Calcular por faixas progressivas, do current para o target
             while (currentRating < target) {
               const pricePer1000 = getPricePer1000(currentRating)
-              
+
               // Determinar o próximo limite de faixa
-              const nextThreshold = 
+              const nextThreshold =
                 currentRating < 5000 ? 5000 :
-                currentRating < 10000 ? 10000 :
-                currentRating < 15000 ? 15000 :
-                currentRating < 20000 ? 20000 :
-                currentRating < 25000 ? 25000 :
-                Infinity
+                  currentRating < 10000 ? 10000 :
+                    currentRating < 15000 ? 15000 :
+                      currentRating < 20000 ? 20000 :
+                        currentRating < 25000 ? 25000 :
+                          Infinity
 
               // Calcular quantos pontos podemos processar nesta faixa
               const maxPointsInRange = Math.min(target, nextThreshold) - currentRating
               const pointsToProcess = Math.min(maxPointsInRange, target - currentRating)
-              
+
               // Calcular preço para esses pontos
               const thousands = Math.ceil(pointsToProcess / 1000)
               total += thousands * pricePer1000
-              
+
               // Avançar para a próxima faixa
               currentRating += pointsToProcess
             }
@@ -153,25 +153,6 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
       },
     },
   },
-  // Jogos futuros podem ser adicionados aqui
-  // LOL: {
-  //   id: 'LOL',
-  //   name: 'League of Legends',
-  //   displayName: 'LoL',
-  //   description: 'Boost de rank no League of Legends',
-  //   href: '/games/lol',
-  //   enabled: false,
-  //   supportedServiceTypes: ['RANK_BOOST', 'PLACEMENT'],
-  // },
-  // VALORANT: {
-  //   id: 'VALORANT',
-  //   name: 'Valorant',
-  //   displayName: 'Valorant',
-  //   description: 'Boost de rank no Valorant',
-  //   href: '/games/valorant',
-  //   enabled: false,
-  //   supportedServiceTypes: ['RANK_BOOST', 'PLACEMENT'],
-  // },
 }
 
 /**

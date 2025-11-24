@@ -42,3 +42,50 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  observe() { }
+  unobserve() { }
+  disconnect() { }
+}
+
+// Mock PointerEvent
+if (!global.PointerEvent) {
+  class PointerEvent extends Event {
+    constructor(type, props) {
+      super(type, props)
+      if (props) {
+        // Only assign properties that are not read-only Event properties
+        // and are specific to PointerEvent
+        for (const key in props) {
+          if (key !== 'bubbles' && key !== 'cancelable' && key !== 'composed' && key !== 'isTrusted' && key !== 'defaultPrevented') {
+            try {
+              this[key] = props[key]
+            } catch (e) {
+              // Ignore read-only properties
+            }
+          }
+        }
+      }
+    }
+  }
+  global.PointerEvent = PointerEvent
+}
+
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = jest.fn()
+
+// Mock matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+})

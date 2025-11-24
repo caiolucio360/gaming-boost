@@ -35,6 +35,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
+import { ReviewModal } from '@/components/reviews/review-modal'
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -154,8 +155,8 @@ export default function DashboardPage() {
     return Array.from(games)
   }, [orders])
 
-  const handlePayment = (orderId: number) => {
-    router.push(`/payment?orderId=${orderId}`)
+  const handlePayment = (orderId: number, total: number) => {
+    router.push(`/payment?orderId=${orderId}&total=${total}`)
   }
 
   const handleCancelClick = (orderId: number) => {
@@ -369,7 +370,7 @@ export default function DashboardPage() {
                       {order.status === 'PENDING' && (
                         <>
                           <ActionButton
-                            onClick={() => handlePayment(order.id)}
+                            onClick={() => handlePayment(order.id, order.total)}
                             icon={ArrowRight}
                             iconPosition="right"
                             className="w-full md:w-auto"
@@ -386,6 +387,25 @@ export default function DashboardPage() {
                             Cancelar Pedido
                           </ActionButton>
                         </>
+                      )}
+
+                      {order.status === 'COMPLETED' && !order.review && (
+                        <ReviewModal
+                          orderId={order.id}
+                          onSuccess={() => fetchOrders(true)}
+                          trigger={
+                            <Button className="w-full md:w-auto bg-yellow-500 hover:bg-yellow-400 text-black font-bold">
+                              Avaliar Booster
+                            </Button>
+                          }
+                        />
+                      )}
+
+                      {order.status === 'COMPLETED' && order.review && (
+                        <div className="flex items-center text-yellow-400 bg-yellow-400/10 px-3 py-2 rounded-md border border-yellow-400/30">
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          <span className="text-sm font-bold">Avaliado ({order.review.rating}★)</span>
+                        </div>
                       )}
                     </div>
                   </div>

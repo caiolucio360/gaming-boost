@@ -21,6 +21,7 @@ model User {
   password           String
   role               Role                @default(CLIENT)
   phone              String? // Telefone de contato
+  taxId              String? // CPF/CNPJ para pagamentos
   active             Boolean             @default(true) // Se a conta está ativa
   metadata           String? // JSON com metadados adicionais
   // Chave PIX (para BOOSTER e ADMIN)
@@ -36,6 +37,13 @@ model User {
   adminRevenues      AdminRevenue[] // Receitas como admin
   commissionHistory  BoosterCommissionHistory[] // Histórico de mudanças de comissão (como booster)
   commissionChanges   BoosterCommissionHistory[] @relation("CommissionChanges") // Mudanças feitas (como admin)
+  boosterProfile     BoosterProfile?
+  reviewsWritten     Review[]            @relation("ReviewAuthor")
+  reviewsReceived    Review[]            @relation("ReviewTarget")
+  notifications      Notification[]
+  disputesCreated    Dispute[]           @relation("DisputeCreator")
+  disputeMessages    DisputeMessage[]    @relation("MessageAuthor")
+  image              String? // Avatar URL
 }
 
 model Service {
@@ -85,6 +93,8 @@ model Order {
   payments          Payment[] // Pagamentos associados ao pedido
   commission        BoosterCommission? // Comissão do booster
   revenue           AdminRevenue? // Receita do admin
+  review            Review? // Avaliação do pedido
+  dispute           Dispute? // Disputa do pedido
 
   // Índices para otimizar queries
   @@index([userId, gameMode, status]) // Para validação de modalidade duplicada (buscar pedidos ativos por modalidade)
@@ -114,6 +124,7 @@ model Payment {
   orderId   Int
   order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   method    String    @default("PIX") // Método de pagamento
+  providerId String? // ID externo do provider (AbacatePay, etc)
   pixCode   String? // Código PIX
   qrCode    String? // Base64 do QR Code
   status    String    @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
@@ -206,4 +217,106 @@ model BoosterCommissionHistory {
   @@index([boosterId])
   @@index([changedBy])
   @@index([createdAt])
+}
+
+model BoosterProfile {
+  id                Int                  @id @default(autoincrement())
+  userId            Int                  @unique
+  user              User                 @relation(fields: [userId], references: [id])
+  bio               String?
+  languages         String[] // Array de idiomas
+  verificationStatus VerificationStatus  @default(PENDING)
+  rating            Float                @default(0)
+  totalReviews      Int                  @default(0)
+  completedOrders   Int                  @default(0)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([verificationStatus])
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  authorId  Int
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  boosterId Int
+  booster   User     @relation("ReviewTarget", fields: [boosterId], references: [id])
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([authorId])
+  @@index([boosterId])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  metadata  String? // JSON
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  ORDER_UPDATE
+  PAYMENT
+  SYSTEM
+  CHAT
+  BOOSTER_ASSIGNED
+  COMMISSION
+}
+
+model Dispute {
+  id        Int              @id @default(autoincrement())
+  orderId   Int              @unique
+  order     Order            @relation(fields: [orderId], references: [id])
+  creatorId Int
+  creator   User             @relation("DisputeCreator", fields: [creatorId], references: [id])
+  reason    String
+  status    DisputeStatus    @default(OPEN)
+  messages  DisputeMessage[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([orderId])
+  @@index([creatorId])
+  @@index([status])
+}
+
+model DisputeMessage {
+  id        Int      @id @default(autoincrement())
+  disputeId Int
+  dispute   Dispute  @relation(fields: [disputeId], references: [id])
+  authorId  Int
+  author    User     @relation("MessageAuthor", fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([disputeId])
+  @@index([authorId])
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_REFUND
+  RESOLVED_PAYOUT
+  RESOLVED_PARTIAL
+  CANCELLED
 }

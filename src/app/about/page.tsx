@@ -1,5 +1,6 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Sobre Nós - GameBoost Pro',
@@ -79,39 +80,45 @@ export default function AboutPage() {
           </div>
 
           <div className="max-w-4xl mx-auto mb-16">
-            <div className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-8">
-              <h2 className="text-3xl font-bold text-white font-orbitron mb-6" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                <span className="text-purple-300">NOSSA</span>
-                <span className="text-white"> HISTÓRIA</span>
-              </h2>
-              <p className="text-gray-300 font-rajdhani leading-relaxed mb-6" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                Fundada em 2020, a GameBoost Pro nasceu da paixão por jogos e da necessidade de oferecer 
-                serviços de boost profissionais e seguros para a comunidade gamer brasileira. Nossa equipe 
-                é formada por jogadores experientes que entendem as dificuldades de subir de rank e alcançar 
-                objetivos nos jogos mais populares.
-              </p>
-              <p className="text-gray-300 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                Com mais de 10.000 clientes satisfeitos, nos tornamos referência em serviços de boost, 
-                oferecendo qualidade, segurança e eficiência em cada projeto. Nossa missão é ajudar 
-                jogadores a alcançarem seus objetivos de forma segura e profissional.
-              </p>
-            </div>
+            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="text-purple-300">NOSSA</span>
+                  <span className="text-white"> HISTÓRIA</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-gray-300 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                  Fundada em 2020, a GameBoost Pro nasceu da paixão por jogos e da necessidade de oferecer 
+                  serviços de boost profissionais e seguros para a comunidade gamer brasileira. Nossa equipe 
+                  é formada por jogadores experientes que entendem as dificuldades de subir de rank e alcançar 
+                  objetivos nos jogos mais populares.
+                </p>
+                <p className="text-gray-300 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                  Com mais de 10.000 clientes satisfeitos, nos tornamos referência em serviços de boost, 
+                  oferecendo qualidade, segurança e eficiência em cada projeto. Nossa missão é ajudar 
+                  jogadores a alcançarem seus objetivos de forma segura e profissional.
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12 lg:mb-16">
             {features.map((feature, index) => (
-              <div
+              <Card
                 key={index}
-                className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-6 text-center hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+                className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
               >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  {feature.title}
-                </h3>
-                <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  {feature.description}
-                </p>
-              </div>
+                <CardContent className="pt-6 text-center">
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
 

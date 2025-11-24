@@ -195,7 +195,8 @@ export default function CartPage() {
           clearCart()
           
           // Redirecionar para pagamento (usar replace para evitar voltar ao carrinho vazio)
-          router.replace(`/payment?orderId=${createdOrders[0]}`)
+          // Passar o total do primeiro item (assumindo pagamento individual por enquanto)
+          router.replace(`/payment?orderId=${createdOrders[0]}&total=${items[0].price}`)
         }, 200)
       } else {
         // Nenhum pedido foi criado - manter itens no carrinho

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 // Como é client component, precisamos usar generateMetadata em um layout ou criar um wrapper
 export default function CS2Page() {
@@ -73,73 +74,52 @@ export default function CS2Page() {
               {services.map((service, index) => (
                 <Card
                   key={index}
-                  className={`bg-black/30 backdrop-blur-md border rounded-lg p-8 transition-all duration-300 ${
+                  className={`bg-black/30 backdrop-blur-md border transition-all duration-300 ${
                     service.available
                       ? 'border-purple-500/50 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 cursor-pointer'
                       : 'border-gray-500/30 opacity-60 cursor-not-allowed'
                   }`}
                 >
-                  {service.available ? (
-                    <Link href={service.href} className="block">
-                      <CardContent className="p-0">
-                        <div className="text-center mb-6">
-                        <div className="text-6xl mb-4">{service.icon}</div>
-                        <h2 className="text-3xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                          {service.title}
-                        </h2>
-                        <p className="text-gray-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                          {service.description}
-                        </p>
-                      </div>
+                  <CardHeader className="text-center pb-2">
+                    <div className="text-6xl mb-4">{service.icon}</div>
+                    <CardTitle className="text-3xl font-bold text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                      {service.title}
+                    </CardTitle>
+                    <CardDescription className="text-gray-300 font-rajdhani text-lg mt-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                      {service.description}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-4">
+                    <ul className="space-y-3 mb-8">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                          <div className={`w-2 h-2 rounded-full mr-3 ${service.available ? 'bg-purple-400' : 'bg-gray-400'}`}></div>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
 
-                      <ul className="space-y-3 mb-8">
-                        {service.features.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                            <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="text-center">
-                        <div className="inline-flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
-                          <span>Continuar</span>
-                          <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </div>
-                      </CardContent>
-                    </Link>
-                  ) : (
-                    <CardContent>
-                      <div className="text-center mb-6">
-                        <div className="text-6xl mb-4">{service.icon}</div>
-                        <h2 className="text-3xl font-bold text-white font-orbitron mb-3" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                          {service.title}
-                        </h2>
-                        <p className="text-gray-300 font-rajdhani text-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                          {service.description}
-                        </p>
-                      </div>
-
-                      <ul className="space-y-3 mb-8">
-                        {service.features.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="text-center">
-                        <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                    <div className="text-center">
+                      {service.available ? (
+                        <Link href={service.href} className="block w-full">
+                          <Button 
+                            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-rajdhani font-bold py-6 text-lg group"
+                          >
+                            Continuar
+                            <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Button>
+                        </Link>
+                      ) : (
+                        <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani w-full" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
                           <span className="text-sm text-purple-400 font-semibold mr-2">(em breve)</span>
                           <span>Em desenvolvimento</span>
                         </div>
-                      </div>
-                    </CardContent>
-                  )}
+                      )}
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>

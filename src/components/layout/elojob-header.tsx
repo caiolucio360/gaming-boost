@@ -13,20 +13,28 @@ import {
   XIcon,
   ChevronDownIcon,
   ShoppingCartIcon,
-  PackageIcon
+  PackageIcon,
+  Bell
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { getEnabledGames } from '@/lib/games-config'
 import { getAuthToken } from '@/lib/api-client'
 
+import { NotificationBell } from '@/components/common/notification-bell'
+
 export function ElojobHeader() {
   const router = useRouter()
   const { user, logout, loading: authLoading } = useAuth()
   const { items } = useCart()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isGamesMenuOpen, setIsGamesMenuOpen] = useState(false)
   const [hasToken, setHasToken] = useState(false)
 
   // Verificar se há token no localStorage para evitar flash de "deslogado"
@@ -65,21 +73,8 @@ export function ElojobHeader() {
     href: game.href,
   }))
 
-  // Fechar menu quando clicar fora
-  const handleClickOutside = () => {
-    setIsGamesMenuOpen(false)
-  }
-
   return (
     <>
-      {/* Overlay para fechar menu quando clicar fora */}
-      {isGamesMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={handleClickOutside}
-        />
-      )}
-
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -134,30 +129,29 @@ export function ElojobHeader() {
                         {gamesItems[0].name}
                       </Link>
                     ) : gamesItems.length > 1 ? (
-                      <div className="relative">
-                        <Button
-                          variant="ghost"
-                          className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10 flex items-center"
-                          onClick={() => setIsGamesMenuOpen(!isGamesMenuOpen)}
-                        >
-                          Jogos
-                          <ChevronDownIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                        {isGamesMenuOpen && (
-                          <div className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-md border border-purple-500/50 rounded-lg shadow-lg z-50">
-                            {gamesItems.map((game) => (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="text-white font-bold hover:text-purple-300 transition-colors duration-300 text-lg tracking-wide px-4 py-2 rounded-lg hover:bg-purple-500/10 flex items-center data-[state=open]:bg-purple-500/10"
+                          >
+                            Jogos
+                            <ChevronDownIcon className="ml-2 h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-black/90 backdrop-blur-md border-purple-500/50 rounded-lg shadow-lg min-w-[12rem]">
+                          {gamesItems.map((game) => (
+                            <DropdownMenuItem key={game.href} asChild>
                               <Link
-                                key={game.href}
                                 href={game.href}
-                                onClick={() => setIsGamesMenuOpen(false)}
-                                className="block text-white font-bold hover:text-purple-300 transition-colors duration-300 text-base tracking-wide py-3 px-4 rounded-lg hover:bg-purple-500/10"
+                                className="block text-white font-bold hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10 transition-colors duration-300 text-base tracking-wide py-3 px-4 rounded-lg cursor-pointer"
                               >
                                 {game.name}
                               </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     ) : null}
                     
                     <Link
@@ -179,136 +173,123 @@ export function ElojobHeader() {
           <div className="hidden lg:flex items-center space-x-4">
             {(authLoading && hasToken) || (!authLoading && user) ? (
               <div className="flex items-center space-x-3">
-                {/* Se está carregando e há token mas ainda não há user, mostrar botões genéricos */}
+                <NotificationBell />
+                
+                {/* Se está carregando e há token mas ainda não há user, mostrar botão genérico */}
                 {authLoading && hasToken && !user ? (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      disabled
-                    >
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Carregando...
-                    </Button>
-                  </>
+                  <Button
+                    variant="ghost"
+                    className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
+                    disabled
+                  >
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    Carregando...
+                  </Button>
                 ) : (
                   <>
-                    {/* ADMIN: Admin, Perfil e Logout */}
-                    {user && user.role === 'ADMIN' && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg border border-purple-500/30"
-                      asChild
-                    >
-                      <Link href="/admin">
-                        <ShieldIcon className="mr-2 h-4 w-4" />
-                        Admin
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      asChild
-                    >
-                      <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Perfil
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      onClick={handleLogout}
-                    >
-                      <LogOutIcon className="mr-2 h-4 w-4" />
-                      Sair
-                    </Button>
-                  </>
-                )}
+                    {/* Cart Button - Visible outside dropdown for CLIENT */}
+                    {user && user.role === 'CLIENT' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300 mr-2"
+                        asChild
+                      >
+                        <Link href="/cart">
+                          <ShoppingCartIcon className="h-5 w-5" />
+                          {cartItemsCount > 0 && (
+                            <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black rounded-full">
+                              {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                            </Badge>
+                          )}
+                        </Link>
+                      </Button>
+                    )}
 
-                {/* CLIENT: Carrinho, Meus Pedidos, Perfil e Logout */}
-                {user && user.role === 'CLIENT' && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300"
-                      asChild
-                    >
-                      <Link href="/cart">
-                        <ShoppingCartIcon className="h-5 w-5" />
-                        {cartItemsCount > 0 && (
-                          <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black rounded-full">
-                            {cartItemsCount > 9 ? '9+' : cartItemsCount}
-                          </Badge>
+                    {/* User Dropdown Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg flex items-center data-[state=open]:bg-purple-500/10"
+                        >
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          Minha Conta
+                          <ChevronDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-md border-purple-500/50 rounded-lg shadow-lg min-w-[12rem]">
+                        
+                        {/* ADMIN Options */}
+                        {user && user.role === 'ADMIN' && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href="/admin" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <ShieldIcon className="mr-2 h-4 w-4" />
+                                Admin
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href="/profile" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                Perfil
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
                         )}
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      asChild
-                    >
-                      <Link href="/dashboard">
-                        <PackageIcon className="mr-2 h-4 w-4" />
-                        Meus Pedidos
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      asChild
-                    >
-                      <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Perfil
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      onClick={handleLogout}
-                    >
-                      <LogOutIcon className="mr-2 h-4 w-4" />
-                      Sair
-                    </Button>
-                  </>
-                )}
 
-                {/* BOOSTER: Meus Trabalhos, Perfil e Logout */}
-                {user && user.role === 'BOOSTER' && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      asChild
-                    >
-                      <Link href="/booster">
-                        <PackageIcon className="mr-2 h-4 w-4" />
-                        Meus Trabalhos
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      asChild
-                    >
-                      <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Perfil
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-white font-bold hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors duration-300 text-lg"
-                      onClick={handleLogout}
-                    >
-                      <LogOutIcon className="mr-2 h-4 w-4" />
-                      Sair
-                    </Button>
-                  </>
-                )}
+                        {/* CLIENT Options */}
+                        {user && user.role === 'CLIENT' && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href="/dashboard" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <PackageIcon className="mr-2 h-4 w-4" />
+                                Meus Pedidos
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href="/booster/apply" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <ShieldIcon className="mr-2 h-4 w-4" />
+                                Seja um Booster
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href="/profile" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                Perfil
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* BOOSTER Options */}
+                        {user && user.role === 'BOOSTER' && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href="/booster" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <PackageIcon className="mr-2 h-4 w-4" />
+                                Meus Trabalhos
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href="/profile" className="w-full cursor-pointer text-white hover:text-purple-300 focus:text-purple-300 focus:bg-purple-500/10">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                Perfil
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* Common Options */}
+                        <DropdownMenuItem 
+                          onClick={handleLogout}
+                          className="w-full cursor-pointer text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10"
+                        >
+                          <LogOutIcon className="mr-2 h-4 w-4" />
+                          Sair
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
               </div>
@@ -421,6 +402,14 @@ export function ElojobHeader() {
                                 </Button>
                               ) : (
                                 <>
+                                  <Link
+                                    href="/notifications"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
+                                  >
+                                    <Bell className="h-5 w-5" />
+                                    <span>Notificações</span>
+                                  </Link>
                                   {/* ADMIN no mobile: Admin, Perfil e Logout */}
                                   {user && user.role === 'ADMIN' && (
                                 <>
@@ -479,6 +468,14 @@ export function ElojobHeader() {
                                   >
                                     <PackageIcon className="h-5 w-5" />
                                     <span>Meus Pedidos</span>
+                                  </Link>
+                                  <Link
+                                    href="/booster/apply"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center space-x-2 text-purple-300 font-bold hover:text-white hover:bg-purple-500/20 py-3 px-4 rounded-lg transition-colors duration-300 border border-purple-500/50"
+                                  >
+                                    <ShieldIcon className="h-5 w-5" />
+                                    <span>Seja um Booster</span>
                                   </Link>
                                   <Link
                                     href="/profile"

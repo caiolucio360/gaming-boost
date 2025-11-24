@@ -13,12 +13,12 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação
     // Primeiro tenta via header (padrão), depois via query string (para SSE)
     let authResult = await verifyAuth(request)
-    
+
     // Se não autenticado via header, tentar via query string (para EventSource)
     if (!authResult.authenticated) {
       const { searchParams } = new URL(request.url)
       const token = searchParams.get('token')
-      
+
       if (token) {
         // Criar request temporário com token no header
         const tempRequest = new NextRequest(request.url, {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         authResult = await verifyAuth(tempRequest)
       }
     }
-    
+
     if (!authResult.authenticated || !authResult.user) {
       return new Response('Unauthorized', { status: 401 })
     }
@@ -38,187 +38,194 @@ export async function GET(request: NextRequest) {
     const userId = authResult.user.id
     const userRole = authResult.user.role
 
-  // Criar stream SSE
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder()
+    // Criar stream SSE
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder()
+        let isClosed = false
+        let pollTimeout: NodeJS.Timeout | null = null
 
-      // Função para enviar evento
-      const sendEvent = (event: string, data: any) => {
-        const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
-        controller.enqueue(encoder.encode(message))
-      }
+        // Função para enviar evento
+        const sendEvent = (event: string, data: any) => {
+          if (isClosed) return // Não enviar se stream está fechado
 
-      // Enviar evento de conexão
-      sendEvent('connected', { userId, role: userRole, timestamp: Date.now() })
+          // Verificar se controller ainda está ativo
+          if (controller.desiredSize === null) {
+            isClosed = true
+            return
+          }
 
-      // Polling otimizado: verificar mudanças a cada 1 segundo para boosters (quando há pedidos)
-      // e 2 segundos para outros casos
-      let isClosed = false
-      let lastAvailableCount = -1
-      let lastPendingCount = -1
-      let lastInProgressCount = -1
-      let lastPendingPayments = -1
-      let pollInterval: NodeJS.Timeout | null = null
-      let currentPollDelay = 2000 // Delay atual do polling
-      
-      const poll = async () => {
-        if (isClosed) {
-          if (pollInterval) clearInterval(pollInterval)
-          return
+          try {
+            const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+            controller.enqueue(encoder.encode(message))
+          } catch (error) {
+            // Controller fechado - comportamento esperado quando cliente desconecta
+            isClosed = true
+          }
         }
-        try {
-          // Verificar mudanças baseado no role do usuário
-          if (userRole === 'BOOSTER') {
-            // Para boosters: verificar pedidos disponíveis e atribuídos
-            const availableOrders = await prisma.order.count({
-              where: {
-                status: 'PENDING',
-                boosterId: null,
-              },
-            })
 
-            const myOrders = await prisma.order.count({
-              where: {
-                boosterId: userId,
-                status: { in: ['IN_PROGRESS', 'PENDING'] },
-              },
-            })
+        // Enviar evento de conexão
+        sendEvent('connected', { userId, role: userRole, timestamp: Date.now() })
 
-            // Enviar evento apenas quando houver mudança real no número de pedidos
-            // Isso evita atualizações desnecessárias e piscar na tela
-            if (lastAvailableCount === -1 || availableOrders !== lastAvailableCount) {
-              sendEvent('orders-update', {
-                available: availableOrders,
-                myOrders,
+        // Estado local para rastrear mudanças
+        let lastAvailableCount = -1
+        let lastPendingCount = -1
+        let lastInProgressCount = -1
+        let lastAdminPendingOrders = -1
+        let lastAdminPendingPayments = -1
+
+        // Função de polling recursiva
+        const poll = async () => {
+          if (isClosed) return
+
+          let nextPollDelay = 2000 // Delay padrão
+
+          try {
+            // Verificar mudanças baseado no role do usuário
+            if (userRole === 'BOOSTER') {
+              // Para boosters: verificar pedidos disponíveis e atribuídos
+              const availableOrders = await prisma.order.count({
+                where: {
+                  status: 'PENDING',
+                  boosterId: null,
+                },
               })
-              lastAvailableCount = availableOrders
-            }
 
-            // Ajustar intervalo: 1s se há pedidos disponíveis, 2s caso contrário
-            const pollDelay = availableOrders > 0 ? 1000 : 2000
-            
-            // Recriar intervalo apenas se o delay mudou
-            if (pollDelay !== currentPollDelay) {
-              if (pollInterval) {
-                clearInterval(pollInterval)
+              const myOrders = await prisma.order.count({
+                where: {
+                  boosterId: userId,
+                  status: { in: ['IN_PROGRESS', 'PENDING'] },
+                },
+              })
+
+              // Enviar evento apenas quando houver mudança real
+              if (lastAvailableCount === -1 || availableOrders !== lastAvailableCount) {
+                sendEvent('orders-update', {
+                  available: availableOrders,
+                  myOrders,
+                })
+                lastAvailableCount = availableOrders
               }
-              currentPollDelay = pollDelay
-              pollInterval = setInterval(poll, pollDelay)
-            }
-          } else if (userRole === 'CLIENT') {
-            // Para clientes: verificar status dos seus pedidos
-            const pendingOrders = await prisma.order.count({
-              where: {
-                userId,
-                status: 'PENDING',
-              },
-            })
 
-            const inProgressOrders = await prisma.order.count({
-              where: {
-                userId,
-                status: 'IN_PROGRESS',
-              },
-            })
+              // Se há pedidos disponíveis, aumentar frequência de polling
+              if (availableOrders > 0) {
+                nextPollDelay = 1000
+              }
 
-            // Enviar evento apenas quando houver mudança real
-            if (lastPendingCount === -1 || lastInProgressCount === -1 ||
+            } else if (userRole === 'CLIENT') {
+              // Para clientes: verificar status dos seus pedidos
+              const pendingOrders = await prisma.order.count({
+                where: {
+                  userId,
+                  status: 'PENDING',
+                },
+              })
+
+              const inProgressOrders = await prisma.order.count({
+                where: {
+                  userId,
+                  status: 'IN_PROGRESS',
+                },
+              })
+
+              if (lastPendingCount === -1 || lastInProgressCount === -1 ||
                 pendingOrders !== lastPendingCount || inProgressOrders !== lastInProgressCount) {
-              sendEvent('orders-update', {
-                pending: pendingOrders,
-                inProgress: inProgressOrders,
+                sendEvent('orders-update', {
+                  pending: pendingOrders,
+                  inProgress: inProgressOrders,
+                })
+                lastPendingCount = pendingOrders
+                lastInProgressCount = inProgressOrders
+              }
+
+            } else if (userRole === 'ADMIN') {
+              // Para admins: verificar pedidos pendentes e pagamentos
+              const pendingOrders = await prisma.order.count({
+                where: {
+                  status: 'PENDING',
+                },
               })
-              lastPendingCount = pendingOrders
-              lastInProgressCount = inProgressOrders
-            }
-          } else if (userRole === 'ADMIN') {
-            // Para admins: verificar pedidos pendentes e pagamentos
-            const pendingOrders = await prisma.order.count({
-              where: {
-                status: 'PENDING',
-              },
-            })
 
-            const pendingPayments = await prisma.payment.count({
-              where: {
-                status: 'PENDING',
-              },
-            })
+              const pendingPayments = await prisma.payment.count({
+                where: {
+                  status: 'PENDING',
+                },
+              })
 
-            // Enviar evento apenas quando houver mudança real
-            const lastAdminPendingOrders = (global as any).lastAdminPendingOrders ?? -1
-            const lastAdminPendingPayments = (global as any).lastAdminPendingPayments ?? -1
-            if (lastAdminPendingOrders === -1 || lastAdminPendingPayments === -1 ||
-                pendingOrders !== lastAdminPendingOrders || 
+              if (lastAdminPendingOrders === -1 || lastAdminPendingPayments === -1 ||
+                pendingOrders !== lastAdminPendingOrders ||
                 pendingPayments !== lastAdminPendingPayments) {
-              sendEvent('admin-update', {
-                pendingOrders,
-                pendingPayments,
-              })
-              ;(global as any).lastAdminPendingOrders = pendingOrders
-              ;(global as any).lastAdminPendingPayments = pendingPayments
+                sendEvent('admin-update', {
+                  pendingOrders,
+                  pendingPayments,
+                })
+                lastAdminPendingOrders = pendingOrders
+                lastAdminPendingPayments = pendingPayments
+              }
+            }
+
+            // Verificar novas notificações (comum a todos)
+            const recentNotification = await prisma.notification.findFirst({
+              where: {
+                userId,
+                createdAt: {
+                  gt: new Date(Date.now() - nextPollDelay) // Notificações criadas desde o último poll
+                },
+                read: false
+              },
+              orderBy: {
+                createdAt: 'desc'
+              }
+            })
+
+            if (recentNotification) {
+              sendEvent('notification', recentNotification)
+            }
+
+          } catch (error) {
+            if (!isClosed) {
+              console.error('Erro no polling SSE:', error)
             }
           }
-        } catch (error) {
+
+          // Agendar próximo poll se a conexão ainda estiver ativa
+          if (!isClosed) {
+            pollTimeout = setTimeout(poll, nextPollDelay)
+          }
+        }
+
+        // Iniciar loop de polling
+        poll()
+
+        // Heartbeat para manter conexão viva (a cada 30s)
+        const heartbeatInterval = setInterval(() => {
           if (isClosed) {
-            if (pollInterval) clearInterval(pollInterval)
+            clearInterval(heartbeatInterval)
             return
           }
           try {
-            console.error('Erro no polling SSE:', error)
-            sendEvent('error', { message: 'Erro ao verificar atualizações' })
-          } catch (sendError) {
-            // Stream pode estar fechado
+            sendEvent('heartbeat', { timestamp: Date.now() })
+          } catch (error) {
             isClosed = true
-            if (pollInterval) clearInterval(pollInterval)
+            clearInterval(heartbeatInterval)
+          }
+        }, 30000)
+
+        // Cleanup
+        const cleanup = () => {
+          isClosed = true
+          if (pollTimeout) clearTimeout(pollTimeout)
+          clearInterval(heartbeatInterval)
+          try {
+            controller.close()
+          } catch (e) {
+            // Ignorar erro se já estiver fechado
           }
         }
-      }
-      
-      // Iniciar polling imediatamente e depois em intervalos
-      await poll()
-      
-      // Para roles não-BOOSTER, usar intervalo fixo de 2 segundos
-      if (userRole !== 'BOOSTER') {
-        pollInterval = setInterval(poll, 2000)
-      }
 
-      // Manter conexão viva com heartbeat
-      const heartbeatInterval = setInterval(() => {
-        if (isClosed) {
-          clearInterval(heartbeatInterval)
-          return
-        }
-        try {
-          sendEvent('heartbeat', { timestamp: Date.now() })
-        } catch (error) {
-          // Stream pode estar fechado
-          isClosed = true
-          clearInterval(heartbeatInterval)
-        }
-      }, 30000) // Heartbeat a cada 30 segundos
-
-      // Limpar intervalos quando conexão for fechada
-      const cleanup = () => {
-        isClosed = true
-        if (pollInterval) clearInterval(pollInterval)
-        clearInterval(heartbeatInterval)
-        try {
-          controller.close()
-        } catch (error) {
-          // Controller já pode estar fechado
-        }
-      }
-
-      request.signal.addEventListener('abort', cleanup)
-
-      // Também limpar quando stream for cancelado
-      if (request.signal.aborted) {
-        cleanup()
-      }
-    },
-  })
+        request.signal.addEventListener('abort', cleanup)
+      },
+    })
 
     return new Response(stream, {
       headers: {
@@ -233,5 +240,3 @@ export async function GET(request: NextRequest) {
     return new Response('Internal Server Error', { status: 500 })
   }
 }
-
-

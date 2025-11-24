@@ -1,5 +1,6 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Depoimentos - GameBoost Pro',
@@ -80,34 +81,36 @@ export default function TestimonialsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <div
+            <Card
               key={index}
-              className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-6 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+              className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
             >
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  {testimonial.avatar}
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-purple-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                      {testimonial.game}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-white font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                    {testimonial.name}
-                  </h3>
-                  <p className="text-purple-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                    {testimonial.game}
-                  </p>
+
+                <div className="flex mb-3">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">★</span>
+                  ))}
                 </div>
-              </div>
 
-              <div className="flex mb-3">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <span key={i} className="text-yellow-400 text-lg">★</span>
-                ))}
-              </div>
-
-              <p className="text-gray-300 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                "{testimonial.text}"
-              </p>
-            </div>
+                <p className="text-gray-300 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                  "{testimonial.text}"
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
 

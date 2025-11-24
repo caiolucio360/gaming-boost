@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Home, ArrowLeft, Search } from 'lucide-react'
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
@@ -24,62 +25,64 @@ export default function NotFound() {
         </div>
 
         {/* Card Principal */}
-        <div className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-8 md:p-12 mb-8">
-          <div className="mb-6">
-            <div className="inline-block bg-purple-500/20 rounded-full p-4 mb-4">
-              <Search className="h-12 w-12 text-purple-400" />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-              <span className="text-purple-300">PÁGINA</span>
-              <span className="text-white"> NÃO ENCONTRADA</span>
-            </h2>
-            <p className="text-lg md:text-xl text-gray-300 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
-              Ops! A página que você está procurando não existe ou foi movida.
-            </p>
-            <p className="text-base text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-              Mas não se preocupe, você ainda pode encontrar nossos serviços de boost!
-            </p>
-          </div>
-
-          {/* Links Rápidos */}
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
-            <Link href="/games/cs2">
-              <div className="bg-black/50 border border-purple-500/30 rounded-lg p-4 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
-                <h3 className="text-white font-bold font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="text-purple-300">COUNTER-STRIKE 2</span>
-                </h3>
-                <p className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Ver serviços de boost
-                </p>
+        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 mb-8">
+          <CardContent className="p-8 md:p-12">
+            <div className="mb-6">
+              <div className="inline-block bg-purple-500/20 rounded-full p-4 mb-4">
+                <Search className="h-12 w-12 text-purple-400" />
               </div>
-            </Link>
-          </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+                <span className="text-purple-300">PÁGINA</span>
+                <span className="text-white"> NÃO ENCONTRADA</span>
+              </h2>
+              <p className="text-lg md:text-xl text-gray-300 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                Ops! A página que você está procurando não existe ou foi movida.
+              </p>
+              <p className="text-base text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                Mas não se preocupe, você ainda pode encontrar nossos serviços de boost!
+              </p>
+            </div>
 
-          {/* Botões de Ação */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
-              className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani font-bold py-6 px-8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30"
-              style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
-            >
-              <Link href="/">
-                <Home className="mr-2 h-5 w-5" />
-                Voltar para Início
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 font-rajdhani font-bold py-6 px-8 transition-all duration-300"
-              style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
-            >
+            {/* Links Rápidos */}
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
               <Link href="/games/cs2">
-                <ArrowLeft className="mr-2 h-5 w-5" />
-                Explorar Serviços
+                <div className="bg-black/50 border border-purple-500/30 rounded-lg p-4 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
+                  <h3 className="text-white font-bold font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                    <span className="text-purple-300">COUNTER-STRIKE 2</span>
+                  </h3>
+                  <p className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    Ver serviços de boost
+                  </p>
+                </div>
               </Link>
-            </Button>
-          </div>
-        </div>
+            </div>
+
+            {/* Botões de Ação */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                asChild
+                className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani font-bold py-6 px-8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30"
+                style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+              >
+                <Link href="/">
+                  <Home className="mr-2 h-5 w-5" />
+                  Voltar para Início
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 font-rajdhani font-bold py-6 px-8 transition-all duration-300"
+                style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+              >
+                <Link href="/games/cs2">
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  Explorar Serviços
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Informações Adicionais */}
         <div className="text-center">
@@ -94,4 +97,3 @@ export default function NotFound() {
     </div>
   )
 }
-

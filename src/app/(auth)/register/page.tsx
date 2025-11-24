@@ -19,17 +19,17 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsLoading(true)
     setError(null)
-    
+    setIsLoading(true)
+
     const formData = new FormData(e.currentTarget)
     const name = formData.get('name') as string
     const email = formData.get('email') as string
     const password = formData.get('password') as string
-    
+
     try {
-      // O AuthContext já faz o redirecionamento, não precisa fazer aqui
       await register(name, email, password)
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar conta')
     } finally {
@@ -80,7 +80,7 @@ export default function RegisterPage() {
               className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password" className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>Senha</Label>
             <div className="relative">

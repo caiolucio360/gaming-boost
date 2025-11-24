@@ -1,6 +1,7 @@
 import { generateMetadata } from '@/lib/seo'
-import type { Metadata } from 'next'
+import type { Metadata} from 'next'
 import Link from 'next/link'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Termos de Uso - GameBoost Pro',
@@ -48,7 +49,8 @@ export default function TermsPage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-8 space-y-8">
+            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+              <CardContent className="p-8 space-y-8">
               
               <section>
                 <h2 className="text-2xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
@@ -127,7 +129,8 @@ export default function TermsPage() {
                 </p>
               </div>
 
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -23,8 +23,6 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
   const gameColors: Record<GameId, string> = {
     CS2: 'bg-orange-500',
-    LOL: 'bg-blue-500',
-    VALORANT: 'bg-red-500',
   }
 
   const handleHire = async () => {

@@ -2,9 +2,10 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-react"
 
-export default function ElojobHero() {
+export function ElojobHero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Background Image */}
@@ -62,45 +63,53 @@ export default function ElojobHero() {
         <div className="w-full mt-8 md:mt-16 mb-8 md:mb-12 px-4">
           {/* Features - Layout Horizontal Compacto */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-xs md:text-sm font-bold text-white">100% SEGURO</h3>
-                <p className="text-[10px] md:text-xs text-gray-200">Conta protegida</p>
-              </div>
-            </div>
+            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
+              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
+                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
+                  <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xs md:text-sm font-bold text-white">100% SEGURO</h3>
+                  <p className="text-[10px] md:text-xs text-gray-200">Conta protegida</p>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                <ZapIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-xs md:text-sm font-bold text-white">EFICIENTE</h3>
-                <p className="text-[10px] md:text-xs text-gray-200">Processo otimizado</p>
-              </div>
-            </div>
+            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
+              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
+                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
+                  <ZapIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xs md:text-sm font-bold text-white">EFICIENTE</h3>
+                  <p className="text-[10px] md:text-xs text-gray-200">Processo otimizado</p>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-xs md:text-sm font-bold text-white">PROFISSIONAL</h3>
-                <p className="text-[10px] md:text-xs text-gray-200">Jogadores experientes</p>
-              </div>
-            </div>
+            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
+              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
+                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
+                  <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xs md:text-sm font-bold text-white">PROFISSIONAL</h3>
+                  <p className="text-[10px] md:text-xs text-gray-200">Jogadores experientes</p>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                <HeadphonesIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-xs md:text-sm font-bold text-white">24/7 SUPORTE</h3>
-                <p className="text-[10px] md:text-xs text-gray-200">Sempre disponível</p>
-              </div>
-            </div>
+            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
+              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
+                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
+                  <HeadphonesIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xs md:text-sm font-bold text-white">24/7 SUPORTE</h3>
+                  <p className="text-[10px] md:text-xs text-gray-200">Sempre disponível</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
