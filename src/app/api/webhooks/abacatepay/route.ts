@@ -71,12 +71,20 @@ export async function POST(request: NextRequest) {
         // Check for event type (AbacatePay standard) or fallback to data.status
         const eventType = body.event || body.type
 
-        console.log('Webhook received:', { 
-            eventType, 
-            eventId,
-            dataId: data?.id,
-            timestamp: new Date().toISOString()
+        // Log completo do webhook recebido para debug
+        console.log('========== WEBHOOK RECEIVED ==========')
+        console.log('Event Type:', eventType)
+        console.log('Event ID:', eventId)
+        console.log('Data ID:', data?.id)
+        console.log('Full Body:', JSON.stringify(body, null, 2))
+        console.log('Headers:', {
+            'x-signature': request.headers.get('x-signature'),
+            'x-abacatepay-signature': request.headers.get('x-abacatepay-signature'),
+            'content-type': request.headers.get('content-type'),
+            'user-agent': request.headers.get('user-agent'),
         })
+        console.log('Timestamp:', new Date().toISOString())
+        console.log('=====================================')
 
         if (eventType === 'billing.paid' || (data && data.status === 'PAID')) {
             if (data && data.id) {
@@ -87,8 +95,20 @@ export async function POST(request: NextRequest) {
                 })
 
                 if (!payment) {
-                    console.warn(`Payment not found for providerId: ${data.id}`)
-                    return NextResponse.json({ received: true, message: 'Payment not found' })
+                    console.error('========== PAYMENT NOT FOUND ==========')
+                    console.error('Provider ID from webhook:', data.id)
+                    console.error('Searching for payment with providerId:', data.id)
+                    console.error('Available payments (last 5):', await prisma.payment.findMany({
+                        take: 5,
+                        orderBy: { createdAt: 'desc' },
+                        select: { id: true, providerId: true, status: true, orderId: true }
+                    }))
+                    console.error('======================================')
+                    return NextResponse.json({ 
+                        received: true, 
+                        message: 'Payment not found',
+                        providerId: data.id 
+                    })
                 }
 
                 // Idempotência: verificar se já foi processado
@@ -203,10 +223,24 @@ export async function POST(request: NextRequest) {
                 console.log(`Payment ${payment.id} status ${data.status} already processed or invalid transition`)
             }
         } else {
-            console.log('Webhook received but no actionable data:', { eventType, hasData: !!data })
+            console.warn('========== WEBHOOK RECEIVED BUT NO ACTION ==========')
+            console.warn('Event Type:', eventType)
+            console.warn('Has Data:', !!data)
+            console.warn('Data:', data)
+            console.warn('Full Body:', JSON.stringify(body, null, 2))
+            console.warn('This might indicate:')
+            console.warn('1. Event format is different than expected')
+            console.warn('2. Event type is not handled')
+            console.warn('3. Data structure is different')
+            console.warn('====================================================')
         }
 
-        return NextResponse.json({ received: true })
+        return NextResponse.json({ 
+            received: true,
+            processed: true,
+            eventType,
+            dataId: data?.id 
+        })
     } catch (error) {
         console.error('Webhook Error:', error)
         return new NextResponse('Internal Server Error', { status: 500 })
