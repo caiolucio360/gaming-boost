@@ -1,4 +1,4 @@
-# Atualizações em Tempo Real - GameBoost Pro
+# Atualizações em Tempo Real - GameBoost
 
 Este documento descreve a implementação de atualizações em tempo real usando **Server-Sent Events (SSE)**, uma solução leve e eficiente para notificações unidirecionais.
 

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { ElojobHero } from "@/components/layout/elojob-hero"
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Início - GameBoost Pro',
+  title: 'Início - GameBoost',
   description: 'Plataforma profissional de boost para Counter-Strike 2. Subimos seu rank Premier e Gamers Club com segurança e rapidez. Boosters verificados, entrega garantida.',
   keywords: [
     'boost cs2',
@@ -24,11 +24,11 @@ export default function HomePage() {
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'GameBoost Pro',
+    name: 'GameBoost',
     description: 'Plataforma profissional de boost para Counter-Strike 2',
     url: siteUrl,
     logo: `${siteUrl}/principal.png`,
-    foundingDate: '2020',
+    foundingDate: '2025',
     numberOfEmployees: {
       '@type': 'QuantitativeValue',
       value: '50+',
@@ -43,7 +43,7 @@ export default function HomePage() {
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'GameBoost Pro',
+    name: 'GameBoost',
     url: siteUrl,
     potentialAction: {
       '@type': 'SearchAction',
@@ -61,7 +61,7 @@ export default function HomePage() {
     serviceType: 'Gaming Boost Service',
     provider: {
       '@type': 'Organization',
-      name: 'GameBoost Pro',
+      name: 'GameBoost',
       url: siteUrl,
     },
     areaServed: {

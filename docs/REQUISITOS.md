@@ -1,4 +1,4 @@
-# Documento de Requisitos - GameBoost Pro
+# Documento de Requisitos - GameBoost
 
 ## 📋 Índice
 
@@ -20,7 +20,7 @@
 
 ### 1.1 Descrição do Projeto
 
-**GameBoost Pro** é uma plataforma web completa para serviços de boost profissional em jogos eletrônicos, inicialmente focada em **Counter-Strike 2 (CS2)**. A plataforma conecta clientes que desejam melhorar seus ranks/ratings com boosters profissionais verificados que executam os serviços.
+**GameBoost** é uma plataforma web completa para serviços de boost profissional em jogos eletrônicos, inicialmente focada em **Counter-Strike 2 (CS2)**. A plataforma conecta clientes que desejam melhorar seus ranks/ratings com boosters profissionais verificados que executam os serviços.
 
 ### 1.2 Problema que Resolve
 
@@ -629,7 +629,7 @@ src/
 
 | Versão | Data | Descrição | Autor |
 |--------|------|-----------|-------|
-| 1.0.0 | 2024-11 | Versão inicial do documento | Equipe GameBoost Pro |
+| 1.0.0 | 2024-11 | Versão inicial do documento | Equipe GameBoost |
 
 ---
 

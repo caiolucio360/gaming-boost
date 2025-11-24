@@ -1,4 +1,4 @@
-# GameBoost Pro
+# GameBoost
 
 Plataforma web full-stack para serviços de boost em jogos eletrônicos, desenvolvida com Next.js 15 e TypeScript.
 

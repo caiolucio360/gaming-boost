@@ -1,4 +1,4 @@
-# Árvore de Rotas - GameBoost Pro
+# Árvore de Rotas - GameBoost
 
 Este documento descreve todas as rotas da aplicação, incluindo rotas públicas, protegidas e APIs.
 

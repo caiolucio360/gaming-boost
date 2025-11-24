@@ -2,8 +2,8 @@ import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Painel Administrativo - GameBoost Pro',
-  description: 'Painel administrativo da GameBoost Pro.',
+  title: 'Painel Administrativo - GameBoost',
+  description: 'Painel administrativo da GameBoost.',
   noindex: true,
 })
 

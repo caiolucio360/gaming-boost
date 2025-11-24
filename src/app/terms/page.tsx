@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Termos de Uso - GameBoost Pro',
-  description: 'Termos e condições de uso da GameBoost Pro. Conheça nossas políticas de uso, responsabilidades e condições para utilização dos serviços de boost.',
+  title: 'Termos de Uso - GameBoost',
+  description: 'Termos e condições de uso da GameBoost. Conheça nossas políticas de uso, responsabilidades e condições para utilização dos serviços de boost.',
   keywords: [
     'termos de uso',
     'termos e condições',
@@ -24,13 +24,13 @@ export default function TermsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Termos de Uso - GameBoost Pro',
-            description: 'Termos e condições de uso da GameBoost Pro',
+            name: 'Termos de Uso - GameBoost',
+            description: 'Termos e condições de uso da GameBoost',
             url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/terms`,
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
-              name: 'GameBoost Pro',
+              name: 'GameBoost',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
             },
           }),

@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import ContactForm from './contact-form'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Contato - GameBoost Pro',
-  description: 'Entre em contato com a GameBoost Pro. Atendimento 24/7. Email, WhatsApp e suporte técnico para dúvidas sobre nossos serviços de boost.',
+  title: 'Contato - GameBoost',
+  description: 'Entre em contato com a GameBoost. Atendimento 24/7. Email, WhatsApp e suporte técnico para dúvidas sobre nossos serviços de boost.',
   keywords: [
     'contato gameboost',
     'suporte boost',

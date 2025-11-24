@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Depoimentos - GameBoost Pro',
+  title: 'Depoimentos - GameBoost',
   description: 'Veja o que nossos clientes dizem sobre nossos serviços de boost. Mais de 10.000 clientes satisfeitos com boost de rank em Counter-Strike 2.',
   keywords: [
     'depoimentos boost',

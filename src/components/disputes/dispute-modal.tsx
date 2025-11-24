@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { showSuccess, showError } from '@/lib/toast'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -101,9 +102,9 @@ export function DisputeModal({ orderId, onClose, onSuccess }: DisputeModalProps)
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="reason" className="text-white font-rajdhani font-semibold">
+              <Label htmlFor="reason" className="text-white font-rajdhani font-semibold">
                 Descreva o problema
-              </label>
+              </Label>
               <Textarea
                 id="reason"
                 placeholder="Explique detalhadamente o que aconteceu com seu pedido..."

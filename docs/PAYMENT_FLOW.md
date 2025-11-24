@@ -1,4 +1,4 @@
-# Fluxo de Pagamentos - GameBoost Pro
+# Fluxo de Pagamentos - GameBoost
 
 Este documento descreve o fluxo completo de pagamentos do sistema, desde o pagamento do cliente até a liberação para boosters e administradores.
 

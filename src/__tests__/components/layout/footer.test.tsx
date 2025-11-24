@@ -12,7 +12,7 @@ describe('Footer', () => {
   it('should display copyright', () => {
     render(<Footer />)
 
-    expect(screen.getByText(/©.*GameBoost Pro/i)).toBeInTheDocument()
+    expect(screen.getByText(/©.*GameBoost/i)).toBeInTheDocument()
   })
 
   it('should have navigation links', () => {

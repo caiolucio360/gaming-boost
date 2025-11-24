@@ -56,7 +56,7 @@ export default function FeaturesSection() {
     <section className="py-20 bg-black text-white">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
-          Por que escolher a <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">GameBoost Pro</span>?
+          Por que escolher a <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">GameBoost</span>?
         </h2>
 
         {/* Grid se adapta automaticamente para menos ou mais itens */}

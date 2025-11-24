@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { ButtonLoading } from '@/components/common/button-loading'
@@ -76,19 +77,21 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Sua senha"
                 required
-                className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400"
+                className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10"
               />
-              <button
+              <Button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOffIcon className="h-4 w-4 text-gray-400" />
+                  <EyeOffIcon className="h-4 w-4" />
                 ) : (
-                  <EyeIcon className="h-4 w-4 text-gray-400" />
+                  <EyeIcon className="h-4 w-4" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -24,7 +24,7 @@ describe('seo', () => {
 
       const metadata = generateMetadata(config)
 
-      expect(metadata.title).toBe('Teste | GameBoost Pro')
+      expect(metadata.title).toBe('Teste | GameBoost')
       expect(metadata.description).toBe('Descrição de teste')
       expect(metadata.keywords).toBeUndefined()
     })
@@ -50,11 +50,11 @@ describe('seo', () => {
       const metadata = generateMetadata(config)
 
       expect(metadata.openGraph).toBeDefined()
-      expect(metadata.openGraph?.title).toBe('Teste | GameBoost Pro')
+      expect(metadata.openGraph?.title).toBe('Teste | GameBoost')
       expect(metadata.openGraph?.description).toBe('Descrição de teste')
       expect(metadata.openGraph?.type).toBe('website')
       expect(metadata.openGraph?.locale).toBe('pt_BR')
-      expect(metadata.openGraph?.siteName).toBe('GameBoost Pro')
+      expect(metadata.openGraph?.siteName).toBe('GameBoost')
     })
 
     it('deve gerar Twitter Cards corretamente', () => {
@@ -67,7 +67,7 @@ describe('seo', () => {
 
       expect(metadata.twitter).toBeDefined()
       expect(metadata.twitter?.card).toBe('summary_large_image')
-      expect(metadata.twitter?.title).toBe('Teste | GameBoost Pro')
+      expect(metadata.twitter?.title).toBe('Teste | GameBoost')
       expect(metadata.twitter?.description).toBe('Descrição de teste')
     })
 

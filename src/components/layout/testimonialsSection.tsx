@@ -21,7 +21,7 @@ const testimonials = [
     game: 'Valorant',
     rank: 'Immortal 2',
     rating: 5,
-    text: 'Estava presa no Platinum há meses. O GameBoost Pro me ajudou a chegar no Immortal! Equipe muito atenciosa e segura.',
+    text: 'Estava presa no Platinum há meses. O GameBoost me ajudou a chegar no Immortal! Equipe muito atenciosa e segura.',
     avatar: '/avatars/ana.jpg',
     verified: true
   },

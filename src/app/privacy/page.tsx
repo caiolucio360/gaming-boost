@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { Card, CardContent} from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Política de Privacidade - GameBoost Pro',
-  description: 'Política de privacidade da GameBoost Pro. Saiba como protegemos e utilizamos suas informações pessoais. Conformidade com LGPD e proteção de dados.',
+  title: 'Política de Privacidade - GameBoost',
+  description: 'Política de privacidade da GameBoost. Saiba como protegemos e utilizamos suas informações pessoais. Conformidade com LGPD e proteção de dados.',
   keywords: [
     'política de privacidade',
     'privacidade gameboost',
@@ -25,13 +25,13 @@ export default function PrivacyPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Política de Privacidade - GameBoost Pro',
-            description: 'Política de privacidade da GameBoost Pro',
+            name: 'Política de Privacidade - GameBoost',
+            description: 'Política de privacidade da GameBoost',
             url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/privacy`,
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
-              name: 'GameBoost Pro',
+              name: 'GameBoost',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
             },
           }),
