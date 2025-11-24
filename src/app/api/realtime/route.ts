@@ -69,10 +69,12 @@ export async function GET(request: NextRequest) {
 
         // Estado local para rastrear mudanças
         let lastAvailableCount = -1
+        let lastMyOrdersCount = -1
         let lastPendingCount = -1
         let lastInProgressCount = -1
         let lastAdminPendingOrders = -1
         let lastAdminPendingPayments = -1
+        let lastNotificationId = -1 // Rastrear última notificação enviada para evitar duplicatas
 
         // Função de polling recursiva
         const poll = async () => {
@@ -99,12 +101,14 @@ export async function GET(request: NextRequest) {
               })
 
               // Enviar evento apenas quando houver mudança real
-              if (lastAvailableCount === -1 || availableOrders !== lastAvailableCount) {
+              if (lastAvailableCount === -1 || lastMyOrdersCount === -1 ||
+                  availableOrders !== lastAvailableCount || myOrders !== lastMyOrdersCount) {
                 sendEvent('orders-update', {
                   available: availableOrders,
                   myOrders,
                 })
                 lastAvailableCount = availableOrders
+                lastMyOrdersCount = myOrders
               }
 
               // Se há pedidos disponíveis, aumentar frequência de polling
@@ -165,21 +169,32 @@ export async function GET(request: NextRequest) {
             }
 
             // Verificar novas notificações (comum a todos)
+            // Buscar apenas notificações não lidas criadas recentemente
+            const notificationCutoff = new Date(Date.now() - 10000) // Últimos 10 segundos
             const recentNotification = await prisma.notification.findFirst({
               where: {
                 userId,
                 createdAt: {
-                  gt: new Date(Date.now() - nextPollDelay) // Notificações criadas desde o último poll
+                  gt: notificationCutoff
                 },
-                read: false
+                read: false,
+                // Evitar enviar a mesma notificação duas vezes
+                ...(lastNotificationId > 0 ? { id: { gt: lastNotificationId } } : {})
               },
               orderBy: {
                 createdAt: 'desc'
               }
             })
 
-            if (recentNotification) {
-              sendEvent('notification', recentNotification)
+            if (recentNotification && recentNotification.id !== lastNotificationId) {
+              sendEvent('notification', {
+                id: recentNotification.id,
+                type: recentNotification.type,
+                title: recentNotification.title,
+                message: recentNotification.message,
+                createdAt: recentNotification.createdAt,
+              })
+              lastNotificationId = recentNotification.id
             }
 
           } catch (error) {
