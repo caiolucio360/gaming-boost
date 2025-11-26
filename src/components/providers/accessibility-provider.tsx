@@ -40,10 +40,10 @@ export function AccessibilityProvider() {
           'landmark-one-main': { enabled: true },
           'page-has-heading-one': { enabled: true },
           'region': { enabled: true },
-        },
+        } as Record<string, { enabled: boolean }>,
         // Tags para verificar (WCAG 2.1 Level A e AA)
         tags: ['wcag2a', 'wcag2aa', 'wcag21aa', 'best-practice'],
-      })
+      } as any)
     }).catch((error) => {
       // Silenciosamente falhar se não conseguir carregar
       console.warn('Failed to load @axe-core/react:', error)

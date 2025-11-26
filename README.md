@@ -5,17 +5,17 @@ Plataforma web full-stack para serviços de boost em jogos eletrônicos, desenvo
 ## 🛠️ Stack
 
 ### Frontend
-- **Next.js 15.4.6** - Framework React com App Router
-- **React 19** - Biblioteca UI
-- **TypeScript 5.9** - Type safety
-- **Tailwind CSS 4.0** - Estilização utility-first
+- **Next.js 15.5.6** - Framework React com App Router
+- **React 19.1.0** - Biblioteca UI
+- **TypeScript 5.9.3** - Type safety
+- **Tailwind CSS 4.1.17** - Estilização utility-first
 - **shadcn/ui** - Componentes acessíveis baseados em Radix UI
 - **React Hook Form + Zod** - Validação de formulários
 - **Lucide React** - Biblioteca de ícones
 
 ### Backend
 - **Next.js API Routes** - Endpoints RESTful
-- **Prisma 6.14** - ORM type-safe
+- **Prisma 6.19.0** - ORM type-safe
 - **PostgreSQL** - Banco de dados relacional
 - **JWT** - Autenticação stateless
 - **bcryptjs** - Hash de senhas
