@@ -72,7 +72,9 @@ export default function RootLayout({
         <AuthProviderWrapper>
           <MotionProvider>
             <ToastProvider />
-            {process.env.NODE_ENV === 'development' && <AccessibilityProviderWrapper />}
+            {typeof process !== 'undefined' && process.env.NODE_ENV === 'development' && (
+              <AccessibilityProviderWrapper />
+            )}
             <SkipLink />
             <LiveRegion message="" id="live-region" />
             <div className="min-h-screen flex flex-col overflow-x-hidden">

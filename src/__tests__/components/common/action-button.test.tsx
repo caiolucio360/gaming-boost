@@ -28,14 +28,14 @@ describe('ActionButton', () => {
   it('should render with danger variant styles', () => {
     const { container } = render(<ActionButton variant="danger">Delete</ActionButton>)
 
-    const button = container.querySelector('.bg-red-500')
+    const button = container.querySelector('.from-red-600')
     expect(button).toBeInTheDocument()
   })
 
   it('should render with success variant styles', () => {
     const { container } = render(<ActionButton variant="success">Save</ActionButton>)
 
-    const button = container.querySelector('.bg-green-500')
+    const button = container.querySelector('.from-green-600')
     expect(button).toBeInTheDocument()
   })
 

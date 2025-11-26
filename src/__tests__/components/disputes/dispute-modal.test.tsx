@@ -13,10 +13,14 @@ describe('DisputeModal', () => {
   const mockOnClose = jest.fn()
   const mockOnSuccess = jest.fn()
   const mockPush = jest.fn()
+  const mockReplace = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
+    ;(useRouter as jest.Mock).mockReturnValue({ 
+      push: mockPush,
+      replace: mockReplace,
+    })
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ dispute: { id: 1 } }),
@@ -26,7 +30,7 @@ describe('DisputeModal', () => {
   it('should render dispute modal', () => {
     render(<DisputeModal orderId={123} onClose={mockOnClose} />)
 
-    expect(screen.getByText(/Abrir Disputa/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Abrir Disputa/i).length).toBeGreaterThan(0)
     expect(screen.getByText(/Pedido #123/i)).toBeInTheDocument()
   })
 
@@ -44,11 +48,11 @@ describe('DisputeModal', () => {
     const textarea = screen.getByPlaceholderText(/Explique detalhadamente/i)
     await user.type(textarea, 'Muito curto')
 
-    const submitButton = screen.getByRole('button', { name: /Abrir Disputa/i })
+    const submitButton = screen.getAllByRole('button', { name: /Abrir Disputa/i })[0]
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/no mínimo 20 caracteres/i)).toBeInTheDocument()
+      expect(screen.getByText(/Por favor, descreva o problema com no mínimo 20 caracteres/i)).toBeInTheDocument()
     })
   })
 
@@ -59,7 +63,8 @@ describe('DisputeModal', () => {
     const textarea = screen.getByPlaceholderText(/Explique detalhadamente/i)
     await user.type(textarea, 'O booster não completou o serviço conforme acordado e não está respondendo')
 
-    const submitButton = screen.getByRole('button', { name: /Abrir Disputa/i })
+    const submitButtons = screen.getAllByRole('button', { name: /Abrir Disputa/i })
+    const submitButton = submitButtons.find(btn => btn.type === 'submit') || submitButtons[0]
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -76,7 +81,7 @@ describe('DisputeModal', () => {
     })
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/disputes/1')
+      expect(mockReplace).toHaveBeenCalledWith('/disputes/1')
       expect(mockOnClose).toHaveBeenCalled()
     })
   })

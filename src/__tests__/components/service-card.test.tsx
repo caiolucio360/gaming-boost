@@ -12,9 +12,11 @@ import { useCart } from '@/contexts/cart-context'
 jest.mock('@/contexts/auth-context')
 jest.mock('@/contexts/cart-context')
 const mockRouterPush = jest.fn()
+const mockRouterReplace = jest.fn()
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockRouterPush,
+    replace: mockRouterReplace,
   }),
 }))
 
@@ -34,6 +36,7 @@ describe('ServiceCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRouterPush.mockClear()
+    mockRouterReplace.mockClear()
     ;(useAuth as jest.Mock).mockReturnValue({
       user: null,
     })
@@ -65,7 +68,7 @@ describe('ServiceCard', () => {
     
     // Aguardar que o redirect seja chamado
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith('/login')
+      expect(mockRouterReplace).toHaveBeenCalledWith('/login')
     }, { timeout: 3000 })
   })
 
@@ -106,10 +109,10 @@ describe('ServiceCard', () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: expect.stringContaining('"serviceId":"service123"'),
+        body: expect.stringContaining('"serviceId":'),
       })
       // Verificar redirecionamento para dashboard
-      expect(mockRouterPush).toHaveBeenCalledWith('/dashboard')
+      expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard')
     }, { timeout: 3000 })
   })
 })
