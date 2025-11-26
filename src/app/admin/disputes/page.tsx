@@ -247,7 +247,7 @@ export default function AdminDisputesPage() {
                         <Button
                           onClick={handleResolve}
                           disabled={!resolutionStatus || resolving}
-                          className="w-full bg-purple-600 hover:bg-purple-500"
+                          className="w-full bg-purple-600 border border-transparent hover:border-white/50"
                         >
                           {resolving ? (
                             <>

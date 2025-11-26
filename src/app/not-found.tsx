@@ -61,7 +61,7 @@ export default function NotFound() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 asChild
-                className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani font-bold py-6 px-8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30"
+                className="bg-purple-500 text-white font-rajdhani font-bold py-6 px-8 transition-all duration-300 border border-transparent hover:border-white/50"
                 style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
               >
                 <Link href="/">
@@ -72,7 +72,7 @@ export default function NotFound() {
               <Button
                 asChild
                 variant="outline"
-                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 font-rajdhani font-bold py-6 px-8 transition-all duration-300"
+                className="border-purple-500/50 text-purple-300 hover:border-white/50 font-rajdhani font-bold py-6 px-8 transition-all duration-300"
                 style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
               >
                 <Link href="/games/cs2">

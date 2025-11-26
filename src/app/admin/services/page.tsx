@@ -182,7 +182,7 @@ export default function AdminServicesPage() {
             </div>
             <Button
               asChild
-              className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
+              className="bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50"
               style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
             >
               <Link href="/admin/services/new">
@@ -235,7 +235,7 @@ export default function AdminServicesPage() {
                 </p>
                 <Button
                   asChild
-                  className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
+                  className="bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50"
                   style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
                 >
                   <Link href="/admin/services/new">

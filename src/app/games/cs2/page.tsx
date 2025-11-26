@@ -74,27 +74,43 @@ export default function CS2Page() {
               {services.map((service, index) => (
                 <Card
                   key={index}
-                  className={`bg-black/30 backdrop-blur-md border transition-all duration-300 ${
+                  className={`group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border transition-all duration-500 overflow-hidden ${
                     service.available
-                      ? 'border-purple-500/50 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 cursor-pointer'
+                      ? 'border-purple-500/50 hover:border-purple-400/80 hover:shadow-2xl hover:shadow-purple-500/30 hover:scale-[1.02] cursor-pointer'
                       : 'border-gray-500/30 opacity-60 cursor-not-allowed'
                   }`}
+                  style={{
+                  }}
                 >
-                  <CardHeader className="text-center pb-2">
-                    <div className="text-6xl mb-4">{service.icon}</div>
-                    <CardTitle className="text-3xl font-bold text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  {/* Efeito de brilho no hover */}
+                  {service.available && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                  )}
+                  
+                  <CardHeader className="text-center pb-2 relative z-10">
+                    <div className="text-6xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 inline-block">
+                      {service.icon}
+                    </div>
+                    <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
                       {service.title}
                     </CardTitle>
-                    <CardDescription className="text-gray-300 font-rajdhani text-lg mt-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <CardDescription className="text-gray-300 font-rajdhani text-lg mt-2 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                       {service.description}
                     </CardDescription>
                   </CardHeader>
                   
-                  <CardContent className="pt-4">
+                  <CardContent className="pt-4 relative z-10">
                     <ul className="space-y-3 mb-8">
                       {service.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                          <div className={`w-2 h-2 rounded-full mr-3 ${service.available ? 'bg-purple-400' : 'bg-gray-400'}`}></div>
+                        <li 
+                          key={featureIndex} 
+                          className="flex items-center text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300"
+                          style={{ 
+                            fontFamily: 'Rajdhani, sans-serif', 
+                            fontWeight: '400',
+                          }}
+                        >
+                          <div className={`w-2 h-2 rounded-full mr-3 transition-all duration-300 ${service.available ? 'bg-purple-400 group-hover:bg-purple-300 group-hover:scale-125' : 'bg-gray-400'}`}></div>
                           {feature}
                         </li>
                       ))}
@@ -104,12 +120,14 @@ export default function CS2Page() {
                       {service.available ? (
                         <Link href={service.href} className="block w-full">
                           <Button 
-                            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-rajdhani font-bold py-6 text-lg group"
+                            className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-rajdhani font-bold py-6 text-lg group shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 relative overflow-hidden"
                           >
-                            Continuar
-                            <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                            <span className="relative z-10 flex items-center justify-center">
+                              Continuar
+                              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </span>
                           </Button>
                         </Link>
                       ) : (

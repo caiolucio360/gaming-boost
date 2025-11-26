@@ -6,6 +6,10 @@ import { Footer } from '@/components/layout/footer'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { AccessibilityProvider } from '@/components/providers/accessibility-provider'
+import { SkipLink } from '@/components/common/skip-link'
+import { LiveRegion } from '@/components/common/live-region'
+import { MotionProvider } from '@/components/providers/motion-provider'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -66,14 +70,19 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
         <AuthProviderWrapper>
-          <ToastProvider />
-          <div className="min-h-screen flex flex-col overflow-x-hidden">
+          <MotionProvider>
+            <ToastProvider />
+            <AccessibilityProvider />
+            <SkipLink />
+            <LiveRegion message="" id="live-region" />
+            <div className="min-h-screen flex flex-col overflow-x-hidden">
             <ElojobHeader />
-            <main className="flex-1 pt-16">
+            <main id="main-content" className="flex-1 pt-16" role="main" aria-label="Conteúdo principal">
               {children}
             </main>
             <Footer />
           </div>
+          </MotionProvider>
         </AuthProviderWrapper>
         <AnalyticsProvider />
       </body>

@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export function Footer() {
   return (
-    <footer className="relative bg-black text-white py-8 md:py-12 z-0">
+    <footer className="relative bg-black text-white py-8 md:py-12 z-0" role="contentinfo" aria-label="Rodapé do site">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 xl:px-12">
         <Separator className="mb-8 md:mb-12 bg-purple-600" />
         
@@ -70,7 +70,7 @@ export function Footer() {
                     </Tooltip>
                   </TooltipProvider>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-2 cursor-not-allowed">
                   <span className="text-xs md:text-sm text-gray-500">Coaching</span>
                   <Badge variant="outline" className="text-xs border-purple-400/50 text-purple-400 bg-transparent">
                     em breve

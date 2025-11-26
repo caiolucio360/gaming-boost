@@ -76,7 +76,7 @@ export default function NotificationsPage() {
           <h1 className="text-3xl font-bold font-orbitron text-purple-400 mb-2">Notificações</h1>
           <p className="text-muted-foreground font-rajdhani">Acompanhe atualizações dos seus pedidos e mensagens do sistema.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={markAllRead} className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 hover:border-purple-400 transition-all duration-300">
+        <Button variant="outline" size="sm" onClick={markAllRead} className="border-purple-500/50 text-purple-300 hover:border-white/50 transition-all duration-300">
           <CheckCheck className="mr-2 h-4 w-4" />
           Marcar tudo como lido
         </Button>
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
 
         {!loading && hasMore && (
           <div className="flex justify-center pt-4">
-            <Button variant="ghost" onClick={loadMore} className="text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 transition-all duration-300">
+            <Button variant="ghost" onClick={loadMore} className="text-purple-300 border border-transparent hover:border-purple-400/50 transition-all duration-300">
               Carregar mais
             </Button>
           </div>

@@ -71,7 +71,7 @@ export default function TestimonialsPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-            <span className="text-purple-300">DEPOIMENTOS</span>
+            <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">DEPOIMENTOS</span>
             <span className="text-white"> DE CLIENTES</span>
           </h1>
           <p className="text-xl text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
@@ -83,11 +83,11 @@ export default function TestimonialsPage() {
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}
-              className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+              className="relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-2xl hover:shadow-purple-500/30 overflow-hidden"
             >
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4 shadow-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
                     {testimonial.avatar}
                   </div>
                   <div>

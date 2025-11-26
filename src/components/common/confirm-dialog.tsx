@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { ButtonLoading } from '@/components/common/button-loading'
 import { ReactNode } from 'react'
 
 interface ConfirmDialogProps {
@@ -20,8 +21,9 @@ interface ConfirmDialogProps {
   description: string
   confirmLabel?: string
   cancelLabel?: string
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
   variant?: 'default' | 'destructive' | 'success'
+  loading?: boolean
   children?: ReactNode
 }
 
@@ -37,14 +39,19 @@ export function ConfirmDialog({
   cancelLabel = 'Cancelar',
   onConfirm,
   variant = 'default',
+  loading = false,
   children,
 }: ConfirmDialogProps) {
   const confirmButtonClass =
     variant === 'destructive'
-      ? 'bg-red-500 hover:bg-red-600 text-white font-rajdhani'
+      ? 'bg-red-500 text-white font-rajdhani border border-transparent hover:border-white/50'
       : variant === 'success'
-      ? 'bg-green-500 hover:bg-green-400 text-white font-rajdhani'
-      : 'bg-purple-500 hover:bg-purple-400 text-white font-rajdhani'
+      ? 'bg-green-500 text-white font-rajdhani border border-transparent hover:border-white/50'
+      : 'bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50'
+
+  const handleConfirm = async () => {
+    await onConfirm()
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -59,16 +66,22 @@ export function ConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border-purple-500/50 text-white hover:bg-purple-500/10 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <AlertDialogCancel 
+            disabled={loading}
+            className="border-purple-500/50 text-white hover:border-white/50 font-rajdhani" 
+            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+          >
             {cancelLabel}
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
+          <ButtonLoading
+            onClick={handleConfirm}
+            loading={loading}
+            loadingText="Processando..."
             className={confirmButtonClass}
             style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
           >
             {confirmLabel}
-          </AlertDialogAction>
+          </ButtonLoading>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

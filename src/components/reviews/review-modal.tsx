@@ -141,7 +141,7 @@ export function ReviewModal({ orderId, trigger, onSuccess }: ReviewModalProps) {
             <Button
               type="submit"
               disabled={isSubmitting || currentRating === 0}
-              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold"
+              className="w-full bg-purple-600 text-white font-bold border border-transparent hover:border-white/50"
             >
               {isSubmitting ? (
                 <>

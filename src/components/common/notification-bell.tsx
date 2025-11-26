@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { NotificationItem, Notification } from './notification-item'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -100,16 +101,25 @@ export function NotificationBell() {
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-brand-red border-2 border-background animate-pulse" />
-          )}
-          <span className="sr-only">Notificações</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-purple-500/50 shadow-lg shadow-purple-500/20" align="end">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300">
+                <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'animate-bellPulse' : ''}`} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-brand-red border-2 border-background animate-pulse" />
+                )}
+                <span className="sr-only">Notificações</span>
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent className="bg-black/90 border-purple-500/50 text-white">
+            <p>{unreadCount > 0 ? `${unreadCount} notificação${unreadCount > 1 ? 'ões' : ''} não lida${unreadCount > 1 ? 's' : ''}` : 'Notificações'}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-purple-500/50 shadow-lg" align="end">
         <div className="flex items-center justify-between p-4 border-b border-purple-500/20">
           <h4 className="font-semibold font-orbitron text-purple-400">Notificações</h4>
           {unreadCount > 0 && (

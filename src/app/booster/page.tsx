@@ -87,6 +87,8 @@ export default function BoosterDashboardPage() {
   const [orderToAction, setOrderToAction] = useState<number | null>(null)
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false)
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false)
+  const [isAccepting, setIsAccepting] = useState(false)
+  const [isCompleting, setIsCompleting] = useState(false)
   const [alert, setAlert] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null)
 
   useEffect(() => {
@@ -197,6 +199,7 @@ export default function BoosterDashboardPage() {
   const handleAcceptOrder = async () => {
     if (!orderToAction) return
 
+    setIsAccepting(true)
     try {
       const response = await fetch(`/api/booster/orders/${orderToAction}`, {
         method: 'POST',
@@ -229,6 +232,8 @@ export default function BoosterDashboardPage() {
         variant: 'destructive',
       })
       setTimeout(() => setAlert(null), 5000)
+    } finally {
+      setIsAccepting(false)
     }
   }
 
@@ -240,6 +245,7 @@ export default function BoosterDashboardPage() {
   const handleCompleteOrder = async () => {
     if (!orderToAction) return
 
+    setIsCompleting(true)
     try {
       const response = await fetch(`/api/booster/orders/${orderToAction}`, {
         method: 'PUT',
@@ -276,6 +282,8 @@ export default function BoosterDashboardPage() {
         variant: 'destructive',
       })
       setTimeout(() => setAlert(null), 5000)
+    } finally {
+      setIsCompleting(false)
     }
   }
 
@@ -308,7 +316,7 @@ export default function BoosterDashboardPage() {
         {/* Link para Pagamentos */}
         <div className="mb-6">
           <Link href="/booster/payments">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-200">
               <DollarSign className="h-4 w-4 mr-2" />
               Ver Meus Pagamentos
             </Button>
@@ -384,26 +392,28 @@ export default function BoosterDashboardPage() {
               />
             ) : (
               <div className="grid gap-6">
-                {orders.map((order) => {
+                {orders.map((order, index) => {
                   return (
                     <Card
                       key={order.id}
-                      className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                      className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden"
                     >
-                      <CardHeader>
+                      {/* Efeito de brilho no hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                      <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-purple-200 transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {order.service.description}
                             </CardDescription>
                           </div>
                           <StatusBadge status={order.status} />
                         </div>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="relative z-10">
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <OrderInfoItem 
@@ -441,6 +451,7 @@ export default function BoosterDashboardPage() {
                             confirmLabel="Aceitar"
                             cancelLabel="Cancelar"
                             onConfirm={handleAcceptOrder}
+                            loading={isAccepting}
                           />
                         </div>
                       </CardContent>
@@ -463,26 +474,28 @@ export default function BoosterDashboardPage() {
               />
             ) : (
               <div className="grid gap-6">
-                {orders.map((order) => {
+                {orders.map((order, index) => {
                   return (
                     <Card
                       key={order.id}
-                      className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                      className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden"
                     >
-                      <CardHeader>
+                      {/* Efeito de brilho no hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                      <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-purple-200 transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {order.service.description}
                             </CardDescription>
                           </div>
                           <StatusBadge status={order.status} />
                         </div>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="relative z-10">
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <OrderInfoItem 
@@ -522,6 +535,7 @@ export default function BoosterDashboardPage() {
                             cancelLabel="Cancelar"
                             onConfirm={handleCompleteOrder}
                             variant="success"
+                            loading={isCompleting}
                           />
                         </div>
                       </CardContent>

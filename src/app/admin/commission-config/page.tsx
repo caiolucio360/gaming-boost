@@ -323,7 +323,7 @@ export default function CommissionConfigPage() {
             <Button
               onClick={handleSave}
               disabled={saving || Math.abs(parseFloat(boosterPercentage) + parseFloat(adminPercentage) - 100) >= 0.01}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full bg-purple-600 text-white border border-transparent hover:border-white/50"
             >
               {saving ? (
                 <>

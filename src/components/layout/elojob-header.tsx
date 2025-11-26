@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
@@ -29,6 +30,7 @@ import { getEnabledGames } from '@/lib/games-config'
 import { getAuthToken } from '@/lib/api-client'
 
 import { NotificationBell } from '@/components/common/notification-bell'
+import { MotionToggle } from '@/components/common/motion-toggle'
 
 export function ElojobHeader() {
   const router = useRouter()
@@ -84,18 +86,29 @@ export function ElojobHeader() {
       )}
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md border-b border-purple-500/20">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md border-b border-purple-500/20" role="banner">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-2 md:py-3 flex items-center justify-between">
           {/* Mobile menu button */}
           <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="bg-black/50 backdrop-blur-md text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/40 border border-purple-500/60 h-10 w-10 rounded-lg"
-            >
-              {isMobileMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    aria-label={isMobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+                    aria-expanded={isMobileMenuOpen}
+                    className="bg-black/50 backdrop-blur-md text-white hover:bg-purple-600 hover:shadow-lg border border-purple-500/60 h-10 w-10 rounded-lg"
+                  >
+                    {isMobileMenuOpen ? <XIcon className="h-5 w-5" aria-hidden="true" /> : <MenuIcon className="h-5 w-5" aria-hidden="true" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-black/90 border-purple-500/50 text-white">
+                  <p>{isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Logo */}
@@ -173,6 +186,10 @@ export function ElojobHeader() {
           <div className="hidden lg:flex items-center space-x-4">
             {(authLoading && hasToken) || (!authLoading && user) ? (
               <div className="flex items-center space-x-3">
+                {/* Motion Toggle - Acessibilidade */}
+                <MotionToggle />
+
+                {/* Notification Bell */}
                 <NotificationBell />
                 
                 {/* Se está carregando e há token mas ainda não há user, mostrar botão genérico */}
@@ -189,21 +206,30 @@ export function ElojobHeader() {
                   <>
                     {/* Cart Button - Visible outside dropdown for CLIENT */}
                     {user && user.role === 'CLIENT' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300 mr-2"
-                        asChild
-                      >
-                        <Link href="/cart">
-                          <ShoppingCartIcon className="h-5 w-5" />
-                          {cartItemsCount > 0 && (
-                            <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black rounded-full">
-                              {cartItemsCount > 9 ? '9+' : cartItemsCount}
-                            </Badge>
-                          )}
-                        </Link>
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300 mr-2"
+                              asChild
+                            >
+                              <Link href="/cart">
+                                <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
+                                {cartItemsCount > 0 && (
+                                  <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black rounded-full">
+                                    {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                                  </Badge>
+                                )}
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-black/90 border-purple-500/50 text-white">
+                            <p>{cartItemsCount > 0 ? `Carrinho (${cartItemsCount} item${cartItemsCount > 1 ? 's' : ''})` : 'Carrinho'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
 
                     {/* User Dropdown Menu */}
@@ -295,6 +321,9 @@ export function ElojobHeader() {
               </div>
             ) : !authLoading ? (
               <div className="flex items-center space-x-4">
+                {/* Motion Toggle - Acessibilidade */}
+                <MotionToggle />
+                
                 {/* Carrinho - visível mesmo sem login */}
                 {cartItemsCount > 0 && (
                   <Button
@@ -304,7 +333,7 @@ export function ElojobHeader() {
                     asChild
                   >
                     <Link href="/cart">
-                      <ShoppingCartIcon className="h-5 w-5" />
+                      <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
                       <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-purple-500 text-white text-xs font-bold border-2 border-black">
                         {cartItemsCount > 9 ? '9+' : cartItemsCount}
                       </Badge>
@@ -320,7 +349,7 @@ export function ElojobHeader() {
                   <Link href="/login">Entrar</Link>
                 </Button>
                 <Button
-                  className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-6 py-2 border-2 border-purple-500 hover:border-purple-400 transition-all duration-300 shadow-lg shadow-purple-500/40 hover:shadow-xl hover:shadow-purple-500/50 text-lg"
+                  className="bg-purple-500 text-white font-bold px-6 py-2 border-2 border-purple-500 hover:border-white/50 transition-all duration-300 shadow-lg text-lg"
                   asChild
                 >
                   <Link href="/register">Cadastrar</Link>
@@ -333,7 +362,7 @@ export function ElojobHeader() {
                 {/* Mobile Navigation */}
                 {isMobileMenuOpen && (
                   <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-t border-purple-500/60 z-[60]">
-                    <nav className="px-6 py-6 space-y-4">
+                    <nav className="px-6 py-6 space-y-4" role="navigation" aria-label="Menu de navegação mobile">
                       <Link
                         href="/"
                         onClick={() => setIsMobileMenuOpen(false)}
@@ -452,14 +481,14 @@ export function ElojobHeader() {
                                     className="flex items-center justify-between text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
                                   >
                                     <div className="flex items-center space-x-2">
-                                      <ShoppingCartIcon className="h-5 w-5" />
-                                      <span>Carrinho</span>
-                                    </div>
-                                    {cartItemsCount > 0 && (
-                                      <Badge className="bg-purple-500 text-white text-xs font-bold min-w-[24px] flex items-center justify-center">
-                                        {cartItemsCount > 9 ? '9+' : cartItemsCount}
-                                      </Badge>
-                                    )}
+                                    <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
+                                    <span>Carrinho</span>
+                                  </div>
+                                  {cartItemsCount > 0 && (
+                                    <Badge className="bg-purple-500 text-white text-xs font-bold min-w-[24px] flex items-center justify-center">
+                                      {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                                    </Badge>
+                                  )}
                                   </Link>
                                   <Link
                                     href="/dashboard"
@@ -544,7 +573,7 @@ export function ElojobHeader() {
                                   className="flex items-center justify-between text-white font-bold hover:text-purple-300 hover:bg-purple-500/10 py-3 px-4 rounded-lg transition-colors duration-300"
                                 >
                                   <div className="flex items-center space-x-2">
-                                    <ShoppingCartIcon className="h-5 w-5" />
+                                    <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
                                     <span>Carrinho</span>
                                   </div>
                                   <Badge className="bg-purple-500 text-white text-xs font-bold">
@@ -561,7 +590,7 @@ export function ElojobHeader() {
                                 <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Entrar</Link>
                               </Button>
                               <Button
-                                className="bg-purple-500 hover:bg-purple-400 text-white font-bold py-3 rounded-lg transition-all duration-300 border-2 border-purple-500"
+                                className="bg-purple-500 text-white font-bold py-3 rounded-lg transition-all duration-300 border-2 border-purple-500 hover:border-white/50"
                                 asChild
                               >
                                 <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>Cadastrar</Link>

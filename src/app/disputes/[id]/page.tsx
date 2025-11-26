@@ -28,15 +28,18 @@ export default function DisputePage() {
         <Button
           asChild
           variant="ghost"
-          className="mb-6 text-purple-400 hover:text-purple-300 font-rajdhani"
+          className="mb-6 text-purple-400 hover:text-purple-300 font-rajdhani border-2 border-purple-500/30 hover:border-purple-400/60 hover:bg-purple-500/10 hover:scale-105 transition-all duration-300"
+          style={{ fontFamily: 'Rajdhani, sans-serif' }}
         >
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="flex items-center">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Dashboard
           </Link>
         </Button>
 
-        <DisputeChat disputeId={disputeId} />
+        <div>
+          <DisputeChat disputeId={disputeId} />
+        </div>
       </div>
     </div>
   )

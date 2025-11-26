@@ -277,7 +277,7 @@ export default function AdminUsersPage() {
               </Select>
               <Button
                 type="submit"
-                className="bg-purple-500 hover:bg-purple-400 text-white font-rajdhani"
+                className="bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50"
                 style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
               >
                 Buscar
@@ -576,7 +576,7 @@ export default function AdminUsersPage() {
                   setTimeout(() => setAlert(null), 5000)
                 }
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-rajdhani"
+              className="bg-purple-600 text-white font-rajdhani border border-transparent hover:border-white/50"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Salvar
@@ -677,7 +677,7 @@ export default function AdminUsersPage() {
                   setTimeout(() => setAlert(null), 5000)
                 }
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-rajdhani"
+              className="bg-purple-600 text-white font-rajdhani border border-transparent hover:border-white/50"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Salvar

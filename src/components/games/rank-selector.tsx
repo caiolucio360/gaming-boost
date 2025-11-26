@@ -89,33 +89,54 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
       </div>
 
       <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
-        {ranks.map((rank) => (
-          <Card 
-            key={rank.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              (step === 'from' && fromRank?.id === rank.id) ||
-              (step === 'to' && toRank?.id === rank.id)
-                ? 'ring-2 ring-blue-500' 
-                : ''
-            }`}
-            onClick={() => handleRankSelect(rank)}
-          >
-            <CardContent className="p-4 text-center">
-              <div className="w-16 h-16 mx-auto mb-2 relative">
-                <Image
-                  src={rank.image}
-                  alt={rank.name}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <h3 className="font-medium text-sm">{rank.name}</h3>
-              {rank.tier && (
-                <p className="text-xs text-gray-500">{rank.tier}</p>
+        {ranks.map((rank, index) => {
+          const isSelected = (step === 'from' && fromRank?.id === rank.id) || (step === 'to' && toRank?.id === rank.id)
+          return (
+            <Card 
+              key={rank.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Selecionar rank ${rank.name}${rank.tier ? ` - ${rank.tier}` : ''}`}
+              aria-pressed={isSelected}
+              className={`group relative cursor-pointer transition-all duration-300 overflow-hidden ${
+                isSelected
+                  ? 'ring-2 ring-purple-500 shadow-lg shadow-purple-500/50 scale-105' 
+                  : 'hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 hover:border-purple-400/50'
+              } bg-gradient-to-br from-gray-900/50 via-gray-800/50 to-gray-900/50 border-purple-500/30`}
+              onClick={() => handleRankSelect(rank)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleRankSelect(rank)
+                }
+              }}
+            >
+              {/* Efeito de brilho no hover */}
+              {!isSelected && (
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
               )}
-            </CardContent>
-          </Card>
-        ))}
+              
+              <CardContent className="p-4 text-center relative z-10">
+                <div className={`w-16 h-16 mx-auto mb-2 relative transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}>
+                  <Image
+                    src={rank.image}
+                    alt={rank.name}
+                    fill
+                    className="object-contain drop-shadow-lg"
+                  />
+                </div>
+                <h3 className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-purple-300 font-bold' : 'text-white group-hover:text-purple-200'}`}>
+                  {rank.name}
+                </h3>
+                {rank.tier && (
+                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-purple-400' : 'text-gray-400 group-hover:text-gray-300'}`}>
+                    {rank.tier}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

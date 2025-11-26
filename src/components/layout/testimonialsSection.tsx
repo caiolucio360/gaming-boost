@@ -69,11 +69,11 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-20 bg-black text-white">
+    <section className="py-20 bg-black text-white" aria-labelledby="testimonials-heading">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 id="testimonials-heading" className="text-4xl md:text-5xl font-bold mb-6">
             <span className="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
               Depoimentos
             </span>
@@ -88,19 +88,19 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <Card 
               key={testimonial.id} 
-              className="bg-gray-900 border-purple-600/50 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300 group"
+              className="relative bg-gray-900 border-purple-600/50 hover:shadow-lg hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden group"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-6">
                 {/* Quote Icon */}
                 <div className="mb-4">
-                  <QuoteIcon className="h-8 w-8 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                  <QuoteIcon className="h-8 w-8 text-purple-400 group-hover:text-purple-300 transition-colors" aria-hidden="true" />
                 </div>
 
                 {/* Rating */}
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    <StarIcon key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" aria-hidden="true" />
                   ))}
                 </div>
 
@@ -138,19 +138,19 @@ export default function TestimonialsSection() {
 
         {/* Stats */}
         <div className="mt-20 grid md:grid-cols-4 gap-8 text-center">
-          <div className="animate-fadeIn">
+          <div>
             <div className="text-4xl md:text-5xl font-bold text-purple-400 mb-2">1000+</div>
             <div className="text-gray-300">Clientes Satisfeitos</div>
           </div>
-          <div className="animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+          <div>
             <div className="text-4xl md:text-5xl font-bold text-purple-400 mb-2">4.9</div>
             <div className="text-gray-300">Avaliação Média</div>
           </div>
-          <div className="animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+          <div>
             <div className="text-4xl md:text-5xl font-bold text-purple-400 mb-2">24/7</div>
             <div className="text-gray-300">Suporte Online</div>
           </div>
-          <div className="animate-fadeIn" style={{ animationDelay: '0.3s' }}>
+          <div>
             <div className="text-4xl md:text-5xl font-bold text-purple-400 mb-2">100%</div>
             <div className="text-gray-300">Segurança Garantida</div>
           </div>

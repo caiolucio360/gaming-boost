@@ -60,10 +60,95 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+
+  /* Cursor padrão para elementos clicáveis */
+  a, button, [role="button"], [onclick], input[type="button"], input[type="submit"], input[type="reset"], label[for] {
+    cursor: pointer;
+  }
+
+  /* Cursor padrão para elementos não clicáveis */
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]), textarea, select {
+    cursor: text;
+  }
+
+  /* Cursor not-allowed para elementos desabilitados */
+  button:disabled, input:disabled, textarea:disabled, select:disabled, [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Cursor not-allowed para elementos desabilitados no footer */
+  footer .cursor-not-allowed,
+  footer [aria-disabled="true"],
+  footer li.cursor-not-allowed {
+    cursor: not-allowed !important;
+  }
+
+  /* Melhorar indicadores de foco para acessibilidade */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Skip link - visível apenas quando focado */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only:focus,
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+/* Suporte para prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Classe para reduzir animações manualmente */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* Custom animations */
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -87,8 +172,19 @@
   }
 }
 
-@keyframes pulse {
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
 
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
   0%,
   100% {
     opacity: 1;
@@ -99,12 +195,148 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(124, 58, 237, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.8), 0 0 30px rgba(124, 58, 237, 0.6);
+  }
+}
+
+@keyframes cartShake {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  10% {
+    transform: rotate(-8deg) scale(1.1);
+  }
+  20% {
+    transform: rotate(8deg) scale(1.1);
+  }
+  30% {
+    transform: rotate(-6deg) scale(1.05);
+  }
+  40% {
+    transform: rotate(6deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(0deg) scale(1);
+  }
+  60% {
+    transform: rotate(-4deg) scale(1.08);
+  }
+  70% {
+    transform: rotate(4deg) scale(1.08);
+  }
+  80% {
+    transform: rotate(-2deg) scale(1.03);
+  }
+  90% {
+    transform: rotate(2deg) scale(1.03);
+  }
+}
+
+@keyframes bellPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes neonGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4),
+                0 0 20px rgba(168, 85, 247, 0.3),
+                0 0 30px rgba(168, 85, 247, 0.2);
+    filter: blur(0px);
+  }
+  25% {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5),
+                0 0 25px rgba(168, 85, 247, 0.4),
+                0 0 35px rgba(168, 85, 247, 0.3);
+    filter: blur(1px);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6),
+                0 0 30px rgba(168, 85, 247, 0.5),
+                0 0 40px rgba(168, 85, 247, 0.4);
+    filter: blur(1.5px);
+  }
+  75% {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5),
+                0 0 25px rgba(168, 85, 247, 0.4),
+                0 0 35px rgba(168, 85, 247, 0.3);
+    filter: blur(1px);
+  }
+}
+
 .animate-slideInFromLeft {
   animation: slideInFromLeft 0.6s ease-out;
 }
 
+.animate-slideInFromRight {
+  animation: slideInFromRight 0.6s ease-out;
+}
+
+.animate-fadeIn {
+  /* Animação removida para evitar flicker */
+  opacity: 1;
+}
+
+.animate-fadeInUp {
+  /* Animação removida para evitar flicker */
+  opacity: 1;
+}
+
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-cartShake {
+  animation: cartShake 1.5s ease-in-out infinite;
+}
+
+.animate-bellPulse {
+  animation: bellPulse 1s ease-in-out infinite;
+}
+
+.animate-neonGlow {
+  animation: neonGlow 2s ease-in-out infinite;
 }
 
 /* Hover effects */

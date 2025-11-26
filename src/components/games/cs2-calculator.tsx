@@ -10,6 +10,8 @@ import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, GameMode, GameModeConfig } from '@/lib/games-config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ButtonLoading } from '@/components/common/button-loading'
+import { showError } from '@/lib/toast'
 
 interface GameCalculatorProps {
   gameId?: GameId
@@ -22,6 +24,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
   const [selectedTarget, setSelectedTarget] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
@@ -32,6 +35,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const handleHire = async () => {
     if (!selectedCurrent || !selectedTarget || price <= 0 || !gameConfig || !modeConfig) return
 
+    setIsLoading(true)
     const currentValue = selectedMode === 'PREMIER' ? parseInt(selectedCurrent) * 1000 : parseInt(selectedCurrent)
     const targetValue = selectedMode === 'PREMIER' ? parseInt(selectedTarget) * 1000 : parseInt(selectedTarget)
     
@@ -60,29 +64,29 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         !!user,
         addItem,
         () => {
-          router.push('/login')
+          router.replace('/login')
         }
       )
 
       // Se o pedido foi criado ou adicionado ao carrinho com sucesso, redirecionar para o carrinho
-      // Usar router.push em vez de window.location.href para evitar reload completo
-      if (orderCreated) {
-        // Pedido criado com sucesso - redirecionar para carrinho
-        router.push('/cart')
-      } else if (user) {
-        // Adicionado ao carrinho (usuário logado mas sem serviceId) - redirecionar para carrinho
-        router.push('/cart')
+      // Usar router.replace para evitar redirecionamentos desnecessários
+      if (orderCreated || user) {
+        router.replace('/cart')
       }
       // Se não estiver logado, o redirecionamento já foi feito dentro de handleServiceHire
     } catch (error) {
       console.error('Erro ao contratar serviço:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro ao contratar serviço. Tente novamente.'
-      alert(errorMessage)
+      showError('Erro', errorMessage)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  // Reset seleções ao mudar de modo
+  // Reset seleções ao mudar de modo com transição
   const handleModeChange = (mode: GameMode) => {
+    if (mode === selectedMode) return
+    
     setSelectedMode(mode)
     setCurrentRating('')
     setTargetRating('')
@@ -206,11 +210,19 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
             <div className="mb-6">
               <Tabs value={selectedMode} onValueChange={(value) => handleModeChange(value as GameMode)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-black/50 border-purple-500/50">
-                  <TabsTrigger value="PREMIER" className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                <TabsList className="grid w-full grid-cols-2 bg-black/50 border-2 border-purple-500/50 rounded-lg p-1 gap-1 h-auto">
+                  <TabsTrigger 
+                    value="PREMIER" 
+                    className="font-rajdhani relative transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-purple-500/20 rounded-md py-2.5 px-4 font-bold flex items-center justify-center h-full" 
+                    style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                  >
                     Premier
                   </TabsTrigger>
-                  <TabsTrigger value="GAMERS_CLUB" className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  <TabsTrigger 
+                    value="GAMERS_CLUB" 
+                    className="font-rajdhani relative transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-purple-500/20 rounded-md py-2.5 px-4 font-bold flex items-center justify-center h-full" 
+                    style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                  >
                     Gamers Club
                   </TabsTrigger>
                 </TabsList>
@@ -219,7 +231,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           )}
 
           {/* Informações do Modo */}
-          <Card className="bg-gradient-to-r from-purple-600/20 to-purple-800/20 border-purple-500/50 mb-6">
+          <Card className="bg-gradient-to-r from-purple-600/20 to-purple-800/20 border-purple-500/50 mb-6 transition-all duration-300">
             <CardContent className="p-3 md:p-4">
               <h3 className="text-base md:text-lg font-bold text-purple-300 font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
                 Sistema {modeConfig.displayName}:
@@ -242,7 +254,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 md:space-y-8">
+          <div className="space-y-6 md:space-y-8 transition-all duration-300">
           {/* Seleção de Pontuações - Lado a Lado */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             {/* Pontuação Atual */}
@@ -312,7 +324,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             <div className="flex justify-center lg:justify-start">
               <Button
                 onClick={calculatePrice}
-                className="bg-purple-500 hover:bg-purple-400 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 text-sm md:text-base"
+                className="bg-purple-500 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 text-sm md:text-base"
               >
                 CALCULAR PREÇO
               </Button>
@@ -335,12 +347,14 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       ? `${selectedCurrent}K → ${selectedTarget}K pontos`
                       : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
                   </p>
-                  <Button 
+                  <ButtonLoading 
                     onClick={handleHire}
-                    className="w-full bg-purple-500 hover:bg-purple-400 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 text-sm md:text-base"
+                    loading={isLoading}
+                    loadingText="Processando..."
+                    className="w-full bg-purple-500 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 text-sm md:text-base"
                   >
                     CONTRATAR AGORA
-                  </Button>
+                  </ButtonLoading>
                 </div>
               ) : (
                 <div className="text-center text-xs md:text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>

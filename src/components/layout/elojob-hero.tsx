@@ -7,9 +7,9 @@ import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-reac
 
 export function ElojobHero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black" aria-label="Hero - Seção principal">
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" aria-hidden="true">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
@@ -17,16 +17,17 @@ export function ElojobHero() {
             backgroundPosition: 'center',
             backgroundSize: 'cover'
           }}
+          aria-hidden="true"
         />
         {/* Overlay para melhorar legibilidade do texto - Contraste otimizado */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" aria-hidden="true" />
       </div>
 
       {/* Content - Layout Profissional com Hierarquia Visual */}
       <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-12 md:py-16 lg:py-20 flex flex-col justify-center items-center min-h-screen pb-24 md:pb-32">
         
         {/* Seção Superior - Título Principal com Espaçamento Adequado */}
-        <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8 transform translate-y-8 md:translate-y-16">
+        <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8">
           <div className="mb-4 md:mb-6">
             <h1 className="text-2xl md:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-wide px-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
               <span className="text-white drop-shadow-2xl shadow-black/50">
@@ -40,7 +41,7 @@ export function ElojobHero() {
           </div>
 
           <div className="mb-6 md:mb-8">
-            <h2 className="text-lg md:text-2xl lg:text-4xl xl:text-5xl font-semibold text-purple-300 drop-shadow-xl shadow-black/30 px-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+            <h2 className="text-lg md:text-2xl lg:text-4xl xl:text-5xl font-semibold bg-gradient-to-r from-purple-300 via-purple-400 to-purple-300 bg-clip-text text-transparent drop-shadow-xl shadow-black/30 px-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
               Alcance seu potencial máximo!
             </h2>
           </div>
@@ -48,12 +49,12 @@ export function ElojobHero() {
           <div className="mb-8 md:mb-12">
             <Button
               size="lg"
-              className="px-6 md:px-12 py-3 md:py-6 text-sm md:text-lg font-bold bg-purple-600/20 backdrop-blur-md border-2 border-purple-500 text-purple-200 hover:bg-purple-600 hover:text-white hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 group"
+              className="px-6 md:px-12 py-3 md:py-6 text-sm md:text-lg font-bold bg-gradient-to-r from-purple-600/30 via-purple-500/30 to-purple-600/30 backdrop-blur-md border-2 border-purple-500/80 text-purple-200 hover:border-white/50 transition-all duration-500 group relative overflow-hidden"
               asChild
             >
-              <Link href="/games/cs2" className="flex items-center space-x-3">
-                <span>CONTRATE JÁ!</span>
-                <ArrowRightIcon className="h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-2 transition-transform" />
+              <Link href="/games/cs2" className="flex items-center space-x-3 relative z-10">
+                <span className="relative z-10">CONTRATE JÁ!</span>
+                <ArrowRightIcon className="h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform duration-300 relative z-10" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -63,53 +64,35 @@ export function ElojobHero() {
         <div className="w-full mt-8 md:mt-16 mb-8 md:mb-12 px-4">
           {/* Features - Layout Horizontal Compacto */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
-            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
-                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                  <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xs md:text-sm font-bold text-white">100% SEGURO</h3>
-                  <p className="text-[10px] md:text-xs text-gray-200">Conta protegida</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
-                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                  <ZapIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xs md:text-sm font-bold text-white">EFICIENTE</h3>
-                  <p className="text-[10px] md:text-xs text-gray-200">Processo otimizado</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
-                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                  <ShieldIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xs md:text-sm font-bold text-white">PROFISSIONAL</h3>
-                  <p className="text-[10px] md:text-xs text-gray-200">Jogadores experientes</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/30 backdrop-blur-md border border-purple-500/60 rounded-lg">
-              <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4">
-                <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
-                  <HeadphonesIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xs md:text-sm font-bold text-white">24/7 SUPORTE</h3>
-                  <p className="text-[10px] md:text-xs text-gray-200">Sempre disponível</p>
-                </div>
-              </CardContent>
-            </Card>
+            {[
+              { icon: ShieldIcon, title: '100% SEGURO', desc: 'Conta protegida', delay: '0.1s' },
+              { icon: ZapIcon, title: 'EFICIENTE', desc: 'Processo otimizado', delay: '0.2s' },
+              { icon: ShieldIcon, title: 'PROFISSIONAL', desc: 'Jogadores experientes', delay: '0.3s' },
+              { icon: HeadphonesIcon, title: '24/7 SUPORTE', desc: 'Sempre disponível', delay: '0.4s' },
+            ].map((feature, index) => (
+              <Card 
+                key={index}
+                className="group bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border border-purple-500/60 hover:border-purple-400/80 rounded-lg hover:shadow-xl hover:shadow-purple-500/30 transition-colors duration-200 overflow-hidden"
+                style={{ transformOrigin: 'center center' }}
+              >
+                <CardContent className="flex flex-col md:flex-row items-center md:items-center space-y-2 md:space-y-0 md:space-x-4 p-3 md:p-4 relative">
+                  {/* Efeito de brilho no hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                  
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex-shrink-0 shadow-lg transition-all duration-300 relative z-10" aria-hidden="true">
+                    <feature.icon className="h-4 w-4 md:h-5 md:w-5 text-white" aria-hidden="true" />
+                  </div>
+                  <div className="text-center md:text-left relative z-10">
+                    <h3 className="text-xs md:text-sm font-bold text-white group-hover:text-purple-200 transition-colors duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-[10px] md:text-xs text-gray-200 group-hover:text-gray-100 transition-colors duration-300">
+                      {feature.desc}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

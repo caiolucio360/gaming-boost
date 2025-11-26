@@ -30,20 +30,29 @@ export function LoadingSpinner({
   text,
 }: LoadingSpinnerProps) {
   const spinner = (
-    <div className={cn('flex items-center justify-center gap-2', className)}>
-      <Loader2 className={cn(sizeClasses[size], 'animate-spin text-purple-500')} />
-      {text && (
-        <span className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+    <div className={cn('flex flex-col items-center justify-center gap-3', className)} role="status" aria-label={text || "Carregando"}>
+      <div className="relative">
+        <Loader2 className={cn(sizeClasses[size], 'animate-spin text-purple-500')} aria-hidden="true" />
+        <div className={cn('absolute inset-0 rounded-full border-2 border-purple-500/20 animate-pulse', sizeClasses[size])} aria-hidden="true" />
+      </div>
+      {text ? (
+        <span className="text-sm text-gray-400 font-rajdhani animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
           {text}
         </span>
+      ) : (
+        <span className="sr-only">Carregando...</span>
       )}
     </div>
   )
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        {spinner}
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
+        <div className="relative">
+          {spinner}
+          {/* Efeito de brilho pulsante */}
+          <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl animate-pulse" />
+        </div>
       </div>
     )
   }

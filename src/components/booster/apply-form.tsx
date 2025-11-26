@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { showSuccess, showError } from '@/lib/toast'
-import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { ButtonLoading } from '@/components/common/button-loading'
 
 const applySchema = z.object({
   bio: z.string().min(10, 'Sua bio deve ter pelo menos 10 caracteres'),
@@ -77,7 +77,7 @@ export function ApplyForm() {
       }
 
       showSuccess('Aplicação enviada!', 'Analisaremos seu perfil em breve.')
-      router.push('/dashboard')
+      router.replace('/dashboard')
     } catch (error) {
       showError('Erro', error instanceof Error ? error.message : 'Tente novamente')
     } finally {
@@ -154,20 +154,14 @@ export function ApplyForm() {
             )}
           </div>
 
-          <Button
+          <ButtonLoading
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3"
+            loading={isSubmitting}
+            loadingText="Enviando..."
+            className="w-full bg-purple-600 text-white font-bold py-3 border border-transparent hover:border-white/50"
           >
-            {isSubmitting ? (
-              <>
-                <LoadingSpinner size="sm" className="mr-2" />
-                Enviando...
-              </>
-            ) : (
-              'Enviar Aplicação'
-            )}
-          </Button>
+            Enviar Aplicação
+          </ButtonLoading>
         </form>
       </CardContent>
     </Card>

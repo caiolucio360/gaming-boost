@@ -170,96 +170,112 @@ export default function AdminDashboardPage() {
 
         {/* Cards de Ações Rápidas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <Link href="/admin/users">
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  <Users className="h-5 w-5 text-purple-500" />
+          <Link href="/admin/users" aria-label="Gerenciar usuários - Ver, editar e gerenciar todos os usuários">
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+              {/* Efeito de brilho no hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-orbitron flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
+                    <Users className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                   Gerenciar Usuários
                 </CardTitle>
-                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Ver, editar e gerenciar todos os usuários
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent className="relative z-10">
+                <div className="flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/admin/orders">
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  <ShoppingCart className="h-5 w-5 text-purple-500" />
+          <Link href="/admin/orders" aria-label="Gerenciar pedidos - Visualizar e atualizar status dos pedidos">
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-orbitron flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
+                    <ShoppingCart className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                   Gerenciar Pedidos
                 </CardTitle>
-                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Visualizar e atualizar status dos pedidos
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent className="relative z-10">
+                <div className="flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/admin/services">
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  <Package className="h-5 w-5 text-purple-500" />
+          <Link href="/admin/services" aria-label="Gerenciar serviços - Criar, editar e gerenciar serviços">
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-orbitron flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
+                    <Package className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                   Gerenciar Serviços
                 </CardTitle>
-                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Criar, editar e gerenciar serviços
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent className="relative z-10">
+                <div className="flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/admin/payments">
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  <DollarSign className="h-5 w-5 text-green-500" />
+          <Link href="/admin/payments" aria-label="Minhas receitas - Visualizar receitas e pagamentos">
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-orbitron flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <div className="p-2 rounded-lg bg-green-500/20 group-hover:bg-green-500/30 transition-colors duration-300">
+                    <DollarSign className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                   Minhas Receitas
                 </CardTitle>
-                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Visualizar receitas e pagamentos
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent className="relative z-10">
+                <div className="flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/admin/commission-config">
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  <SettingsIcon className="h-5 w-5 text-purple-500" />
+          <Link href="/admin/commission-config" aria-label="Configurar comissões - Definir porcentagens de comissão">
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-orbitron flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
+                    <SettingsIcon className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                   Configurar Comissões
                 </CardTitle>
-                <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Definir porcentagens de comissão
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                  Acessar <ArrowRight className="ml-2 h-4 w-4" />
+              <CardContent className="relative z-10">
+                <div className="flex items-center text-purple-300 font-rajdhani group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  Acessar <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
@@ -317,7 +333,9 @@ export default function AdminDashboardPage() {
                   return (
                     <div
                       key={order.id}
-                      className="flex items-center justify-between p-4 bg-black/50 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-colors"
+                      className="group flex items-center justify-between p-4 bg-gradient-to-br from-black/50 via-black/40 to-black/50 rounded-lg border border-purple-500/20 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-[1.01] transition-all duration-300"
+                      style={{
+                      }}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">

@@ -162,7 +162,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
             type="submit"
             loading={isLoading}
             loadingText="Gerando PIX..."
-            className="w-full bg-purple-500 hover:bg-purple-400 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 font-rajdhani"
+            className="w-full bg-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani"
           >
             GERAR CÓDIGO PIX
           </ButtonLoading>

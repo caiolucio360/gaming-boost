@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState<number | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [alert, setAlert] = useState<{ 
     title: string
     description: string
@@ -156,7 +157,7 @@ export default function DashboardPage() {
   }, [orders])
 
   const handlePayment = (orderId: number, total: number) => {
-    router.push(`/payment?orderId=${orderId}&total=${total}`)
+    router.replace(`/payment?orderId=${orderId}&total=${total}`)
   }
 
   const handleCancelClick = (orderId: number) => {
@@ -167,6 +168,7 @@ export default function DashboardPage() {
   const handleCancelConfirm = async () => {
     if (!orderToCancel) return
 
+    setIsCancelling(true)
     try {
       const response = await fetch(`/api/orders/${orderToCancel}`, {
         method: 'PUT',
@@ -190,6 +192,7 @@ export default function DashboardPage() {
       console.error('Erro ao cancelar pedido:', error)
       handleApiError(error, 'Erro ao cancelar pedido')
     } finally {
+      setIsCancelling(false)
       setCancelDialogOpen(false)
       setOrderToCancel(null)
     }
@@ -231,18 +234,20 @@ export default function DashboardPage() {
         )}
 
         {/* Filtros */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 mb-6">
-          <CardContent className="pt-4 pb-4">
+        <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 mb-6 overflow-hidden">
+          {/* Efeito de brilho sutil */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+          <CardContent className="pt-4 pb-4 relative z-10">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Filtros de Status - Badges Compactos */}
               <div className="flex flex-wrap items-center gap-2">
                 <Filter className="h-4 w-4 text-purple-300 mr-1" />
                 <button
                   onClick={() => setFilterStatus('')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     !filterStatus
-                      ? 'bg-purple-500/20 border border-purple-400 text-purple-300'
-                      : 'bg-black/50 border border-purple-500/30 text-gray-400 hover:border-purple-500/50 hover:text-purple-300'
+                      ? 'bg-gradient-to-r from-purple-500/20 to-purple-600/20 border border-purple-400 text-purple-300 shadow-lg shadow-purple-500/20'
+                      : 'bg-black/50 border border-purple-500/30 text-gray-400 hover:border-purple-500/50 hover:text-purple-300 hover:bg-purple-500/10'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -250,7 +255,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('PENDING')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'PENDING'
                       ? 'bg-yellow-500/20 border border-yellow-400 text-yellow-300'
                       : 'bg-black/50 border border-yellow-500/30 text-gray-400 hover:border-yellow-500/50 hover:text-yellow-300'
@@ -261,7 +266,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('IN_PROGRESS')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'IN_PROGRESS'
                       ? 'bg-blue-500/20 border border-blue-400 text-blue-300'
                       : 'bg-black/50 border border-blue-500/30 text-gray-400 hover:border-blue-500/50 hover:text-blue-300'
@@ -272,7 +277,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('COMPLETED')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'COMPLETED'
                       ? 'bg-green-500/20 border border-green-400 text-green-300'
                       : 'bg-black/50 border border-green-500/30 text-gray-400 hover:border-green-500/50 hover:text-green-300'
@@ -283,7 +288,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('CANCELLED')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'CANCELLED'
                       ? 'bg-red-500/20 border border-red-400 text-red-300'
                       : 'bg-black/50 border border-red-500/30 text-gray-400 hover:border-red-500/50 hover:text-red-300'
@@ -344,7 +349,7 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="grid gap-6">
-            {filteredOrders.map((order) => {
+            {filteredOrders.map((order, index) => {
               return (
                 <DashboardCard
                   key={order.id}
@@ -394,7 +399,7 @@ export default function DashboardPage() {
                           orderId={order.id}
                           onSuccess={() => fetchOrders(true)}
                           trigger={
-                            <Button className="w-full md:w-auto bg-yellow-500 hover:bg-yellow-400 text-black font-bold">
+                            <Button className="w-full md:w-auto bg-yellow-500 text-black font-bold border border-transparent hover:border-black/50">
                               Avaliar Booster
                             </Button>
                           }
@@ -432,6 +437,7 @@ export default function DashboardPage() {
           cancelLabel="Não, manter pedido"
           onConfirm={handleCancelConfirm}
           variant="destructive"
+          loading={isCancelling}
         />
       </div>
     </div>

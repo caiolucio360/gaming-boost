@@ -26,16 +26,16 @@ export function ActionButton({
   ...props
 }: ActionButtonProps) {
   const variantClasses = {
-    primary: 'bg-purple-500 hover:bg-purple-400 text-white',
-    danger: 'bg-red-500 hover:bg-red-600 text-white',
-    success: 'bg-green-500 hover:bg-green-400 text-white',
-    outline: 'border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200',
+    primary: 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg border border-transparent hover:border-white/50',
+    danger: 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg border border-transparent hover:border-white/50',
+    success: 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg border border-transparent hover:border-white/50',
+    outline: 'border-2 border-purple-500/50 text-purple-300 hover:border-purple-400',
   }
 
   return (
     <Button
       className={cn(
-        'font-rajdhani',
+        'font-rajdhani transition-colors duration-200',
         variantClasses[variant],
         className
       )}

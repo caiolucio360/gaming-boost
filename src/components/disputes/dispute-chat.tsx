@@ -219,7 +219,7 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
               <Button
                 type="submit"
                 disabled={sending || !message.trim()}
-                className="bg-purple-600 hover:bg-purple-500"
+                className="bg-purple-600 border border-transparent hover:border-white/50"
               >
                 {sending ? (
                   <LoadingSpinner size="sm" />

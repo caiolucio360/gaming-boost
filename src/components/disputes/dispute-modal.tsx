@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { showSuccess, showError } from '@/lib/toast'
-import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { ButtonLoading } from '@/components/common/button-loading'
 import { AlertTriangle } from 'lucide-react'
 
 const disputeSchema = z.object({
@@ -67,7 +68,7 @@ export function DisputeModal({ orderId, onClose, onSuccess }: DisputeModalProps)
       }
       
       // Navigate to dispute page
-      router.push(`/disputes/${result.dispute.id}`)
+      router.replace(`/disputes/${result.dispute.id}`)
       onClose()
     } catch (error) {
       showError('Erro', error instanceof Error ? error.message : 'Tente novamente')
@@ -94,12 +95,13 @@ export function DisputeModal({ orderId, onClose, onSuccess }: DisputeModalProps)
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-              <p className="text-sm text-yellow-200 font-rajdhani">
+            <Alert className="bg-yellow-500/10 border-yellow-500/30">
+              <AlertTriangle className="h-4 w-4 text-yellow-200" />
+              <AlertDescription className="text-sm text-yellow-200 font-rajdhani">
                 <strong>Importante:</strong> Disputas devem ser abertas apenas para problemas sérios com o serviço. 
                 Nossa equipe irá analisar o caso e tomar uma decisão justa.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
 
             <div className="space-y-2">
               <Label htmlFor="reason" className="text-white font-rajdhani font-semibold">
@@ -126,20 +128,14 @@ export function DisputeModal({ orderId, onClose, onSuccess }: DisputeModalProps)
               >
                 Cancelar
               </Button>
-              <Button
+              <ButtonLoading
                 type="submit"
-                disabled={isSubmitting}
-                className="bg-red-600 hover:bg-red-500 text-white font-bold font-rajdhani"
+                loading={isSubmitting}
+                loadingText="Abrindo..."
+                className="bg-red-600 text-white font-bold font-rajdhani border border-transparent hover:border-white/50"
               >
-                {isSubmitting ? (
-                  <>
-                    <LoadingSpinner size="sm" className="mr-2" />
-                    Abrindo...
-                  </>
-                ) : (
-                  'Abrir Disputa'
-                )}
-              </Button>
+                Abrir Disputa
+              </ButtonLoading>
             </div>
           </form>
         </CardContent>

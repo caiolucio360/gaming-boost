@@ -32,15 +32,15 @@ export default function GamesSection() {
     }))
   
     return (
-      <section className="py-20 bg-black">
+      <section className="py-20 bg-black" aria-labelledby="games-heading">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
+          <h2 id="games-heading" className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
             Jogos Disponíveis
           </h2>
   
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {games.map((game, i) => (
-              <Link key={i} href={game.href} className="group">
+              <Link key={i} href={game.href} className="group" aria-label={`Ver serviços de ${game.name} - ${game.description}`}>
                 <Card className="overflow-hidden border-purple-600/50 bg-gray-900 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300 group-hover:scale-105">
                   <div
                     className={cn(
@@ -48,7 +48,7 @@ export default function GamesSection() {
                       game.gradient
                     )}
                   >
-                    <game.icon className="h-20 w-20 text-white" />
+                    <game.icon className="h-20 w-20 text-white" aria-hidden="true" />
                   </div>
                   <CardHeader className="text-center">
                     <CardTitle className="text-xl font-bold text-white">
