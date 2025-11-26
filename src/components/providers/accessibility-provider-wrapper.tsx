@@ -1,22 +1,30 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-
-// Importar dinamicamente apenas em desenvolvimento e no cliente
-const AccessibilityProvider = dynamic(
-  () => import('./accessibility-provider').then((mod) => ({ default: mod.AccessibilityProvider })),
-  { 
-    ssr: false,
-    loading: () => null,
-  }
-)
+import { useEffect, useState } from 'react'
 
 export function AccessibilityProviderWrapper() {
-  // Só renderizar em desenvolvimento
-  if (process.env.NODE_ENV !== 'development') {
+  const [AccessibilityProvider, setAccessibilityProvider] = useState<React.ComponentType | null>(null)
+
+  useEffect(() => {
+    // Só carregar em desenvolvimento
+    if (process.env.NODE_ENV !== 'development') {
+      return
+    }
+
+    // Importar dinamicamente apenas no cliente
+    import('./accessibility-provider')
+      .then((mod) => {
+        setAccessibilityProvider(() => mod.AccessibilityProvider)
+      })
+      .catch(() => {
+        // Silenciosamente falhar se não conseguir carregar
+      })
+  }, [])
+
+  if (!AccessibilityProvider) {
     return null
   }
-  
+
   return <AccessibilityProvider />
 }
 

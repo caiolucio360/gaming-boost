@@ -1,13 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer, dev }) => {
-    // Externalizar @axe-core/react em produção para evitar erros de build
-    if (!dev && !isServer) {
-      config.externals = config.externals || []
-      config.externals.push('@axe-core/react')
-    }
-    return config
-  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',
