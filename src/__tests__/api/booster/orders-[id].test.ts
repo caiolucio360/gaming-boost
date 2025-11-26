@@ -15,6 +15,7 @@ jest.mock('@/lib/db', () => ({
     },
     order: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
     },
@@ -90,6 +91,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
     }
 
     ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(booster)
     ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(commissionConfig)
 
@@ -103,8 +105,13 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
         boosterCommission: {
           create: jest.fn().mockResolvedValue({ id: 1 }),
         },
+        user: {
+          findMany: jest.fn().mockResolvedValue([
+            { id: 1, adminProfitShare: 1.0 }
+          ]),
+        },
         adminRevenue: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          create: jest.fn().mockResolvedValue({ id: 1 }),
         },
       }
       return callback(tx)
@@ -177,6 +184,96 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
 
     expect(response.status).toBe(400)
     expect(data.message).toContain('não está disponível')
+  })
+
+  it('deve retornar erro 400 se booster já possui pedido pendente', async () => {
+    ;(verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'booster@test.com',
+        role: 'BOOSTER',
+      },
+    })
+
+    const existingOrder = {
+      id: 2,
+      userId: 1,
+      serviceId: 1,
+      status: 'PENDING',
+      boosterId: null,
+      total: 100,
+    }
+
+    const activeOrder = {
+      id: 1,
+      status: 'PENDING',
+    }
+
+    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
+
+    const request = new NextRequest('http://localhost:3000/api/booster/orders/2', {
+      method: 'POST',
+    })
+
+    const response = await POST(request, { params: Promise.resolve({ id: '2' }) })
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('já possui um pedido')
+    expect(data.message).toContain('pendente')
+    expect(prisma.order.findFirst).toHaveBeenCalledWith({
+      where: {
+        boosterId: 1,
+        status: {
+          in: ['PENDING', 'IN_PROGRESS'],
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+      },
+    })
+  })
+
+  it('deve retornar erro 400 se booster já possui pedido em andamento', async () => {
+    ;(verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'booster@test.com',
+        role: 'BOOSTER',
+      },
+    })
+
+    const existingOrder = {
+      id: 2,
+      userId: 1,
+      serviceId: 1,
+      status: 'PENDING',
+      boosterId: null,
+      total: 100,
+    }
+
+    const activeOrder = {
+      id: 1,
+      status: 'IN_PROGRESS',
+    }
+
+    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
+
+    const request = new NextRequest('http://localhost:3000/api/booster/orders/2', {
+      method: 'POST',
+    })
+
+    const response = await POST(request, { params: Promise.resolve({ id: '2' }) })
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('já possui um pedido')
+    expect(data.message).toContain('em andamento')
   })
 })
 

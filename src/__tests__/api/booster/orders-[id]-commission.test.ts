@@ -11,6 +11,7 @@ jest.mock('@/lib/db', () => ({
   prisma: {
     order: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
     },
     user: {
@@ -109,6 +110,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       }
 
       ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const tx = {
@@ -130,8 +132,13 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
               status: 'PENDING',
             }),
           },
+          user: {
+            findMany: jest.fn().mockResolvedValue([
+              { id: 1, adminProfitShare: 1.0 }
+            ]),
+          },
           adminRevenue: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            create: jest.fn().mockResolvedValue({ id: 1 }),
           },
         }
         return await callback(tx)
@@ -209,6 +216,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       }
 
       ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
       ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(mockConfig)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
@@ -231,8 +239,13 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
               status: 'PENDING',
             }),
           },
+          user: {
+            findMany: jest.fn().mockResolvedValue([
+              { id: 1, adminProfitShare: 1.0 }
+            ]),
+          },
           adminRevenue: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            create: jest.fn().mockResolvedValue({ id: 1 }),
           },
         }
         return await callback(tx)
@@ -309,6 +322,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       }
 
       ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
       ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(null)
       ;(prisma.commissionConfig.create as jest.Mock).mockResolvedValue(mockConfig)
@@ -332,8 +346,13 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
               status: 'PENDING',
             }),
           },
+          user: {
+            findMany: jest.fn().mockResolvedValue([
+              { id: 1, adminProfitShare: 1.0 }
+            ]),
+          },
           adminRevenue: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            create: jest.fn().mockResolvedValue({ id: 1 }),
           },
         }
         return await callback(tx)

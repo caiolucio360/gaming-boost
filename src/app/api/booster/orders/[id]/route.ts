@@ -55,6 +55,31 @@ export async function POST(
       )
     }
 
+    // Validar: booster só pode aceitar 1 pedido por vez
+    // Só pode aceitar outro quando o atual for COMPLETED ou CANCELLED
+    const activeOrder = await prisma.order.findFirst({
+      where: {
+        boosterId,
+        status: {
+          in: ['PENDING', 'IN_PROGRESS'], // Verificar pedidos pendentes e em andamento
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+      },
+    })
+
+    if (activeOrder) {
+      const statusName = activeOrder.status === 'PENDING' ? 'pendente' : 'em andamento'
+      return NextResponse.json(
+        {
+          message: `Você já possui um pedido ${statusName} (ID: ${activeOrder.id}). Finalize ou cancele o pedido atual antes de aceitar um novo.`,
+        },
+        { status: 400 }
+      )
+    }
+
     // Buscar o booster para verificar se tem comissão personalizada
     const booster = await prisma.user.findUnique({
       where: { id: boosterId },
