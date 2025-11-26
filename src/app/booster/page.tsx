@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Package,
   CheckCircle2,
@@ -300,7 +299,6 @@ export default function BoosterDashboardPage() {
   return (
     <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
-        {refreshing && <RefreshingBanner />}
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -323,32 +321,93 @@ export default function BoosterDashboardPage() {
           </Link>
         </div>
 
-        {/* Cards de Estatísticas */}
+        {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
           <StatsGridSkeleton count={5} />
         ) : stats ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
-            <StatCard
-              title="Disponíveis"
-              value={stats.available}
-              description="Pedidos pendentes"
-              icon={Package}
-              iconColor="text-yellow-500"
-            />
-            <StatCard
-              title="Em Andamento"
-              value={stats.assigned}
-              description="Pedidos ativos"
-              icon={Loader2}
-              iconColor="text-blue-500"
-            />
-            <StatCard
-              title="Concluídos"
-              value={stats.completed}
-              description="Pedidos finalizados"
-              icon={CheckCircle2}
-              iconColor="text-green-500"
-            />
+            {/* Card de Navegação - Disponíveis */}
+            <Card
+              onClick={() => setActiveTab('available')}
+              className={`cursor-pointer transition-all duration-200 ${
+                activeTab === 'available'
+                  ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/70 shadow-lg shadow-yellow-500/20'
+                  : 'bg-black/30 border-purple-500/50 hover:border-yellow-500/50 hover:bg-yellow-500/5'
+              }`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Disponíveis
+                    </p>
+                    <p className="text-3xl font-bold text-yellow-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      {stats.available}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Pedidos pendentes
+                    </p>
+                  </div>
+                  <Package className={`h-8 w-8 ${activeTab === 'available' ? 'text-yellow-500' : 'text-yellow-500/50'}`} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card de Navegação - Em Andamento */}
+            <Card
+              onClick={() => setActiveTab('assigned')}
+              className={`cursor-pointer transition-all duration-200 ${
+                activeTab === 'assigned'
+                  ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/70 shadow-lg shadow-blue-500/20'
+                  : 'bg-black/30 border-purple-500/50 hover:border-blue-500/50 hover:bg-blue-500/5'
+              }`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Em Andamento
+                    </p>
+                    <p className="text-3xl font-bold text-blue-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      {stats.assigned}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Pedidos ativos
+                    </p>
+                  </div>
+                  <Loader2 className={`h-8 w-8 ${activeTab === 'assigned' ? 'text-blue-500' : 'text-blue-500/50'}`} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card de Navegação - Concluídos */}
+            <Card
+              onClick={() => setActiveTab('completed')}
+              className={`cursor-pointer transition-all duration-200 ${
+                activeTab === 'completed'
+                  ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border-green-500/70 shadow-lg shadow-green-500/20'
+                  : 'bg-black/30 border-purple-500/50 hover:border-green-500/50 hover:bg-green-500/5'
+              }`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Concluídos
+                    </p>
+                    <p className="text-3xl font-bold text-green-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      {stats.completed}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      Pedidos finalizados
+                    </p>
+                  </div>
+                  <CheckCircle2 className={`h-8 w-8 ${activeTab === 'completed' ? 'text-green-500' : 'text-green-500/50'}`} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cards de Estatísticas - Ganhos */}
             <StatCard
               title="Ganhos Totais"
               value={formatPrice(stats.totalEarnings)}
@@ -366,22 +425,10 @@ export default function BoosterDashboardPage() {
           </div>
         ) : null}
 
-        {/* Tabs de Pedidos */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-black/30 border border-purple-500/50">
-            <TabsTrigger value="available" className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              Disponíveis ({stats?.available || 0})
-            </TabsTrigger>
-            <TabsTrigger value="assigned" className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              Em Andamento ({stats?.assigned || 0})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              Concluídos ({stats?.completed || 0})
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Pedidos Disponíveis */}
-          <TabsContent value="available" className="mt-6">
+        {/* Pedidos Disponíveis */}
+        {activeTab === 'available' && (
+          <div className="mt-6">
+            {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
               <OrdersListSkeleton count={3} />
             ) : orders.length === 0 ? (
@@ -460,10 +507,13 @@ export default function BoosterDashboardPage() {
                 })}
               </div>
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Pedidos em Andamento */}
-          <TabsContent value="assigned" className="mt-6">
+        {/* Pedidos em Andamento */}
+        {activeTab === 'assigned' && (
+          <div className="mt-6">
+            {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
               <OrdersListSkeleton count={3} />
             ) : orders.length === 0 ? (
@@ -544,10 +594,13 @@ export default function BoosterDashboardPage() {
                 })}
               </div>
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Pedidos Concluídos */}
-          <TabsContent value="completed" className="mt-6">
+        {/* Pedidos Concluídos */}
+        {activeTab === 'completed' && (
+          <div className="mt-6">
+            {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
               <OrdersListSkeleton count={3} />
             ) : orders.length === 0 ? (
@@ -604,8 +657,8 @@ export default function BoosterDashboardPage() {
                 })}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </div>
   )
