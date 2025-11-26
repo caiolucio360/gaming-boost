@@ -60,7 +60,6 @@ Plataforma web full-stack para serviços de boost em jogos eletrônicos, desenvo
 - **Jest + Testing Library** - Testes unitários e de integração (139+ testes)
 - **ESLint** - Linting de código com configuração Next.js
 - **TypeScript Strict Mode** - Type checking rigoroso
-- **@axe-core/react** - Auditoria de acessibilidade em desenvolvimento
 - **Vercel Analytics & Speed Insights** - Monitoramento de performance
 - **Turbopack** - Build rápido em desenvolvimento
 
@@ -157,7 +156,6 @@ src/
 - **Toast Notifications** - Feedback de ações do usuário com Sonner
 - **Dark Mode** - Suporte completo a tema claro/escuro
 - **Accessibility** - Componentes acessíveis (WCAG 2.1 Level AA)
-  - Auditoria automática com @axe-core/react em desenvolvimento
   - Navegação por teclado
   - Suporte a leitores de tela
   - Contraste adequado de cores
