@@ -6,10 +6,10 @@ import { Footer } from '@/components/layout/footer'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
-import { AccessibilityProvider } from '@/components/providers/accessibility-provider'
 import { SkipLink } from '@/components/common/skip-link'
 import { LiveRegion } from '@/components/common/live-region'
 import { MotionProvider } from '@/components/providers/motion-provider'
+import { AccessibilityProviderWrapper } from '@/components/providers/accessibility-provider-wrapper'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -72,7 +72,7 @@ export default function RootLayout({
         <AuthProviderWrapper>
           <MotionProvider>
             <ToastProvider />
-            <AccessibilityProvider />
+            {process.env.NODE_ENV === 'development' && <AccessibilityProviderWrapper />}
             <SkipLink />
             <LiveRegion message="" id="live-region" />
             <div className="min-h-screen flex flex-col overflow-x-hidden">
