@@ -9,7 +9,6 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { SkipLink } from '@/components/common/skip-link'
 import { LiveRegion } from '@/components/common/live-region'
 import { MotionProvider } from '@/components/providers/motion-provider'
-import { AccessibilityProviderWrapper } from '@/components/providers/accessibility-provider-wrapper'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -72,9 +71,6 @@ export default function RootLayout({
         <AuthProviderWrapper>
           <MotionProvider>
             <ToastProvider />
-            {typeof process !== 'undefined' && process.env.NODE_ENV === 'development' && (
-              <AccessibilityProviderWrapper />
-            )}
             <SkipLink />
             <LiveRegion message="" id="live-region" />
             <div className="min-h-screen flex flex-col overflow-x-hidden">

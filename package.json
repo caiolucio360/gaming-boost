@@ -61,7 +61,6 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@axe-core/react": "^4.11.0",
     "@eslint/eslintrc": "^3",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.0.0",
