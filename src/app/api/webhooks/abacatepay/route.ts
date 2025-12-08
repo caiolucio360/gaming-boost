@@ -84,7 +84,7 @@ async function handlePaymentPaid(data: Record<string, unknown>): Promise<{ proce
     }
 
     // Atualizar pagamento em transação
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
         // Atualizar pagamento
         await tx.payment.update({
             where: { id: payment.id },
@@ -94,11 +94,11 @@ async function handlePaymentPaid(data: Record<string, unknown>): Promise<{ proce
             },
         })
 
-        // Atualizar pedido para IN_PROGRESS se estava PENDING
+        // Atualizar pedido para PAID se estava PENDING
         if (payment.order.status === 'PENDING') {
             await tx.order.update({
                 where: { id: payment.order.id },
-                data: { status: 'IN_PROGRESS' },
+                data: { status: 'PAID' },
             })
 
             // Criar notificação para o usuário
@@ -107,11 +107,11 @@ async function handlePaymentPaid(data: Record<string, unknown>): Promise<{ proce
                     userId: payment.order.userId,
                     type: 'PAYMENT',
                     title: 'Pagamento Confirmado',
-                    message: `O pagamento do pedido #${payment.order.id} foi confirmado.`,
+                    message: `O pagamento do pedido #${payment.order.id} foi confirmado e aguarda um booster.`,
                 },
             })
 
-            console.log(`Payment ${payment.id} confirmed, order ${payment.order.id} updated to IN_PROGRESS`)
+            console.log(`Payment ${payment.id} confirmed, order ${payment.order.id} updated to PAID`)
         }
     })
 
@@ -210,7 +210,7 @@ async function handlePaymentStatus(
 
     // Processar REFUNDED
     if (newStatus === 'REFUNDED' && payment.status !== 'REFUNDED') {
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             await tx.payment.update({
                 where: { id: payment.id },
                 data: { status: 'REFUNDED' },
@@ -240,7 +240,7 @@ async function handlePaymentStatus(
 
     // Processar EXPIRED ou CANCELLED
     if ((newStatus === 'EXPIRED' || newStatus === 'CANCELLED') && payment.status === 'PENDING') {
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             await tx.payment.update({
                 where: { id: payment.id },
                 data: { status: newStatus },

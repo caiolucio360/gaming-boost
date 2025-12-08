@@ -41,9 +41,9 @@ export async function POST(
       )
     }
 
-    if (order.status !== 'PENDING') {
+    if (order.status !== 'PAID') {
       return NextResponse.json(
-        { message: 'Pedido não está disponível para aceitação' },
+        { message: 'Pedido não está pago e disponível para aceitação' },
         { status: 400 }
       )
     }
@@ -61,7 +61,7 @@ export async function POST(
       where: {
         boosterId,
         status: {
-          in: ['PENDING', 'IN_PROGRESS'], // Verificar pedidos pendentes e em andamento
+          in: ['PENDING', 'PAID', 'IN_PROGRESS'], // Verificar pedidos ativos
         },
       },
       select: {
@@ -71,7 +71,7 @@ export async function POST(
     })
 
     if (activeOrder) {
-      const statusName = activeOrder.status === 'PENDING' ? 'pendente' : 'em andamento'
+      const statusName = activeOrder.status === 'PENDING' || activeOrder.status === 'PAID' ? 'pendente' : 'em andamento'
       return NextResponse.json(
         {
           message: `Você já possui um pedido ${statusName} (ID: ${activeOrder.id}). Finalize ou cancele o pedido atual antes de aceitar um novo.`,
@@ -120,13 +120,13 @@ export async function POST(
 
     // Atribuir pedido ao booster, calcular comissão e mudar status para IN_PROGRESS
     // Usar transação atômica para evitar race conditions
-    const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updatedOrder = await prisma.$transaction(async (tx: any) => {
       // Verificar e atualizar em uma única operação atômica
       // Usar updateMany com condições para garantir atomicidade
       const updateResult = await tx.order.updateMany({
         where: {
           id: orderId,
-          status: 'PENDING',
+          status: 'PAID',
           boosterId: null, // Apenas se ainda não tiver booster
         },
         data: {
@@ -149,8 +149,8 @@ export async function POST(
         if (!currentOrder) {
           throw new Error('Pedido não encontrado')
         }
-        if (currentOrder.status !== 'PENDING') {
-          throw new Error('Pedido não está disponível para aceitação')
+        if (currentOrder.status !== 'PAID') {
+          throw new Error('Pedido não está pago ou disponível para aceitação')
         }
         if (currentOrder.boosterId) {
           throw new Error('Pedido já foi atribuído a outro booster')
@@ -203,7 +203,7 @@ export async function POST(
       })
 
       // Calcular total de shares para normalização (caso a soma não seja 1 ou 100)
-      const totalShares = admins.reduce((sum, admin) => sum + (admin.adminProfitShare || 0), 0)
+      const totalShares = admins.reduce((sum: number, admin: any) => sum + (admin.adminProfitShare || 0), 0)
 
       // Criar registros de receita para cada admin
       if (admins.length > 0) {
@@ -234,7 +234,7 @@ export async function POST(
       }
 
       return updated
-    }).catch((error) => {
+    }).catch((error: any) => {
       // Se for erro de validação, retornar erro específico
       if (error.message.includes('já foi atribuído') ||
         error.message.includes('não está disponível') ||

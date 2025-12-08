@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         game: 'CS2', // Filtrar apenas orders com games válidos
       },
     }
-    if (status && ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
+    if (status && ['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
       where.status = status
     }
 

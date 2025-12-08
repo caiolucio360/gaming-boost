@@ -88,11 +88,11 @@ export async function POST(request: NextRequest) {
 
             // Se foi pago, atualizar o pedido também
             if (result.status === 'PAID') {
-                await prisma.$transaction(async (tx) => {
-                    // Atualizar pedido para IN_PROGRESS
+                await prisma.$transaction(async (tx: any) => {
+                    // Atualizar pedido para PAID (aguardando um booster aceitar)
                     await tx.order.update({
                         where: { id: payment.order.id },
-                        data: { status: 'IN_PROGRESS' }
+                        data: { status: 'PAID' }
                     })
 
                     // Criar notificação

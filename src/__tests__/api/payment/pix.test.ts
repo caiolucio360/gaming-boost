@@ -33,10 +33,10 @@ jest.mock('@/lib/auth-middleware', () => ({
 
 // Mock do AbacatePay
 jest.mock('@/lib/abacatepay', () => ({
-  createAbacatePayCharge: jest.fn(),
+  createPixQrCode: jest.fn(),
 }))
 
-import { createAbacatePayCharge } from '@/lib/abacatepay'
+import { createPixQrCode } from '@/lib/abacatepay'
 
 // As funções generatePixCode e generateQRCodeBase64 são funções internas do módulo
 // Não precisamos mocká-las, pois são chamadas diretamente dentro do POST
@@ -65,6 +65,7 @@ describe('POST /api/payment/pix', () => {
       status: 'PENDING',
       user: { name: 'Teste', email: 'teste@teste.com' },
       service: { name: 'Boost Service' },
+      payments: [], // Empty payments array - no existing payments
     }
 
     const mockPayment = {
@@ -79,22 +80,22 @@ describe('POST /api/payment/pix', () => {
       providerId: 'charge-123',
     }
 
-    const mockAbacatePayResponse = {
-      data: {
-        id: 'charge-123',
-        amount: 10000,
-        status: 'PENDING',
-        pix: {
-          code: 'pix-code-123',
-          qrCode: 'qr-code-url',
-        },
-        url: 'payment-url',
-      }
+    const mockPixQrCodeResponse = {
+      id: 'pix-123',
+      amount: 10000,
+      status: 'PENDING',
+      brCode: 'pix-code-123',
+      brCodeBase64: 'base64-qr-code',
+      devMode: true,
+      platformFee: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     }
 
       ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
       ; (prisma.payment.create as jest.Mock).mockResolvedValue(mockPayment)
-      ; (createAbacatePayCharge as jest.Mock).mockResolvedValue(mockAbacatePayResponse)
+      ; (createPixQrCode as jest.Mock).mockResolvedValue(mockPixQrCodeResponse)
 
     const request = new NextRequest('http://localhost:3000/api/payment/pix', {
       method: 'POST',
@@ -103,6 +104,8 @@ describe('POST /api/payment/pix', () => {
       },
       body: JSON.stringify({
         orderId: 1,
+        phone: '+5511999999999',
+        taxId: '12345678900',
       }),
     })
 
@@ -112,7 +115,7 @@ describe('POST /api/payment/pix', () => {
     expect(response.status).toBe(200)
     expect(data.payment).toBeDefined()
     expect(data.payment.orderId).toBe(mockOrder.id)
-    expect(createAbacatePayCharge).toHaveBeenCalled()
+    expect(createPixQrCode).toHaveBeenCalled()
     expect(prisma.payment.create).toHaveBeenCalled()
   })
 
@@ -151,6 +154,8 @@ describe('POST /api/payment/pix', () => {
       },
       body: JSON.stringify({
         orderId: 999,
+        phone: '+5511999999999',
+        taxId: '12345678900',
       }),
     })
 
@@ -158,7 +163,7 @@ describe('POST /api/payment/pix', () => {
     const data = await response.json()
 
     expect(response.status).toBe(404)
-    expect(data.message).toContain('não encontrada')
+    expect(data.message).toContain('não encontrad')
   })
 
   it('deve retornar erro 403 se order não pertencer ao usuário', async () => {
@@ -179,6 +184,7 @@ describe('POST /api/payment/pix', () => {
       status: 'PENDING',
       user: { name: 'Other', email: 'other@test.com' },
       service: { name: 'Service' },
+      payments: [],
     }
 
       ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
@@ -190,6 +196,8 @@ describe('POST /api/payment/pix', () => {
       },
       body: JSON.stringify({
         orderId: 1,
+        phone: '+5511999999999',
+        taxId: '12345678900',
       }),
     })
 

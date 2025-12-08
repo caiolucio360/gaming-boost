@@ -85,10 +85,10 @@ export async function GET(request: NextRequest) {
           try {
             // Verificar mudanças baseado no role do usuário
             if (userRole === 'BOOSTER') {
-              // Para boosters: verificar pedidos disponíveis e atribuídos
+              // Para boosters: verificar pedidos disponíveis (PAID sem booster) e atribuídos
               const availableOrders = await prisma.order.count({
                 where: {
-                  status: 'PENDING',
+                  status: 'PAID',
                   boosterId: null,
                 },
               })
@@ -96,13 +96,13 @@ export async function GET(request: NextRequest) {
               const myOrders = await prisma.order.count({
                 where: {
                   boosterId: userId,
-                  status: { in: ['IN_PROGRESS', 'PENDING'] },
+                  status: 'IN_PROGRESS',
                 },
               })
 
               // Enviar evento apenas quando houver mudança real
               if (lastAvailableCount === -1 || lastMyOrdersCount === -1 ||
-                  availableOrders !== lastAvailableCount || myOrders !== lastMyOrdersCount) {
+                availableOrders !== lastAvailableCount || myOrders !== lastMyOrdersCount) {
                 sendEvent('orders-update', {
                   available: availableOrders,
                   myOrders,
@@ -118,10 +118,11 @@ export async function GET(request: NextRequest) {
 
             } else if (userRole === 'CLIENT') {
               // Para clientes: verificar status dos seus pedidos
-              const pendingOrders = await prisma.order.count({
+              // Pedidos aguardando pagamento (PENDING) ou aguardando booster (PAID)
+              const pendingOrPaidOrders = await prisma.order.count({
                 where: {
                   userId,
-                  status: 'PENDING',
+                  status: { in: ['PENDING', 'PAID'] },
                 },
               })
 
@@ -133,20 +134,20 @@ export async function GET(request: NextRequest) {
               })
 
               if (lastPendingCount === -1 || lastInProgressCount === -1 ||
-                pendingOrders !== lastPendingCount || inProgressOrders !== lastInProgressCount) {
+                pendingOrPaidOrders !== lastPendingCount || inProgressOrders !== lastInProgressCount) {
                 sendEvent('orders-update', {
-                  pending: pendingOrders,
+                  pending: pendingOrPaidOrders,
                   inProgress: inProgressOrders,
                 })
-                lastPendingCount = pendingOrders
+                lastPendingCount = pendingOrPaidOrders
                 lastInProgressCount = inProgressOrders
               }
 
             } else if (userRole === 'ADMIN') {
-              // Para admins: verificar pedidos pendentes e pagamentos
+              // Para admins: verificar pedidos pendentes/pagos e pagamentos
               const pendingOrders = await prisma.order.count({
                 where: {
-                  status: 'PENDING',
+                  status: { in: ['PENDING', 'PAID'] },
                 },
               })
 

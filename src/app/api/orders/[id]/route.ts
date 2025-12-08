@@ -124,33 +124,47 @@ export async function PUT(
     // Apenas pedidos PENDING podem ser cancelados pelo cliente
     if (order.status !== 'PENDING') {
       return NextResponse.json(
-        { 
+        {
           message: `Não é possível cancelar um pedido com status ${order.status}. Apenas pedidos pendentes podem ser cancelados.`,
         },
         { status: 400 }
       )
     }
 
-    // Cancelar o pedido
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'CANCELLED',
-      },
-      include: {
-        service: true,
-        booster: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+    // Cancelar o pedido e pagamentos pendentes
+    const updatedOrder = await prisma.$transaction(async (tx: any) => {
+      // Cancelar pagamentos pendentes
+      await tx.payment.updateMany({
+        where: {
+          orderId: orderId,
+          status: 'PENDING',
+        },
+        data: {
+          status: 'CANCELLED',
+        },
+      })
+
+      // Cancelar o pedido
+      return await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'CANCELLED',
+        },
+        include: {
+          service: true,
+          booster: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
           },
         },
-      },
+      })
     })
 
     return NextResponse.json(
-      { 
+      {
         message: 'Pedido cancelado com sucesso',
         order: updatedOrder,
       },

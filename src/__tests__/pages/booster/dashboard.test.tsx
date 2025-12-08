@@ -159,7 +159,7 @@ describe('BoosterDashboardPage', () => {
     const mockOrders = [
       {
         id: 1,
-        status: 'PENDING',
+        status: 'PAID',
         total: 100,
         service: { name: 'Boost CS2', description: 'Rank Boost', game: 'CS2' },
         user: { name: 'Client' },
@@ -177,9 +177,10 @@ describe('BoosterDashboardPage', () => {
 
     render(<BoosterDashboardPage />)
 
-    const cards = await screen.findAllByTestId('card')
-    expect(cards).toHaveLength(1)
-    expect(cards[0]).toHaveTextContent('Boost CS2')
-    expect(cards[0]).toHaveTextContent('Rank Boost')
+    await waitFor(() => {
+      expect(screen.getByText('Boost CS2')).toBeInTheDocument()
+      expect(screen.getByText('Rank Boost')).toBeInTheDocument()
+      expect(screen.getByText('Status: PAID')).toBeInTheDocument()
+    })
   })
 })

@@ -21,12 +21,13 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') // 'available' | 'assigned' | 'completed'
     const status = searchParams.get('status')
 
+    // Build where clause - using any due to Prisma custom output type issues
     let where: any = {}
 
     if (type === 'available') {
-      // Pedidos disponíveis: PENDING e sem booster atribuído
+      // Pedidos disponíveis: PAID e sem booster atribuído
       where = {
-        status: 'PENDING',
+        status: 'PAID',
         boosterId: null,
       }
     } else if (type === 'assigned') {
@@ -45,13 +46,14 @@ export async function GET(request: NextRequest) {
       // Todos os pedidos relacionados ao booster
       where = {
         OR: [
-          { boosterId: userId }, // Pedidos atribuídos
-          { status: 'PENDING', boosterId: null }, // Pedidos disponíveis
+          { boosterId: userId },
+          { status: 'PAID', boosterId: null },
         ],
       }
     }
 
-    if (status && ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
+    const validStatuses = ['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+    if (status && validStatuses.includes(status)) {
       where.status = status
     }
 
@@ -90,7 +92,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       available: await prisma.order.count({
         where: {
-          status: 'PENDING',
+          status: 'PAID',
           boosterId: null,
           service: {
             game: 'CS2',
@@ -156,4 +158,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

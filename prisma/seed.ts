@@ -1,8 +1,7 @@
-import { PrismaClient } from '../src/generated/prisma'
+import { prisma } from '../src/lib/db'
 import bcrypt from 'bcryptjs'
 import { getEnabledGames, GAMES_CONFIG } from '../src/lib/games-config'
 
-const prisma = new PrismaClient()
 
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
@@ -150,42 +149,42 @@ async function main() {
     // }
   }
 
-        // Criar serviços no banco de dados
-        const createdServices: Array<{ id: number; game: string; type: string; name: string; description: string; price: number; duration: string }> = []
-        for (const serviceData of services) {
-          try {
-            // Verificar se o serviço já existe pelo nome e jogo
-            const existingService = await prisma.service.findFirst({
-              where: {
-                name: serviceData.name,
-                game: serviceData.game,
-              },
-            })
+  // Criar serviços no banco de dados
+  const createdServices: Array<{ id: number; game: string; type: string; name: string; description: string; price: number; duration: string }> = []
+  for (const serviceData of services) {
+    try {
+      // Verificar se o serviço já existe pelo nome e jogo
+      const existingService = await prisma.service.findFirst({
+        where: {
+          name: serviceData.name,
+          game: serviceData.game,
+        },
+      })
 
-            let service
-            if (existingService) {
-              // Atualizar se já existir
-              service = await prisma.service.update({
-                where: { id: existingService.id },
-                data: {
-                  name: serviceData.name,
-                  description: serviceData.description,
-                  price: serviceData.price,
-                  duration: serviceData.duration,
-                },
-              })
-            } else {
-              // Criar novo serviço
-              service = await prisma.service.create({
-                data: serviceData,
-              })
-            }
-            createdServices.push(service)
-            console.log(`✅ Serviço criado: ${service.name} (${service.game})`)
-          } catch (error) {
-            console.error(`❌ Erro ao criar serviço ${serviceData.name}:`, error)
-          }
-        }
+      let service
+      if (existingService) {
+        // Atualizar se já existir
+        service = await prisma.service.update({
+          where: { id: existingService.id },
+          data: {
+            name: serviceData.name,
+            description: serviceData.description,
+            price: serviceData.price,
+            duration: serviceData.duration,
+          },
+        })
+      } else {
+        // Criar novo serviço
+        service = await prisma.service.create({
+          data: serviceData,
+        })
+      }
+      createdServices.push(service)
+      console.log(`✅ Serviço criado: ${service.name} (${service.game})`)
+    } catch (error) {
+      console.error(`❌ Erro ao criar serviço ${serviceData.name}:`, error)
+    }
+  }
 
   console.log(`✅ Total de ${createdServices.length} serviços criados`)
 
@@ -193,7 +192,7 @@ async function main() {
   // IMPORTANTE: Não criar múltiplos pedidos ativos (PENDING ou IN_PROGRESS) da mesma modalidade para o mesmo usuário
   // Respeitar a regra: máximo 1 boost ativo por modalidade por usuário
   const exampleOrders = []
-  
+
   if (createdServices.length >= 4) {
     // testUser: 1 Premier PENDING, 1 Gamers Club COMPLETED
     exampleOrders.push(
@@ -268,7 +267,7 @@ async function main() {
       gameMode: 'PREMIER',
       gameType: 'CS2_PREMIER',
     })
-    
+
     // client2: 1 Premier PENDING (usuário diferente, pode ter)
     if (createdServices.length > 1) {
       exampleOrders.push({
@@ -325,7 +324,7 @@ async function main() {
   // Criar mais alguns pedidos com diferentes status para melhorar os dados de teste
   // IMPORTANTE: Respeitar a regra - não criar múltiplos pedidos ativos da mesma modalidade para o mesmo usuário
   const additionalOrders = []
-  
+
   if (createdServices.length >= 2) {
     // client2: 1 Gamers Club PENDING (não viola a regra pois client2 não tem Premier ativo)
     additionalOrders.push(

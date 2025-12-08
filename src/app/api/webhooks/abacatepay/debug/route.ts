@@ -49,10 +49,10 @@ export async function GET(request: NextRequest) {
 
     if (!payment) {
       return NextResponse.json(
-        { 
+        {
           error: 'Pagamento não encontrado',
           providerId,
-          orderId 
+          orderId
         },
         { status: 404 }
       )
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
         email: payment.order.user.email,
         name: payment.order.user.name,
       },
-      notifications: notifications.map(n => ({
+      notifications: notifications.map((n: any) => ({
         id: n.id,
         title: n.title,
         message: n.message,

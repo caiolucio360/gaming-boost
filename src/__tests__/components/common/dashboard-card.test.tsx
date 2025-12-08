@@ -3,7 +3,7 @@ import { DashboardCard } from '@/components/common/dashboard-card'
 
 describe('DashboardCard', () => {
   it('should render with title', () => {
-    render(<DashboardCard title="Meus Pedidos" />)
+    render(<DashboardCard title="Meus Pedidos"><div>Content</div></DashboardCard>)
 
     expect(screen.getByText('Meus Pedidos')).toBeInTheDocument()
   })
@@ -23,27 +23,44 @@ describe('DashboardCard', () => {
       <DashboardCard
         title="Pedidos"
         description="Veja todos os seus pedidos aqui"
-      />
+      >
+        <div>Content</div>
+      </DashboardCard>
     )
 
     expect(screen.getByText('Veja todos os seus pedidos aqui')).toBeInTheDocument()
   })
 
-  it('should render with action button', () => {
-    render(
-      <DashboardCard
-        title="Pedidos"
-        action={<button>Ver Todos</button>}
-      />
+  it('should render with status PENDING styling', () => {
+    const { container } = render(
+      <DashboardCard title="Test" status="PENDING">
+        <div>Content</div>
+      </DashboardCard>
     )
 
-    expect(screen.getByRole('button', { name: 'Ver Todos' })).toBeInTheDocument()
+    const card = container.firstChild
+    expect(card).toHaveClass('border-yellow-500/50')
   })
 
-  it('should have correct styling', () => {
-    const { container } = render(<DashboardCard title="Test" />)
+  it('should render with status PAID styling', () => {
+    const { container } = render(
+      <DashboardCard title="Test" status="PAID">
+        <div>Content</div>
+      </DashboardCard>
+    )
 
     const card = container.firstChild
-    expect(card).toHaveClass('bg-black/30')
+    expect(card).toHaveClass('border-cyan-500/50')
+  })
+
+  it('should render with status IN_PROGRESS styling', () => {
+    const { container } = render(
+      <DashboardCard title="Test" status="IN_PROGRESS">
+        <div>Content</div>
+      </DashboardCard>
+    )
+
+    const card = container.firstChild
+    expect(card).toHaveClass('border-blue-500/50')
   })
 })

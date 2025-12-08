@@ -49,16 +49,16 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
     boosterToken = 'mock-booster-token'
     boosterId = 2
     orderId = 1
-    
-    // Mock verifyBooster para retornar booster
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
-      authenticated: true,
-      user: {
-        id: boosterId,
-        email: 'booster@test.com',
-        role: 'BOOSTER',
-      },
-    })
+
+      // Mock verifyBooster para retornar booster
+      ; (verifyBooster as jest.Mock).mockResolvedValue({
+        authenticated: true,
+        user: {
+          id: boosterId,
+          email: 'booster@test.com',
+          role: 'BOOSTER',
+        },
+      })
   })
 
   afterEach(() => {
@@ -72,7 +72,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         userId: 3,
         serviceId: 1,
         boosterId: null,
-        status: 'PENDING',
+        status: 'PAID',
         total: 100.0,
         adminId: 1,
       }
@@ -109,40 +109,40 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         },
       }
 
-      ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
-      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
-      ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const tx = {
-          order: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockUpdatedOrder,
-              adminId: 1,
-            }),
-          },
-          boosterCommission: {
-            create: jest.fn().mockResolvedValue({
-              id: 1,
-              orderId: orderId,
-              boosterId: boosterId,
-              orderTotal: 100.0,
-              percentage: 0.75,
-              amount: 75.0,
-              status: 'PENDING',
-            }),
-          },
-          user: {
-            findMany: jest.fn().mockResolvedValue([
-              { id: 1, adminProfitShare: 1.0 }
-            ]),
-          },
-          adminRevenue: {
-            create: jest.fn().mockResolvedValue({ id: 1 }),
-          },
-        }
-        return await callback(tx)
-      })
+        ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+        ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
+        ; (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
+        ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          const tx = {
+            order: {
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockUpdatedOrder,
+                adminId: 1,
+              }),
+            },
+            boosterCommission: {
+              create: jest.fn().mockResolvedValue({
+                id: 1,
+                orderId: orderId,
+                boosterId: boosterId,
+                orderTotal: 100.0,
+                percentage: 0.75,
+                amount: 75.0,
+                status: 'PENDING',
+              }),
+            },
+            user: {
+              findMany: jest.fn().mockResolvedValue([
+                { id: 1, adminProfitShare: 1.0 }
+              ]),
+            },
+            adminRevenue: {
+              create: jest.fn().mockResolvedValue({ id: 1 }),
+            },
+          }
+          return await callback(tx)
+        })
 
       const request = new NextRequest(`http://localhost/api/booster/orders/${orderId}`, {
         method: 'POST',
@@ -171,7 +171,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         userId: 3,
         serviceId: 1,
         boosterId: null,
-        status: 'PENDING',
+        status: 'PAID',
         total: 100.0,
         adminId: 1,
       }
@@ -215,41 +215,41 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         },
       }
 
-      ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
-      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
-      ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(mockConfig)
-      ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const tx = {
-          order: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockUpdatedOrder,
-              adminId: 1,
-            }),
-          },
-          boosterCommission: {
-            create: jest.fn().mockResolvedValue({
-              id: 1,
-              orderId: orderId,
-              boosterId: boosterId,
-              orderTotal: 100.0,
-              percentage: 0.70,
-              amount: 70.0,
-              status: 'PENDING',
-            }),
-          },
-          user: {
-            findMany: jest.fn().mockResolvedValue([
-              { id: 1, adminProfitShare: 1.0 }
-            ]),
-          },
-          adminRevenue: {
-            create: jest.fn().mockResolvedValue({ id: 1 }),
-          },
-        }
-        return await callback(tx)
-      })
+        ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+        ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
+        ; (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
+        ; (prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(mockConfig)
+        ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          const tx = {
+            order: {
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockUpdatedOrder,
+                adminId: 1,
+              }),
+            },
+            boosterCommission: {
+              create: jest.fn().mockResolvedValue({
+                id: 1,
+                orderId: orderId,
+                boosterId: boosterId,
+                orderTotal: 100.0,
+                percentage: 0.70,
+                amount: 70.0,
+                status: 'PENDING',
+              }),
+            },
+            user: {
+              findMany: jest.fn().mockResolvedValue([
+                { id: 1, adminProfitShare: 1.0 }
+              ]),
+            },
+            adminRevenue: {
+              create: jest.fn().mockResolvedValue({ id: 1 }),
+            },
+          }
+          return await callback(tx)
+        })
 
       const request = new NextRequest(`http://localhost/api/booster/orders/${orderId}`, {
         method: 'POST',
@@ -277,7 +277,7 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         userId: 3,
         serviceId: 1,
         boosterId: null,
-        status: 'PENDING',
+        status: 'PAID',
         total: 100.0,
         adminId: 1,
       }
@@ -321,42 +321,42 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
         },
       }
 
-      ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
-      ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
-      ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(null)
-      ;(prisma.commissionConfig.create as jest.Mock).mockResolvedValue(mockConfig)
-      ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const tx = {
-          order: {
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockUpdatedOrder,
-              adminId: 1,
-            }),
-          },
-          boosterCommission: {
-            create: jest.fn().mockResolvedValue({
-              id: 1,
-              orderId: orderId,
-              boosterId: boosterId,
-              orderTotal: 100.0,
-              percentage: 0.70,
-              amount: 70.0,
-              status: 'PENDING',
-            }),
-          },
-          user: {
-            findMany: jest.fn().mockResolvedValue([
-              { id: 1, adminProfitShare: 1.0 }
-            ]),
-          },
-          adminRevenue: {
-            create: jest.fn().mockResolvedValue({ id: 1 }),
-          },
-        }
-        return await callback(tx)
-      })
+        ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder)
+        ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
+        ; (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockBooster)
+        ; (prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(null)
+        ; (prisma.commissionConfig.create as jest.Mock).mockResolvedValue(mockConfig)
+        ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          const tx = {
+            order: {
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockUpdatedOrder,
+                adminId: 1,
+              }),
+            },
+            boosterCommission: {
+              create: jest.fn().mockResolvedValue({
+                id: 1,
+                orderId: orderId,
+                boosterId: boosterId,
+                orderTotal: 100.0,
+                percentage: 0.70,
+                amount: 70.0,
+                status: 'PENDING',
+              }),
+            },
+            user: {
+              findMany: jest.fn().mockResolvedValue([
+                { id: 1, adminProfitShare: 1.0 }
+              ]),
+            },
+            adminRevenue: {
+              create: jest.fn().mockResolvedValue({ id: 1 }),
+            },
+          }
+          return await callback(tx)
+        })
 
       const request = new NextRequest(`http://localhost/api/booster/orders/${orderId}`, {
         method: 'POST',

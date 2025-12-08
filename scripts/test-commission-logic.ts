@@ -1,7 +1,5 @@
 
-import { PrismaClient } from '../src/generated/prisma'
-
-const prisma = new PrismaClient()
+import { prisma } from '../src/lib/db'
 
 async function main() {
     console.log('🚀 Starting Commission Logic Test...')
@@ -89,7 +87,7 @@ async function main() {
             select: { id: true, adminProfitShare: true, email: true }
         })
 
-        const totalShares = admins.reduce((sum, admin) => sum + (admin.adminProfitShare || 0), 0)
+        const totalShares = admins.reduce((sum: number, admin: any) => sum + (admin.adminProfitShare || 0), 0)
 
         console.log(`Total Order: ${order.total}`)
         console.log(`Booster Commission: ${boosterCommission} (${boosterPercentage * 100}%)`)
@@ -156,8 +154,8 @@ async function main() {
             include: { admin: true }
         })
 
-        const revAdmin1 = revenues.find(r => r.admin.email === admin1Email)
-        const revAdmin2 = revenues.find(r => r.admin.email === admin2Email)
+        const revAdmin1 = revenues.find((r: any) => r.admin.email === admin1Email)
+        const revAdmin2 = revenues.find((r: any) => r.admin.email === admin2Email)
 
         // Expected:
         // Booster gets 20% of 100 = 20.

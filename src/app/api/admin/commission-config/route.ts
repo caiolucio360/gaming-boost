@@ -72,7 +72,8 @@ export async function PUT(request: NextRequest) {
     }
 
     // Desabilitar configurações antigas e criar nova
-    const config = await prisma.$transaction(async (tx) => {
+    // Using any due to Prisma custom output path type resolution issues
+    const config = await prisma.$transaction(async (tx: any) => {
       // Desabilitar todas as configurações existentes
       await tx.commissionConfig.updateMany({
         where: { enabled: true },
@@ -103,4 +104,3 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
-

@@ -35,7 +35,7 @@ describe('BoosterCard', () => {
   it('should show verified badge when verified', () => {
     render(<BoosterCard booster={mockBooster} />)
 
-    expect(screen.getByText('Verificado')).toBeInTheDocument()
+    expect(screen.getByText('✓ Verificado')).toBeInTheDocument()
   })
 
   it('should not show verified badge when not verified', () => {

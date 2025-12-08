@@ -139,6 +139,7 @@ model Payment {
 
 enum OrderStatus {
   PENDING
+  PAID
   IN_PROGRESS
   COMPLETED
   CANCELLED

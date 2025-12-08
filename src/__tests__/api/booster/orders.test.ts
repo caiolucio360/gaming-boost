@@ -38,7 +38,7 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar pedidos disponíveis para booster', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -53,7 +53,7 @@ describe('GET /api/booster/orders', () => {
         userId: 1,
         serviceId: 1,
         boosterId: null,
-        status: 'PENDING',
+        status: 'PAID',
         total: 100,
         createdAt: new Date(),
         user: { id: 1, email: 'user1@test.com', name: 'User 1' },
@@ -67,14 +67,14 @@ describe('GET /api/booster/orders', () => {
       },
     ]
 
-    ;(prisma.order.findMany as jest.Mock).mockResolvedValue(mockOrders)
-    ;(prisma.order.count as jest.Mock).mockResolvedValue(1)
-    ;(prisma.order.aggregate as jest.Mock).mockResolvedValue({
-      _sum: { total: 100 },
-    })
-    ;(prisma.boosterCommission.aggregate as jest.Mock).mockResolvedValue({
-      _sum: { amount: 0 },
-    })
+      ; (prisma.order.findMany as jest.Mock).mockResolvedValue(mockOrders)
+      ; (prisma.order.count as jest.Mock).mockResolvedValue(1)
+      ; (prisma.order.aggregate as jest.Mock).mockResolvedValue({
+        _sum: { total: 100 },
+      })
+      ; (prisma.boosterCommission.aggregate as jest.Mock).mockResolvedValue({
+        _sum: { amount: 0 },
+      })
 
     const request = new NextRequest(
       'http://localhost:3000/api/booster/orders?type=available',
@@ -89,12 +89,12 @@ describe('GET /api/booster/orders', () => {
     expect(response.status).toBe(200)
     expect(data.orders).toBeDefined()
     expect(data.orders).toHaveLength(1)
-    expect(data.orders[0].status).toBe('PENDING')
+    expect(data.orders[0].status).toBe('PAID')
     expect(data.orders[0].boosterId).toBeNull()
   })
 
   it('deve retornar pedidos atribuídos ao booster', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -123,14 +123,14 @@ describe('GET /api/booster/orders', () => {
       },
     ]
 
-    ;(prisma.order.findMany as jest.Mock).mockResolvedValue(mockOrders)
-    ;(prisma.order.count as jest.Mock).mockResolvedValue(1)
-    ;(prisma.order.aggregate as jest.Mock).mockResolvedValue({
-      _sum: { total: 100 },
-    })
-    ;(prisma.boosterCommission.aggregate as jest.Mock).mockResolvedValue({
-      _sum: { amount: 50 },
-    })
+      ; (prisma.order.findMany as jest.Mock).mockResolvedValue(mockOrders)
+      ; (prisma.order.count as jest.Mock).mockResolvedValue(1)
+      ; (prisma.order.aggregate as jest.Mock).mockResolvedValue({
+        _sum: { total: 100 },
+      })
+      ; (prisma.boosterCommission.aggregate as jest.Mock).mockResolvedValue({
+        _sum: { amount: 50 },
+      })
 
     const request = new NextRequest(
       'http://localhost:3000/api/booster/orders?type=assigned',
@@ -149,7 +149,7 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar erro 401 se não autenticado', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: false,
       error: 'Não autenticado',
     })
@@ -166,7 +166,7 @@ describe('GET /api/booster/orders', () => {
   })
 
   it('deve retornar erro 403 se não for booster', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: false,
       error: 'Acesso negado. Permissão insuficiente.',
     })

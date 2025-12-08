@@ -76,7 +76,7 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2">
-              {profile.languages.map((lang) => (
+              {profile.languages.map((lang: any) => (
                 <Badge key={lang} variant="secondary" className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30">
                   {lang}
                 </Badge>
@@ -119,7 +119,7 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
 
           <div className="grid gap-4">
             {profile.user.reviewsReceived.length > 0 ? (
-              profile.user.reviewsReceived.map((review) => (
+              profile.user.reviewsReceived.map((review: any) => (
                 <Card key={review.id} className="bg-black/20 border-purple-500/20">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">

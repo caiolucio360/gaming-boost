@@ -5,7 +5,7 @@ export interface AbacatePayCustomer {
     name: string
     email: string
     taxId: string // CPF/CNPJ
-    cellphone: string
+    cellphone: string // Required by AbacatePay
 }
 
 // Params for creating a charge
@@ -160,12 +160,15 @@ export async function createPixQrCode(params: CreatePixQrCodeParams): Promise<Pi
     }
 
     if (params.customer) {
-        body.customer = {
+        const customerData: Record<string, unknown> = {
             name: params.customer.name,
-            cellphone: params.customer.cellphone,
             email: params.customer.email,
             taxId: params.customer.taxId,
         }
+        if (params.customer.cellphone) {
+            customerData.cellphone = params.customer.cellphone
+        }
+        body.customer = customerData
     }
 
     if (params.metadata) {
@@ -340,7 +343,7 @@ export async function createAbacatePayCharge(params: CreateChargeParams): Promis
             customer: {
                 name: params.customer.name,
                 email: params.customer.email,
-                cellphone: params.customer.cellphone,
+                cellphone: params.customer.cellphone || '+5500000000000', // SDK requires cellphone
                 taxId: params.customer.taxId,
             },
         })

@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se há pagamento confirmado
-    const paidPayment = order.payments.find(p => p.status === 'PAID')
-    
+    const paidPayment = order.payments.find((p: any) => p.status === 'PAID')
+
     if (!paidPayment) {
       return NextResponse.json(
         { message: 'Nenhum pagamento confirmado encontrado para este pedido' },
@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Liberar comissões/receitas em uma transação
-    const result = await prisma.$transaction(async (tx) => {
+    // Using any due to Prisma custom output path type resolution issues
+    const result = await prisma.$transaction(async (tx: any) => {
       // Atualizar comissão do booster se existir e estiver pendente
       if (order.commission && order.commission.status === 'PENDING') {
         await tx.boosterCommission.update({
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Atualizar receitas dos admins se existirem e estiverem pendentes
-      const pendingRevenues = order.revenues.filter(r => r.status === 'PENDING')
+      const pendingRevenues = order.revenues.filter((r: any) => r.status === 'PENDING')
       for (const revenue of pendingRevenues) {
         await tx.adminRevenue.update({
           where: { id: revenue.id },
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(
-      { 
+      {
         message: 'Pagamentos liberados com sucesso',
         orderId: orderIdNum,
       },
@@ -106,4 +106,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

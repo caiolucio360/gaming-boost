@@ -48,7 +48,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
   })
 
   it('deve aceitar pedido com sucesso usando transação atômica', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -61,7 +61,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       id: 1,
       userId: 1,
       serviceId: 1,
-      status: 'PENDING',
+      status: 'PAID',
       boosterId: null,
       total: 100,
     }
@@ -90,32 +90,32 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       booster: { id: 1, email: 'booster@test.com', name: 'Booster' },
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
-    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(booster)
-    ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(commissionConfig)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Nenhum pedido ativo
+      ; (prisma.user.findUnique as jest.Mock).mockResolvedValue(booster)
+      ; (prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue(commissionConfig)
 
-    // Simular transação atômica
-    ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-      const tx = {
-        order: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue(updatedOrder),
-        },
-        boosterCommission: {
-          create: jest.fn().mockResolvedValue({ id: 1 }),
-        },
-        user: {
-          findMany: jest.fn().mockResolvedValue([
-            { id: 1, adminProfitShare: 1.0 }
-          ]),
-        },
-        adminRevenue: {
-          create: jest.fn().mockResolvedValue({ id: 1 }),
-        },
-      }
-      return callback(tx)
-    })
+      // Simular transação atômica
+      ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const tx = {
+          order: {
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            findUnique: jest.fn().mockResolvedValue(updatedOrder),
+          },
+          boosterCommission: {
+            create: jest.fn().mockResolvedValue({ id: 1 }),
+          },
+          user: {
+            findMany: jest.fn().mockResolvedValue([
+              { id: 1, adminProfitShare: 1.0 }
+            ]),
+          },
+          adminRevenue: {
+            create: jest.fn().mockResolvedValue({ id: 1 }),
+          },
+        }
+        return callback(tx)
+      })
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'POST',
@@ -132,7 +132,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
   })
 
   it('deve retornar erro 404 se pedido não existir', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -141,7 +141,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       },
     })
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/999', {
       method: 'POST',
@@ -155,7 +155,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
   })
 
   it('deve retornar erro 400 se pedido já foi aceito', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -173,7 +173,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       total: 100,
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'POST',
@@ -183,11 +183,11 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.message).toContain('não está disponível')
+    expect(data.message).toContain('não está pago')
   })
 
   it('deve retornar erro 400 se booster já possui pedido pendente', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -200,18 +200,18 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       id: 2,
       userId: 1,
       serviceId: 1,
-      status: 'PENDING',
+      status: 'PAID',
       boosterId: null,
       total: 100,
     }
 
     const activeOrder = {
       id: 1,
-      status: 'PENDING',
+      status: 'PAID',
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/2', {
       method: 'POST',
@@ -227,7 +227,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       where: {
         boosterId: 1,
         status: {
-          in: ['PENDING', 'IN_PROGRESS'],
+          in: ['PENDING', 'PAID', 'IN_PROGRESS'],
         },
       },
       select: {
@@ -238,7 +238,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
   })
 
   it('deve retornar erro 400 se booster já possui pedido em andamento', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -251,7 +251,7 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       id: 2,
       userId: 1,
       serviceId: 1,
-      status: 'PENDING',
+      status: 'PAID',
       boosterId: null,
       total: 100,
     }
@@ -261,8 +261,8 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
       status: 'IN_PROGRESS',
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.findFirst as jest.Mock).mockResolvedValue(activeOrder)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/2', {
       method: 'POST',
@@ -283,7 +283,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
   })
 
   it('deve atualizar status do pedido para COMPLETED', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -306,9 +306,9 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
       status: 'COMPLETED',
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
-    ;(prisma.order.update as jest.Mock).mockResolvedValue(updatedOrder)
-    ;(prisma.boosterCommission.updateMany as jest.Mock).mockResolvedValue({ count: 1 })
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.update as jest.Mock).mockResolvedValue(updatedOrder)
+      ; (prisma.boosterCommission.updateMany as jest.Mock).mockResolvedValue({ count: 1 })
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'PUT',
@@ -326,7 +326,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
   })
 
   it('deve retornar erro 404 se pedido não existir', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -335,7 +335,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
       },
     })
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(null)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/999', {
       method: 'PUT',
@@ -352,7 +352,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
   })
 
   it('deve retornar erro 403 se pedido não pertence ao booster', async () => {
-    ;(verifyBooster as jest.Mock).mockResolvedValue({
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
         id: 1,
@@ -370,7 +370,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
       total: 100,
     }
 
-    ;(prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
+      ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'PUT',

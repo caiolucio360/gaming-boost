@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     if (notes) orderData.notes = notes
 
     // Criar order e receita do admin em uma transação
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: any) => {
       const newOrder = await tx.order.create({
         data: orderData,
         include: {

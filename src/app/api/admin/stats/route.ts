@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         revenue: {
           total: totalRevenue || 0,
         },
-        recentOrders: recentOrders.map((order) => {
+        recentOrders: recentOrders.map((order: any) => {
           // Garantir que createdAt seja uma string ISO
           let createdAtStr: string
           if (order.createdAt instanceof Date) {
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     const errorStack = error instanceof Error ? error.stack : undefined
     console.error('Detalhes do erro:', { message: errorMessage, stack: errorStack })
     return NextResponse.json(
-      { 
+      {
         message: 'Erro ao buscar estatísticas',
         error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
       },

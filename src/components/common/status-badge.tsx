@@ -1,8 +1,8 @@
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Clock, CheckCircle2, XCircle, Loader2, LucideIcon } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, Loader2, LucideIcon, CreditCard } from 'lucide-react'
 
-export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+export type OrderStatus = 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
 interface StatusConfig {
   label: string
@@ -15,7 +15,13 @@ const statusConfigs: Record<OrderStatus, StatusConfig & { tooltip: string }> = {
     label: 'Pendente',
     color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
     icon: Clock,
-    tooltip: 'Pedido aguardando processamento',
+    tooltip: 'Pedido aguardando pagamento',
+  },
+  PAID: {
+    label: 'Pago',
+    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+    icon: CreditCard,
+    tooltip: 'Pagamento confirmado, aguardando um booster aceitar',
   },
   IN_PROGRESS: {
     label: 'Em Progresso',

@@ -88,9 +88,9 @@ export async function PUT(
 
     const updateData: any = {}
 
-    if (status && ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
+    if (status && ['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
       updateData.status = status
-      
+
       // Se estiver marcando como COMPLETED, liberar automaticamente as comissões/receitas
       if (status === 'COMPLETED') {
         // Liberar automaticamente comissão do booster (disponível para saque)

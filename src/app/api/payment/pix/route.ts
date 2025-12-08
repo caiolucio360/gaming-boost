@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar dados de pagamento fornecidos
+    // Validar dados de pagamento fornecidos - telefone e CPF são obrigatórios para AbacatePay
     if (!phone || !taxId) {
       return NextResponse.json(
         {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar se já existe pagamento pendente válido
     const existingPayment = order.payments.find(
-      (p) => p.status === 'PENDING' && p.expiresAt && new Date(p.expiresAt) > new Date()
+      (p: any) => p.status === 'PENDING' && p.expiresAt && new Date(p.expiresAt) > new Date()
     )
 
     if (existingPayment) {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe pagamento pago
-    const paidPayment = order.payments.find((p) => p.status === 'PAID')
+    const paidPayment = order.payments.find((p: any) => p.status === 'PAID')
     if (paidPayment) {
       return NextResponse.json(
         { message: 'Este pedido já foi pago', payment: paidPayment },
@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
       console.log('Order ID:', order.id)
       console.log('Order Total:', order.total)
       console.log('Amount in cents:', Math.round(order.total * 100))
-      console.log('Customer Phone:', phone)
       console.log('Customer CPF:', taxId.substring(0, 3) + '...' + taxId.substring(taxId.length - 2))
+      console.log('Customer Phone:', phone)
       console.log('=================================================')
 
       const pixData = await createPixQrCode({

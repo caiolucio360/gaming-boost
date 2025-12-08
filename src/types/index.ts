@@ -31,7 +31,7 @@ export interface Order {
   userId: number;
   serviceId: number;
   boosterId?: number | null;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   total: number;
   createdAt: Date;
   updatedAt?: Date;

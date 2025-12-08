@@ -21,7 +21,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 const mockService: Service = {
-  id: 'service123',
+  id: 123,
   game: 'CS2',
   type: 'RANK_BOOST',
   name: 'Boost CS2 Premier: 10K → 15K',

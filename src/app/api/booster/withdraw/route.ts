@@ -180,11 +180,11 @@ export async function GET(request: NextRequest) {
         // Calcular estatísticas
         const stats = {
             totalWithdrawals: withdrawals.length,
-            pendingWithdrawals: withdrawals.filter(w => w.status === 'PENDING' || w.status === 'PROCESSING').length,
-            completedWithdrawals: withdrawals.filter(w => w.status === 'COMPLETE').length,
+            pendingWithdrawals: withdrawals.filter((w: any) => w.status === 'PENDING' || w.status === 'PROCESSING').length,
+            completedWithdrawals: withdrawals.filter((w: any) => w.status === 'COMPLETE').length,
             totalWithdrawn: withdrawals
-                .filter(w => w.status === 'COMPLETE')
-                .reduce((acc, w) => acc + w.amount, 0),
+                .filter((w: any) => w.status === 'COMPLETE')
+                .reduce((acc: any, w: any) => acc + w.amount, 0),
         }
 
         // Calcular saldo disponível

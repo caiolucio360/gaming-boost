@@ -5,7 +5,8 @@ describe('ElojobHero', () => {
   it('should render hero section', () => {
     render(<ElojobHero />)
 
-    expect(screen.getByRole('banner')).toBeInTheDocument()
+    // ElojobHero uses section with aria-label
+    expect(screen.getByRole('region', { name: /Hero/i })).toBeInTheDocument()
   })
 
   it('should display main heading', () => {
@@ -18,20 +19,21 @@ describe('ElojobHero', () => {
   it('should show CTA button', () => {
     render(<ElojobHero />)
 
-    const ctaButton = screen.getByRole('link', { name: /Começar Agora/i })
+    // CTA text is "CONTRATE JÁ!"
+    const ctaButton = screen.getByRole('link', { name: /CONTRATE JÁ/i })
     expect(ctaButton).toBeInTheDocument()
   })
 
   it('should have correct link for CTA', () => {
     render(<ElojobHero />)
 
-    const ctaButton = screen.getByRole('link', { name: /Começar Agora/i })
+    const ctaButton = screen.getByRole('link', { name: /CONTRATE JÁ/i })
     expect(ctaButton).toHaveAttribute('href', '/games/cs2')
   })
 
   it('should display hero description', () => {
     render(<ElojobHero />)
 
-    expect(screen.getByText(/Boost profissional/i)).toBeInTheDocument()
+    expect(screen.getByText(/Boost Profissional/i)).toBeInTheDocument()
   })
 })

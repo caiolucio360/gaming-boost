@@ -18,8 +18,8 @@ describe('Footer', () => {
   it('should have navigation links', () => {
     render(<Footer />)
 
-    expect(screen.getByRole('link', { name: /Sobre/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Contato/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Termos/i })).toBeInTheDocument()
   })
 
   it('should show privacy policy link', () => {

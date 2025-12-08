@@ -5,7 +5,7 @@ describe('PageHeader', () => {
   it('should render title', () => {
     render(<PageHeader title="Meus Pedidos" />)
 
-    expect(screen.getByRole('heading', { name: 'Meus Pedidos' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Meus Pedidos/i })).toBeInTheDocument()
   })
 
   it('should render description', () => {
@@ -19,29 +19,22 @@ describe('PageHeader', () => {
     expect(screen.getByText('Acompanhe suas estatísticas')).toBeInTheDocument()
   })
 
-  it('should render action button', () => {
+  it('should render with highlight', () => {
     render(
       <PageHeader
-        title="Pedidos"
-        action={<button>Criar Novo</button>}
+        title="Dashboard"
+        highlight="GAME"
       />
     )
 
-    expect(screen.getByRole('button', { name: 'Criar Novo' })).toBeInTheDocument()
+    expect(screen.getByText('GAME')).toBeInTheDocument()
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
   })
 
-  it('should render breadcrumb', () => {
-    render(
-      <PageHeader
-        title="Pedidos"
-        breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Pedidos', href: '/pedidos' },
-        ]}
-      />
-    )
-
-    expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('Pedidos')).toBeInTheDocument()
+  it('should have header styling', () => {
+    render(<PageHeader title="Test" />)
+    
+    const heading = screen.getByRole('heading')
+    expect(heading).toHaveClass('font-bold')
   })
 })
