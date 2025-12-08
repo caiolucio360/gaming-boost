@@ -160,7 +160,7 @@ export function ElojobHeader() {
                 <>
                   {/* Cart Button - Visible outside dropdown for CLIENT */}
                   {user && user.role === 'CLIENT' && (
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button

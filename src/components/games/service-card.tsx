@@ -88,7 +88,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
       
       <CardContent className="relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <TooltipProvider>
+          <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center space-x-2 cursor-help">
@@ -102,8 +102,6 @@ export function ServiceCard({ service }: ServiceCardProps) {
                 <p>Tempo estimado de conclusão</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center space-x-2 cursor-help">
