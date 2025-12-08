@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  CreditCard,
+  ArrowUpDown,
 } from 'lucide-react'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { PageHeader } from '@/components/common/page-header'
@@ -32,7 +34,7 @@ import { RefreshingBanner } from '@/components/common/refreshing-banner'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
 import { ReviewModal } from '@/components/reviews/review-modal'
@@ -51,7 +53,6 @@ export default function DashboardPage() {
     variant: 'default' | 'destructive'
   } | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('')
-  const [filterGame, setFilterGame] = useState<string>('')
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
 
   useEffect(() => {
@@ -113,16 +114,13 @@ export default function DashboardPage() {
     }
 
     // Filtro por jogo
-    if (filterGame) {
-      filtered = filtered.filter(order => order.service?.game === filterGame)
-    }
-
     // Ordenação: primeiro por status (na ordem dos filtros), depois por data
     const statusOrder: Record<string, number> = {
       'PENDING': 1,
-      'IN_PROGRESS': 2,
-      'COMPLETED': 3,
-      'CANCELLED': 4,
+      'PAID': 2,
+      'IN_PROGRESS': 3,
+      'COMPLETED': 4,
+      'CANCELLED': 5,
     }
 
     filtered.sort((a, b) => {
@@ -143,17 +141,10 @@ export default function DashboardPage() {
     })
 
     return filtered
-  }, [orders, filterStatus, filterGame, sortOrder])
-
-  // Obter jogos únicos dos pedidos
-  const availableGames = useMemo(() => {
-    const games = new Set<GameId>()
-    orders.forEach(order => {
-      if (order.service?.game) {
-        games.add(order.service.game as GameId)
-      }
-    })
-    return Array.from(games)
+  }, [orders, filterStatus, sortOrder])
+  // Pedidos pendentes de pagamento (destaque no topo)
+  const pendingPaymentOrders = useMemo(() => {
+    return orders.filter(order => order.status === 'PENDING')
   }, [orders])
 
   const handlePayment = (orderId: number, total: number) => {
@@ -265,6 +256,17 @@ export default function DashboardPage() {
                   Pendentes
                 </button>
                 <button
+                  onClick={() => setFilterStatus('PAID')}
+                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                    filterStatus === 'PAID'
+                      ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300'
+                      : 'bg-black/50 border border-cyan-500/30 text-gray-400 hover:border-cyan-500/50 hover:text-cyan-300'
+                  }`}
+                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                >
+                  Pagos
+                </button>
+                <button
                   onClick={() => setFilterStatus('IN_PROGRESS')}
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'IN_PROGRESS'
@@ -299,33 +301,16 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              {/* Filtros Adicionais - Compactos */}
+              {/* Botão de Ordenação */}
               <div className="flex flex-1 gap-2 md:ml-auto md:justify-end">
-                {availableGames.length > 0 && (
-                  <Select value={filterGame || undefined} onValueChange={(value) => setFilterGame(value === 'all' ? '' : value)}>
-                    <SelectTrigger className="w-full md:w-[160px] h-9 bg-black/50 border-purple-500/50 text-white font-rajdhani text-xs hover:border-purple-400 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                      <SelectValue placeholder="Jogo" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-purple-500/50">
-                      <SelectItem value="all">Todos os jogos</SelectItem>
-                      {availableGames.map((game) => (
-                        <SelectItem key={game} value={game}>
-                          {game === 'CS2' ? 'Counter-Strike 2' : game === 'LOL' ? 'League of Legends' : game === 'VALORANT' ? 'Valorant' : game}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'newest' | 'oldest')}>
-                  <SelectTrigger className="w-full md:w-[140px] h-9 bg-black/50 border-purple-500/50 text-white font-rajdhani text-xs hover:border-purple-400 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-purple-500/50">
-                    <SelectItem value="newest">Mais recentes</SelectItem>
-                    <SelectItem value="oldest">Mais antigos</SelectItem>
-                  </SelectContent>
-                </Select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                  className="w-[130px] px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 bg-black/50 border border-purple-500/30 text-gray-400 hover:border-purple-500/50 hover:text-purple-300 hover:bg-purple-500/10 flex items-center justify-center gap-1.5"
+                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                >
+                  <ArrowUpDown className="h-3.5 w-3.5" />
+                  {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
+                </button>
               </div>
             </div>
           </CardContent>
@@ -355,6 +340,7 @@ export default function DashboardPage() {
                   key={order.id}
                   title={order.service?.name || 'Serviço'}
                   description={order.service?.description || 'Descrição não disponível'}
+                  status={order.status as 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">

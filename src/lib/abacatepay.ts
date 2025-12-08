@@ -187,11 +187,34 @@ export async function createPixQrCode(params: CreatePixQrCodeParams): Promise<Pi
 
 /**
  * Verifica o status de um pagamento PIX
- * @param pixQrCodeId - ID do PIX QR Code
+ * @param pixQrCodeId - ID do PIX QR Code ou Billing ID
  * @returns Status atual e data de expiração
  */
 export async function checkPixStatus(pixQrCodeId: string): Promise<PixStatusResponse> {
     console.log('Checking PIX status for:', pixQrCodeId)
+
+    // Se for um Billing ID antigo (starts with "bill_")
+    if (pixQrCodeId.startsWith('bill_')) {
+        console.log('Legacy Billing ID detected, checking billing status...');
+        const result = await apiRequest<AbacatePayResponse>(
+            `/billing/list?id=${encodeURIComponent(pixQrCodeId)}`,
+            'GET'
+        )
+
+        // billing/list retorna uma lista de billings
+        // O SDK antigo retornava um array, vamos assumir que a API retorna
+        // Se a resposta for um array, pegamos o primeiro
+        const billing = Array.isArray(result) ? result[0] : result;
+
+        if (!billing) {
+            throw new Error(`Billing not found: ${pixQrCodeId}`)
+        }
+
+        return {
+            status: billing.status,
+            expiresAt: new Date(Date.now() + 3600000).toISOString() // Fake expiry for legacy billing if not present
+        }
+    }
 
     const result = await apiRequest<PixStatusResponse>(
         `/pixQrCode/check?id=${encodeURIComponent(pixQrCodeId)}`,

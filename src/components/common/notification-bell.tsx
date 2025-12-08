@@ -106,10 +106,19 @@ export function NotificationBell() {
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300">
-                <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'animate-bellPulse' : ''}`} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-brand-red border-2 border-background animate-pulse" />
-                )}
+                <div className={`relative ${unreadCount > 0 ? 'animate-bellPulse' : ''}`}>
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span 
+                      className={`absolute -top-2.5 -right-2.5 h-[18px] flex items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[10px] font-bold leading-none ${unreadCount > 9 ? 'min-w-[22px] px-1.5' : 'min-w-[18px]'}`}
+                      style={{ 
+                        boxShadow: '0 0 8px rgba(239, 68, 68, 0.6), 0 2px 4px rgba(0, 0, 0, 0.3)',
+                      }}
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span className="sr-only">Notificações</span>
               </Button>
             </PopoverTrigger>
