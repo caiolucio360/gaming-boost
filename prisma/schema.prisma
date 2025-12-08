@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
@@ -44,6 +44,7 @@ model User {
   notifications      Notification[]
   disputesCreated    Dispute[]           @relation("DisputeCreator")
   disputeMessages    DisputeMessage[]    @relation("MessageAuthor")
+  withdrawals        Withdrawal[]        // Saques solicitados
   image              String? // Avatar URL
 }
 
@@ -321,3 +322,35 @@ enum DisputeStatus {
   RESOLVED_PARTIAL
   CANCELLED
 }
+
+// Modelo para rastrear saques PIX de boosters e admins
+model Withdrawal {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId  String?          // ID do saque no AbacatePay (tran_123456)
+  externalId  String           @unique  // ID único no nosso sistema
+  amount      Int              // Valor em centavos
+  platformFee Int?             // Taxa da plataforma
+  pixKeyType  String           // CPF, CNPJ, EMAIL, PHONE, RANDOM, BR_CODE
+  pixKey      String           // Valor da chave PIX
+  status      WithdrawalStatus @default(PENDING)
+  receiptUrl  String?
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  completedAt DateTime?
+
+  @@index([userId, status])
+  @@index([status])
+  @@index([providerId])
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+  CANCELLED
+}
+

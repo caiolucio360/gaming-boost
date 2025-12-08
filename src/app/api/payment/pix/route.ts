@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createAbacatePayCharge } from '@/lib/abacatepay'
+import { createPixQrCode } from '@/lib/abacatepay'
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,13 +64,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se já existe pagamento
+    // Verificar se já existe pagamento pendente válido
     const existingPayment = order.payments.find(
-      (p) => p.status === 'PENDING' || p.status === 'PAID'
+      (p) => p.status === 'PENDING' && p.expiresAt && new Date(p.expiresAt) > new Date()
     )
 
     if (existingPayment) {
-      return NextResponse.json({ payment: existingPayment }, { status: 200 })
+      // Retornar pagamento existente com QR Code
+      return NextResponse.json({
+        payment: existingPayment,
+        message: 'Pagamento PIX já existente'
+      }, { status: 200 })
+    }
+
+    // Verificar se já existe pagamento pago
+    const paidPayment = order.payments.find((p) => p.status === 'PAID')
+    if (paidPayment) {
+      return NextResponse.json(
+        { message: 'Este pedido já foi pago', payment: paidPayment },
+        { status: 400 }
+      )
     }
 
     // Verificar API Key
@@ -82,60 +95,59 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Gerar cobrança no AbacatePay
+    // Gerar PIX QR Code no AbacatePay
     try {
-      console.log('========== CREATING PIX PAYMENT ==========')
+      console.log('========== CREATING PIX QR CODE PAYMENT ==========')
       console.log('Order ID:', order.id)
       console.log('Order Total:', order.total)
       console.log('Amount in cents:', Math.round(order.total * 100))
       console.log('Customer Phone:', phone)
       console.log('Customer CPF:', taxId.substring(0, 3) + '...' + taxId.substring(taxId.length - 2))
-      console.log('===========================================')
+      console.log('=================================================')
 
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-      const returnUrl = `${baseUrl}/dashboard`
-
-      const charge = await createAbacatePayCharge({
-        amount: order.total * 100, // Converter para centavos
+      const pixData = await createPixQrCode({
+        amount: Math.round(order.total * 100), // Converter para centavos
         description: `Pedido #${order.id} - ${order.service.name}`,
+        expiresIn: 1800, // 30 minutos
         customer: {
           name: order.user.name || 'Cliente',
           email: order.user.email,
-          taxId: taxId,           // Use CPF provided in request
-          cellphone: phone,       // Use phone provided in request
+          taxId: taxId,
+          cellphone: phone,
         },
-        returnUrl: returnUrl,
-        completionUrl: returnUrl,
+        metadata: {
+          orderId: order.id.toString(),
+        }
       })
 
-      console.log('========== CHARGE CREATED SUCCESSFULLY ==========')
-      console.log('Billing ID:', charge.id)
-      console.log('Payment URL:', charge.url)
-      console.log('Full Charge Data:', JSON.stringify(charge, null, 2))
+      console.log('========== PIX QR CODE CREATED SUCCESSFULLY ==========')
+      console.log('PIX ID:', pixData.id)
+      console.log('Status:', pixData.status)
+      console.log('BrCode length:', pixData.brCode?.length)
+      console.log('Has QR Image:', !!pixData.brCodeBase64)
+      console.log('Expires At:', pixData.expiresAt)
+      console.log('======================================================')
 
-      // NOTA: O SDK da AbacatePay retorna um objeto IBilling que não inclui dados do PIX diretamente
-      // Para obter o QR Code PIX, você precisa usar o pixQrCode.create() separadamente
-      // Por enquanto, vamos armazenar a URL de pagamento
-      const paymentUrl = charge.url
-      const expiresAt = new Date(Date.now() + 30 * 60 * 1000) // 30 minutos
-
-      // Salvar informação de pagamento no banco (SEM salvar phone/taxId)
+      // Salvar informação de pagamento no banco
       const payment = await prisma.payment.create({
         data: {
           orderId: order.id,
           method: 'PIX',
-          providerId: charge.id,
-          pixCode: paymentUrl, // Armazenar URL de pagamento ao invés do código PIX diretamente
-          qrCode: paymentUrl, // URL do QR Code
+          providerId: pixData.id,
+          pixCode: pixData.brCode,       // Código copia-e-cola
+          qrCode: pixData.brCodeBase64,  // Imagem do QR Code em base64
           status: 'PENDING',
           total: order.total,
-          expiresAt,
+          expiresAt: new Date(pixData.expiresAt),
         },
       })
 
-      return NextResponse.json({ payment }, { status: 201 })
+      return NextResponse.json({
+        payment,
+        message: 'PIX gerado com sucesso'
+      }, { status: 201 })
     } catch (error) {
-      console.error('Erro ao gerar cobrança AbacatePay:', error)
+      console.error('Erro ao gerar PIX QR Code:', error)
 
       // Log detalhado do erro
       if (error instanceof Error) {
@@ -159,3 +171,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
