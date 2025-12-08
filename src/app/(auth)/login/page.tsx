@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -27,7 +25,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { login } = useAuth()
-  const router = useRouter()
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,7 +39,6 @@ export default function LoginPage() {
     setError(null)
     
     try {
-      // O AuthContext já faz o redirecionamento, não precisa fazer aqui
       await login(data.email, data.password)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
@@ -52,23 +48,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center py-32 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+    <div className="flex-1 bg-black flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-4 sm:p-8">
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-3xl font-bold text-white font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
             <span className="text-purple-300">ENTRAR</span>
             <span className="text-white"> NA CONTA</span>
           </h1>
-          <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+          <p className="text-sm text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
             Entre na sua conta para acessar nossos serviços
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {error && (
               <Alert variant="destructive" className="bg-red-500/20 border-red-500/50">
-                <AlertDescription className="text-red-300 font-rajdhani">
+                <AlertDescription className="text-red-300 font-rajdhani text-sm">
                   {error}
                 </AlertDescription>
               </Alert>
@@ -79,18 +75,18 @@ export default function LoginPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  <FormLabel className="text-white font-rajdhani text-sm">
                     Email
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="seu@email.com"
-                      className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400"
+                      className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 h-10"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-400" />
+                  <FormMessage className="text-red-400 text-xs" />
                 </FormItem>
               )}
             />
@@ -100,7 +96,7 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  <FormLabel className="text-white font-rajdhani text-sm">
                     Senha
                   </FormLabel>
                   <FormControl>
@@ -108,7 +104,7 @@ export default function LoginPage() {
                       <Input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Sua senha"
-                        className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10"
+                        className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10 h-10"
                         {...field}
                       />
                       <Button
@@ -118,42 +114,36 @@ export default function LoginPage() {
                         className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? (
-                          <EyeOffIcon className="h-4 w-4" />
-                        ) : (
-                          <EyeIcon className="h-4 w-4" />
-                        )}
+                        {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                       </Button>
                     </div>
                   </FormControl>
-                  <FormMessage className="text-red-400" />
+                  <FormMessage className="text-red-400 text-xs" />
                 </FormItem>
               )}
             />
 
-          <div className="flex items-center justify-between">
-            <Link 
-              href="/forgot-password" 
-              className="text-sm text-purple-400 hover:text-purple-300 transition-colors font-rajdhani"
-              style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}
+            <div className="flex items-center justify-end">
+              <Link 
+                href="/forgot-password" 
+                className="text-xs text-purple-400 hover:text-purple-300 transition-colors font-rajdhani"
+              >
+                Esqueceu a senha?
+              </Link>
+            </div>
+
+            <ButtonLoading 
+              type="submit" 
+              loading={isLoading}
+              loadingText="Entrando..."
+              className="w-full bg-purple-500 text-white font-bold py-2.5 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani text-sm" 
             >
-              Esqueceu a senha?
-            </Link>
-          </div>
+              ENTRAR
+            </ButtonLoading>
 
-          <ButtonLoading 
-            type="submit" 
-            loading={isLoading}
-            loadingText="Entrando..."
-            className="w-full bg-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani" 
-            style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
-          >
-            ENTRAR
-          </ButtonLoading>
-
-            <div className="text-center text-sm">
-              <span className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>Não tem uma conta? </span>
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            <div className="text-center text-xs">
+              <span className="text-gray-400 font-rajdhani">Não tem uma conta? </span>
+              <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors font-rajdhani font-medium">
                 Cadastre-se
               </Link>
             </div>

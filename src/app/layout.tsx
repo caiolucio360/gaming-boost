@@ -3,6 +3,7 @@ import { Orbitron, Rajdhani } from 'next/font/google'
 import './globals.css'
 import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
+import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
@@ -75,10 +76,11 @@ export default function RootLayout({
             <LiveRegion message="" id="live-region" />
             <div className="min-h-screen flex flex-col overflow-x-hidden">
             <ElojobHeader />
-            <main id="main-content" className="flex-1 pt-16" role="main" aria-label="Conteúdo principal">
+            <main id="main-content" className="flex-1 pt-16 pb-24 lg:pb-0" role="main" aria-label="Conteúdo principal">
               {children}
             </main>
             <Footer />
+            <MobileBottomNav />
           </div>
           </MotionProvider>
         </AuthProviderWrapper>
