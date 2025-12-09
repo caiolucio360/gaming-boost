@@ -41,6 +41,9 @@ export const config = {
         '/cart/:path*',
         '/payment/:path*',
 
+        // Notificações
+        '/notifications/:path*',
+
         // Área do booster
         '/booster/:path*',
 
