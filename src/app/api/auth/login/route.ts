@@ -1,33 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import bcrypt from 'bcryptjs'
 import { generateToken } from '@/lib/jwt'
+import { LoginSchema } from '@/schemas/auth'
+import { validateBody } from '@/lib/validate'
+import { AuthService } from '@/services'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json()
 
-    // Validações
-    if (!email || !password) {
+    // Validate with Zod schema
+    const validation = validateBody(LoginSchema, body)
+
+    if (!validation.success) {
+      if (!body.email || !body.password) {
+        return NextResponse.json(
+          { message: 'Email e senha são obrigatórios' },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json(
-        { message: 'Email e senha são obrigatórios' },
+        { message: 'Dados inválidos', errors: validation.errors },
         { status: 400 }
       )
     }
 
-    // Buscar usuário
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    // Use AuthService for credential validation
+    const result = await AuthService.validateCredentials(validation.data)
 
-    if (!user) {
+    if (!result.success) {
       return NextResponse.json(
         { message: 'Email ou senha incorretos' },
         { status: 401 }
       )
     }
 
-    // Verificar se o usuário está ativo
+    const { user } = result
+
+    // Check if user is active
     if (!user.active) {
       return NextResponse.json(
         { message: 'Conta desativada. Entre em contato com o suporte.' },
@@ -35,24 +45,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar senha
-    const isPasswordValid = await bcrypt.compare(password, user.password)
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { message: 'Email ou senha incorretos' },
-        { status: 401 }
-      )
-    }
-
-    // Gerar token JWT
+    // Generate JWT token
     const token = generateToken({
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: user.role as 'CLIENT' | 'BOOSTER' | 'ADMIN',
     })
 
-    // Redirecionar baseado no role após login
+    // Calculate redirect path based on role
     let redirectPath = '/dashboard'
     if (user.role === 'ADMIN') {
       redirectPath = '/admin'
@@ -82,4 +82,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

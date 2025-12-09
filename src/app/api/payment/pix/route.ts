@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createPixQrCode } from '@/lib/abacatepay'
+import { CreatePixSchema } from '@/schemas/payment'
+import { validateBody } from '@/lib/validate'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,29 +18,42 @@ export async function POST(request: NextRequest) {
 
     const userId = authResult.user.id
     const body = await request.json()
-    const { orderId, phone, taxId } = body
 
-    if (!orderId) {
+    // Validate with Zod schema
+    const validation = validateBody(CreatePixSchema, body)
+
+    if (!validation.success) {
+      const missingFields = {
+        orderId: !body.orderId,
+        phone: !body.phone,
+        taxId: !body.taxId,
+      }
+
+      if (missingFields.orderId) {
+        return NextResponse.json(
+          { message: 'orderId é obrigatório' },
+          { status: 400 }
+        )
+      }
+
+      if (missingFields.phone || missingFields.taxId) {
+        return NextResponse.json(
+          {
+            message: 'Dados incompletos para pagamento',
+            error: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
+            missingFields
+          },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json(
-        { message: 'orderId é obrigatório' },
+        { message: 'Dados inválidos', errors: validation.errors },
         { status: 400 }
       )
     }
 
-    // Validar dados de pagamento fornecidos - telefone e CPF são obrigatórios para AbacatePay
-    if (!phone || !taxId) {
-      return NextResponse.json(
-        {
-          message: 'Dados incompletos para pagamento',
-          error: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
-          missingFields: {
-            phone: !phone,
-            taxId: !taxId,
-          }
-        },
-        { status: 400 }
-      )
-    }
+    const { orderId, phone, taxId } = validation.data
 
     // Buscar pedido
     const order = await prisma.order.findUnique({
@@ -66,11 +81,10 @@ export async function POST(request: NextRequest) {
 
     // Verificar se já existe pagamento pendente válido
     const existingPayment = order.payments.find(
-      (p: any) => p.status === 'PENDING' && p.expiresAt && new Date(p.expiresAt) > new Date()
+      (p: { status: string; expiresAt: Date | null }) => p.status === 'PENDING' && p.expiresAt && new Date(p.expiresAt) > new Date()
     )
 
     if (existingPayment) {
-      // Retornar pagamento existente com QR Code
       return NextResponse.json({
         payment: existingPayment,
         message: 'Pagamento PIX já existente'
@@ -78,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe pagamento pago
-    const paidPayment = order.payments.find((p: any) => p.status === 'PAID')
+    const paidPayment = order.payments.find((p: { status: string }) => p.status === 'PAID')
     if (paidPayment) {
       return NextResponse.json(
         { message: 'Este pedido já foi pago', payment: paidPayment },
@@ -106,9 +120,9 @@ export async function POST(request: NextRequest) {
       console.log('=================================================')
 
       const pixData = await createPixQrCode({
-        amount: Math.round(order.total * 100), // Converter para centavos
+        amount: Math.round(order.total * 100),
         description: `Pedido #${order.id} - ${order.service.name}`,
-        expiresIn: 1800, // 30 minutos
+        expiresIn: 1800,
         customer: {
           name: order.user.name || 'Cliente',
           email: order.user.email,
@@ -134,8 +148,8 @@ export async function POST(request: NextRequest) {
           orderId: order.id,
           method: 'PIX',
           providerId: pixData.id,
-          pixCode: pixData.brCode,       // Código copia-e-cola
-          qrCode: pixData.brCodeBase64,  // Imagem do QR Code em base64
+          pixCode: pixData.brCode,
+          qrCode: pixData.brCodeBase64,
           status: 'PENDING',
           total: order.total,
           expiresAt: new Date(pixData.expiresAt),
@@ -149,7 +163,6 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Erro ao gerar PIX QR Code:', error)
 
-      // Log detalhado do erro
       if (error instanceof Error) {
         console.error('Error message:', error.message)
         console.error('Error stack:', error.stack)
@@ -171,4 +184,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

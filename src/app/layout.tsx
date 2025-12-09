@@ -10,6 +10,7 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { SkipLink } from '@/components/common/skip-link'
 import { LiveRegion } from '@/components/common/live-region'
 import { MotionProvider } from '@/components/providers/motion-provider'
+import { QueryProvider } from '@/providers/query-provider'
 
 const orbitron = Orbitron({ 
   subsets: ['latin'],
@@ -69,21 +70,23 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
-        <AuthProviderWrapper>
-          <MotionProvider>
-            <ToastProvider />
-            <SkipLink />
-            <LiveRegion message="" id="live-region" />
-            <div className="min-h-screen flex flex-col overflow-x-hidden">
-            <ElojobHeader />
-            <main id="main-content" className="flex-1 pt-16 pb-24 lg:pb-0" role="main" aria-label="Conteúdo principal">
-              {children}
-            </main>
-            <Footer />
-            <MobileBottomNav />
-          </div>
-          </MotionProvider>
-        </AuthProviderWrapper>
+        <QueryProvider>
+          <AuthProviderWrapper>
+            <MotionProvider>
+              <ToastProvider />
+              <SkipLink />
+              <LiveRegion message="" id="live-region" />
+              <div className="min-h-screen flex flex-col overflow-x-hidden">
+              <ElojobHeader />
+              <main id="main-content" className="flex-1 pt-16 pb-24 lg:pb-0" role="main" aria-label="Conteúdo principal">
+                {children}
+              </main>
+              <Footer />
+              <MobileBottomNav />
+            </div>
+            </MotionProvider>
+          </AuthProviderWrapper>
+        </QueryProvider>
         <AnalyticsProvider />
       </body>
     </html>

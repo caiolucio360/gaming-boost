@@ -12,7 +12,7 @@ export interface SEOConfig {
   modifiedTime?: string
 }
 
-const DEFAULT_SITE_URL = 'https://gameboostpro.com.br'
+const DEFAULT_SITE_URL = 'https://gaming-boost.vercel.app'
 const DEFAULT_OG_IMAGE = '/principal.png'
 
 export function generateMetadata({

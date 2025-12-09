@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { ButtonLoading } from '@/components/common/button-loading'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { validateCPF, validatePhone, formatTaxId, formatPhone, maskCPF, maskPhone } from '@/lib/validation'
+import { validateCPF, validatePhone, formatTaxId, formatPhone, maskCPF, maskPhone } from '@/lib/brazilian'
 
 interface PaymentFormProps {
   orderId: number

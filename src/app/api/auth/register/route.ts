@@ -1,84 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import bcrypt from 'bcryptjs'
 import { generateToken } from '@/lib/jwt'
+import { RegisterSchema } from '@/schemas/auth'
+import { validateBody } from '@/lib/validate'
+import { AuthService } from '@/services'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json()
+    const body = await request.json()
 
-    // Validações
-    if (!email || !password) {
+    // Validate with Zod schema
+    const validation = validateBody(RegisterSchema, body)
+
+    if (!validation.success) {
+      const errors = validation.errors
+      const hasEmailError = errors.some(e => e.field === 'email')
+      const hasPasswordError = errors.some(e => e.field === 'password')
+
+      if (!body.email || !body.password) {
+        return NextResponse.json(
+          { message: 'Email e senha são obrigatórios' },
+          { status: 400 }
+        )
+      }
+
+      if (hasPasswordError) {
+        return NextResponse.json(
+          { message: 'A senha deve ter pelo menos 6 caracteres' },
+          { status: 400 }
+        )
+      }
+
+      if (hasEmailError) {
+        return NextResponse.json(
+          { message: 'Email inválido' },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json(
-        { message: 'Email e senha são obrigatórios' },
+        { message: 'Dados inválidos', errors },
         { status: 400 }
       )
     }
 
-    if (password.length < 6) {
+    // Use AuthService for business logic
+    const result = await AuthService.registerUser(validation.data)
+
+    if (!result.success) {
       return NextResponse.json(
-        { message: 'A senha deve ter pelo menos 6 caracteres' },
+        { message: result.error },
         { status: 400 }
       )
     }
 
-    // Validação básica de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { message: 'Email inválido' },
-        { status: 400 }
-      )
-    }
+    const { user } = result
 
-    // Verificar se o email já existe
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
-
-    if (existingUser) {
-      return NextResponse.json(
-        { message: 'Email já cadastrado' },
-        { status: 400 }
-      )
-    }
-
-    // Hash da senha
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Criar usuário
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'CLIENT',
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-      },
-    })
-
-    // Gerar token JWT
+    // Generate JWT token
     const token = generateToken({
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: user.role as 'CLIENT' | 'BOOSTER' | 'ADMIN',
     })
 
     return NextResponse.json(
       {
         message: 'Conta criada com sucesso',
         token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
+        user,
       },
       { status: 201 }
     )
@@ -90,4 +78,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
