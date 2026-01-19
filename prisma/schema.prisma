@@ -46,6 +46,9 @@ model User {
   disputeMessages    DisputeMessage[]    @relation("MessageAuthor")
   withdrawals        Withdrawal[]        // Saques solicitados
   image              String? // Avatar URL
+  // Steam profile
+  steamProfileUrl    String?              // URL do perfil Steam
+  steamId            String?              // Steam64 ID
 }
 
 model Service {
@@ -86,6 +89,11 @@ model Order {
   gameType          String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
   metadata          String? // JSON com metadados adicionais
   notes             String? // Notas adicionais do cliente ou booster
+  // Credenciais Steam do cliente (criptografadas)
+  steamCredentials  String?            // Credenciais criptografadas (username + password)
+  steamProfileUrl   String?            // URL do perfil Steam do cliente
+  steamConsent      Boolean            @default(false) // Cliente consentiu compartilhar credenciais
+  steamConsentAt    DateTime?          // Data do consentimento
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -232,6 +240,12 @@ model BoosterProfile {
   rating            Float                @default(0)
   totalReviews      Int                  @default(0)
   completedOrders   Int                  @default(0)
+  // Steam profile e CS2 stats
+  steamProfileUrl   String?              // URL do perfil Steam do booster
+  steamId           String?              // Steam64 ID
+  cs2Rank           String?              // Rank atual no CS2 (ex: "Global Elite")
+  cs2PremierRating  Int?                 // Rating Premier (ex: 18500)
+  cs2Hours          Int?                 // Horas jogadas no CS2
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
 

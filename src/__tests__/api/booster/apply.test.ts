@@ -43,6 +43,8 @@ describe('Booster Apply API', () => {
                 bio: 'I am a pro player with 10 years experience',
                 languages: ['pt-BR'],
                 portfolioUrl: 'https://example.com',
+                steamProfileUrl: 'https://steamcommunity.com/profiles/76561198012345678',
+                cs2PremierRating: 15000,
             }),
         })
         const res = await POST(req)

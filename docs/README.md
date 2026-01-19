@@ -68,6 +68,31 @@ Estratégia de precificação e análise de mercado:
 - Tabela de referência
 - Recomendações futuras
 
+## 🎮 Steam & Leetify Integration
+
+The application integrates with Steam and Leetify to fetch CS2 player stats.
+
+### Environment Variables
+
+Add these to your `.env.local`:
+
+```bash
+# Get your API key at: https://leetify.com/app/developer
+LEETIFY_API_KEY="your-leetify-api-key"
+
+# Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+ENCRYPTION_KEY="your-64-char-hex-key"
+```
+
+### Getting a Leetify API Key
+
+1. Go to [leetify.com/app/developer](https://leetify.com/app/developer)
+2. Log in with your Steam account
+3. Copy your API key
+4. Add it to `.env.local`
+
+> **Note**: The API works without a key but has stricter rate limits.
+
 ## 📖 Como Usar
 
 1. **Para entender o projeto completo**: Comece com `REQUISITOS.md` - documento principal com todos os requisitos, funcionalidades e regras de negócio

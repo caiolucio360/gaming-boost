@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { z } from 'zod'
+import { SteamProfileUrlSchema } from '@/schemas/steam'
+import { validateSteamProfileUrl, fetchCS2Stats, extractSteam64Id } from '@/services/steam.service'
 
 const applySchema = z.object({
     bio: z.string().min(10, 'Bio deve ter pelo menos 10 caracteres'),
     languages: z.array(z.string()).min(1, 'Selecione pelo menos um idioma'),
-    portfolioUrl: z.string().url('URL inválida').optional(),
+    portfolioUrl: z.union([z.literal(''), z.string().url('URL inválida')]).optional(),
+    // Steam profile fields
+    steamProfileUrl: SteamProfileUrlSchema,
+    cs2PremierRating: z.number().int().min(0).max(50000).optional(),
+    cs2Rank: z.string().max(50).optional(),
+    cs2Hours: z.number().int().min(0).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -41,15 +48,31 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const { bio, languages } = validation.data
+        const { bio, languages, steamProfileUrl, cs2PremierRating, cs2Rank, cs2Hours } = validation.data
 
-        // Criar perfil de booster
+        // Validate and extract Steam ID
+        const steamValidation = validateSteamProfileUrl(steamProfileUrl)
+        if (!steamValidation.valid) {
+            return NextResponse.json(
+                { message: steamValidation.error },
+                { status: 400 }
+            )
+        }
+
+        const steamId = extractSteam64Id(steamProfileUrl)
+
+        // Criar perfil de booster com dados Steam
         const profile = await prisma.boosterProfile.create({
             data: {
                 userId,
                 bio,
                 languages,
                 verificationStatus: 'PENDING',
+                steamProfileUrl,
+                steamId,
+                cs2PremierRating,
+                cs2Rank,
+                cs2Hours,
             },
         })
 

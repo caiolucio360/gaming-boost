@@ -7,9 +7,12 @@ import { z } from 'zod'
 import { validateCPF, validatePhone } from '@/lib/brazilian'
 
 /**
- * Schema for validating IDs (CUID format used by Prisma)
+ * Schema for validating IDs (accepts string or number, coerces to string)
  */
-export const IdSchema = z.string().min(1, 'ID é obrigatório')
+export const IdSchema = z.union([
+    z.string().min(1, 'ID é obrigatório'),
+    z.number().int().positive()
+]).transform((val) => String(val))
 
 /**
  * Schema for pagination parameters

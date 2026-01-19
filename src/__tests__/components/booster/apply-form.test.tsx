@@ -80,7 +80,55 @@ describe('ApplyForm', () => {
     expect(screen.getByText('Torne-se um Booster')).toBeInTheDocument()
     expect(screen.getByLabelText(/Sobre você/i)).toBeInTheDocument()
     expect(screen.getByText(/Idiomas/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Perfil Steam/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Enviar Aplicação/i })).toBeInTheDocument()
+  })
+
+  it('should show validation error for invalid Steam URL', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm />)
+
+    const bioInput = screen.getByLabelText(/Sobre você/i)
+    await user.type(bioInput, 'Bio com mais de 10 caracteres')
+
+    const steamInput = screen.getByLabelText(/Perfil Steam/i)
+    await user.type(steamInput, 'not-a-valid-url')
+
+    const submitButton = screen.getByRole('button', { name: /Enviar Aplicação/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText(/URL do Steam inválida/i)).toBeInTheDocument()
+    })
+  })
+
+  it('should accept valid Steam profile URL', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm />)
+
+    const bioInput = screen.getByLabelText(/Sobre você/i)
+    await user.type(bioInput, 'Bio com mais de 10 caracteres')
+
+    const steamInput = screen.getByLabelText(/Perfil Steam/i)
+    await user.type(steamInput, 'https://steamcommunity.com/profiles/76561198012345678')
+
+    const form = screen.getByRole('button', { name: /Enviar Aplicação/i }).closest('form')
+    fireEvent.submit(form!)
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/booster/apply',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      )
+    })
+  })
+
+  it('should display Leetify attribution when Steam field is present', () => {
+    render(<ApplyForm />)
+    
+    expect(screen.getByAltText(/Data provided by Leetify/i)).toBeInTheDocument()
   })
 
   it('should show validation errors for empty fields', async () => {
@@ -101,6 +149,9 @@ describe('ApplyForm', () => {
 
     const bioInput = screen.getByLabelText(/Sobre você/i)
     await user.type(bioInput, 'Sou um jogador experiente.')
+
+    const steamInput = screen.getByLabelText(/Perfil Steam/i)
+    await user.type(steamInput, 'https://steamcommunity.com/profiles/76561198012345678')
 
     const form = screen.getByRole('button', { name: /Enviar Aplicação/i }).closest('form')
     fireEvent.submit(form!)
@@ -126,7 +177,10 @@ describe('ApplyForm', () => {
     render(<ApplyForm />)
 
     const bioInput = screen.getByLabelText(/Sobre você/i)
-    await user.type(bioInput, 'Bio válida.')
+    await user.type(bioInput, 'Bio válida com mais de dez caracteres.')
+
+    const steamInput = screen.getByLabelText(/Perfil Steam/i)
+    await user.type(steamInput, 'https://steamcommunity.com/profiles/76561198012345678')
 
     const form = screen.getByRole('button', { name: /Enviar Aplicação/i }).closest('form')
     fireEvent.submit(form!)

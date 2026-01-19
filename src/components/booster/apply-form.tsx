@@ -13,11 +13,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { showSuccess, showError } from '@/lib/toast'
 import { ButtonLoading } from '@/components/common/button-loading'
+import { SteamProfileUrlSchema } from '@/schemas/steam'
+import { LEETIFY_HOMEPAGE, LEETIFY_ATTRIBUTION_LOGO } from '@/services/steam.service'
 
 const applySchema = z.object({
   bio: z.string().min(10, 'Sua bio deve ter pelo menos 10 caracteres'),
   languages: z.array(z.string()).min(1, 'Selecione pelo menos um idioma'),
-  portfolioUrl: z.string().url('URL inválida').optional().or(z.literal('')),
+  portfolioUrl: z.union([z.literal(''), z.string().url('URL inválida')]).optional(),
+  steamProfileUrl: SteamProfileUrlSchema,
 })
 
 type ApplyFormData = z.infer<typeof applySchema>
@@ -44,6 +47,7 @@ export function ApplyForm() {
       bio: '',
       languages: ['pt-BR'],
       portfolioUrl: '',
+      steamProfileUrl: '',
     },
   })
 
@@ -137,6 +141,39 @@ export function ApplyForm() {
             {errors.languages && (
               <p className="text-red-400 text-sm">{errors.languages.message}</p>
             )}
+          </div>
+
+          {/* Steam Profile Section */}
+          <div className="space-y-4 p-4 border border-purple-500/30 rounded-lg bg-black/20">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="steamProfileUrl" className="text-white font-rajdhani text-lg">
+                Perfil Steam
+              </Label>
+              <a 
+                href={LEETIFY_HOMEPAGE} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img 
+                  src={LEETIFY_ATTRIBUTION_LOGO} 
+                  alt="Data provided by Leetify" 
+                  className="h-6"
+                />
+              </a>
+            </div>
+            <Input
+              id="steamProfileUrl"
+              placeholder="https://steamcommunity.com/profiles/76561198..."
+              className="bg-black/50 border-purple-500/30 text-white"
+              {...register('steamProfileUrl')}
+            />
+            {errors.steamProfileUrl && (
+              <p className="text-red-400 text-sm">{errors.steamProfileUrl.message}</p>
+            )}
+            <p className="text-gray-500 text-xs">
+              Cole a URL do seu perfil Steam. Usamos isso para verificar seu rank no CS2.
+            </p>
           </div>
 
           <div className="space-y-2">
