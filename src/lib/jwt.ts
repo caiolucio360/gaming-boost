@@ -7,9 +7,14 @@ export interface JWTPayload {
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
 }
 
-// Obter a secret key do ambiente ou usar uma padrão para desenvolvimento
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d' // 7 dias por padrão
+// Obter a secret key do ambiente
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not defined')
+}
+
+// 7 dias por padrão se não definido
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 
 /**
  * Gera um token JWT para o usuário
@@ -17,7 +22,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d' // 7 dias por padrão
 export function generateToken(payload: JWTPayload): string {
   return jwt.sign(
     payload,
-    JWT_SECRET,
+    JWT_SECRET as string,
     {
       expiresIn: JWT_EXPIRES_IN,
       issuer: 'gaming-boost',
@@ -32,7 +37,7 @@ export function generateToken(payload: JWTPayload): string {
  */
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, {
+    const decoded = jwt.verify(token, JWT_SECRET as string, {
       issuer: 'gaming-boost',
       audience: 'gaming-boost-users',
     }) as JWTPayload

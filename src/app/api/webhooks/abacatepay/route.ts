@@ -13,10 +13,8 @@ function validateWebhookSignature(
     secret: string
 ): boolean {
     if (!signature || !secret) {
-        console.warn('Webhook signature validation skipped: missing signature or secret')
-        // Em desenvolvimento, pode retornar true se não houver secret configurado
-        // Em produção, isso deve ser obrigatório
-        return process.env.NODE_ENV !== 'production'
+        console.warn('Webhook signature validation failed: missing signature or secret')
+        return false
     }
 
     try {

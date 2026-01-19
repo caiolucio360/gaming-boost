@@ -17,18 +17,16 @@ const KEY_LENGTH = 32 // 256 bits
 function getEncryptionKey(): Buffer {
     const keyEnv = process.env.ENCRYPTION_KEY
 
-    if (keyEnv) {
-        // Key should be 32 bytes (256 bits) hex encoded = 64 chars
-        if (keyEnv.length === 64) {
-            return Buffer.from(keyEnv, 'hex')
-        }
-        // If not hex, hash it to get consistent key
-        return crypto.createHash('sha256').update(keyEnv).digest()
+    if (!keyEnv) {
+        throw new Error('FATAL: ENCRYPTION_KEY environment variable is not defined')
     }
 
-    // Fallback for development - NOT secure for production
-    console.warn('⚠️ ENCRYPTION_KEY not set, using insecure default')
-    return crypto.createHash('sha256').update('dev-key-not-for-production').digest()
+    // Key should be 32 bytes (256 bits) hex encoded = 64 chars
+    if (keyEnv.length !== 64) {
+        throw new Error('FATAL: ENCRYPTION_KEY must be exactly 64 hex characters (256 bits)')
+    }
+
+    return Buffer.from(keyEnv, 'hex')
 }
 
 /**
