@@ -172,7 +172,7 @@ export default function AdminBoostersPage() {
                 {/* Back link */}
                 <Link 
                     href="/admin" 
-                    className="inline-flex items-center text-gray-400 hover:text-purple-300 transition-colors mb-6 font-rajdhani"
+                    className="inline-flex items-center text-gray-400 hover:text-brand-purple-light transition-colors mb-6 font-rajdhani"
                     style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
                     <ArrowLeft className="h-4 w-4 mr-2" />
@@ -218,13 +218,13 @@ export default function AdminBoostersPage() {
 
                 {/* Filter indicator */}
                 <div className="mb-4">
-                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                         Filtrando: {filter === 'PENDING' ? 'Pendentes' : filter === 'VERIFIED' ? 'Aprovados' : 'Rejeitados'}
                     </Badge>
                 </div>
 
                 {/* Applications List */}
-                <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+                <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
                     <CardHeader>
                         <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                             Lista de Aplicações
@@ -249,7 +249,7 @@ export default function AdminBoostersPage() {
                                 {applications.map((app) => (
                                     <div
                                         key={app.id}
-                                        className="group p-4 bg-gradient-to-br from-black/50 via-black/40 to-black/50 rounded-lg border border-purple-500/20 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
+                                        className="group p-4 bg-gradient-to-br from-black/50 via-black/40 to-black/50 rounded-lg border border-brand-purple/20 hover:border-brand-purple-light/60 hover:shadow-lg hover:shadow-brand-purple/10 transition-all duration-300"
                                     >
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
@@ -272,7 +272,7 @@ export default function AdminBoostersPage() {
                                             {app.steamProfileUrl && (
                                                 <div>
                                                     <Label className="text-gray-500 text-xs uppercase font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Perfil Steam</Label>
-                                                    <p className="text-purple-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    <p className="text-brand-purple-light font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                         <a href={app.steamProfileUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
                                                             {app.steamProfileUrl}
                                                         </a>
@@ -294,7 +294,7 @@ export default function AdminBoostersPage() {
                                                     <Label className="text-gray-500 text-xs uppercase font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Idiomas</Label>
                                                     <div className="flex gap-2 mt-1">
                                                         {app.languages?.map((lang) => (
-                                                            <Badge key={lang} variant="outline" className="border-purple-500/30 text-purple-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            <Badge key={lang} variant="outline" className="border-brand-purple/30 text-brand-purple-light font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                 {lang}
                                                             </Badge>
                                                         ))}
@@ -310,7 +310,7 @@ export default function AdminBoostersPage() {
                                         </div>
 
                                         {app.verificationStatus === 'PENDING' && (
-                                            <div className="flex gap-3 pt-4 mt-4 border-t border-purple-500/20">
+                                            <div className="flex gap-3 pt-4 mt-4 border-t border-brand-purple/20">
                                                 <Button
                                                     onClick={() => openDialog(app, 'VERIFIED')}
                                                     className="bg-green-600 hover:bg-green-700 font-rajdhani"
@@ -340,7 +340,7 @@ export default function AdminBoostersPage() {
 
             {/* Confirmation Dialog */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="bg-gray-900 border-purple-500/30">
+                <DialogContent className="bg-brand-black-light border-brand-purple/30">
                     <DialogHeader>
                         <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                             {dialogAction === 'VERIFIED' ? 'Aprovar Booster' : 'Rejeitar Aplicação'}
@@ -362,7 +362,7 @@ export default function AdminBoostersPage() {
                                 value={rejectReason}
                                 onChange={(e) => setRejectReason(e.target.value)}
                                 placeholder="Explique o motivo..."
-                                className="bg-black/50 border-purple-500/30 text-white font-rajdhani"
+                                className="bg-brand-black/50 border-brand-purple/30 text-white font-rajdhani"
                                 style={{ fontFamily: 'Rajdhani, sans-serif' }}
                             />
                         </div>

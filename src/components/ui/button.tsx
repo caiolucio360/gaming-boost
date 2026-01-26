@@ -11,24 +11,24 @@ const buttonVariants = cva(
       variants: {
         variant: {
           // Primary: Main CTA button with brand purple
-          default: "bg-action-primary text-text-on-brand border border-transparent hover:bg-action-primary-hover shadow-glow-sm hover:shadow-glow",
+          default: "bg-brand-purple text-white border border-transparent hover:bg-brand-purple-hover shadow-glow-sm hover:shadow-glow",
           // Destructive: Danger/error actions
           destructive:
-            "bg-action-danger text-white border border-transparent hover:border-white/50 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+            "bg-brand-red text-white border border-transparent hover:border-white/50 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
           // Outline: Secondary actions
           outline:
-            "border border-border-ds-default bg-transparent hover:border-border-ds-brand hover:bg-surface-subtle dark:bg-transparent",
+            "border border-white/10 bg-transparent hover:border-brand-purple hover:bg-brand-black-light dark:bg-transparent",
           // Secondary: Less prominent actions
           secondary:
             "bg-secondary text-secondary-foreground border border-transparent hover:border-secondary-foreground/50",
           // Strong: High-conversion CTAs with dark purple
           strong:
-            "bg-action-strong text-text-on-brand border border-transparent hover:bg-brand-purple shadow-glow hover:shadow-glow-lg font-bold",
+            "bg-brand-purple-dark text-white border border-transparent hover:bg-brand-purple shadow-glow hover:shadow-glow-lg font-bold",
           // Ghost: Minimal style for subtle actions
           ghost:
-            "border border-transparent hover:border-foreground/30 hover:bg-surface-subtle",
+            "border border-transparent hover:border-foreground/30 hover:bg-brand-black-light",
           // Link: Text-only button style
-          link: "text-text-brand underline-offset-4 hover:underline border-0",
+          link: "text-brand-purple underline-offset-4 hover:underline border-0",
         },
       size: {
         // Mobile-first: min-h-touch ensures 44px touch targets on mobile

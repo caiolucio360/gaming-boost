@@ -297,7 +297,7 @@ export default function BoosterDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
@@ -314,7 +314,7 @@ export default function BoosterDashboardPage() {
         {/* Link para Pagamentos */}
         <div className="mb-6">
           <Link href="/booster/payments">
-            <Button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-200">
+            <Button className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-200">
               <DollarSign className="h-4 w-4 mr-2" />
               Ver Meus Pagamentos
             </Button>
@@ -332,19 +332,19 @@ export default function BoosterDashboardPage() {
               className={`cursor-pointer transition-all duration-200 ${
                 activeTab === 'available'
                   ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/70 shadow-lg shadow-yellow-500/20'
-                  : 'bg-black/30 border-purple-500/50 hover:border-yellow-500/50 hover:bg-yellow-500/5'
+                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-yellow-500/50 hover:bg-yellow-500/5'
               }`}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Disponíveis
                     </p>
                     <p className="text-3xl font-bold text-yellow-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                       {stats.available}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Pedidos pendentes
                     </p>
                   </div>
@@ -359,19 +359,19 @@ export default function BoosterDashboardPage() {
               className={`cursor-pointer transition-all duration-200 ${
                 activeTab === 'assigned'
                   ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/70 shadow-lg shadow-blue-500/20'
-                  : 'bg-black/30 border-purple-500/50 hover:border-blue-500/50 hover:bg-blue-500/5'
+                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-blue-500/50 hover:bg-blue-500/5'
               }`}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Em Andamento
                     </p>
                     <p className="text-3xl font-bold text-blue-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                       {stats.assigned}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Pedidos ativos
                     </p>
                   </div>
@@ -386,19 +386,19 @@ export default function BoosterDashboardPage() {
               className={`cursor-pointer transition-all duration-200 ${
                 activeTab === 'completed'
                   ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border-green-500/70 shadow-lg shadow-green-500/20'
-                  : 'bg-black/30 border-purple-500/50 hover:border-green-500/50 hover:bg-green-500/5'
+                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-green-500/50 hover:bg-green-500/5'
               }`}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Concluídos
                     </p>
                     <p className="text-3xl font-bold text-green-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                       {stats.completed}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Pedidos finalizados
                     </p>
                   </div>
@@ -443,17 +443,17 @@ export default function BoosterDashboardPage() {
                   return (
                     <Card
                       key={order.id}
-                      className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden"
+                      className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden"
                     >
                       {/* Efeito de brilho no hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
                       <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-purple-200 transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -465,7 +465,7 @@ export default function BoosterDashboardPage() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <OrderInfoItem 
                               label="Valor Total" 
-                              value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                              value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                             />
                             {order.commission && (
                               <OrderInfoItem 
@@ -528,17 +528,17 @@ export default function BoosterDashboardPage() {
                   return (
                     <Card
                       key={order.id}
-                      className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden"
+                      className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden"
                     >
                       {/* Efeito de brilho no hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
                       <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-purple-200 transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -550,7 +550,7 @@ export default function BoosterDashboardPage() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <OrderInfoItem 
                               label="Valor Total" 
-                              value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                              value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                             />
                             {order.commission && (
                               <OrderInfoItem 
@@ -615,7 +615,7 @@ export default function BoosterDashboardPage() {
                   return (
                     <Card
                       key={order.id}
-                      className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                      className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
                     >
                       <CardHeader>
                         <div className="flex items-start justify-between">
@@ -623,7 +623,7 @@ export default function BoosterDashboardPage() {
                             <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -634,7 +634,7 @@ export default function BoosterDashboardPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <OrderInfoItem 
                             label="Valor Total" 
-                            value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                            value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                           />
                           {order.commission && (
                             <OrderInfoItem 

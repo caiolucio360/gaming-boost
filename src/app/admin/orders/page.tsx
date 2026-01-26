@@ -134,7 +134,7 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
@@ -143,7 +143,7 @@ export default function AdminOrdersPage() {
           </Alert>
         )}
         <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center text-purple-300 hover:text-purple-200 font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Dashboard
           </Link>
@@ -155,13 +155,13 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Filtro */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 mb-6">
+        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-full md:w-[200px] bg-black/50 border-purple-500/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
-              <SelectContent className="bg-black border-purple-500/50">
+              <SelectContent className="bg-brand-black border-brand-purple/50">
                 <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="PENDING">Pendentes</SelectItem>
                 <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
@@ -187,7 +187,7 @@ export default function AdminOrdersPage() {
               return (
                 <Card
                   key={order.id}
-                  className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                  className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -195,7 +195,7 @@ export default function AdminOrdersPage() {
                         <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                           {order.service.name}
                         </CardTitle>
-                        <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                           {order.user.name || order.user.email} • {order.service.game}
                         </CardDescription>
                       </div>
@@ -207,7 +207,7 @@ export default function AdminOrdersPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         <OrderInfoItem
                           label="Valor Total"
-                          value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                         />
                         <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
                         <OrderInfoItem label="Tipo de Serviço" value={order.service.type} />
@@ -215,16 +215,16 @@ export default function AdminOrdersPage() {
                           <OrderInfoItem
                             label="Booster Atribuído"
                             value={order.booster.name || order.booster.email}
-                            valueClassName="text-purple-300"
+                            valueClassName="text-brand-purple-light"
                           />
                         )}
                       </div>
 
                       {/* Informações de Pagamento */}
                       {order.payments && order.payments.length > 0 && (
-                        <div className="pt-2 border-t border-purple-500/20">
+                        <div className="pt-2 border-t border-brand-purple/20">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-400">Status do Pagamento:</span>
+                            <span className="text-brand-gray-500">Status do Pagamento:</span>
                             {order.payments.some(p => p.status === 'PAID') ? (
                               <Badge className="bg-green-500/20 text-green-300 border-green-500/50">
                                 Pago
@@ -239,12 +239,12 @@ export default function AdminOrdersPage() {
                       )}
 
                       {/* Atualizar Status */}
-                      <div className="flex flex-wrap gap-2 pt-4 border-t border-purple-500/20">
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-brand-purple/20">
                         <Select value={order.status} onValueChange={(value) => handleStatusUpdate(order.id, value)}>
-                          <SelectTrigger className="w-full md:w-[200px] bg-black/50 border-purple-500/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-black border-purple-500/50">
+                          <SelectContent className="bg-brand-black border-brand-purple/50">
                             <SelectItem value="PENDING">Pendente</SelectItem>
                             <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
                             <SelectItem value="COMPLETED">Concluído</SelectItem>
@@ -257,7 +257,7 @@ export default function AdminOrdersPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 font-rajdhani"
+                          className="border-brand-purple/50 text-brand-purple-light hover:bg-brand-purple/10 font-rajdhani"
                           style={{ fontFamily: 'Rajdhani, sans-serif' }}
                         >
                           <Link href={`/admin/orders/${order.id}`}>
@@ -275,7 +275,7 @@ export default function AdminOrdersPage() {
         )}
 
         <div className="mt-4 text-center">
-          <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         </div>

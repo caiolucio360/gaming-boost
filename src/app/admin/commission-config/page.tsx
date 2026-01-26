@@ -185,7 +185,7 @@ export default function CommissionConfigPage() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <Link href="/admin">
-            <Button variant="ghost" className="text-purple-300 hover:text-purple-200 mb-4">
+            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Dashboard
             </Button>
@@ -213,10 +213,10 @@ export default function CommissionConfigPage() {
         {loading ? (
           <ProfileSkeleton />
         ) : (
-          <Card className="bg-black/30 border-purple-500/50">
+          <Card className="bg-brand-black/30 border-brand-purple/50">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Settings className="h-5 w-5 text-purple-400" />
+              <Settings className="h-5 w-5 text-brand-purple-light" />
               Porcentagens de Comissão
             </CardTitle>
             <CardDescription className="text-gray-400">
@@ -247,7 +247,7 @@ export default function CommissionConfigPage() {
                       setAdminPercentage((100 - booster).toFixed(1))
                     }
                   }}
-                  className="bg-black/50 border-purple-500/50 text-white text-lg font-bold"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold"
                 />
                 <p className="text-xs text-gray-500">
                   Valor que o booster receberá por cada pedido concluído
@@ -276,7 +276,7 @@ export default function CommissionConfigPage() {
                       setBoosterPercentage((100 - admin).toFixed(1))
                     }
                   }}
-                  className="bg-black/50 border-purple-500/50 text-white text-lg font-bold"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold"
                 />
                 <p className="text-xs text-gray-500">
                   Valor que o administrador receberá por cada pedido concluído
@@ -285,7 +285,7 @@ export default function CommissionConfigPage() {
             </div>
 
             {/* Indicador de Soma */}
-            <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+            <div className="p-4 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">Soma das porcentagens:</span>
                 <span className={`text-lg font-bold ${
@@ -305,7 +305,7 @@ export default function CommissionConfigPage() {
 
             {/* Exemplo de Cálculo */}
             {config && (
-              <div className="p-4 bg-black/50 border border-purple-500/30 rounded-lg">
+              <div className="p-4 bg-brand-black/50 border border-brand-purple/30 rounded-lg">
                 <p className="text-sm text-gray-400 mb-2">Exemplo de cálculo (pedido de R$ 100,00):</p>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -314,7 +314,7 @@ export default function CommissionConfigPage() {
                   </div>
                   <div>
                     <p className="text-gray-500">Admin receberá:</p>
-                    <p className="text-purple-300 font-bold">R$ {(100 * parseFloat(adminPercentage) / 100).toFixed(2)}</p>
+                    <p className="text-brand-purple-light font-bold">R$ {(100 * parseFloat(adminPercentage) / 100).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -323,7 +323,7 @@ export default function CommissionConfigPage() {
             <Button
               onClick={handleSave}
               disabled={saving || Math.abs(parseFloat(boosterPercentage) + parseFloat(adminPercentage) - 100) >= 0.01}
-              className="w-full bg-purple-600 text-white border border-transparent hover:border-white/50"
+              className="w-full bg-brand-purple text-white border border-transparent hover:border-white/50"
             >
               {saving ? (
                 <>

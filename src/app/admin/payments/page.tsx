@@ -139,7 +139,7 @@ export default function AdminPaymentsPage() {
         
         <div className="mb-6">
           <Link href="/admin">
-            <Button variant="ghost" className="text-purple-300 hover:text-purple-200 mb-4">
+            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Dashboard
             </Button>
@@ -178,7 +178,7 @@ export default function AdminPaymentsPage() {
               value={stats.totalRevenues}
               description="Todas as receitas"
               icon={DollarSign}
-              iconColor="text-purple-500"
+              iconColor="text-brand-purple"
             />
             <StatCard
               title="Pagas"
@@ -199,8 +199,8 @@ export default function AdminPaymentsPage() {
 
         {/* Tabs de Receitas */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-black/30 border border-purple-500/50">
-            <TabsTrigger value="all" className="data-[state=active]:bg-purple-500/20">
+          <TabsList className="grid w-full grid-cols-4 bg-brand-black/30 border border-brand-purple/50">
+            <TabsTrigger value="all" className="data-[state=active]:bg-brand-purple/20">
               Todas
             </TabsTrigger>
             <TabsTrigger value="PENDING" className="data-[state=active]:bg-yellow-500/20">
@@ -226,7 +226,7 @@ export default function AdminPaymentsPage() {
             ) : (
               <div className="grid gap-4 lg:gap-6">
                 {revenues.map((revenue) => (
-                  <Card key={revenue.id} className="bg-black/30 backdrop-blur-md border-purple-500/50">
+                  <Card key={revenue.id} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -248,7 +248,7 @@ export default function AdminPaymentsPage() {
                         />
                         <OrderInfoItem 
                           label="Valor Total do Pedido" 
-                          value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.orderTotal)}</span>}
+                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.orderTotal)}</span>}
                         />
                         <OrderInfoItem label="Cliente" value={revenue.order.user.name || revenue.order.user.email} />
                         {revenue.order.booster && (

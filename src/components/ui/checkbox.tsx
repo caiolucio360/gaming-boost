@@ -17,10 +17,10 @@ function Checkbox({
         // Touch target wrapper - visual is 18px but touch area extends with relative positioning
         "peer relative",
         // Visual checkbox styling
-        "border-border-ds-default dark:bg-input/30",
-        "data-[state=checked]:bg-action-primary data-[state=checked]:text-text-on-brand data-[state=checked]:border-action-primary",
-        "focus-visible:border-border-ds-brand focus-visible:ring-border-ds-brand/30",
-        "aria-invalid:ring-status-error/20 dark:aria-invalid:ring-status-error/40 aria-invalid:border-status-error",
+        "border-white/10 dark:bg-input/30",
+        "data-[state=checked]:bg-brand-purple data-[state=checked]:text-white data-[state=checked]:border-brand-purple",
+        "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30",
+        "aria-invalid:ring-brand-red/20 dark:aria-invalid:ring-brand-red/40 aria-invalid:border-brand-red",
         // Size - visual is 18px (size-[18px]) but touch target is larger via pseudo-element
         "size-[18px] shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-1",
         // Touch target expansion - creates 44x44 touch area centered on checkbox

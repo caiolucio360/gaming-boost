@@ -203,7 +203,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           highlight="MEU"
@@ -228,20 +228,20 @@ export default function DashboardPage() {
         )}
 
         {/* Filtros */}
-        <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 mb-6 overflow-hidden">
+        <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 mb-6 overflow-hidden">
           {/* Efeito de brilho sutil */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
           <CardContent className="pt-4 pb-4 relative z-10">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Filtros de Status - Badges Compactos */}
               <div className="flex flex-wrap items-center gap-2">
-                <Filter className="h-4 w-4 text-purple-300 mr-1" />
+                <Filter className="h-4 w-4 text-brand-purple-light mr-1" />
                 <button
                   onClick={() => setFilterStatus('')}
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     !filterStatus
-                      ? 'bg-gradient-to-r from-purple-500/20 to-purple-600/20 border border-purple-400 text-purple-300 shadow-lg shadow-purple-500/20'
-                      : 'bg-black/50 border border-purple-500/30 text-gray-400 hover:border-purple-500/50 hover:text-purple-300 hover:bg-purple-500/10'
+                      ? 'bg-gradient-to-r from-brand-purple/20 to-brand-purple-dark/20 border border-brand-purple-light text-brand-purple-light shadow-lg shadow-brand-purple/20'
+                      : 'bg-brand-black/50 border border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'PENDING'
                       ? 'bg-yellow-500/20 border border-yellow-400 text-yellow-300'
-                      : 'bg-black/50 border border-yellow-500/30 text-gray-400 hover:border-yellow-500/50 hover:text-yellow-300'
+                      : 'bg-brand-black/50 border border-yellow-500/30 text-brand-gray-500 hover:border-yellow-500/50 hover:text-yellow-300'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'PAID'
                       ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300'
-                      : 'bg-black/50 border border-cyan-500/30 text-gray-400 hover:border-cyan-500/50 hover:text-cyan-300'
+                      : 'bg-brand-black/50 border border-cyan-500/30 text-brand-gray-500 hover:border-cyan-500/50 hover:text-cyan-300'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'IN_PROGRESS'
                       ? 'bg-blue-500/20 border border-blue-400 text-blue-300'
-                      : 'bg-black/50 border border-blue-500/30 text-gray-400 hover:border-blue-500/50 hover:text-blue-300'
+                      : 'bg-brand-black/50 border border-blue-500/30 text-brand-gray-500 hover:border-blue-500/50 hover:text-blue-300'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'COMPLETED'
                       ? 'bg-green-500/20 border border-green-400 text-green-300'
-                      : 'bg-black/50 border border-green-500/30 text-gray-400 hover:border-green-500/50 hover:text-green-300'
+                      : 'bg-brand-black/50 border border-green-500/30 text-brand-gray-500 hover:border-green-500/50 hover:text-green-300'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -296,7 +296,7 @@ export default function DashboardPage() {
                   className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'CANCELLED'
                       ? 'bg-red-500/20 border border-red-400 text-red-300'
-                      : 'bg-black/50 border border-red-500/30 text-gray-400 hover:border-red-500/50 hover:text-red-300'
+                      : 'bg-brand-black/50 border border-red-500/30 text-brand-gray-500 hover:border-red-500/50 hover:text-red-300'
                   }`}
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
@@ -308,7 +308,7 @@ export default function DashboardPage() {
               <div className="flex flex-1 gap-2 md:ml-auto md:justify-end">
                 <button
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="w-[130px] px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 bg-black/50 border border-purple-500/30 text-gray-400 hover:border-purple-500/50 hover:text-purple-300 hover:bg-purple-500/10 flex items-center justify-center gap-1.5"
+                  className="w-[130px] px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 bg-brand-black/50 border border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10 flex items-center justify-center gap-1.5"
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
                   <ArrowUpDown className="h-3.5 w-3.5" />
@@ -423,7 +423,7 @@ export default function DashboardPage() {
 
         {!loading && orders.length > 0 && (
           <div className="mt-4 text-center">
-            <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               Mostrando {filteredOrders.length} de {orders.length} pedido{orders.length !== 1 ? 's' : ''}
             </p>
           </div>

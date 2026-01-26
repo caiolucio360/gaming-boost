@@ -128,13 +128,13 @@ export default function BoosterPaymentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Removido RefreshingBanner para evitar piscar - atualizações são silenciosas */}
         
         <div className="mb-6">
           <Link href="/booster">
-            <Button variant="ghost" className="text-purple-300 hover:text-purple-200 mb-4">
+            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Dashboard
             </Button>
@@ -173,7 +173,7 @@ export default function BoosterPaymentsPage() {
               value={stats.totalCommissions}
               description="Todas as comissões"
               icon={DollarSign}
-              iconColor="text-purple-500"
+              iconColor="text-brand-purple"
             />
             <StatCard
               title="Pagas"
@@ -194,8 +194,8 @@ export default function BoosterPaymentsPage() {
 
         {/* Tabs de Comissões */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-black/30 border border-purple-500/50">
-            <TabsTrigger value="all" className="data-[state=active]:bg-purple-500/20">
+          <TabsList className="grid w-full grid-cols-4 bg-brand-black/30 border border-brand-purple/50">
+            <TabsTrigger value="all" className="data-[state=active]:bg-brand-purple/20">
               Todas
             </TabsTrigger>
             <TabsTrigger value="PENDING" className="data-[state=active]:bg-yellow-500/20">
@@ -221,14 +221,14 @@ export default function BoosterPaymentsPage() {
             ) : (
               <div className="grid gap-4 lg:gap-6">
                 {commissions.map((commission) => (
-                  <Card key={commission.id} className="bg-black/30 backdrop-blur-md border-purple-500/50">
+                  <Card key={commission.id} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                             {commission.order.service.name}
                           </CardTitle>
-                          <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                             Pedido #{commission.order.id}
                           </CardDescription>
                         </div>
@@ -243,7 +243,7 @@ export default function BoosterPaymentsPage() {
                         />
                         <OrderInfoItem 
                           label="Valor Total do Pedido" 
-                          value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.orderTotal)}</span>}
+                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.orderTotal)}</span>}
                         />
                         <OrderInfoItem label="Cliente" value={commission.order.user.name || commission.order.user.email} />
                         {commission.status === 'PAID' && commission.paidAt && (

@@ -15,13 +15,13 @@ function Card({ className, interactive = false, ...props }: CardProps) {
         // Layout
         "flex flex-col gap-6 rounded-xl py-6 shadow-sm",
         // Surface and text using design system tokens
-        "bg-surface-card text-text-primary",
+        "bg-brand-black-light text-white",
         // Border with hover effect
-        "border border-border-ds-default",
+        "border border-white/10",
         // Micro-interactions: subtle lift and glow on hover
         interactive
-          ? "card-interactive hover:border-border-ds-brand/50"
-          : "hover:border-border-ds-brand/50 transition-colors",
+          ? "card-interactive hover:border-brand-purple/50"
+          : "hover:border-brand-purple/50 transition-colors",
         className
       )}
       {...props}
@@ -56,7 +56,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-text-secondary text-sm", className)}
+      className={cn("text-brand-gray-300 text-sm", className)}
       {...props}
     />
   )

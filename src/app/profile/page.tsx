@@ -212,7 +212,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <PageHeader
           highlight="MEU"
@@ -224,7 +224,7 @@ export default function ProfilePage() {
           <ProfileSkeleton />
         ) : !profile ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               Erro ao carregar perfil
             </p>
           </div>
@@ -248,24 +248,24 @@ export default function ProfilePage() {
 
         <div className="grid gap-6">
           {/* Informações da Conta */}
-          <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden">
+          <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
             {/* Efeito de brilho sutil */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
             <CardHeader className="relative z-10">
-              <CardTitle className="text-white flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300">
-                <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
-                  <UserIcon className="h-5 w-5 text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+              <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
+                <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
+                  <UserIcon className="h-5 w-5 text-brand-purple-light group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 Informações da Conta
               </CardTitle>
-              <CardDescription className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+              <CardDescription className="text-brand-gray-500 group-hover:text-brand-gray-300 transition-colors duration-300">
                 Visualize e edite suas informações pessoais
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 relative z-10">
               {/* Nome */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-400 flex items-center gap-2">
+                <Label htmlFor="name" className="text-brand-gray-500 flex items-center gap-2">
                   <UserIcon className="h-4 w-4" />
                   Nome
                 </Label>
@@ -275,13 +275,13 @@ export default function ProfilePage() {
                   placeholder="Seu nome completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-black/50 border-purple-500/50 text-white"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white"
                 />
               </div>
 
               {/* Email (read-only) */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-400 flex items-center gap-2">
+                <Label htmlFor="email" className="text-brand-gray-500 flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Email
                 </Label>
@@ -290,14 +290,14 @@ export default function ProfilePage() {
                   type="email"
                   value={profile.email}
                   disabled
-                  className="bg-black/30 border-purple-500/30 text-gray-400 cursor-not-allowed"
+                  className="bg-brand-black/30 border-brand-purple/30 text-brand-gray-500 cursor-not-allowed"
                 />
-                <p className="text-xs text-gray-500">O email não pode ser alterado</p>
+                <p className="text-xs text-brand-gray-500">O email não pode ser alterado</p>
               </div>
 
               {/* Telefone */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-gray-400 flex items-center gap-2">
+                <Label htmlFor="phone" className="text-brand-gray-500 flex items-center gap-2">
                   <Phone className="h-4 w-4" />
                   Telefone
                 </Label>
@@ -307,14 +307,14 @@ export default function ProfilePage() {
                   placeholder="(00) 00000-0000"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="bg-black/50 border-purple-500/50 text-white"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white"
                 />
               </div>
 
               {/* Chave PIX (apenas para BOOSTER e ADMIN) */}
               {authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN') && (
                 <div className="space-y-2">
-                  <Label htmlFor="pixKey" className="text-gray-400 flex items-center gap-2">
+                  <Label htmlFor="pixKey" className="text-brand-gray-500 flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />
                     Chave PIX
                   </Label>
@@ -324,18 +324,18 @@ export default function ProfilePage() {
                     placeholder="email@exemplo.com ou CPF/CNPJ ou telefone"
                     value={pixKey}
                     onChange={(e) => setPixKey(e.target.value)}
-                    className="bg-black/50 border-purple-500/50 text-white"
+                    className="bg-brand-black/50 border-brand-purple/50 text-white"
                   />
-                  <p className="text-xs text-gray-500">Chave PIX para recebimento de pagamentos</p>
+                  <p className="text-xs text-brand-gray-500">Chave PIX para recebimento de pagamentos</p>
                 </div>
               )}
 
               {/* Informações adicionais */}
-              <Separator className="bg-purple-500/30" />
+              <Separator className="bg-brand-purple/30" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-400 mb-1">Função</p>
+                  <p className="text-brand-gray-500 mb-1">Função</p>
                   <p className="text-white font-semibold capitalize">
                     {profile.role === 'CLIENT' ? 'Cliente' : 
                      profile.role === 'BOOSTER' ? 'Booster' : 
@@ -343,20 +343,20 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-400 mb-1">Conta criada em</p>
+                  <p className="text-brand-gray-500 mb-1">Conta criada em</p>
                   <p className="text-white">{formatDate(profile.createdAt)}</p>
                 </div>
                 {profile._count && (
                   <>
                     {profile._count.orders !== undefined && (
                       <div>
-                        <p className="text-gray-400 mb-1">Pedidos realizados</p>
+                        <p className="text-brand-gray-500 mb-1">Pedidos realizados</p>
                         <p className="text-white font-semibold">{profile._count.orders}</p>
                       </div>
                     )}
                     {profile._count.boosterOrders !== undefined && (
                       <div>
-                        <p className="text-gray-400 mb-1">Trabalhos como booster</p>
+                        <p className="text-brand-gray-500 mb-1">Trabalhos como booster</p>
                         <p className="text-white font-semibold">{profile._count.boosterOrders}</p>
                       </div>
                     )}
@@ -367,23 +367,23 @@ export default function ProfilePage() {
           </Card>
 
           {/* Alterar Senha */}
-          <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden">
+          <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
             {/* Efeito de brilho sutil */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
             <CardHeader className="relative z-10">
-              <CardTitle className="text-white flex items-center gap-2 group-hover:text-purple-200 transition-colors duration-300">
-                <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors duration-300">
-                  <Lock className="h-5 w-5 text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+              <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
+                <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
+                  <Lock className="h-5 w-5 text-brand-purple-light group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 Alterar Senha
               </CardTitle>
-              <CardDescription className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+              <CardDescription className="text-brand-gray-500 group-hover:text-brand-gray-300 transition-colors duration-300">
                 Deixe em branco se não deseja alterar sua senha
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 relative z-10">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-gray-400">
+                <Label htmlFor="currentPassword" className="text-brand-gray-500">
                   Senha Atual
                 </Label>
                 <Input
@@ -392,12 +392,12 @@ export default function ProfilePage() {
                   placeholder="Digite sua senha atual"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="bg-black/50 border-purple-500/50 text-white"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-gray-400">
+                <Label htmlFor="newPassword" className="text-brand-gray-500">
                   Nova Senha
                 </Label>
                 <Input
@@ -406,12 +406,12 @@ export default function ProfilePage() {
                   placeholder="Digite sua nova senha (mín. 6 caracteres)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-black/50 border-purple-500/50 text-white"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-400">
+                <Label htmlFor="confirmPassword" className="text-brand-gray-500">
                   Confirmar Nova Senha
                 </Label>
                 <Input
@@ -420,7 +420,7 @@ export default function ProfilePage() {
                   placeholder="Confirme sua nova senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-black/50 border-purple-500/50 text-white"
+                  className="bg-brand-black/50 border-brand-purple/50 text-white"
                 />
               </div>
             </CardContent>
@@ -431,14 +431,14 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               onClick={() => router.back()}
-              className="border-2 border-purple-500/50 text-white hover:border-white/50 transition-all duration-300"
+              className="border-2 border-brand-purple/50 text-white hover:border-white/50 transition-all duration-300"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>Salvando...</>

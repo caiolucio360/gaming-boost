@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
  */
 export function OrderCardSkeleton() {
   return (
-    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader>
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-48" />
@@ -60,7 +60,7 @@ export function OrdersListSkeleton({ count = 3 }: { count?: number }) {
  */
 export function StatCardSkeleton() {
   return (
-    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4 rounded" />
@@ -91,9 +91,9 @@ export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
  */
 export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-border-ds-brand/50">
+    <div className="w-full overflow-hidden rounded-lg border border-brand-purple/50">
       {/* Header */}
-      <div className="bg-surface-subtle border-b border-border-ds-brand/30 px-4 py-3">
+      <div className="bg-brand-black-light border-b border-brand-purple/30 px-4 py-3">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
           {Array.from({ length: cols }).map((_, i) => (
             <Skeleton key={i} className="h-4 w-full" />
@@ -104,7 +104,7 @@ export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className={`px-4 py-3 grid gap-4 ${rowIndex !== rows - 1 ? 'border-b border-border-ds-brand/20' : ''}`}
+          className={`px-4 py-3 grid gap-4 ${rowIndex !== rows - 1 ? 'border-b border-brand-purple/20' : ''}`}
           style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         >
           {Array.from({ length: cols }).map((_, colIndex) => (
@@ -121,7 +121,7 @@ export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
  */
 export function ProfileSkeleton() {
   return (
-    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-16 w-16 rounded-full" />
@@ -173,7 +173,7 @@ export function FormSkeleton({ fields = 3 }: { fields?: number }) {
  */
 export function PaymentSkeleton() {
   return (
-    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader className="text-center pb-2">
         <Skeleton className="h-7 w-48 mx-auto" />
         <Skeleton className="h-5 w-32 mx-auto mt-2" />
@@ -209,7 +209,7 @@ export function PaymentSkeleton() {
  */
 export function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-surface-page py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-brand-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="space-y-2">
           <Skeleton className="h-10 w-64" />
@@ -227,7 +227,7 @@ export function PageSkeleton() {
  */
 export function CalculatorSkeleton() {
   return (
-    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader className="text-center">
         <Skeleton className="h-8 w-56 mx-auto" />
         <Skeleton className="h-4 w-72 mx-auto mt-2" />
@@ -250,7 +250,7 @@ export function CalculatorSkeleton() {
           </div>
         </div>
         {/* Price display */}
-        <div className="bg-surface-subtle rounded-lg p-4 space-y-2">
+        <div className="bg-brand-black-light rounded-lg p-4 space-y-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-10 w-32" />
         </div>

@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-[var(--surface-page)] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Removido banner de refreshing para evitar piscar - atualizações são silenciosas */}
         {error && (
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
             value={formatPrice(stats.revenue.total)}
             description="Pedidos concluídos"
             icon={DollarSign}
-            valueColor="text-purple-300"
+            valueColor="text-[var(--action-primary-hover)]"
           />
         </div>
 
@@ -164,21 +164,21 @@ export default function AdminDashboardPage() {
           
           {/* Gerenciar Usuários */}
           <Link href="/admin/users" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-purple-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1">
+            <div className="relative h-full p-6 rounded-2xl bg-[var(--surface-card)] backdrop-blur-xl border border-[var(--border-default)] hover:border-[var(--border-brand)]/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-[var(--action-primary)]/10 hover:-translate-y-1 card-interactive">
               {/* Glow effect */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--action-primary)]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/25 group-hover:scale-110 group-hover:shadow-purple-500/40 transition-all duration-300">
-                  <Users className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-[var(--action-primary)]/25 group-hover:scale-110 group-hover:shadow-[var(--action-primary)]/40 transition-all duration-300">
+                  <Users className="h-7 w-7 text-[var(--text-on-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-purple-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-orbitron group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Usuários
                 </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-[var(--text-muted)] text-sm font-rajdhani group-hover:text-[var(--text-secondary)] transition-colors">
                   Gerenciar todos os usuários da plataforma
                 </p>
-                <div className="flex items-center mt-4 text-purple-400 text-sm font-medium group-hover:text-purple-300 transition-colors">
+                <div className="flex items-center mt-4 text-[var(--action-primary-hover)] text-sm font-medium group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -187,20 +187,20 @@ export default function AdminDashboardPage() {
 
           {/* Gerenciar Pedidos */}
           <Link href="/admin/orders" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-blue-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative h-full p-6 rounded-2xl bg-[var(--surface-card)] backdrop-blur-xl border border-[var(--border-default)] hover:border-[var(--border-brand)]/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-[var(--action-primary)]/10 hover:-translate-y-1 card-interactive">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--action-primary)]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/25 group-hover:scale-110 group-hover:shadow-blue-500/40 transition-all duration-300">
-                  <ShoppingCart className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-[var(--action-primary)]/25 group-hover:scale-110 group-hover:shadow-[var(--action-primary)]/40 transition-all duration-300">
+                  <ShoppingCart className="h-7 w-7 text-[var(--text-on-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-blue-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-orbitron group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Pedidos
                 </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-[var(--text-muted)] text-sm font-rajdhani group-hover:text-[var(--text-secondary)] transition-colors">
                   Visualizar e gerenciar status dos pedidos
                 </p>
-                <div className="flex items-center mt-4 text-blue-400 text-sm font-medium group-hover:text-blue-300 transition-colors">
+                <div className="flex items-center mt-4 text-[var(--action-primary-hover)] text-sm font-medium group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -209,20 +209,20 @@ export default function AdminDashboardPage() {
 
           {/* Receitas */}
           <Link href="/admin/payments" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-green-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-green-500/10 hover:-translate-y-1">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative h-full p-6 rounded-2xl bg-[var(--surface-card)] backdrop-blur-xl border border-[var(--border-default)] hover:border-[var(--status-success)]/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-[var(--status-success)]/10 hover:-translate-y-1 card-interactive">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--status-success)]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 shadow-lg shadow-green-500/25 group-hover:scale-110 group-hover:shadow-green-500/40 transition-all duration-300">
-                  <DollarSign className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--status-success)] to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-[var(--status-success)]/25 group-hover:scale-110 group-hover:shadow-[var(--status-success)]/40 transition-all duration-300">
+                  <DollarSign className="h-7 w-7 text-[var(--text-on-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-green-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-orbitron group-hover:text-emerald-200 transition-colors">
                   Receitas
                 </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-[var(--text-muted)] text-sm font-rajdhani group-hover:text-[var(--text-secondary)] transition-colors">
                   Acompanhar pagamentos e receitas
                 </p>
-                <div className="flex items-center mt-4 text-green-400 text-sm font-medium group-hover:text-green-300 transition-colors">
+                <div className="flex items-center mt-4 text-[var(--status-success)] text-sm font-medium group-hover:text-emerald-300 transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -231,20 +231,20 @@ export default function AdminDashboardPage() {
 
           {/* Configurar Comissões */}
           <Link href="/admin/commission-config" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-orange-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative h-full p-6 rounded-2xl bg-[var(--surface-card)] backdrop-blur-xl border border-[var(--border-default)] hover:border-[var(--status-warning)]/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-[var(--status-warning)]/10 hover:-translate-y-1 card-interactive">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--status-warning)]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-orange-500/25 group-hover:scale-110 group-hover:shadow-orange-500/40 transition-all duration-300">
-                  <SettingsIcon className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--status-warning)] to-amber-600 flex items-center justify-center mb-4 shadow-lg shadow-[var(--status-warning)]/25 group-hover:scale-110 group-hover:shadow-[var(--status-warning)]/40 transition-all duration-300">
+                  <SettingsIcon className="h-7 w-7 text-[var(--text-on-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-orange-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-orbitron group-hover:text-amber-200 transition-colors">
                   Comissões
                 </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-[var(--text-muted)] text-sm font-rajdhani group-hover:text-[var(--text-secondary)] transition-colors">
                   Configurar porcentagens de comissão
                 </p>
-                <div className="flex items-center mt-4 text-orange-400 text-sm font-medium group-hover:text-orange-300 transition-colors">
+                <div className="flex items-center mt-4 text-[var(--status-warning)] text-sm font-medium group-hover:text-amber-300 transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -253,20 +253,20 @@ export default function AdminDashboardPage() {
 
           {/* Aplicações de Booster */}
           <Link href="/admin/boosters" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-yellow-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative h-full p-6 rounded-2xl bg-[var(--surface-card)] backdrop-blur-xl border border-[var(--border-default)] hover:border-[var(--border-brand)]/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-[var(--action-primary)]/10 hover:-translate-y-1 card-interactive">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--action-primary)]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center mb-4 shadow-lg shadow-yellow-500/25 group-hover:scale-110 group-hover:shadow-yellow-500/40 transition-all duration-300">
-                  <Users className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-[var(--action-primary)]/25 group-hover:scale-110 group-hover:shadow-[var(--action-primary)]/40 transition-all duration-300">
+                  <Users className="h-7 w-7 text-[var(--text-on-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-yellow-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 font-orbitron group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Boosters
                 </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-[var(--text-muted)] text-sm font-rajdhani group-hover:text-[var(--text-secondary)] transition-colors">
                   Aprovar ou rejeitar candidatos
                 </p>
-                <div className="flex items-center mt-4 text-yellow-400 text-sm font-medium group-hover:text-yellow-300 transition-colors">
+                <div className="flex items-center mt-4 text-[var(--action-primary-hover)] text-sm font-medium group-hover:text-[var(--action-primary-hover)] transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -276,12 +276,12 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Pedidos Recentes */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+        <Card className="bg-[var(--surface-card)]/30 backdrop-blur-md border-[var(--border-brand)]/50">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-[var(--text-primary)] font-orbitron">
               Pedidos Recentes
             </CardTitle>
-            <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <CardDescription className="text-[var(--text-muted)] font-rajdhani">
               Últimos 5 pedidos criados
             </CardDescription>
           </CardHeader>
@@ -300,22 +300,22 @@ export default function AdminDashboardPage() {
                   const statusConfigs: Record<string, { label: string; color: string; icon: any }> = {
                     PENDING: {
                       label: 'Pendente',
-                      color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
+                      color: 'bg-[var(--status-warning)]/20 text-amber-300 border-[var(--status-warning)]/50',
                       icon: Clock,
                     },
                     IN_PROGRESS: {
                       label: 'Em Progresso',
-                      color: 'bg-blue-500/20 text-blue-300 border-blue-500/50',
+                      color: 'bg-[var(--action-primary)]/20 text-[var(--action-primary-hover)] border-[var(--action-primary)]/50',
                       icon: Loader2,
                     },
                     COMPLETED: {
                       label: 'Concluído',
-                      color: 'bg-green-500/20 text-green-300 border-green-500/50',
+                      color: 'bg-[var(--status-success)]/20 text-emerald-300 border-[var(--status-success)]/50',
                       icon: CheckCircle2,
                     },
                     CANCELLED: {
                       label: 'Cancelado',
-                      color: 'bg-red-500/20 text-red-300 border-red-500/50',
+                      color: 'bg-[var(--status-error)]/20 text-red-300 border-[var(--status-error)]/50',
                       icon: XCircle,
                     },
                   }
@@ -326,26 +326,24 @@ export default function AdminDashboardPage() {
                   return (
                     <div
                       key={order.id}
-                      className="group flex items-center justify-between p-4 bg-gradient-to-br from-black/50 via-black/40 to-black/50 rounded-lg border border-purple-500/20 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-[1.01] transition-all duration-300"
-                      style={{
-                      }}
+                      className="group flex items-center justify-between p-4 bg-[var(--surface-card)]/50 rounded-lg border border-[var(--border-brand)]/20 hover:border-[var(--border-brand)]/60 hover:shadow-lg hover:shadow-[var(--action-primary)]/10 hover:scale-[1.01] transition-all duration-300"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <p className="text-white font-rajdhani font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <p className="text-[var(--text-primary)] font-rajdhani font-bold">
                             {order.service.name}
                           </p>
-                          <Badge className={`${statusInfo.color} border font-rajdhani flex items-center gap-1`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <Badge className={`${statusInfo.color} border font-rajdhani flex items-center gap-1`}>
                             <StatusIcon className="h-3 w-3" />
                             {statusInfo.label}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        <p className="text-sm text-[var(--text-muted)] font-rajdhani">
                           {order.user.name || order.user.email} • {order.service.game} • {formatDate(order.createdAt)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <p className="text-lg font-bold text-[var(--action-primary-hover)] font-orbitron">
                           {formatPrice(order.total)}
                         </p>
                       </div>
@@ -362,4 +360,3 @@ export default function AdminDashboardPage() {
     </div>
   )
 }
-

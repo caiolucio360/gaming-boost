@@ -67,36 +67,36 @@ export default function AboutPage() {
           }),
         }}
       />
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-              <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">SOBRE</span>
+              <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">SOBRE</span>
               <span className="text-white"> NÓS</span>
             </h1>
-            <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            <p className="text-xl text-brand-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
               A melhor plataforma de boost para gamers do Brasil
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto mb-16">
-            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden">
+            <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
               {/* Efeito de brilho sutil */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
               <CardHeader className="relative z-10">
-                <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">NOSSA</span>
+                <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">NOSSA</span>
                   <span className="text-white"> HISTÓRIA</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 relative z-10">
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Fundada em 2020, a GameBoost nasceu da paixão por jogos e da necessidade de oferecer 
                   serviços de boost profissionais e seguros para a comunidade gamer brasileira. Nossa equipe 
                   é formada por jogadores experientes que entendem as dificuldades de subir de rank e alcançar 
                   objetivos nos jogos mais populares.
                 </p>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Com mais de 10.000 clientes satisfeitos, nos tornamos referência em serviços de boost, 
                   oferecendo qualidade, segurança e eficiência em cada projeto. Nossa missão é ajudar 
                   jogadores a alcançarem seus objetivos de forma segura e profissional.
@@ -109,20 +109,20 @@ export default function AboutPage() {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-2xl hover:shadow-purple-500/30 transition-colors duration-200 overflow-hidden"
+                className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 transition-colors duration-200 overflow-hidden"
                 style={{
                 }}
               >
                 {/* Efeito de brilho no hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/10 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="pt-6 text-center relative z-10">
                   <div className="text-4xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 inline-block">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-white font-orbitron mb-3 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <h3 className="text-xl font-bold text-white font-orbitron mb-3 group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
                     {feature.title}
                   </h3>
-                  <p className="text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                  <p className="text-brand-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                     {feature.description}
                   </p>
                 </CardContent>

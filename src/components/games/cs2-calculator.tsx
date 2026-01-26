@@ -241,7 +241,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   if (!gameConfig || !modeConfig) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card className="bg-[#1A1A1A] border border-white/5">
+        <Card className="bg-brand-black-light border border-white/5">
           <CardContent className="p-6">
             <p className="text-white text-center">Configuração do jogo não encontrada.</p>
           </CardContent>
@@ -252,10 +252,10 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="bg-[#1A1A1A] border border-white/5 hover:border-[#7C3AED]/50 transition-colors">
+      <Card className="bg-brand-black-light border border-white/5 hover:border-brand-purple/50 transition-colors">
         <CardHeader>
           <CardTitle className="text-xl md:text-3xl font-bold font-orbitron text-center">
-            <span className="text-[#A855F7]">{gameConfig.displayName}</span>
+            <span className="text-brand-purple-light">{gameConfig.displayName}</span>
             <span className="text-white"> CALCULATOR</span>
           </CardTitle>
         </CardHeader>
@@ -264,20 +264,20 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
             <div className="mb-6">
               <Tabs value={selectedMode} onValueChange={(value) => handleModeChange(value as GameMode)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-[#27272a] border border-[#7C3AED]/30 rounded-lg p-1 gap-1 h-auto">
+                <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
                   <TabsTrigger
                     value="PREMIER"
                     className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
-                      data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(124,58,237,0.5)]
-                      data-[state=inactive]:text-[#6B7280] data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-[#7C3AED]/20"
+                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
                   >
                     Premier
                   </TabsTrigger>
                   <TabsTrigger
                     value="GAMERS_CLUB"
                     className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
-                      data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(124,58,237,0.5)]
-                      data-[state=inactive]:text-[#6B7280] data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-[#7C3AED]/20"
+                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
                   >
                     Gamers Club
                   </TabsTrigger>
@@ -287,21 +287,21 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           )}
 
           {/* Mode Info */}
-          <Card className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 mb-6">
+          <Card className="bg-brand-purple/10 border border-brand-purple/30 mb-6">
             <CardContent className="p-3 md:p-4">
-              <h3 className="text-base md:text-lg font-bold text-[#A855F7] font-orbitron mb-2">
+              <h3 className="text-base md:text-lg font-bold text-brand-purple-light font-orbitron mb-2">
                 Sistema {modeConfig.displayName}:
               </h3>
-              <div className="text-xs md:text-sm text-[#D1D5DB] font-rajdhani space-y-1">
+              <div className="text-xs md:text-sm text-brand-gray-300 font-rajdhani space-y-1">
                 {selectedMode === 'PREMIER' ? (
                   <>
-                    <p><span className="text-[#A855F7]">• Pontuação:</span> 1k a 26k pontos</p>
-                    <p><span className="text-[#A855F7]">• Preço:</span> {modeConfig.pricingInfo.description}</p>
+                    <p><span className="text-brand-purple-light">• Pontuação:</span> 1k a 26k pontos</p>
+                    <p><span className="text-brand-purple-light">• Preço:</span> {modeConfig.pricingInfo.description}</p>
                   </>
                 ) : (
                   <>
-                    <p><span className="text-[#A855F7]">• Níveis:</span> 1 a 20</p>
-                    <p><span className="text-[#A855F7]">• Preço:</span> {modeConfig.pricingInfo.description}</p>
+                    <p><span className="text-brand-purple-light">• Níveis:</span> 1 a 20</p>
+                    <p><span className="text-brand-purple-light">• Preço:</span> {modeConfig.pricingInfo.description}</p>
                   </>
                 )}
               </div>
@@ -310,21 +310,21 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
           {/* Warning for Active Orders */}
           {user && hasActiveOrderInMode && (
-            <Card className="bg-[#F59E0B]/20 border border-[#F59E0B]/70 mb-6 animate-pulse">
+            <Card className="bg-amber-500/20 border border-amber-500/70 mb-6 animate-pulse">
               <CardContent className="p-4 md:p-5">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <h3 className="text-sm md:text-base font-bold text-[#F59E0B] font-rajdhani mb-2">
+                    <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
                       Você já possui um boost ativo nesta modalidade
                     </h3>
-                    <p className="text-xs md:text-sm text-[#D1D5DB] font-rajdhani mb-3">
+                    <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
                       Você tem {activeOrders.length} pedido{activeOrders.length > 1 ? 's' : ''} {activeOrders[0].status === 'PENDING' ? 'pendente' : activeOrders[0].status === 'PAID' ? 'pago' : 'em andamento'} de boost {selectedMode === 'PREMIER' ? 'Premier' : 'Gamers Club'}.
                       Finalize ou cancele o pedido anterior antes de criar um novo.
                     </p>
                     <Link
                       href="/dashboard"
-                      className="inline-block bg-[#F59E0B] hover:bg-[#F59E0B]/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
+                      className="inline-block bg-amber-500 hover:bg-amber-500/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
                     >
                       Ver Meus Pedidos
                     </Link>
@@ -353,8 +353,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                         onClick={() => handleCurrentSelect(point.value)}
                         className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
                           ${isSelected
-                            ? 'bg-[#7C3AED] border-[#A855F7] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] scale-105'
-                            : 'bg-[#27272a] border-white/10 text-[#D1D5DB] hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:text-white'
+                            ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                            : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
                           }`}
                       >
                         {point.display}
@@ -380,8 +380,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                         onClick={() => handleTargetSelect(point.value)}
                         className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
                           ${isSelected
-                            ? 'bg-[#7C3AED] border-[#A855F7] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] scale-105'
-                            : 'bg-[#27272a] border-white/10 text-[#D1D5DB] hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:text-white'
+                            ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                            : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
                           }`}
                       >
                         {point.display}
@@ -399,9 +399,9 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                 <button
                   onClick={calculatePrice}
                   disabled={!selectedCurrent || !selectedTarget || isCalculating}
-                  className="bg-[#7C3AED] hover:bg-[#A855F7] text-white font-bold py-3 px-8 rounded-lg transition-all 
-                    shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)]
-                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#7C3AED] disabled:hover:shadow-[0_0_20px_rgba(124,58,237,0.5)]
+                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-8 rounded-lg transition-all 
+                    shadow-glow hover:shadow-glow-hover
+                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
                     font-rajdhani text-sm md:text-base flex items-center gap-2"
                 >
                   {isCalculating ? (
@@ -422,15 +422,15 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
               </div>
 
               {/* Price Result */}
-              <div className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 rounded-xl p-4 md:p-6">
+              <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-4 md:p-6">
                 <h3 className="text-xl md:text-2xl font-bold font-orbitron mb-3 md:mb-4">
-                  <span className="text-[#A855F7]">PREÇO</span>
+                  <span className="text-brand-purple-light">PREÇO</span>
                   <span className="text-white"> ESTIMADO</span>
                 </h3>
 
                 {isCalculating ? (
                   <div className="text-center py-4">
-                    <div className="inline-flex items-center gap-3 text-[#A855F7]">
+                    <div className="inline-flex items-center gap-3 text-brand-purple-light">
                       <svg className="animate-spin h-6 w-6 md:h-8 md:w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -442,10 +442,10 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   </div>
                 ) : price > 0 ? (
                   <div className="text-center">
-                    <div className="text-3xl md:text-5xl font-bold text-[#A855F7] font-orbitron mb-2">
+                    <div className="text-3xl md:text-5xl font-bold text-brand-purple-light font-orbitron mb-2">
                       R$ {price.toFixed(2)}
                     </div>
-                    <p className="text-sm md:text-base text-[#D1D5DB] font-rajdhani mb-4">
+                    <p className="text-sm md:text-base text-brand-gray-300 font-rajdhani mb-4">
                       {selectedMode === 'PREMIER'
                         ? `${selectedCurrent}K → ${selectedTarget}K pontos`
                         : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
@@ -454,11 +454,11 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <div>
                         <button
                           disabled={true}
-                          className="w-full bg-[#27272a] text-[#6B7280] font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                          className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
                         >
                           BOOST JÁ ATIVO NESTA MODALIDADE
                         </button>
-                        <p className="text-xs text-[#F59E0B] font-rajdhani">
+                        <p className="text-xs text-amber-500 font-rajdhani">
                           Finalize seu pedido atual para contratar um novo
                         </p>
                       </div>
@@ -466,8 +466,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <button
                         onClick={handleHire}
                         disabled={isLoading}
-                        className="w-full bg-[#4C1D95] hover:bg-[#7C3AED] text-white font-bold py-3 px-6 rounded-lg transition-all 
-                          shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)]
+                        className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all 
+                          shadow-glow hover:shadow-glow-hover
                           disabled:opacity-50 disabled:cursor-not-allowed
                           font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"
                       >
@@ -489,7 +489,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center text-xs md:text-sm text-[#6B7280] font-rajdhani py-4">
+                  <div className="text-center text-xs md:text-sm text-brand-gray-500 font-rajdhani py-4">
                     {selectedMode === 'PREMIER'
                       ? 'Selecione as pontuações e clique em "Calcular Preço"'
                       : 'Selecione os níveis e clique em "Calcular Preço"'}

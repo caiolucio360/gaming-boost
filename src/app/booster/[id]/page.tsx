@@ -52,8 +52,8 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header Section */}
-        <div className="bg-black/30 backdrop-blur-md border border-purple-500/30 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
-          <Avatar className="h-32 w-32 border-4 border-purple-500/50">
+        <div className="bg-black/30 backdrop-blur-md border border-brand-purple/30 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+          <Avatar className="h-32 w-32 border-4 border-brand-purple/50">
             <AvatarImage src={profile.user.image || ''} alt={profile.user.name || 'Booster'} />
             <AvatarFallback className="bg-purple-900/50 text-purple-200 text-2xl">
               {profile.user.name?.substring(0, 2).toUpperCase() || 'BO'}
@@ -77,7 +77,7 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2">
               {profile.languages.map((lang: any) => (
-                <Badge key={lang} variant="secondary" className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30">
+                <Badge key={lang} variant="secondary" className="bg-brand-purple/20 text-brand-purple-light hover:bg-brand-purple/30">
                   {lang}
                 </Badge>
               ))}
@@ -89,7 +89,7 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
           </div>
 
           <div className="flex flex-col gap-4 min-w-[200px]">
-            <Card className="bg-purple-900/20 border-purple-500/30">
+            <Card className="bg-purple-900/20 border-brand-purple/30">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-yellow-400">
                   <Star className="h-5 w-5 fill-yellow-400" />
@@ -120,10 +120,10 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
           <div className="grid gap-4">
             {profile.user.reviewsReceived.length > 0 ? (
               profile.user.reviewsReceived.map((review: any) => (
-                <Card key={review.id} className="bg-black/20 border-purple-500/20">
+                <Card key={review.id} className="bg-black/20 border-brand-purple/20">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <Avatar className="h-10 w-10 border border-purple-500/30">
+                      <Avatar className="h-10 w-10 border border-brand-purple/30">
                         <AvatarImage src={review.author.image || ''} />
                         <AvatarFallback className="bg-gray-800 text-gray-400">
                           {review.author.name?.substring(0, 2).toUpperCase() || 'CL'}

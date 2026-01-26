@@ -104,7 +104,7 @@ export default function AdminDisputesPage() {
       case 'RESOLVED_PAYOUT':
         return 'bg-green-500/20 text-green-300'
       case 'RESOLVED_PARTIAL':
-        return 'bg-purple-500/20 text-purple-300'
+        return 'bg-brand-purple/20 text-brand-purple-light'
       case 'CANCELLED':
         return 'bg-gray-500/20 text-gray-300'
       default:
@@ -125,7 +125,7 @@ export default function AdminDisputesPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Disputes List */}
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardHeader>
               <CardTitle className="text-white font-orbitron">
                 Disputas ({disputes.length})
@@ -141,8 +141,8 @@ export default function AdminDisputesPage() {
                     onClick={() => setSelectedDispute(dispute)}
                     className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                       selectedDispute?.id === dispute.id
-                        ? 'bg-purple-600/20 border-purple-500'
-                        : 'bg-gray-800/30 border-gray-700/30 hover:border-purple-500/50'
+                        ? 'bg-brand-purple/20 border-brand-purple'
+                        : 'bg-gray-800/30 border-gray-700/30 hover:border-brand-purple/50'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -168,7 +168,7 @@ export default function AdminDisputesPage() {
           </Card>
 
           {/* Dispute Detail & Resolution */}
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardHeader>
               <CardTitle className="text-white font-orbitron">
                 {selectedDispute ? `Disputa #${selectedDispute.id}` : 'Selecione uma disputa'}
@@ -205,7 +205,7 @@ export default function AdminDisputesPage() {
                     <p className="text-white">{selectedDispute.messages.length} mensagens</p>
                     <Button
                       variant="link"
-                      className="text-purple-400 p-0 h-auto"
+                      className="text-brand-purple-light p-0 h-auto"
                       onClick={() => router.push(`/disputes/${selectedDispute.id}`)}
                     >
                       Ver conversa completa
@@ -220,7 +220,7 @@ export default function AdminDisputesPage() {
                         <div>
                           <label className="text-sm text-gray-400 mb-1 block">Resolução</label>
                           <Select value={resolutionStatus} onValueChange={setResolutionStatus}>
-                            <SelectTrigger className="bg-black/50 border-purple-500/30 text-white">
+                            <SelectTrigger className="bg-brand-black/50 border-brand-purple/30 text-white">
                               <SelectValue placeholder="Selecione a resolução" />
                             </SelectTrigger>
                             <SelectContent>
@@ -240,14 +240,14 @@ export default function AdminDisputesPage() {
                             value={resolution}
                             onChange={(e) => setResolution(e.target.value)}
                             placeholder="Adicione detalhes sobre a resolução..."
-                            className="bg-black/50 border-purple-500/30 text-white"
+                            className="bg-brand-black/50 border-brand-purple/30 text-white"
                           />
                         </div>
 
                         <Button
                           onClick={handleResolve}
                           disabled={!resolutionStatus || resolving}
-                          className="w-full bg-purple-600 border border-transparent hover:border-white/50"
+                          className="w-full bg-brand-purple border border-transparent hover:border-white/50"
                         >
                           {resolving ? (
                             <>

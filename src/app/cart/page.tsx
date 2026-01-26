@@ -149,37 +149,37 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white font-orbitron mb-2">
-            <span className="text-purple-300">CARRINHO</span>
+            <span className="text-brand-purple-light">CARRINHO</span>
             <span className="text-white"> DE COMPRAS</span>
           </h1>
-          <p className="text-gray-300 font-rajdhani">
+          <p className="text-brand-gray-300 font-rajdhani">
             Revise seus serviços selecionados antes de finalizar
           </p>
         </div>
 
         {items.length === 0 && !isRedirecting ? (
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <ShoppingCart className="h-16 w-16 text-brand-gray-500 mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-white font-orbitron mb-2">
                   Carrinho vazio
                 </h3>
-                <p className="text-gray-400 font-rajdhani mb-6">
+                <p className="text-brand-gray-500 font-rajdhani mb-6">
                   Seu carrinho está vazio. Adicione serviços para continuar.
                 </p>
-                <Button asChild className="bg-purple-500 text-white font-rajdhani">
+                <Button asChild className="bg-brand-purple text-white font-rajdhani">
                   <Link href="/games/cs2">Explorar Jogos</Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
         ) : isRedirecting ? (
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <LoadingSpinner size="lg" text="Redirecionando para pagamento..." fullScreen={false} />
@@ -190,19 +190,19 @@ export default function CartPage() {
           <div className="space-y-6">
             <div className="space-y-4">
               {items.map((item: CartItem, index: number) => (
-                <Card key={index} className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 transition-colors">
+                <Card key={index} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 transition-colors">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-white font-orbitron mb-2">
                           {item.serviceName}
                         </CardTitle>
-                        <CardDescription className="text-gray-400 font-rajdhani">
+                        <CardDescription className="text-brand-gray-500 font-rajdhani">
                           {item.description || 'Serviço de boost profissional'}
                         </CardDescription>
                         {item.currentRank && item.targetRank && (
                           <div className="mt-2 flex flex-wrap gap-2">
-                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50">
+                            <Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50">
                               {item.currentRank} → {item.targetRank}
                             </Badge>
                             <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/50">
@@ -224,12 +224,12 @@ export default function CartPage() {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-400 font-rajdhani mb-1">Duração estimada</p>
+                        <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">Duração estimada</p>
                         <p className="text-sm text-white font-rajdhani">{item.duration || '1-3 dias'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-400 font-rajdhani mb-1">Preço</p>
-                        <p className="text-xl font-bold text-purple-300 font-orbitron">
+                        <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">Preço</p>
+                        <p className="text-xl font-bold text-brand-purple-light font-orbitron">
                           {formatPrice(item.price)}
                         </p>
                       </div>
@@ -240,7 +240,7 @@ export default function CartPage() {
             </div>
 
             {/* Resumo do pedido */}
-            <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 sticky top-24">
+            <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 sticky top-24">
               <CardHeader>
                 <CardTitle className="text-white font-orbitron">
                   <span className="text-purple-300">RESUMO</span> DO PEDIDO
@@ -248,12 +248,12 @@ export default function CartPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-gray-300 font-rajdhani">Total de itens</p>
+                  <p className="text-brand-gray-300 font-rajdhani">Total de itens</p>
                   <p className="text-white font-rajdhani font-semibold">{items.length}</p>
                 </div>
-                <div className="flex items-center justify-between border-t border-purple-500/30 pt-4">
+                <div className="flex items-center justify-between border-t border-brand-purple/30 pt-4">
                   <p className="text-lg font-bold text-white font-orbitron">Total</p>
-                  <p className="text-2xl font-bold text-purple-300 font-orbitron">
+                  <p className="text-2xl font-bold text-brand-purple-light font-orbitron">
                     {formatPrice(total)}
                   </p>
                 </div>
@@ -263,7 +263,7 @@ export default function CartPage() {
                     <Button
                       onClick={handleFinalizePurchase}
                       disabled={isProcessing || items.length === 0}
-                      className="w-full bg-purple-500 text-white font-rajdhani disabled:opacity-50"
+                      className="w-full bg-brand-purple text-white font-rajdhani disabled:opacity-50"
                     >
                       {isProcessing ? (
                         <>
@@ -280,7 +280,7 @@ export default function CartPage() {
                     <Button
                       asChild
                       variant="outline"
-                      className="w-full border-purple-500/50 text-purple-300 hover:border-purple-400"
+                      className="w-full border-brand-purple/50 text-brand-purple-light hover:border-brand-purple-light"
                     >
                       <Link href="/dashboard">
                         Ver Meus Pedidos
@@ -290,13 +290,13 @@ export default function CartPage() {
                   </div>
                 ) : (
                   <div className="space-y-2 mt-4">
-                    <Button asChild className="w-full bg-purple-500 text-white font-rajdhani">
+                    <Button asChild className="w-full bg-brand-purple text-white font-rajdhani">
                       <Link href="/login">
                         Fazer Login para Continuar
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
-                    <p className="text-xs text-center text-gray-400 font-rajdhani">
+                    <p className="text-xs text-center text-brand-gray-500 font-rajdhani">
                       Seus itens serão salvos no carrinho
                     </p>
                   </div>

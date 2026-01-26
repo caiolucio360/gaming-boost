@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 // Stats card skeleton (for dashboard stats)
 export function SkeletonStatsCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50", className)}>
+    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4 rounded" />
@@ -23,7 +23,7 @@ export function SkeletonStatsCard({ className }: { className?: string }) {
 // Order card skeleton (for order lists)
 export function SkeletonOrderCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50", className)}>
+    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -58,9 +58,9 @@ export function SkeletonTable({
   className?: string
 }) {
   return (
-    <div className={cn("w-full overflow-hidden rounded-lg border border-border-ds-brand/50", className)}>
+    <div className={cn("w-full overflow-hidden rounded-lg border border-brand-purple/50", className)}>
       {/* Header */}
-      <div className="bg-surface-subtle border-b border-border-ds-brand/30 px-4 py-3">
+      <div className="bg-brand-black-light border-b border-brand-purple/30 px-4 py-3">
         <div className="flex items-center gap-4">
           {Array.from({ length: columns }).map((_, i) => (
             <Skeleton key={i} className="h-4 flex-1" />
@@ -73,7 +73,7 @@ export function SkeletonTable({
           key={rowIndex}
           className={cn(
             "px-4 py-3 flex items-center gap-4",
-            rowIndex !== rows - 1 && "border-b border-border-ds-brand/20"
+            rowIndex !== rows - 1 && "border-b border-brand-purple/20"
           )}
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
@@ -94,7 +94,7 @@ export function SkeletonTable({
 // Profile card skeleton
 export function SkeletonProfileCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50", className)}>
+    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
           <SkeletonAvatar size="lg" />
@@ -124,7 +124,7 @@ export function SkeletonProfileCard({ className }: { className?: string }) {
 // Payment/PIX card skeleton
 export function SkeletonPaymentCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50", className)}>
+    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
       <CardHeader className="text-center pb-2">
         <Skeleton className="h-7 w-48 mx-auto" />
         <Skeleton className="h-5 w-32 mx-auto mt-2" />
@@ -158,7 +158,7 @@ export function SkeletonPaymentCard({ className }: { className?: string }) {
 // Calculator/service card skeleton
 export function SkeletonCalculatorCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50", className)}>
+    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
       <CardHeader className="text-center">
         <Skeleton className="h-8 w-56 mx-auto" />
         <Skeleton className="h-4 w-72 mx-auto mt-2" />
@@ -181,7 +181,7 @@ export function SkeletonCalculatorCard({ className }: { className?: string }) {
           </div>
         </div>
         {/* Price display */}
-        <div className="bg-surface-subtle rounded-lg p-4 space-y-2">
+        <div className="bg-brand-black-light rounded-lg p-4 space-y-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-10 w-32" />
         </div>
@@ -271,7 +271,7 @@ export function SkeletonList({
       {Array.from({ length: items }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-lg bg-surface-card/30 border border-border-ds-brand/30"
+          className="flex items-center gap-4 p-4 rounded-lg bg-brand-black-light/30 border border-brand-purple/30"
         >
           <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
           <div className="flex-1 space-y-2">

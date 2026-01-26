@@ -83,11 +83,11 @@ export default function TestimonialsPage() {
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}
-              className="relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-2xl hover:shadow-purple-500/30 overflow-hidden"
+              className="relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 overflow-hidden"
             >
               <CardContent className="pt-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4 shadow-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
+                  <div className="w-12 h-12 bg-gradient-to-br from-brand-purple to-brand-purple-dark rounded-full flex items-center justify-center text-white font-bold font-rajdhani mr-4 shadow-lg" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
                     {testimonial.avatar}
                   </div>
                   <div>

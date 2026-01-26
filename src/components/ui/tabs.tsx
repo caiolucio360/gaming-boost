@@ -27,7 +27,7 @@ function TabsList({
       data-slot="tabs-list"
       className={cn(
         // Mobile-first: min-h-touch ensures 44px touch targets
-        "bg-surface-subtle text-text-muted inline-flex h-11 min-h-touch w-fit items-center justify-center rounded-lg p-1",
+        "bg-brand-black-light text-brand-gray-500 inline-flex h-11 min-h-touch w-fit items-center justify-center rounded-lg p-1",
         className
       )}
       {...props}
@@ -46,11 +46,11 @@ function TabsTrigger({
         // Base styles with touch-friendly height
         "inline-flex h-9 min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-all",
         // Text and border
-        "text-text-secondary border border-transparent",
+        "text-brand-gray-300 border border-transparent",
         // Active state - uses design system tokens
-        "data-[state=active]:bg-surface-card data-[state=active]:text-text-primary data-[state=active]:border-border-ds-brand/30 data-[state=active]:shadow-sm",
+        "data-[state=active]:bg-brand-black data-[state=active]:text-white data-[state=active]:border-brand-purple/30 data-[state=active]:shadow-sm",
         // Focus state
-        "focus-visible:border-border-ds-brand focus-visible:ring-border-ds-brand/30 focus-visible:ring-[3px] focus-visible:outline-1",
+        "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30 focus-visible:ring-[3px] focus-visible:outline-1",
         // Disabled state
         "disabled:pointer-events-none disabled:opacity-50",
         // SVG handling

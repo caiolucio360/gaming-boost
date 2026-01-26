@@ -42,12 +42,12 @@ function SelectTrigger({
         // Size variants with minimum touch targets
         "data-[size=default]:h-10 data-[size=default]:min-h-touch data-[size=sm]:h-9 data-[size=sm]:min-h-[36px]",
         // Border and background - using design system tokens
-        "border-border-ds-default bg-surface-card",
-        "data-[placeholder]:text-text-muted [&_svg:not([class*='text-'])]:text-text-muted",
+        "border-white/10 bg-brand-black-light",
+        "data-[placeholder]:text-brand-gray-500 [&_svg:not([class*='text-'])]:text-brand-gray-500",
         // Focus state
-        "focus-visible:border-border-ds-brand focus-visible:ring-border-ds-brand/30 focus-visible:ring-1",
+        "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30 focus-visible:ring-1",
         // Validation states
-        "aria-invalid:ring-status-error/20 dark:aria-invalid:ring-status-error/40 aria-invalid:border-status-error",
+        "aria-invalid:ring-brand-red/20 dark:aria-invalid:ring-brand-red/40 aria-invalid:border-brand-red",
         // Cursor
         "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
         // Value styling
@@ -126,9 +126,9 @@ function SelectItem({
         // Base styles with touch-friendly padding
         "relative flex w-full items-center gap-2 rounded-sm py-2.5 pr-8 pl-3 text-sm outline-hidden select-none min-h-[40px]",
         // Colors using design system tokens
-        "text-text-primary [&_svg:not([class*='text-'])]:text-text-muted",
+        "text-white [&_svg:not([class*='text-'])]:text-brand-gray-500",
         // Focus/hover states
-        "focus:bg-surface-subtle focus:text-text-primary",
+        "focus:bg-brand-black-light focus:text-white",
         // Cursor
         "cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         // SVG handling
@@ -141,7 +141,7 @@ function SelectItem({
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4 text-text-brand" />
+          <CheckIcon className="size-4 text-brand-purple" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

@@ -211,11 +211,11 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         {refreshing && (
-          <div className="mb-4 p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-            <p className="text-sm text-purple-300 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
+            <p className="text-sm text-brand-purple-light font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               <Loader2 className="h-4 w-4 inline-block mr-2 animate-spin" />
               Atualizando...
             </p>
@@ -229,32 +229,32 @@ export default function AdminUsersPage() {
         )}
         {/* Header */}
         <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center text-purple-300 hover:text-purple-200 font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Dashboard
           </Link>
           <h1 className="text-4xl font-bold text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-            <span className="text-purple-300">GERENCIAR</span>
+            <span className="text-brand-purple-light">GERENCIAR</span>
             <span className="text-white"> USUÁRIOS</span>
           </h1>
-          <p className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+          <p className="text-brand-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
             Visualize e gerencie todos os usuários da plataforma
           </p>
         </div>
 
         {/* Filtros e Busca */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 mb-6">
+        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
           <CardContent className="pt-6">
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-brand-gray-500" />
                   <Input
                     type="text"
                     placeholder="Buscar por email ou nome..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-black/50 border-purple-500/50 text-white font-rajdhani"
+                    className="pl-10 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
                     style={{ fontFamily: 'Rajdhani, sans-serif' }}
                   />
                 </div>
@@ -265,10 +265,10 @@ export default function AdminUsersPage() {
                   setFilterRole(value === 'all' ? '' : value)
                 }}
               >
-                <SelectTrigger className="w-full md:w-[200px] bg-black/50 border-purple-500/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   <SelectValue placeholder="Todos os roles" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-purple-500/50">
+                <SelectContent className="bg-brand-black border-brand-purple/50">
                   <SelectItem value="all">Todos os roles</SelectItem>
                   <SelectItem value="CLIENT">Clientes</SelectItem>
                   <SelectItem value="BOOSTER">Boosters</SelectItem>
@@ -277,7 +277,7 @@ export default function AdminUsersPage() {
               </Select>
               <Button
                 type="submit"
-                className="bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50"
+                className="bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50"
                 style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
               >
                 Buscar
@@ -290,14 +290,14 @@ export default function AdminUsersPage() {
         {loading ? (
           <TableSkeleton rows={8} cols={5} />
         ) : users.length === 0 ? (
-          <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <Users className="h-16 w-16 text-brand-gray-500 mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                   Nenhum usuário encontrado
                 </h3>
-                <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   Tente ajustar os filtros de busca
                 </p>
               </div>
@@ -312,7 +312,7 @@ export default function AdminUsersPage() {
               return (
                 <Card
                   key={adminUser.id}
-                  className="bg-black/30 backdrop-blur-md border-purple-500/50 hover:border-purple-400 transition-colors"
+                  className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
@@ -329,15 +329,15 @@ export default function AdminUsersPage() {
                             {roleInfo.label}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                           {adminUser.email}
                         </p>
-                        <p className="text-xs text-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        <p className="text-xs text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                           Criado em {formatDate(adminUser.createdAt)} • {adminUser._count.orders} pedidos
                         </p>
                         {adminUser.role === 'BOOSTER' && (
                           <div className="mt-2">
-                            <p className="text-xs text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <p className="text-xs text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               Comissão: {adminUser.boosterCommissionPercentage !== null && adminUser.boosterCommissionPercentage !== undefined
                                 ? `${(adminUser.boosterCommissionPercentage * 100).toFixed(0)}%`
                                 : 'Padrão (70%)'}
@@ -346,7 +346,7 @@ export default function AdminUsersPage() {
                         )}
                         {adminUser.role === 'ADMIN' && (
                           <div className="mt-2">
-                            <p className="text-xs text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <p className="text-xs text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               Share de Lucro: {adminUser.adminProfitShare !== null && adminUser.adminProfitShare !== undefined
                                 ? adminUser.adminProfitShare
                                 : '0 (Divisão igualitária)'}
@@ -427,7 +427,7 @@ export default function AdminUsersPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 font-rajdhani"
+                          className="border-brand-purple/50 text-brand-purple-light hover:bg-brand-purple/10 font-rajdhani"
                           style={{ fontFamily: 'Rajdhani, sans-serif' }}
                         >
                           <Link href={`/admin/users/${adminUser.id}`}>
@@ -465,7 +465,7 @@ export default function AdminUsersPage() {
         )}
 
         <div className="mt-4 text-center">
-          <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Total: {users.length} usuário{users.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -473,12 +473,12 @@ export default function AdminUsersPage() {
 
       {/* Dialog para configurar comissão */}
       <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>
-        <DialogContent className="bg-black border-purple-500/50">
+        <DialogContent className="bg-brand-black border-brand-purple/50">
           <DialogHeader>
             <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               Configurar Comissão
             </DialogTitle>
-            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <DialogDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               {selectedUser?.name || selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -494,11 +494,11 @@ export default function AdminUsersPage() {
                 step="0.1"
                 value={commissionPercentage}
                 onChange={(e) => setCommissionPercentage(e.target.value)}
-                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani mt-1"
                 style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 placeholder="70"
               />
-              <p className="text-xs text-gray-400 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 Valor entre 0 e 100 (ex: 75 para 75%)
               </p>
             </div>
@@ -509,7 +509,7 @@ export default function AdminUsersPage() {
               <Textarea
                 value={commissionReason}
                 onChange={(e) => setCommissionReason(e.target.value)}
-                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani mt-1"
                 style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 placeholder="Ex: Ajuste por desempenho excepcional"
                 rows={3}
@@ -520,7 +520,7 @@ export default function AdminUsersPage() {
             <Button
               variant="outline"
               onClick={() => setCommissionDialogOpen(false)}
-              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              className="border-brand-purple/50 text-brand-purple-light font-rajdhani"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Cancelar
@@ -576,7 +576,7 @@ export default function AdminUsersPage() {
                   setTimeout(() => setAlert(null), 5000)
                 }
               }}
-              className="bg-purple-600 text-white font-rajdhani border border-transparent hover:border-white/50"
+              className="bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Salvar
@@ -587,12 +587,12 @@ export default function AdminUsersPage() {
 
       {/* Dialog para configurar Profit Share (Admin) */}
       <Dialog open={profitShareDialogOpen} onOpenChange={setProfitShareDialogOpen}>
-        <DialogContent className="bg-black border-purple-500/50">
+        <DialogContent className="bg-brand-black border-brand-purple/50">
           <DialogHeader>
             <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               Configurar Profit Share
             </DialogTitle>
-            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <DialogDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               {selectedUser?.name || selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -607,11 +607,11 @@ export default function AdminUsersPage() {
                 step="0.1"
                 value={profitShareValue}
                 onChange={(e) => setProfitShareValue(e.target.value)}
-                className="bg-black/50 border-purple-500/50 text-white font-rajdhani mt-1"
+                className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani mt-1"
                 style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 placeholder="Ex: 1.0"
               />
-              <p className="text-xs text-gray-400 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 Valor relativo para divisão do lucro (ex: 1.0, 0.5, 2.0).
                 <br />
                 Se todos tiverem 1.0, a divisão é igualitária.
@@ -622,7 +622,7 @@ export default function AdminUsersPage() {
             <Button
               variant="outline"
               onClick={() => setProfitShareDialogOpen(false)}
-              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              className="border-brand-purple/50 text-brand-purple-light font-rajdhani"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Cancelar
@@ -677,7 +677,7 @@ export default function AdminUsersPage() {
                   setTimeout(() => setAlert(null), 5000)
                 }
               }}
-              className="bg-purple-600 text-white font-rajdhani border border-transparent hover:border-white/50"
+              className="bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Salvar
@@ -688,44 +688,44 @@ export default function AdminUsersPage() {
 
       {/* Dialog para histórico de comissão */}
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="bg-black border-purple-500/50 max-w-2xl">
+        <DialogContent className="bg-brand-black border-brand-purple/50 max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               Histórico de Comissão
             </DialogTitle>
-            <DialogDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <DialogDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               {selectedUser?.name || selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-96 overflow-y-auto">
             {loadingHistory ? (
               <div className="text-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-500 mx-auto" />
+                <Loader2 className="h-8 w-8 animate-spin text-brand-purple mx-auto" />
               </div>
             ) : commissionHistory.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <div className="text-center py-8 text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 Nenhuma mudança registrada
               </div>
             ) : (
               <div className="space-y-4">
                 {commissionHistory.map((item: any) => (
-                  <Card key={item.id} className="bg-black/30 border-purple-500/50">
+                  <Card key={item.id} className="bg-black/30 border-brand-purple/50">
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <span className="text-sm text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {item.previousPercentage !== null
                                 ? `${(item.previousPercentage * 100).toFixed(0)}%`
                                 : 'N/A'} → {(item.newPercentage * 100).toFixed(0)}%
                             </span>
                           </div>
                           {item.reason && (
-                            <p className="text-xs text-gray-500 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <p className="text-xs text-brand-gray-500 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                               {item.reason}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <p className="text-xs text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                             Alterado por {item.changedByUser?.name || item.changedByUser?.email} em {formatDate(item.createdAt)}
                           </p>
                         </div>
@@ -740,7 +740,7 @@ export default function AdminUsersPage() {
             <Button
               variant="outline"
               onClick={() => setHistoryDialogOpen(false)}
-              className="border-purple-500/50 text-purple-300 font-rajdhani"
+              className="border-brand-purple/50 text-brand-purple-light font-rajdhani"
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               Fechar

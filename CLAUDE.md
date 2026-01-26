@@ -251,7 +251,7 @@ LEETIFY_API_KEY           # Leetify API for CS2 stats (optional)
 ```
 src/
 ├── app/
-│   ├── (auth)/              # Auth route group (login, register, forgot-password)
+│   ├── (auth)/              # Auth route group
 │   ├── (dashboard)/         # Dashboard route group
 │   ├── admin/               # Admin panel pages
 │   ├── booster/             # Booster dashboard pages

@@ -42,14 +42,8 @@ export async function GET(request: NextRequest) {
         prisma.order.findMany({
           take: 5,
           orderBy: { createdAt: 'desc' },
-          where: {
-            service: {
-              game: 'CS2', // Filtrar apenas orders com games válidos
-            },
-          },
           include: {
             user: { select: { email: true, name: true } },
-            service: { select: { name: true, game: true } },
           },
         }).catch(() => []),
       ])
@@ -84,6 +78,12 @@ export async function GET(request: NextRequest) {
             createdAtStr = new Date().toISOString()
           }
 
+          // Build service name from order metadata
+          const gameMode = order.gameMode || 'PREMIER'
+          const serviceName = gameMode === 'GAMERS_CLUB'
+            ? `Boost Gamers Club ${order.currentRank || ''} → ${order.targetRank || ''}`.trim()
+            : `Boost Premier ${order.currentRating || order.currentRank || ''} → ${order.targetRating || order.targetRank || ''}`.trim()
+
           return {
             id: order.id,
             status: order.status,
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
               name: order.user?.name || null,
             },
             service: {
-              name: order.service?.name || 'Serviço não encontrado',
-              game: order.service?.game || 'CS2',
+              name: serviceName || 'Boost CS2',
+              game: order.game || 'CS2',
             },
           }
         }),

@@ -50,8 +50,8 @@ export default function PrivacyPage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/20 transition-colors duration-200 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
               <CardContent className="p-8 space-y-8 relative z-10">
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
@@ -305,7 +305,7 @@ export default function PrivacyPage() {
                 </div>
               </section>
 
-              <div className="border-t border-purple-500/30 pt-8 mt-8">
+              <div className="border-t border-brand-purple/30 pt-8 mt-8">
                 <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Última atualização: Janeiro de 2026
                 </p>

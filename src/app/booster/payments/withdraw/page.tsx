@@ -174,11 +174,11 @@ export default function BoosterWithdrawPage() {
         </div>
 
         {/* Saldo disponível */}
-        <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-500/50">
+        <Card className="bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/10 border-brand-purple/50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Wallet className="w-8 h-8 text-purple-400" />
+                <Wallet className="w-8 h-8 text-brand-purple-light" />
                 <div>
                   <p className="text-gray-400 text-sm font-rajdhani">Saldo Disponível</p>
                   <p className="text-2xl font-bold text-white font-orbitron">
@@ -194,7 +194,7 @@ export default function BoosterWithdrawPage() {
         </Card>
 
         {/* Formulário de saque */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
           <CardHeader>
             <CardTitle className="text-white font-orbitron">Novo Saque</CardTitle>
             <CardDescription className="text-gray-400 font-rajdhani">
@@ -221,7 +221,7 @@ export default function BoosterWithdrawPage() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0,00"
-                    className="bg-black/50 border-purple-500/50 text-white"
+                    className="bg-brand-black/50 border-brand-purple/50 text-white"
                     required
                   />
                 </div>
@@ -229,7 +229,7 @@ export default function BoosterWithdrawPage() {
                 <div className="space-y-2">
                   <Label htmlFor="pixKeyType" className="text-white">Tipo de Chave PIX</Label>
                   <Select value={pixKeyType} onValueChange={setPixKeyType}>
-                    <SelectTrigger className="bg-black/50 border-purple-500/50 text-white">
+                    <SelectTrigger className="bg-brand-black/50 border-brand-purple/50 text-white">
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -250,14 +250,14 @@ export default function BoosterWithdrawPage() {
                     value={pixKey}
                     onChange={(e) => setPixKey(e.target.value)}
                     placeholder="Digite sua chave PIX"
-                    className="bg-black/50 border-purple-500/50 text-white"
+                    className="bg-brand-black/50 border-brand-purple/50 text-white"
                     required
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold"
+                  className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-bold"
                   disabled={isSubmitting || availableBalance < 350}
                 >
                   {isSubmitting ? (
@@ -275,7 +275,7 @@ export default function BoosterWithdrawPage() {
         </Card>
 
         {/* Histórico de saques */}
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
           <CardHeader>
             <CardTitle className="text-white font-orbitron">Histórico de Saques</CardTitle>
           </CardHeader>
@@ -289,7 +289,7 @@ export default function BoosterWithdrawPage() {
                 {withdrawals.map((withdrawal) => (
                   <div
                     key={withdrawal.id}
-                    className="flex items-center justify-between p-4 bg-black/30 rounded-lg border border-purple-500/20"
+                    className="flex items-center justify-between p-4 bg-black/30 rounded-lg border border-brand-purple/20"
                   >
                     <div>
                       <p className="text-white font-bold">{formatPrice(withdrawal.amount / 100)}</p>
@@ -307,7 +307,7 @@ export default function BoosterWithdrawPage() {
                           href={withdrawal.receiptUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-purple-400 text-xs mt-1 hover:underline"
+                          className="block text-brand-purple-light text-xs mt-1 hover:underline"
                         >
                           Ver comprovante
                         </a>

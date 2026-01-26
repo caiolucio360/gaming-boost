@@ -28,10 +28,10 @@ function PaymentContent() {
 
   if (!orderId || !total) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-brand-black flex items-center justify-center p-4">
         <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-6 py-4 rounded-lg text-center">
           <p className="font-rajdhani mb-4">Informações de pagamento inválidas</p>
-          <Link href="/dashboard" className="text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-2">
+          <Link href="/dashboard" className="text-brand-purple-light hover:text-brand-purple-light transition-colors inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Voltar ao Dashboard
           </Link>
@@ -64,18 +64,18 @@ function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-brand-black flex flex-col">
       {/* Header */}
-      <header className="bg-black/50 backdrop-blur-md border-b border-purple-500/20 p-4">
+      <header className="bg-brand-black/50 backdrop-blur-md border-b border-brand-purple/20 p-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors flex items-center gap-2">
+          <Link href="/dashboard" className="text-brand-gray-500 hover:text-white transition-colors flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             <span className="font-rajdhani hidden sm:inline">Voltar</span>
           </Link>
           <h1 className="text-lg font-bold text-white font-orbitron">
             Pedido #{orderId}
           </h1>
-          <Link href="/" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/" className="text-brand-gray-500 hover:text-white transition-colors">
             <Home className="w-5 h-5" />
           </Link>
         </div>
@@ -127,7 +127,7 @@ function PaymentContent() {
               <div className="flex gap-4 mt-6">
                 <Button
                   variant="outline"
-                  className="flex-1 border-gray-500/50 text-gray-400 hover:text-white hover:bg-gray-500/10"
+                  className="flex-1 border-gray-500/50 text-brand-gray-500 hover:text-white hover:bg-gray-500/10"
                   onClick={() => router.push('/dashboard')}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -135,7 +135,7 @@ function PaymentContent() {
                 </Button>
                 {payment.status === 'EXPIRED' && (
                   <Button
-                    className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
+                    className="flex-1 bg-brand-purple hover:bg-brand-purple-dark text-white"
                     onClick={() => setPayment(null)}
                   >
                     Gerar Novo PIX
@@ -153,9 +153,9 @@ function PaymentContent() {
 export default function PaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-brand-black flex items-center justify-center p-4">
         <div className="text-white font-rajdhani flex items-center gap-3">
-          <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
           Carregando...
         </div>
       </div>
