@@ -14,7 +14,19 @@ function Checkbox({
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-purple-500 focus-visible:ring-purple-500/30 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+        // Touch target wrapper - visual is 18px but touch area extends with relative positioning
+        "peer relative",
+        // Visual checkbox styling
+        "border-border-ds-default dark:bg-input/30",
+        "data-[state=checked]:bg-action-primary data-[state=checked]:text-text-on-brand data-[state=checked]:border-action-primary",
+        "focus-visible:border-border-ds-brand focus-visible:ring-border-ds-brand/30",
+        "aria-invalid:ring-status-error/20 dark:aria-invalid:ring-status-error/40 aria-invalid:border-status-error",
+        // Size - visual is 18px (size-[18px]) but touch target is larger via pseudo-element
+        "size-[18px] shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-1",
+        // Touch target expansion - creates 44x44 touch area centered on checkbox
+        "before:absolute before:-inset-3 before:content-['']",
+        // Cursor
+        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

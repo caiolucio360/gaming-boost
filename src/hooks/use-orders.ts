@@ -12,21 +12,19 @@ interface Order {
     id: number
     status: string
     total: number
-    serviceId?: number
+    game?: string
+    gameMode?: string
+    currentRank?: string
+    targetRank?: string
     createdAt?: string
-    service?: {
-        id: number
-        name: string
-    }
 }
 
 interface CreateOrderInput {
-    serviceId: number
+    game?: 'CS2'
     total: number
     currentRank?: string
     targetRank?: string
     gameMode?: string
-    notes?: string
 }
 
 interface OrdersResponse {

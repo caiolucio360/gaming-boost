@@ -29,21 +29,56 @@ jest.mock('@/lib/games-config', () => ({
     displayName: 'CS2',
     modes: {
       PREMIER: {
+        id: 'PREMIER',
         name: 'Premier',
         displayName: 'Premier',
         ratingPoints: [1000, 5000, 10000, 15000, 20000],
-        pricingRules: {
-          basePrice: 10,
-          unit: 1000,
-          calculation: (current: number, target: number) => {
-            if (current >= target) return 0
-            return ((target - current) / 1000) * 10
-          }
-        }
+        pricingInfo: {
+          unit: '1000 pontos',
+          description: 'Preços progressivos por faixa de rating',
+        },
+      },
+      GAMERS_CLUB: {
+        id: 'GAMERS_CLUB',
+        name: 'Gamers Club',
+        displayName: 'Gamers Club',
+        ratingPoints: [1, 2, 3, 4, 5, 10, 15, 20],
+        ranks: [
+          { id: 'iniciante', name: 'Iniciante', minPoints: 1, maxPoints: 3 },
+        ],
+        pricingInfo: {
+          unit: '1 nível',
+          description: 'Preços progressivos por faixa de nível',
+        },
       }
     }
   }),
 }))
+
+// Mock pricing API
+const mockFetch = jest.fn()
+global.fetch = mockFetch
+
+beforeEach(() => {
+  mockFetch.mockImplementation((url) => {
+    if (url.includes('/api/pricing/calculate')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ price: 40, pricePerUnit: 10, breakdown: [] }),
+      })
+    }
+    if (url.includes('/api/orders')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ orders: [] }),
+      })
+    }
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({}),
+    })
+  })
+})
 
 describe('CS2Calculator', () => {
   it('should render calculator', () => {

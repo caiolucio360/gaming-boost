@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { IdSchema, PaginationSchema, MoneySchema } from './common'
+import { PaginationSchema, MoneySchema } from './common'
 
 /**
  * Valid order statuses
@@ -21,17 +21,22 @@ export const OrderStatusEnum = z.enum([
 export type OrderStatus = z.infer<typeof OrderStatusEnum>
 
 /**
+ * Valid games
+ */
+export const GameEnum = z.enum(['CS2'])
+
+/**
  * Schema for creating a new order
  */
 export const CreateOrderSchema = z.object({
-    serviceId: IdSchema,
+    game: GameEnum.default('CS2'),
     total: MoneySchema,
     currentRank: z.string().optional(),
     targetRank: z.string().optional(),
-    currentLevel: z.number().optional(),
-    targetLevel: z.number().optional(),
-    notes: z.string().optional(),
-    gameCredentials: z.string().optional(),
+    currentRating: z.number().optional(),
+    targetRating: z.number().optional(),
+    gameMode: z.string().optional(),
+    gameType: z.string().optional(),
     boosterId: z.string().optional(),
 })
 

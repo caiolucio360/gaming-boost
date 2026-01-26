@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +23,6 @@ export async function GET(request: NextRequest) {
         inProgressOrders,
         completedOrders,
         cancelledOrders,
-        totalServices,
         totalRevenueResult,
         recentOrders,
       ] = await Promise.all([
@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
         prisma.order.count({ where: { status: 'IN_PROGRESS' } }).catch(() => 0),
         prisma.order.count({ where: { status: 'COMPLETED' } }).catch(() => 0),
         prisma.order.count({ where: { status: 'CANCELLED' } }).catch(() => 0),
-        prisma.service.count().catch(() => 0),
         prisma.order.aggregate({
           where: { status: 'COMPLETED' },
           _sum: { total: true },
@@ -70,9 +69,6 @@ export async function GET(request: NextRequest) {
           inProgress: inProgressOrders,
           completed: completedOrders,
           cancelled: cancelledOrders,
-        },
-        services: {
-          total: totalServices,
         },
         revenue: {
           total: totalRevenue || 0,
@@ -111,17 +107,11 @@ export async function GET(request: NextRequest) {
       throw queryError // Re-lança para ser capturado pelo catch externo
     }
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    const errorStack = error instanceof Error ? error.stack : undefined
-    console.error('Detalhes do erro:', { message: errorMessage, stack: errorStack })
-    return NextResponse.json(
-      {
-        message: 'Erro ao buscar estatísticas',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    )
+    if (error instanceof Error) {
+      const errorStack = error.stack
+      console.error('Detalhes do erro:', { message: error.message, stack: errorStack })
+    }
+    return createApiErrorResponse(error, ErrorMessages.ADMIN_STATS_FAILED, 'GET /api/admin/stats')
   }
 }
 

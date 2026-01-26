@@ -44,9 +44,6 @@ interface Stats {
     completed: number
     cancelled: number
   }
-  services: {
-    total: number
-  }
   revenue: {
     total: number
   }
@@ -140,7 +137,7 @@ export default function AdminDashboardPage() {
           <StatsGridSkeleton count={4} />
         ) : stats ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <StatCard
             title="Total de Usuários"
             value={stats.users.total}
@@ -152,12 +149,6 @@ export default function AdminDashboardPage() {
             value={stats.orders.total}
             description={`${stats.orders.pending} pendentes • ${stats.orders.completed} concluídos`}
             icon={ShoppingCart}
-          />
-          <StatCard
-            title="Serviços Disponíveis"
-            value={stats.services.total}
-            description="Ativos na plataforma"
-            icon={Package}
           />
           <StatCard
             title="Receita Total"
@@ -210,28 +201,6 @@ export default function AdminDashboardPage() {
                   Visualizar e gerenciar status dos pedidos
                 </p>
                 <div className="flex items-center mt-4 text-blue-400 text-sm font-medium group-hover:text-blue-300 transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Gerenciar Serviços */}
-          <Link href="/admin/services" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-white/10 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-1">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25 group-hover:scale-110 group-hover:shadow-cyan-500/40 transition-all duration-300">
-                  <Package className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-cyan-200 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                  Serviços
-                </h3>
-                <p className="text-gray-400 text-sm font-rajdhani group-hover:text-gray-300 transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                  Criar e editar serviços disponíveis
-                </p>
-                <div className="flex items-center mt-4 text-cyan-400 text-sm font-medium group-hover:text-cyan-300 transition-colors">
                   Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>

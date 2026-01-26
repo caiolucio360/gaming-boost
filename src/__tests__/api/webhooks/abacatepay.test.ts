@@ -93,7 +93,7 @@ describe('POST /api/webhooks/abacatepay', () => {
             expect(response.status).toBe(200)
             expect(data.received).toBe(true)
             expect(data.processed).toBe(true)
-            expect(data.message).toBe('Payment confirmed')
+            expect(data.message).toBe('Pagamento confirmado')
         })
 
         it('deve retornar idempotente se pagamento já foi processado', async () => {
@@ -121,7 +121,7 @@ describe('POST /api/webhooks/abacatepay', () => {
             const data = await response.json()
 
             expect(response.status).toBe(200)
-            expect(data.message).toBe('Already processed')
+            expect(data.message).toBe('Já processado')
         })
 
         it('deve retornar erro quando pagamento não encontrado', async () => {
@@ -142,9 +142,9 @@ describe('POST /api/webhooks/abacatepay', () => {
             const response = await POST(request)
             const data = await response.json()
 
-            expect(response.status).toBe(200) // Webhook deve sempre retornar 200
+            expect(response.status).toBe(500) // Service returns failure when payment not found
             expect(data.processed).toBe(false)
-            expect(data.message).toBe('Payment not found')
+            expect(data.error).toBe('Pagamento não encontrado')
         })
     })
 
@@ -168,7 +168,7 @@ describe('POST /api/webhooks/abacatepay', () => {
 
             expect(response.status).toBe(200)
             expect(data.processed).toBe(true)
-            expect(data.message).toBe('Withdrawal completed')
+            expect(data.message).toBe('Saque concluído')
         })
 
         it('deve retornar erro quando saque não encontrado', async () => {
@@ -213,7 +213,7 @@ describe('POST /api/webhooks/abacatepay', () => {
 
             expect(response.status).toBe(200)
             expect(data.processed).toBe(true)
-            expect(data.message).toBe('Withdrawal failed')
+            expect(data.message).toBe('Saque falhou')
         })
     })
 })

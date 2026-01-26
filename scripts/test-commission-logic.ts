@@ -56,7 +56,6 @@ async function main() {
                 game: 'CS2',
                 type: 'RANK_BOOST',
                 price: 100.0,
-                duration: '1h'
             }
         })
 
@@ -94,18 +93,12 @@ async function main() {
         console.log(`Total Admin Revenue to Split: ${adminRevenueTotal}`)
         console.log(`Total Shares: ${totalShares}`)
 
-        // Update Order
+        // Update Order (commission data is stored in BoosterCommission and AdminRevenue models, not on Order)
         await prisma.order.update({
             where: { id: order.id },
             data: {
                 boosterId: booster.id,
                 status: 'IN_PROGRESS',
-                boosterCommission,
-                boosterPercentage,
-                // adminRevenue and adminPercentage are legacy fields, we can set them to total or leave null/0 depending on schema, 
-                // but for multi-admin they are less relevant. We'll set them to total for backward compat if needed.
-                adminRevenue: adminRevenueTotal,
-                adminPercentage: adminPercentageTotal
             }
         })
 

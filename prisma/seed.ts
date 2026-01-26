@@ -1,424 +1,137 @@
-import { prisma } from '../src/lib/db'
+import 'dotenv/config'
+import { PrismaClient } from '../src/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 import bcrypt from 'bcryptjs'
-import { getEnabledGames, GAMES_CONFIG } from '../src/lib/games-config'
 
+const getDirectDatabaseUrl = () => {
+    const url = process.env.DATABASE_URL || ''
+    return url.replace('-pooler.', '.').replace('&channel_binding=require', '')
+}
+
+const adapter = new PrismaPg({ connectionString: getDirectDatabaseUrl() })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  console.log('🌱 Iniciando seed do banco de dados...')
+    console.log('🌱 Seeding database...\n')
 
-  // Hash da senha '123456' para o usuário de teste
-  const hashedPassword = await bcrypt.hash('123456', 10)
+    // 1. USERS
+    console.log('👤 Creating users...')
 
-  // Criar usuário de teste (teste@teste.com)
-  const testUser = await prisma.user.upsert({
-    where: { email: 'teste@teste.com' },
-    update: {},
-    create: {
-      email: 'teste@teste.com',
-      name: 'Usuário de Teste',
-      password: hashedPassword,
-      role: 'CLIENT',
-    },
-  })
-
-  console.log('✅ Usuário de teste criado:', testUser.email)
-
-  // Criar usuário admin
-  const adminPassword = await bcrypt.hash('admin123', 10)
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@gameboostpro.com' },
-    update: {},
-    create: {
-      email: 'admin@gameboostpro.com',
-      name: 'Administrador',
-      password: adminPassword,
-      role: 'ADMIN',
-    },
-  })
-
-  console.log('✅ Usuário admin criado:', admin.email)
-
-  // Criar usuário booster de teste
-  const boosterPassword = await bcrypt.hash('booster123', 10)
-  const booster = await prisma.user.upsert({
-    where: { email: 'booster@gameboostpro.com' },
-    update: {},
-    create: {
-      email: 'booster@gameboostpro.com',
-      name: 'Booster Pro',
-      password: boosterPassword,
-      role: 'BOOSTER',
-    },
-  })
-
-  console.log('✅ Usuário booster criado:', booster.email)
-
-  // Criar alguns clientes adicionais para testes
-  const clientPassword = await bcrypt.hash('cliente123', 10)
-  const client2 = await prisma.user.upsert({
-    where: { email: 'cliente2@teste.com' },
-    update: {},
-    create: {
-      email: 'cliente2@teste.com',
-      name: 'Cliente 2',
-      password: clientPassword,
-      role: 'CLIENT',
-    },
-  })
-
-  console.log('✅ Usuário cliente 2 criado:', client2.email)
-
-  // Criar serviços dinamicamente baseado nos jogos habilitados
-  const enabledGames = getEnabledGames()
-  console.log('🎮 Jogos habilitados:', enabledGames.map(g => g.name).join(', '))
-
-  const services = []
-
-  // Para cada jogo habilitado, criar serviços básicos de rank boost
-  for (const game of enabledGames) {
-    // Criar serviços apenas para os tipos de serviço suportados pelo jogo
-    if (game.supportedServiceTypes.includes('RANK_BOOST')) {
-      // Serviços padrão para rank boost (podem ser customizados por jogo)
-      const gameServices = [
-        // Serviços específicos Premier (preços alinhados ao mercado brasileiro)
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Premier: 5K → 10K`,
-          description: `Boost profissional no ${game.name} Premier de 5.000 para 10.000 pontos. Serviço rápido e seguro.`,
-          price: 175.00, // 5K-9.999: R$ 35/1000 × 5 = R$ 175
-          duration: '2-4 dias',
+    const admin = await prisma.user.upsert({
+        where: { email: 'admin@gameboost.com' },
+        update: {},
+        create: {
+            email: 'admin@gameboost.com',
+            name: 'Admin',
+            password: await bcrypt.hash('admin123', 10),
+            role: 'ADMIN',
+            pixKey: '11999999999',
+            adminProfitShare: 0.5,
         },
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Premier: 10K → 15K`,
-          description: `Boost profissional no ${game.name} Premier de 10.000 para 15.000 pontos. Boost garantido.`,
-          price: 225.00, // 10K-14.999: R$ 45/1000 × 5 = R$ 225
-          duration: '3-6 dias',
-        },
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Premier: 15K → 20K`,
-          description: `Boost profissional no ${game.name} Premier de 15.000 para 20.000 pontos. Serviço premium.`,
-          price: 250.00, // 15K-19.999: R$ 50/1000 × 5 = R$ 250
-          duration: '4-7 dias',
-        },
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Premier: 20K → 25K`,
-          description: `Boost profissional no ${game.name} Premier de 20.000 para 25.000 pontos. Para jogadores avançados.`,
-          price: 300.00, // 20K-24.999: R$ 60/1000 × 5 = R$ 300
-          duration: '5-8 dias',
-        },
-        // Serviços genéricos para boosts customizados (calculados dinamicamente)
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Premier Customizado`,
-          description: `Boost profissional no ${game.name} Premier com faixa personalizada. Preço calculado dinamicamente.`,
-          price: 0, // Preço será definido no pedido
-          duration: '2-7 dias',
-        },
-        {
-          game: game.id as any,
-          type: 'RANK_BOOST' as const,
-          name: `Boost ${game.displayName} Gamers Club Customizado`,
-          description: `Boost profissional no ${game.name} Gamers Club com faixa personalizada. Preço calculado dinamicamente.`,
-          price: 0, // Preço será definido no pedido
-          duration: '2-7 dias',
-        },
-      ]
-      services.push(...gameServices)
-    }
-
-    // Adicionar outros tipos de serviço se o jogo suportar
-    // Exemplo para coaching (se implementado):
-    // if (game.supportedServiceTypes.includes('COACHING')) {
-    //   services.push({
-    //     id: `coaching-${game.id.toLowerCase()}`,
-    //     game: game.id as any,
-    //     type: 'COACHING' as const,
-    //     name: `Coaching ${game.displayName}`,
-    //     description: `Sessões de coaching personalizado para ${game.name}`,
-    //     price: 99.90,
-    //     duration: '1 sessão',
-    //   })
-    // }
-  }
-
-  // Criar serviços no banco de dados
-  const createdServices: Array<{ id: number; game: string; type: string; name: string; description: string; price: number; duration: string }> = []
-  for (const serviceData of services) {
-    try {
-      // Verificar se o serviço já existe pelo nome e jogo
-      const existingService = await prisma.service.findFirst({
-        where: {
-          name: serviceData.name,
-          game: serviceData.game,
-        },
-      })
-
-      let service
-      if (existingService) {
-        // Atualizar se já existir
-        service = await prisma.service.update({
-          where: { id: existingService.id },
-          data: {
-            name: serviceData.name,
-            description: serviceData.description,
-            price: serviceData.price,
-            duration: serviceData.duration,
-          },
-        })
-      } else {
-        // Criar novo serviço
-        service = await prisma.service.create({
-          data: serviceData,
-        })
-      }
-      createdServices.push(service)
-      console.log(`✅ Serviço criado: ${service.name} (${service.game})`)
-    } catch (error) {
-      console.error(`❌ Erro ao criar serviço ${serviceData.name}:`, error)
-    }
-  }
-
-  console.log(`✅ Total de ${createdServices.length} serviços criados`)
-
-  // Criar alguns pedidos de exemplo
-  // IMPORTANTE: Não criar múltiplos pedidos ativos (PENDING ou IN_PROGRESS) da mesma modalidade para o mesmo usuário
-  // Respeitar a regra: máximo 1 boost ativo por modalidade por usuário
-  const exampleOrders = []
-
-  if (createdServices.length >= 4) {
-    // testUser: 1 Premier PENDING, 1 Gamers Club COMPLETED
-    exampleOrders.push(
-      {
-        userId: testUser.id,
-        serviceId: createdServices[0].id,
-        status: 'PENDING' as const,
-        total: createdServices[0].price,
-        boosterId: null, // Disponível para boosters
-        currentRank: '10K',
-        targetRank: '15K',
-        currentRating: 10000,
-        targetRating: 15000,
-        gameMode: 'PREMIER',
-        gameType: 'CS2_PREMIER',
-      },
-      {
-        userId: testUser.id,
-        serviceId: createdServices[2].id,
-        status: 'COMPLETED' as const,
-        total: createdServices[2].price,
-        boosterId: booster.id, // Concluído pelo booster
-        currentRank: '5',
-        targetRank: '10',
-        currentRating: 5,
-        targetRating: 10,
-        gameMode: 'GAMERS_CLUB',
-        gameType: 'CS2_GAMERS_CLUB',
-      },
-      // client2: 1 Premier PENDING
-      {
-        userId: client2.id,
-        serviceId: createdServices[3].id,
-        status: 'PENDING' as const,
-        total: createdServices[3].price,
-        boosterId: null, // Disponível para boosters
-        currentRank: '20K',
-        targetRank: '25K',
-        currentRating: 20000,
-        targetRating: 25000,
-        gameMode: 'PREMIER',
-        gameType: 'CS2_PREMIER',
-      },
-      // booster como cliente: 1 Premier IN_PROGRESS
-      {
-        userId: booster.id,
-        serviceId: createdServices[1].id,
-        status: 'IN_PROGRESS' as const,
-        total: createdServices[1].price,
-        boosterId: null, // Não atribuído a si mesmo
-        currentRank: '15K',
-        targetRank: '20K',
-        currentRating: 15000,
-        targetRating: 20000,
-        gameMode: 'PREMIER',
-        gameType: 'CS2_PREMIER',
-      }
-    )
-  } else if (createdServices.length > 0) {
-    // Se houver menos de 4 serviços, criar pedidos respeitando a regra
-    // testUser: 1 Premier PENDING
-    exampleOrders.push({
-      userId: testUser.id,
-      serviceId: createdServices[0].id,
-      status: 'PENDING' as const,
-      total: createdServices[0].price,
-      boosterId: null,
-      currentRank: '10K',
-      targetRank: '15K',
-      currentRating: 10000,
-      targetRating: 15000,
-      gameMode: 'PREMIER',
-      gameType: 'CS2_PREMIER',
     })
+    console.log('  ✓ Admin:', admin.email)
 
-    // client2: 1 Premier PENDING (usuário diferente, pode ter)
-    if (createdServices.length > 1) {
-      exampleOrders.push({
-        userId: client2.id,
-        serviceId: createdServices[1].id,
-        status: 'PENDING' as const,
-        total: createdServices[1].price,
-        boosterId: null,
-        currentRank: '15K',
-        targetRank: '20K',
-        currentRating: 15000,
-        targetRating: 20000,
-        gameMode: 'PREMIER',
-        gameType: 'CS2_PREMIER',
-      })
-    }
-  }
-
-  // Criar pedidos no banco de dados
-  const createdOrders = []
-  for (const orderData of exampleOrders) {
-    try {
-      // Verificar se o pedido já existe (evitar duplicatas)
-      const existingOrder = await prisma.order.findFirst({
-        where: {
-          userId: orderData.userId,
-          serviceId: orderData.serviceId,
-          status: orderData.status,
+    const booster = await prisma.user.upsert({
+        where: { email: 'booster@gameboost.com' },
+        update: {},
+        create: {
+            email: 'booster@gameboost.com',
+            name: 'Booster Pro',
+            password: await bcrypt.hash('booster123', 10),
+            role: 'BOOSTER',
+            pixKey: '11988888888',
+            boosterCommissionPercentage: 0.70,
         },
-      })
+    })
+    console.log('  ✓ Booster:', booster.email)
 
-      if (existingOrder) {
-        console.log(`⚠️  Pedido já existe, pulando: ${existingOrder.id}`)
-        createdOrders.push(existingOrder)
-        continue
-      }
-
-      const order = await prisma.order.create({
-        data: {
-          ...orderData,
-          createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // Data aleatória dos últimos 7 dias
+    const client = await prisma.user.upsert({
+        where: { email: 'cliente@gameboost.com' },
+        update: {},
+        create: {
+            email: 'cliente@gameboost.com',
+            name: 'Cliente',
+            password: await bcrypt.hash('cliente123', 10),
+            role: 'CLIENT',
         },
-      })
-      createdOrders.push(order)
-      const serviceName = createdServices.find(s => s.id === orderData.serviceId)?.name || 'Serviço'
-      console.log(`✅ Pedido criado: ${serviceName} (Status: ${order.status})`)
-    } catch (error) {
-      console.error(`❌ Erro ao criar pedido:`, error)
-    }
-  }
+    })
+    console.log('  ✓ Client:', client.email)
 
-  console.log(`✅ Total de ${createdOrders.length} pedidos criados`)
-
-  // Criar mais alguns pedidos com diferentes status para melhorar os dados de teste
-  // IMPORTANTE: Respeitar a regra - não criar múltiplos pedidos ativos da mesma modalidade para o mesmo usuário
-  const additionalOrders = []
-
-  if (createdServices.length >= 2) {
-    // client2: 1 Gamers Club PENDING (não viola a regra pois client2 não tem Premier ativo)
-    additionalOrders.push(
-      {
-        userId: client2.id,
-        serviceId: createdServices[1].id,
-        status: 'PENDING' as const,
-        total: createdServices[1].price,
-        boosterId: null,
-        currentRank: '12',
-        targetRank: '18',
-        currentRating: 12,
-        targetRating: 18,
-        gameMode: 'GAMERS_CLUB',
-        gameType: 'CS2_GAMERS_CLUB',
-      }
-    )
-  }
-
-  // Mais pedidos completos para estatísticas de receita
-  // testUser pode ter múltiplos pedidos COMPLETED da mesma modalidade (não há problema)
-  if (createdServices.length >= 1) {
-    additionalOrders.push(
-      {
-        userId: testUser.id,
-        serviceId: createdServices[0].id,
-        status: 'COMPLETED' as const,
-        total: createdServices[0].price,
-        boosterId: booster.id,
-        currentRank: '10K',
-        targetRank: '15K',
-        currentRating: 10000,
-        targetRating: 15000,
-        gameMode: 'PREMIER',
-        gameType: 'CS2_PREMIER',
-      }
-    )
-  }
-
-  // Criar pedidos adicionais
-  for (const orderData of additionalOrders) {
-    try {
-      const existingOrder = await prisma.order.findFirst({
-        where: {
-          userId: orderData.userId,
-          serviceId: orderData.serviceId,
-          status: orderData.status,
+    // 2. BOOSTER PROFILE
+    console.log('\n🎮 Creating booster profile...')
+    await prisma.boosterProfile.upsert({
+        where: { userId: booster.id },
+        update: {},
+        create: {
+            userId: booster.id,
+            bio: 'Booster profissional',
+            verificationStatus: 'VERIFIED',
+            rating: 5.0,
+            completedOrders: 0,
         },
-      })
+    })
+    console.log('  ✓ Booster profile created')
 
-      if (!existingOrder) {
-        const order = await prisma.order.create({
-          data: {
-            ...orderData,
-            createdAt: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000), // Últimos 14 dias
-          },
+    // 3. COMMISSION CONFIG
+    console.log('\n💰 Creating commission config...')
+    const existingConfig = await prisma.commissionConfig.findFirst({ where: { enabled: true } })
+    if (!existingConfig) {
+        await prisma.commissionConfig.create({
+            data: { boosterPercentage: 0.70, adminPercentage: 0.30, enabled: true },
         })
-        const serviceName = createdServices.find(s => s.id === orderData.serviceId)?.name || 'Serviço'
-        console.log(`✅ Pedido adicional criado: ${serviceName} (Status: ${order.status})`)
-      }
-    } catch (error) {
-      console.error(`❌ Erro ao criar pedido adicional:`, error)
+        console.log('  ✓ Commission: 70% booster / 30% admin')
+    } else {
+        console.log('  ✓ Commission config exists')
     }
-  }
 
-  const totalOrders = await prisma.order.count()
-  console.log(`✅ Total de ${totalOrders} pedidos no banco`)
+    // 4. PRICING CONFIG (CS2)
+    console.log('\n📊 Creating pricing configs...')
 
-  console.log('\n✅ Seed concluído com sucesso!')
-  console.log('\n📝 Resumo:')
-  console.log(`   - ${enabledGames.length} jogo(s) habilitado(s)`)
-  console.log(`   - ${createdServices.length} serviço(s) criado(s)`)
-  console.log(`   - ${createdOrders.length} pedido(s) criado(s)`)
-  console.log('\n🎮 Jogos configurados:')
-  enabledGames.forEach(game => {
-    const gameServices = createdServices.filter(s => s.game === game.id)
-    console.log(`   - ${game.name}: ${gameServices.length} serviço(s)`)
-  })
-  console.log('\n👤 Usuários de teste:')
-  console.log('   - Cliente: teste@teste.com / 123456')
-  console.log('   - Admin: admin@gameboostpro.com / admin123')
-  console.log('   - Booster: booster@gameboostpro.com / booster123')
-  console.log('   - Cliente 2: cliente2@teste.com / cliente123')
-  console.log('\n📊 Resumo final do banco:')
-  console.log(`   👥 ${await prisma.user.count()} usuários`)
-  console.log(`   📦 ${await prisma.service.count()} serviços`)
-  console.log(`   🛒 ${await prisma.order.count()} pedidos`)
+    const premierPricing = [
+        { rangeStart: 0, rangeEnd: 4999, price: 25 },
+        { rangeStart: 5000, rangeEnd: 9999, price: 35 },
+        { rangeStart: 10000, rangeEnd: 14999, price: 45 },
+        { rangeStart: 15000, rangeEnd: 19999, price: 50 },
+        { rangeStart: 20000, rangeEnd: 24999, price: 60 },
+        { rangeStart: 25000, rangeEnd: 26000, price: 90 },
+    ]
+
+    for (const r of premierPricing) {
+        await prisma.pricingConfig.upsert({
+            where: { game_gameMode_rangeStart: { game: 'CS2', gameMode: 'PREMIER', rangeStart: r.rangeStart } },
+            update: { rangeEnd: r.rangeEnd, price: r.price },
+            create: { game: 'CS2', gameMode: 'PREMIER', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1000 pontos', enabled: true },
+        })
+    }
+    console.log('  ✓ Premier pricing (6 ranges)')
+
+    const gcPricing = [
+        { rangeStart: 1, rangeEnd: 10, price: 20 },
+        { rangeStart: 11, rangeEnd: 14, price: 40 },
+        { rangeStart: 15, rangeEnd: 17, price: 50 },
+        { rangeStart: 18, rangeEnd: 19, price: 70 },
+        { rangeStart: 20, rangeEnd: 20, price: 120 },
+    ]
+
+    for (const r of gcPricing) {
+        await prisma.pricingConfig.upsert({
+            where: { game_gameMode_rangeStart: { game: 'CS2', gameMode: 'GAMERS_CLUB', rangeStart: r.rangeStart } },
+            update: { rangeEnd: r.rangeEnd, price: r.price },
+            create: { game: 'CS2', gameMode: 'GAMERS_CLUB', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1 nível', enabled: true },
+        })
+    }
+    console.log('  ✓ Gamers Club pricing (5 ranges)')
+
+    // SUMMARY
+    console.log('\n' + '='.repeat(50))
+    console.log('✅ Seed completed!')
+    console.log('='.repeat(50))
+    console.log('\n📌 Test accounts:')
+    console.log('   Admin:   admin@gameboost.com / admin123')
+    console.log('   Booster: booster@gameboost.com / booster123')
+    console.log('   Client:  cliente@gameboost.com / cliente123')
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+    .catch((e) => { console.error('❌ Seed failed:', e); process.exit(1) })
+    .finally(() => prisma.$disconnect())

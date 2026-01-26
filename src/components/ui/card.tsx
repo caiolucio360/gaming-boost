@@ -2,12 +2,26 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+interface CardProps extends React.ComponentProps<"div"> {
+  /** Enable micro-interactions (lift + glow on hover) */
+  interactive?: boolean
+}
+
+function Card({ className, interactive = false, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        // Layout
+        "flex flex-col gap-6 rounded-xl py-6 shadow-sm",
+        // Surface and text using design system tokens
+        "bg-surface-card text-text-primary",
+        // Border with hover effect
+        "border border-border-ds-default",
+        // Micro-interactions: subtle lift and glow on hover
+        interactive
+          ? "card-interactive hover:border-border-ds-brand/50"
+          : "hover:border-border-ds-brand/50 transition-colors",
         className
       )}
       {...props}
@@ -42,7 +56,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("text-text-secondary text-sm", className)}
       {...props}
     />
   )

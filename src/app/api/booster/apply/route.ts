@@ -61,20 +61,29 @@ export async function POST(request: NextRequest) {
 
         const steamId = extractSteam64Id(steamProfileUrl)
 
-        // Criar perfil de booster com dados Steam
-        const profile = await prisma.boosterProfile.create({
-            data: {
-                userId,
-                bio,
-                languages,
-                verificationStatus: 'PENDING',
-                steamProfileUrl,
-                steamId,
-                cs2PremierRating,
-                cs2Rank,
-                cs2Hours,
-            },
-        })
+        // Update user with Steam profile info and create booster profile
+        const [updatedUser, profile] = await prisma.$transaction([
+            // Store Steam info on User model
+            prisma.user.update({
+                where: { id: userId },
+                data: {
+                    steamProfileUrl,
+                    steamId,
+                },
+            }),
+            // Create booster profile with CS2 stats (Steam profile URL/ID now on User)
+            prisma.boosterProfile.create({
+                data: {
+                    userId,
+                    bio,
+                    languages,
+                    verificationStatus: 'PENDING',
+                    cs2PremierRating,
+                    cs2Rank,
+                    cs2Hours,
+                },
+            }),
+        ])
 
         // Criar notificação para admins (opcional, futuro)
 

@@ -1,9 +1,20 @@
 /**
  * Utilitários para exibir notificações toast
  * Usa Sonner para notificações modernas e não intrusivas
+ *
+ * Styling uses Design System tokens (see docs/design_system.md)
  */
 
 import { toast } from 'sonner'
+
+// Toast styling using design system semantic classes
+const toastStyles = {
+  success: 'bg-status-success/10 border-status-success/50 text-status-success',
+  error: 'bg-status-error/10 border-status-error/50 text-status-error',
+  warning: 'bg-status-warning/10 border-status-warning/50 text-status-warning',
+  info: 'bg-action-primary/10 border-action-primary/50 text-text-brand',
+  loading: 'bg-action-primary/10 border-action-primary/50 text-text-brand',
+}
 
 /**
  * Exibe uma notificação de sucesso
@@ -12,7 +23,7 @@ export function showSuccess(message: string, description?: string) {
   toast.success(message, {
     description,
     duration: 4000,
-    className: 'bg-green-500/10 border-green-500/50 text-green-300',
+    className: toastStyles.success,
   })
 }
 
@@ -23,7 +34,7 @@ export function showError(message: string, description?: string) {
   toast.error(message, {
     description,
     duration: 5000,
-    className: 'bg-red-500/10 border-red-500/50 text-red-300',
+    className: toastStyles.error,
   })
 }
 
@@ -34,7 +45,7 @@ export function showInfo(message: string, description?: string) {
   toast.info(message, {
     description,
     duration: 4000,
-    className: 'bg-blue-500/10 border-blue-500/50 text-blue-300',
+    className: toastStyles.info,
   })
 }
 
@@ -45,7 +56,7 @@ export function showWarning(message: string, description?: string) {
   toast.warning(message, {
     description,
     duration: 4000,
-    className: 'bg-yellow-500/10 border-yellow-500/50 text-yellow-300',
+    className: toastStyles.warning,
   })
 }
 
@@ -54,7 +65,7 @@ export function showWarning(message: string, description?: string) {
  */
 export function showLoading(message: string) {
   return toast.loading(message, {
-    className: 'bg-purple-500/10 border-purple-500/50 text-purple-300',
+    className: toastStyles.loading,
   })
 }
 
@@ -66,7 +77,7 @@ export function updateToSuccess(toastId: string | number, message: string, descr
     id: toastId,
     description,
     duration: 4000,
-    className: 'bg-green-500/10 border-green-500/50 text-green-300',
+    className: toastStyles.success,
   })
 }
 
@@ -78,7 +89,7 @@ export function updateToError(toastId: string | number, message: string, descrip
     id: toastId,
     description,
     duration: 5000,
-    className: 'bg-red-500/10 border-red-500/50 text-red-300',
+    className: toastStyles.error,
   })
 }
 

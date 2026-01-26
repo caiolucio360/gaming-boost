@@ -89,12 +89,13 @@ describe('games-config', () => {
       expect(cs2Config?.modes?.GAMERS_CLUB.id).toBe('GAMERS_CLUB')
     })
 
-    it('deve ter pricingRules para modos', () => {
+    it('deve ter pricingInfo para modos', () => {
       const cs2Config = GAMES_CONFIG.CS2
-      expect(cs2Config?.modes?.PREMIER?.pricingRules).toBeDefined()
-      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingRules).toBeDefined()
-      expect(cs2Config?.modes?.PREMIER?.pricingRules.basePrice).toBe(25)
-      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingRules.basePrice).toBe(20)
+      // Pricing is now database-driven, but pricingInfo contains display metadata
+      expect(cs2Config?.modes?.PREMIER?.pricingInfo).toBeDefined()
+      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingInfo).toBeDefined()
+      expect(cs2Config?.modes?.PREMIER?.pricingInfo.unit).toBe('1000 pontos')
+      expect(cs2Config?.modes?.GAMERS_CLUB?.pricingInfo.unit).toBe('1 nível')
     })
 
     it('deve ter ratingPoints ou ranks para cada modo', () => {

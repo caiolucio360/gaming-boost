@@ -11,7 +11,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
-import { ButtonLoading } from '@/components/common/button-loading'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -37,7 +36,7 @@ export default function LoginPage() {
   const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setError(null)
-    
+
     try {
       await login(data.email, data.password)
     } catch (err) {
@@ -48,14 +47,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex-1 bg-black flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-black/30 backdrop-blur-md border border-purple-500/50 rounded-lg p-4 sm:p-8">
+    <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
+      <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-8">
         <div className="text-center mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-3xl font-bold text-white font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-            <span className="text-purple-300">ENTRAR</span>
+          <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2">
+            <span className="text-brand-purple-light">ENTRAR</span>
             <span className="text-white"> NA CONTA</span>
           </h1>
-          <p className="text-sm text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+          <p className="text-sm text-brand-gray-300 font-rajdhani">
             Entre na sua conta para acessar nossos serviços
           </p>
         </div>
@@ -63,13 +62,13 @@ export default function LoginPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {error && (
-              <Alert variant="destructive" className="bg-red-500/20 border-red-500/50">
-                <AlertDescription className="text-red-300 font-rajdhani text-sm">
+              <Alert variant="destructive" className="bg-brand-red/20 border-brand-red/50">
+                <AlertDescription className="text-brand-red font-rajdhani text-sm">
                   {error}
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -82,15 +81,15 @@ export default function LoginPage() {
                     <Input
                       type="email"
                       placeholder="seu@email.com"
-                      className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 h-10"
+                      className="h-10 bg-brand-black-light border-white/10 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-white placeholder:text-brand-gray-500"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-400 text-xs" />
+                  <FormMessage className="text-brand-red text-xs" />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="password"
@@ -104,46 +103,57 @@ export default function LoginPage() {
                       <Input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Sua senha"
-                        className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10 h-10"
+                        className="pr-10 h-10 bg-brand-black-light border-white/10 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-white placeholder:text-brand-gray-500"
                         {...field}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 hover:bg-transparent"
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 text-brand-gray-500 hover:text-brand-gray-300 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                       </Button>
                     </div>
                   </FormControl>
-                  <FormMessage className="text-red-400 text-xs" />
+                  <FormMessage className="text-brand-red text-xs" />
                 </FormItem>
               )}
             />
 
             <div className="flex items-center justify-end">
-              <Link 
-                href="/forgot-password" 
-                className="text-xs text-purple-400 hover:text-purple-300 transition-colors font-rajdhani"
+              <Link
+                href="/forgot-password"
+                className="text-xs text-brand-purple hover:text-brand-purple-light transition-colors font-rajdhani"
               >
                 Esqueceu a senha?
               </Link>
             </div>
 
-            <ButtonLoading 
-              type="submit" 
-              loading={isLoading}
-              loadingText="Entrando..."
-              className="w-full bg-purple-500 text-white font-bold py-2.5 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani text-sm" 
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-6 rounded-lg transition-all
+                shadow-glow hover:shadow-glow-hover
+                disabled:opacity-50 disabled:cursor-not-allowed font-rajdhani flex items-center justify-center gap-2"
             >
-              ENTRAR
-            </ButtonLoading>
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Entrando...
+                </>
+              ) : (
+                'ENTRAR'
+              )}
+            </button>
 
             <div className="text-center text-xs">
-              <span className="text-gray-400 font-rajdhani">Não tem uma conta? </span>
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors font-rajdhani font-medium">
+              <span className="text-brand-gray-500 font-rajdhani">Não tem uma conta? </span>
+              <Link href="/register" className="text-brand-purple hover:text-brand-purple-light transition-colors font-rajdhani font-medium">
                 Cadastre-se
               </Link>
             </div>

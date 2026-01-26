@@ -161,23 +161,26 @@ export default function DashboardPage() {
 
     setIsCancelling(true)
     try {
-      const response = await fetch(`/api/orders/${orderToCancel}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/orders/${orderToCancel}/cancel`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          reason: 'Cancelado pelo cliente via dashboard',
+        }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        showSuccess('Pedido cancelado com sucesso!')
+        showSuccess(data.message || 'Pedido cancelado com sucesso!')
         setCancelDialogOpen(false)
         setOrderToCancel(null)
         // Recarregar pedidos sem mostrar loading completo
         fetchOrders(true)
       } else {
-        showError('Erro ao cancelar pedido', data.message || 'Não foi possível cancelar o pedido')
+        showError('Erro ao cancelar pedido', data.error || 'Não foi possível cancelar o pedido')
       }
     } catch (error) {
       console.error('Erro ao cancelar pedido:', error)
@@ -380,6 +383,18 @@ export default function DashboardPage() {
                         </>
                       )}
 
+                      {order.status === 'PAID' && (
+                        <ActionButton
+                          onClick={() => handleCancelClick(order.id)}
+                          variant="danger"
+                          icon={X}
+                          iconPosition="right"
+                          className="w-full md:w-auto"
+                        >
+                          Cancelar e Solicitar Reembolso
+                        </ActionButton>
+                      )}
+
                       {order.status === 'COMPLETED' && !order.review && (
                         <ReviewModal
                           orderId={order.id}
@@ -418,7 +433,11 @@ export default function DashboardPage() {
           open={cancelDialogOpen}
           onOpenChange={setCancelDialogOpen}
           title="Cancelar Pedido"
-          description="Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita."
+          description={
+            orderToCancel && orders.find(o => o.id === orderToCancel)?.status === 'PAID'
+              ? 'Tem certeza que deseja cancelar este pedido? O pagamento será reembolsado e o valor retornará para sua conta em até 5 dias úteis.'
+              : 'Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.'
+          }
           confirmLabel="Sim, cancelar pedido"
           cancelLabel="Não, manter pedido"
           onConfirm={handleCancelConfirm}

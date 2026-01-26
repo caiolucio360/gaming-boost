@@ -7,7 +7,6 @@ interface CartContextType {
   items: CartItem[]
   addItem: (item: CartItem) => { success: boolean; error?: string }
   removeItem: (index: number) => void
-  removeItemByServiceId: (serviceId: string | number) => void
   clearCart: () => void
   processCartAfterLogin: () => Promise<void>
 }
@@ -68,13 +67,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((_, i) => i !== index))
   }, [])
 
-  const removeItemByServiceId = useCallback((serviceId: string | number) => {
-    setItems((prev) => prev.filter((item) => {
-      if (item.serviceId === undefined) return true
-      return item.serviceId.toString() !== serviceId.toString()
-    }))
-  }, [])
-
   const clearCart = useCallback(() => {
     setItems([])
     if (typeof window !== 'undefined') {
@@ -89,39 +81,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     for (const item of items) {
       try {
-        // Se o item tem serviceId, criar order diretamente
-        if (item.serviceId) {
-          const body: any = {
-            serviceId: item.serviceId,
-            total: item.price,
-          }
+        const body: any = {
+          game: item.game,
+          total: item.price,
+        }
 
-          // Adicionar metadados se existirem
-          if (item.currentRank) body.currentRank = item.currentRank
-          if (item.targetRank) body.targetRank = item.targetRank
-          if (item.metadata) {
-            if (item.metadata.currentRating !== undefined) body.currentRating = item.metadata.currentRating
-            if (item.metadata.targetRating !== undefined) body.targetRating = item.metadata.targetRating
-            if (item.metadata.mode) body.gameMode = item.metadata.mode
-            if (item.metadata.gameType) body.gameType = item.metadata.gameType
-            body.metadata = JSON.stringify(item.metadata)
-          }
+        // Adicionar metadados se existirem
+        if (item.currentRank) body.currentRank = item.currentRank
+        if (item.targetRank) body.targetRank = item.targetRank
+        if (item.metadata) {
+          if (item.metadata.currentRating !== undefined) body.currentRating = item.metadata.currentRating
+          if (item.metadata.targetRating !== undefined) body.targetRating = item.metadata.targetRating
+          if (item.metadata.mode) body.gameMode = item.metadata.mode
+          if (item.metadata.gameType) body.gameType = item.metadata.gameType
+          body.metadata = JSON.stringify(item.metadata)
+        }
 
-          const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-          })
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        })
 
-          if (!response.ok) {
-            console.error('Erro ao criar order para item:', item)
-          }
-        } else {
-          // Se não tem serviceId, pode precisar criar um serviço primeiro ou
-          // adicionar como order personalizada. Por enquanto, vamos apenas logar
-          console.warn('Item do carrinho sem serviceId, precisa ser processado manualmente:', item)
+        if (!response.ok) {
+          console.error('Erro ao criar order para item:', item)
         }
       } catch (error) {
         console.error('Erro ao processar item do carrinho:', error)
@@ -138,7 +123,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         items,
         addItem,
         removeItem,
-        removeItemByServiceId,
         clearCart,
         processCartAfterLogin,
       }}
@@ -155,4 +139,3 @@ export function useCart() {
   }
   return context
 }
-

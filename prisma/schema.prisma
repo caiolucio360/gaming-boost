@@ -33,7 +33,7 @@ model User {
   updatedAt          DateTime            @updatedAt
   orders             Order[] // Pedidos como cliente
   boosterOrders      Order[]             @relation("BoosterOrders") // Pedidos como booster
-  adminOrders        Order[]             @relation("AdminOrders") // Pedidos como admin
+  // adminOrders relation removed - AdminRevenue handles multi-admin revenue distribution
   boosterCommissions BoosterCommission[] // Comissões como booster
   adminRevenues      AdminRevenue[] // Receitas como admin
   commissionHistory  BoosterCommissionHistory[] // Histórico de mudanças de comissão (como booster)
@@ -51,35 +51,14 @@ model User {
   steamId            String?              // Steam64 ID
 }
 
-model Service {
-  id          Int         @id @default(autoincrement())
-  game        Game
-  type        ServiceType
-  name        String
-  description String
-  price       Float
-  duration    String
-  enabled     Boolean     @default(true) // Se o serviço está ativo
-  image       String? // URL da imagem do serviço
-  metadata    String? // JSON com metadados adicionais
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orders      Order[]
-}
-
 model Order {
   id                Int                @id @default(autoincrement())
   userId            Int
-  serviceId         Int
   boosterId         Int? // Booster atribuído ao pedido
-  adminId           Int? // Admin responsável pelo pedido (quem recebe a receita)
+  game              Game               @default(CS2) // Jogo do pedido
   status            OrderStatus        @default(PENDING)
   total             Float
-  // Valores de comissão e receita calculados
-  boosterCommission Float? // Valor que o booster vai receber (calculado quando pedido é aceito)
-  adminRevenue      Float? // Valor que o admin vai receber (calculado quando pedido é criado)
-  boosterPercentage Float? // Porcentagem de comissão do booster (ex: 0.70 = 70%)
-  adminPercentage   Float? // Porcentagem de receita do admin (ex: 0.30 = 30%)
+
   // Metadados do pedido
   currentRank       String? // Rank/pontuação atual (ex: "10K", "Nível 5")
   targetRank        String? // Rank/pontuação desejada (ex: "15K", "Nível 10")
@@ -88,7 +67,6 @@ model Order {
   gameMode          String? // Modo do jogo (ex: "PREMIER", "GAMERS_CLUB")
   gameType          String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
   metadata          String? // JSON com metadados adicionais
-  notes             String? // Notas adicionais do cliente ou booster
   // Credenciais Steam do cliente (criptografadas)
   steamCredentials  String?            // Credenciais criptografadas (username + password)
   steamProfileUrl   String?            // URL do perfil Steam do cliente
@@ -97,12 +75,10 @@ model Order {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service           Service            @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   booster           User?              @relation("BoosterOrders", fields: [boosterId], references: [id], onDelete: SetNull)
-  admin             User?              @relation("AdminOrders", fields: [adminId], references: [id], onDelete: SetNull)
   payments          Payment[] // Pagamentos associados ao pedido
   commission        BoosterCommission? // Comissão do booster
-  revenues          AdminRevenue[] // Receitas dos admins (agora múltiplo)
+  revenues          AdminRevenue[] // Receitas dos admins (múltiplo - via AdminRevenue model)
   review            Review? // Avaliação do pedido
   dispute           Dispute? // Disputa do pedido
 
@@ -110,8 +86,6 @@ model Order {
   @@index([userId, gameMode, status]) // Para validação de modalidade duplicada (buscar pedidos ativos por modalidade)
   @@index([userId, status]) // Para buscar pedidos do usuário por status
   @@index([boosterId, status]) // Para buscar pedidos do booster por status
-  @@index([adminId, status]) // Para buscar pedidos do admin por status
-  @@index([serviceId]) // Para joins com Service
   @@index([status]) // Para filtros por status (admin/booster dashboards)
 }
 
@@ -125,10 +99,6 @@ enum Game {
   CS2
 }
 
-enum ServiceType {
-  RANK_BOOST
-}
-
 model Payment {
   id        Int       @id @default(autoincrement())
   orderId   Int
@@ -137,12 +107,20 @@ model Payment {
   providerId String? // ID externo do provider (AbacatePay, etc)
   pixCode   String? // Código PIX
   qrCode    String? // Base64 do QR Code
-  status    String    @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
+  status    PaymentStatus @default(PENDING)
   total     Float
   expiresAt DateTime?
   paidAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+  REFUNDED
 }
 
 enum OrderStatus {
@@ -240,9 +218,7 @@ model BoosterProfile {
   rating            Float                @default(0)
   totalReviews      Int                  @default(0)
   completedOrders   Int                  @default(0)
-  // Steam profile e CS2 stats
-  steamProfileUrl   String?              // URL do perfil Steam do booster
-  steamId           String?              // Steam64 ID
+  // CS2 stats (Steam profile info is on User model)
   cs2Rank           String?              // Rank atual no CS2 (ex: "Global Elite")
   cs2PremierRating  Int?                 // Rating Premier (ex: 18500)
   cs2Hours          Int?                 // Horas jogadas no CS2
@@ -367,5 +343,23 @@ enum WithdrawalStatus {
   COMPLETE
   FAILED
   CANCELLED
+}
+
+// Configuração de preços por faixa
+// Cada faixa representa um range (ex: Premier 0-5000 = R$25/1000, GC Level 1-10 = R$20/level)
+model PricingConfig {
+  id          Int      @id @default(autoincrement())
+  game        Game     // CS2, etc
+  gameMode    String   // PREMIER, GAMERS_CLUB
+  rangeStart  Int      // Início da faixa (ex: 0, 5000, 10000 para Premier ou 1, 11, 15 para GC)
+  rangeEnd    Int      // Fim da faixa (ex: 4999, 9999, 14999 para Premier ou 10, 14, 17 para GC)
+  price       Float    // Preço por unidade (ex: 25.00 por 1000 pontos ou 20.00 por nível)
+  unit        String   // Descrição da unidade (ex: "1000 pontos", "1 nível")
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([game, gameMode, rangeStart]) // Não pode ter duas configs para o mesmo range
+  @@index([game, gameMode, enabled])
 }
 

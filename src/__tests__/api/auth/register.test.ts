@@ -25,6 +25,15 @@ jest.mock('@/lib/db', () => ({
   },
 }))
 
+// Mock rate limiter
+jest.mock('@/lib/rate-limit', () => ({
+  authRateLimiter: {
+    check: jest.fn().mockResolvedValue({ success: true, remaining: 5, limit: 5, reset: Date.now() + 900000 }),
+  },
+  getIdentifier: jest.fn().mockReturnValue('test-ip'),
+  createRateLimitHeaders: jest.fn().mockReturnValue({}),
+}))
+
 describe('POST /api/auth/register', () => {
   beforeEach(() => {
     jest.clearAllMocks()

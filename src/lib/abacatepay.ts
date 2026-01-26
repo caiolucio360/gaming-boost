@@ -248,6 +248,31 @@ export async function simulatePixPayment(pixQrCodeId: string): Promise<PixQrCode
     return result
 }
 
+/**
+ * Reembolsa um pagamento PIX
+ * @param pixQrCodeId - ID do PIX QR Code a ser reembolsado
+ * @returns Dados atualizados do PIX com status REFUNDED
+ */
+export async function refundPixPayment(pixQrCodeId: string): Promise<PixQrCodeResponse> {
+    console.log('========== REFUNDING PIX PAYMENT ==========')
+    console.log('PIX ID:', pixQrCodeId)
+    console.log('===========================================')
+
+    const result = await apiRequest<PixQrCodeResponse>(
+        `/pixQrCode/refund?id=${encodeURIComponent(pixQrCodeId)}`,
+        'POST',
+        {}
+    )
+
+    console.log('========== PIX REFUND COMPLETED ==========')
+    console.log('PIX ID:', result.id)
+    console.log('Status:', result.status)
+    console.log('Amount:', result.amount)
+    console.log('=========================================')
+
+    return result
+}
+
 // ====== WITHDRAW FUNCTIONS ======
 
 /**

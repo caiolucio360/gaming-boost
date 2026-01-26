@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,8 @@ import { getGameConfig, GameId, GameMode, GameModeConfig } from '@/lib/games-con
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ButtonLoading } from '@/components/common/button-loading'
 import { showError } from '@/lib/toast'
+import { AlertCircle, Calculator, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 interface GameCalculatorProps {
   gameId?: GameId
@@ -25,12 +27,56 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const [selectedCurrent, setSelectedCurrent] = useState('')
   const [selectedTarget, setSelectedTarget] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
+  const [activeOrders, setActiveOrders] = useState<any[]>([])
+  const [isCheckingOrders, setIsCheckingOrders] = useState(false)
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
 
   const gameConfig = getGameConfig(gameId)
   const modeConfig = gameConfig?.modes?.[selectedMode]
+
+  // Check for active orders when user is logged in or mode changes
+  useEffect(() => {
+    const checkActiveOrders = async () => {
+      if (!user) {
+        setActiveOrders([])
+        return
+      }
+
+      setIsCheckingOrders(true)
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          const orders = data.orders || []
+
+          // Filter for active orders (PENDING, PAID, IN_PROGRESS) in current game mode
+          const activeInMode = orders.filter((order: any) =>
+            ['PENDING', 'PAID', 'IN_PROGRESS'].includes(order.status) &&
+            order.gameMode === selectedMode
+          )
+
+          setActiveOrders(activeInMode)
+        }
+      } catch (error) {
+        console.error('Error checking active orders:', error)
+      } finally {
+        setIsCheckingOrders(false)
+      }
+    }
+
+    checkActiveOrders()
+  }, [user, selectedMode])
+
+  const hasActiveOrderInMode = activeOrders.length > 0
 
   const handleHire = async () => {
     if (!selectedCurrent || !selectedTarget || price <= 0 || !gameConfig || !modeConfig) return
@@ -68,12 +114,9 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         }
       )
 
-      // Se o pedido foi criado ou adicionado ao carrinho com sucesso, redirecionar para o carrinho
-      // Usar router.replace para evitar redirecionamentos desnecessários
       if (orderCreated || user) {
         router.replace('/cart')
       }
-      // Se não estiver logado, o redirecionamento já foi feito dentro de handleServiceHire
     } catch (error) {
       console.error('Erro ao contratar serviço:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro ao contratar serviço. Tente novamente.'
@@ -116,36 +159,22 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
       }
       
       return filteredPoints.map(value => {
-        // Cores baseadas em faixas para Premier
-        if (selectedMode === 'PREMIER') {
-          if (value <= 4000) return { value, color: 'bg-gray-500 border-gray-400', display: `${value / 1000}K` }
-          if (value <= 10000) return { value, color: 'bg-blue-400 border-blue-300', display: `${value / 1000}K` }
-          if (value <= 15000) return { value, color: 'bg-blue-600 border-blue-500', display: `${value / 1000}K` }
-          if (value <= 25000) return { value, color: 'bg-purple-600 border-purple-500', display: `${value / 1000}K` }
-          return { value, color: 'bg-red-500 border-red-400', display: `${value / 1000}K` } // 26K
-        }
+        // Display value based on mode
+        const display = selectedMode === 'PREMIER' 
+          ? `${value / 1000}K` 
+          : value.toString()
         
-        // Cores baseadas em faixas para Gamers Club
-        if (selectedMode === 'GAMERS_CLUB') {
-          if (value <= 3) return { value, color: 'bg-gray-500 border-gray-400', display: value.toString() }
-          if (value <= 7) return { value, color: 'bg-blue-400 border-blue-300', display: value.toString() }
-          if (value <= 11) return { value, color: 'bg-blue-600 border-blue-500', display: value.toString() }
-          if (value <= 15) return { value, color: 'bg-purple-600 border-purple-500', display: value.toString() }
-          if (value <= 19) return { value, color: 'bg-purple-800 border-purple-700', display: value.toString() }
-          return { value, color: 'bg-red-500 border-red-400', display: value.toString() } // Level 20
-        }
-        
-        return { value, color: 'bg-gray-500 border-gray-400', display: value.toString() }
+        return { value, display }
       })
     }
     
     return []
   }
 
-  const currentRatingPoints = getRatingPoints(false) // Current: Premier até 25K, GC até 19
-  const targetRatingPoints = getRatingPoints(true) // Target: Premier até 26K, GC até 20
+  const currentRatingPoints = getRatingPoints(false)
+  const targetRatingPoints = getRatingPoints(true)
 
-  const calculatePrice = () => {
+  const calculatePrice = async () => {
     if (!selectedCurrent || !selectedTarget || !modeConfig) {
       setPrice(0)
       return
@@ -163,12 +192,37 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     const currentValue = selectedMode === 'PREMIER' ? current * 1000 : current
     const targetValue = selectedMode === 'PREMIER' ? target * 1000 : target
 
-    // Usar a função de cálculo do modo
-    if (modeConfig.pricingRules.calculation) {
-      const calculatedPrice = modeConfig.pricingRules.calculation(currentValue, targetValue)
-      setPrice(calculatedPrice)
-    } else {
+    setIsCalculating(true)
+    try {
+      // Chamar API para calcular preço dinamicamente
+      const response = await fetch('/api/pricing/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          game: gameId,
+          gameMode: selectedMode,
+          current: currentValue,
+          target: targetValue,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        showError('Erro ao calcular preço', error.error || 'Não foi possível calcular o preço')
+        setPrice(0)
+        return
+      }
+
+      const data = await response.json()
+      setPrice(data.data.price)
+    } catch (error) {
+      console.error('Error calculating price:', error)
+      showError('Erro', 'Não foi possível calcular o preço. Tente novamente.')
       setPrice(0)
+    } finally {
+      setIsCalculating(false)
     }
   }
 
@@ -187,7 +241,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   if (!gameConfig || !modeConfig) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+        <Card className="bg-[#1A1A1A] border border-white/5">
           <CardContent className="p-6">
             <p className="text-white text-center">Configuração do jogo não encontrada.</p>
           </CardContent>
@@ -198,30 +252,32 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+      <Card className="bg-[#1A1A1A] border border-white/5 hover:border-[#7C3AED]/50 transition-colors">
         <CardHeader>
-          <CardTitle className="text-xl md:text-3xl font-bold text-white font-orbitron text-center" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-            <span className="text-purple-300">{gameConfig.displayName}</span>
+          <CardTitle className="text-xl md:text-3xl font-bold font-orbitron text-center">
+            <span className="text-[#A855F7]">{gameConfig.displayName}</span>
             <span className="text-white"> CALCULATOR</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Seletor de Modo */}
+          {/* Mode Selector */}
           {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
             <div className="mb-6">
               <Tabs value={selectedMode} onValueChange={(value) => handleModeChange(value as GameMode)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-black/50 border-2 border-purple-500/50 rounded-lg p-1 gap-1 h-auto">
-                  <TabsTrigger 
-                    value="PREMIER" 
-                    className="font-rajdhani relative transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-purple-500/20 rounded-md py-2.5 px-4 font-bold flex items-center justify-center h-full" 
-                    style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                <TabsList className="grid w-full grid-cols-2 bg-[#27272a] border border-[#7C3AED]/30 rounded-lg p-1 gap-1 h-auto">
+                  <TabsTrigger
+                    value="PREMIER"
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
+                      data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(124,58,237,0.5)]
+                      data-[state=inactive]:text-[#6B7280] data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-[#7C3AED]/20"
                   >
                     Premier
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="GAMERS_CLUB" 
-                    className="font-rajdhani relative transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-purple-500/20 rounded-md py-2.5 px-4 font-bold flex items-center justify-center h-full" 
-                    style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                  <TabsTrigger
+                    value="GAMERS_CLUB"
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
+                      data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(124,58,237,0.5)]
+                      data-[state=inactive]:text-[#6B7280] data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-[#7C3AED]/20"
                   >
                     Gamers Club
                   </TabsTrigger>
@@ -230,142 +286,218 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             </div>
           )}
 
-          {/* Informações do Modo */}
-          <Card className="bg-gradient-to-r from-purple-600/20 to-purple-800/20 border-purple-500/50 mb-6 transition-all duration-300">
+          {/* Mode Info */}
+          <Card className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 mb-6">
             <CardContent className="p-3 md:p-4">
-              <h3 className="text-base md:text-lg font-bold text-purple-300 font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <h3 className="text-base md:text-lg font-bold text-[#A855F7] font-orbitron mb-2">
                 Sistema {modeConfig.displayName}:
               </h3>
-              <div className="text-xs md:text-sm text-gray-300 font-rajdhani space-y-1" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+              <div className="text-xs md:text-sm text-[#D1D5DB] font-rajdhani space-y-1">
                 {selectedMode === 'PREMIER' ? (
                   <>
-                    <p><span className="text-purple-300">• Pontuação:</span> 0 a 40.000+ pontos</p>
-                    <p><span className="text-purple-300">• Faixas:</span> 7 faixas de cores baseadas na pontuação</p>
-                    <p><span className="text-purple-300">• Preço:</span> R$ {modeConfig.pricingRules.basePrice} a cada {modeConfig.pricingRules.unit} de diferença</p>
+                    <p><span className="text-[#A855F7]">• Pontuação:</span> 1k a 26k pontos</p>
+                    <p><span className="text-[#A855F7]">• Preço:</span> {modeConfig.pricingInfo.description}</p>
                   </>
                 ) : (
                   <>
-                    <p><span className="text-purple-300">• Níveis:</span> 1 a 20</p>
-                    <p><span className="text-purple-300">• Ranqueamento:</span> Sistema Gamers Club</p>
-                    <p><span className="text-purple-300">• Preço:</span> R$ {modeConfig.pricingRules.basePrice} por {modeConfig.pricingRules.unit}</p>
+                    <p><span className="text-[#A855F7]">• Níveis:</span> 1 a 20</p>
+                    <p><span className="text-[#A855F7]">• Preço:</span> {modeConfig.pricingInfo.description}</p>
                   </>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          <div className="space-y-6 md:space-y-8 transition-all duration-300">
-          {/* Seleção de Pontuações - Lado a Lado */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-            {/* Pontuação Atual */}
-            <div>
-              <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
-              </h3>
-              <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                {currentRatingPoints.map((point) => {
-                  const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                  const isSelected = selectedCurrent === displayValue
-                  
-                  return (
-                    <Button
-                      key={point.value}
-                      onClick={() => handleCurrentSelect(point.value)}
-                      variant="outline"
-                      className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
-                        isSelected
-                          ? 'ring-4 ring-yellow-400 ring-opacity-90 shadow-lg shadow-yellow-400/60 scale-105 bg-yellow-500/90'
-                          : 'hover:ring-2 hover:ring-purple-300 hover:ring-opacity-40'
-                      } ${point.color}`}
+          {/* Warning for Active Orders */}
+          {user && hasActiveOrderInMode && (
+            <Card className="bg-[#F59E0B]/20 border border-[#F59E0B]/70 mb-6 animate-pulse">
+              <CardContent className="p-4 md:p-5">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-sm md:text-base font-bold text-[#F59E0B] font-rajdhani mb-2">
+                      Você já possui um boost ativo nesta modalidade
+                    </h3>
+                    <p className="text-xs md:text-sm text-[#D1D5DB] font-rajdhani mb-3">
+                      Você tem {activeOrders.length} pedido{activeOrders.length > 1 ? 's' : ''} {activeOrders[0].status === 'PENDING' ? 'pendente' : activeOrders[0].status === 'PAID' ? 'pago' : 'em andamento'} de boost {selectedMode === 'PREMIER' ? 'Premier' : 'Gamers Club'}.
+                      Finalize ou cancele o pedido anterior antes de criar um novo.
+                    </p>
+                    <Link
+                      href="/dashboard"
+                      className="inline-block bg-[#F59E0B] hover:bg-[#F59E0B]/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
                     >
-                      <span className="text-white font-bold text-xs md:text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                        {point.display}
-                      </span>
-                    </Button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Pontuação Desejada */}
-            <div>
-              <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
-              </h3>
-              <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                {targetRatingPoints.map((point) => {
-                  const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                  const isSelected = selectedTarget === displayValue
-                  
-                  return (
-                    <Button
-                      key={point.value}
-                      onClick={() => handleTargetSelect(point.value)}
-                      variant="outline"
-                      className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
-                        isSelected
-                          ? 'ring-4 ring-yellow-400 ring-opacity-90 shadow-lg shadow-yellow-400/60 scale-105 bg-yellow-500/90'
-                          : 'hover:ring-2 hover:ring-purple-300 hover:ring-opacity-40'
-                      } ${point.color}`}
-                    >
-                      <span className="text-white font-bold text-xs md:text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>
-                        {point.display}
-                      </span>
-                    </Button>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Botão de Cálculo e Resultado */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-            {/* Botão de Cálculo */}
-            <div className="flex justify-center lg:justify-start">
-              <Button
-                onClick={calculatePrice}
-                className="bg-purple-500 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 text-sm md:text-base"
-              >
-                CALCULAR PREÇO
-              </Button>
-            </div>
-
-            {/* Resultado do Preço */}
-            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/50 rounded-lg p-4 md:p-6">
-              <h3 className="text-xl md:text-2xl font-bold text-white font-orbitron mb-3 md:mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                <span className="text-purple-300">PREÇO</span>
-                <span className="text-white"> ESTIMADO</span>
-              </h3>
-              
-              {price > 0 ? (
-                <div className="text-center">
-                  <div className="text-2xl md:text-4xl font-bold text-purple-300 font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-                    R$ {price.toFixed(2)}
+                      Ver Meus Pedidos
+                    </Link>
                   </div>
-                  <p className="text-sm md:text-base text-gray-300 font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                    {selectedMode === 'PREMIER' 
-                      ? `${selectedCurrent}K → ${selectedTarget}K pontos`
-                      : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
-                  </p>
-                  <ButtonLoading 
-                    onClick={handleHire}
-                    loading={isLoading}
-                    loadingText="Processando..."
-                    className="w-full bg-purple-500 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 text-sm md:text-base"
-                  >
-                    CONTRATAR AGORA
-                  </ButtonLoading>
                 </div>
-              ) : (
-                <div className="text-center text-xs md:text-sm text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  {selectedMode === 'PREMIER' 
-                    ? 'Selecione as pontuações para calcular o preço'
-                    : 'Selecione os níveis para calcular o preço'}
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="space-y-6 md:space-y-8">
+            {/* Rating Selection - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* Current Rating */}
+              <div>
+                <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4">
+                  {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
+                </h3>
+                <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                  {currentRatingPoints.map((point) => {
+                    const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
+                    const isSelected = selectedCurrent === displayValue
+
+                    return (
+                      <button
+                        key={point.value}
+                        onClick={() => handleCurrentSelect(point.value)}
+                        className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
+                          ${isSelected
+                            ? 'bg-[#7C3AED] border-[#A855F7] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] scale-105'
+                            : 'bg-[#27272a] border-white/10 text-[#D1D5DB] hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:text-white'
+                          }`}
+                      >
+                        {point.display}
+                      </button>
+                    )
+                  })}
                 </div>
-              )}
+              </div>
+
+              {/* Target Rating */}
+              <div>
+                <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4">
+                  {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
+                </h3>
+                <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                  {targetRatingPoints.map((point) => {
+                    const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
+                    const isSelected = selectedTarget === displayValue
+
+                    return (
+                      <button
+                        key={point.value}
+                        onClick={() => handleTargetSelect(point.value)}
+                        className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
+                          ${isSelected
+                            ? 'bg-[#7C3AED] border-[#A855F7] text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] scale-105'
+                            : 'bg-[#27272a] border-white/10 text-[#D1D5DB] hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:text-white'
+                          }`}
+                      >
+                        {point.display}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Calculate Button and Result */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* Calculate Button */}
+              <div className="flex justify-center lg:justify-start">
+                <button
+                  onClick={calculatePrice}
+                  disabled={!selectedCurrent || !selectedTarget || isCalculating}
+                  className="bg-[#7C3AED] hover:bg-[#A855F7] text-white font-bold py-3 px-8 rounded-lg transition-all 
+                    shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)]
+                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#7C3AED] disabled:hover:shadow-[0_0_20px_rgba(124,58,237,0.5)]
+                    font-rajdhani text-sm md:text-base flex items-center gap-2"
+                >
+                  {isCalculating ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Calculando...
+                    </>
+                  ) : (
+                    <>
+                      <Calculator className="h-5 w-5" />
+                      CALCULAR PREÇO
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Price Result */}
+              <div className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 rounded-xl p-4 md:p-6">
+                <h3 className="text-xl md:text-2xl font-bold font-orbitron mb-3 md:mb-4">
+                  <span className="text-[#A855F7]">PREÇO</span>
+                  <span className="text-white"> ESTIMADO</span>
+                </h3>
+
+                {isCalculating ? (
+                  <div className="text-center py-4">
+                    <div className="inline-flex items-center gap-3 text-[#A855F7]">
+                      <svg className="animate-spin h-6 w-6 md:h-8 md:w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-sm md:text-base font-rajdhani font-semibold">
+                        Calculando preço...
+                      </span>
+                    </div>
+                  </div>
+                ) : price > 0 ? (
+                  <div className="text-center">
+                    <div className="text-3xl md:text-5xl font-bold text-[#A855F7] font-orbitron mb-2">
+                      R$ {price.toFixed(2)}
+                    </div>
+                    <p className="text-sm md:text-base text-[#D1D5DB] font-rajdhani mb-4">
+                      {selectedMode === 'PREMIER'
+                        ? `${selectedCurrent}K → ${selectedTarget}K pontos`
+                        : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
+                    </p>
+                    {user && hasActiveOrderInMode ? (
+                      <div>
+                        <button
+                          disabled={true}
+                          className="w-full bg-[#27272a] text-[#6B7280] font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                        >
+                          BOOST JÁ ATIVO NESTA MODALIDADE
+                        </button>
+                        <p className="text-xs text-[#F59E0B] font-rajdhani">
+                          Finalize seu pedido atual para contratar um novo
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleHire}
+                        disabled={isLoading}
+                        className="w-full bg-[#4C1D95] hover:bg-[#7C3AED] text-white font-bold py-3 px-6 rounded-lg transition-all 
+                          shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)]
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"
+                      >
+                        {isLoading ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processando...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="h-5 w-5" />
+                            CONTRATAR AGORA
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center text-xs md:text-sm text-[#6B7280] font-rajdhani py-4">
+                    {selectedMode === 'PREMIER'
+                      ? 'Selecione as pontuações e clique em "Calcular Preço"'
+                      : 'Selecione os níveis e clique em "Calcular Preço"'}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         </CardContent>
       </Card>
     </div>

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { OrderService } from '@/services'
 import { z } from 'zod'
 
-// Simple schema for order creation
+// Schema for order creation
 const CreateOrderSchema = z.object({
-  serviceId: z.number().or(z.string().transform(Number)),
+  game: z.enum(['CS2']).default('CS2'),
   total: z.number().or(z.string().transform(Number)),
   currentRank: z.string().optional(),
   targetRank: z.string().optional(),
@@ -13,16 +15,15 @@ const CreateOrderSchema = z.object({
   targetRating: z.number().or(z.string().transform(Number)).optional(),
   gameMode: z.string().optional(),
   gameType: z.string().optional(),
-  notes: z.string().optional(),
-  currentLevel: z.number().optional(),
-  targetLevel: z.number().optional(),
-  gameCredentials: z.string().optional(),
-  boosterId: z.string().optional(),
+  metadata: z.string().optional(),
+  steamCredentials: z.string().optional(),
+  steamProfileUrl: z.string().optional(),
+  steamConsent: z.boolean().optional(),
 })
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação via NextAuth
+    // Verify authentication
     const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
@@ -31,38 +32,45 @@ export async function GET(request: NextRequest) {
         401
       )
     }
+
     const userId = authResult.user.id
 
-    // Buscar orders do usuário com informações do serviço
-    const orders = await prisma.order.findMany({
-      where: {
-        userId,
-        service: {
-          game: 'CS2',
-        },
-      },
-      include: {
-        service: true,
-        review: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    // Use OrderService to get user's CS2 orders
+    const result = await OrderService.getUserCS2Orders(userId)
 
-    return NextResponse.json({ orders }, { status: 200 })
+    if (!result.success) {
+      return NextResponse.json(
+        { message: result.error },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ orders: result.data }, { status: 200 })
   } catch (error) {
-    console.error('Erro ao buscar orders:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar solicitações' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/orders')
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Verificar autenticação via NextAuth
+    // Rate limiting: 10 order creation attempts per minute per IP
+    const identifier = getIdentifier(request)
+    const rateLimitResult = await apiRateLimiter.check(identifier, 10)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: 'Muitas tentativas. Aguarde um momento e tente novamente.',
+          error: 'RATE_LIMIT_EXCEEDED'
+        },
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rateLimitResult)
+        }
+      )
+    }
+
+    // Verify authentication
     const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
@@ -79,9 +87,9 @@ export async function POST(request: NextRequest) {
     const parseResult = CreateOrderSchema.safeParse(body)
 
     if (!parseResult.success) {
-      if (!body.serviceId || !body.total) {
+      if (!body.total) {
         return NextResponse.json(
-          { message: 'serviceId e total são obrigatórios' },
+          { message: 'total é obrigatório' },
           { status: 400 }
         )
       }
@@ -92,141 +100,49 @@ export async function POST(request: NextRequest) {
     }
 
     const data = parseResult.data
-    const serviceId = typeof data.serviceId === 'number' ? data.serviceId : parseInt(String(data.serviceId))
-    const total = typeof data.total === 'number' ? data.total : parseFloat(String(data.total))
 
-    // Verificar se o serviço existe
-    const service = await prisma.service.findUnique({
-      where: { id: serviceId },
-    })
-
-    if (!service) {
-      return NextResponse.json(
-        { message: 'Serviço não encontrado' },
-        { status: 404 }
-      )
-    }
-
-    // Validar: usuário não pode ter mais de 1 boost de rank ativo por modalidade
-    const gameMode = data.gameMode
-    if (gameMode && (gameMode === 'PREMIER' || gameMode === 'GAMERS_CLUB')) {
-      const existingOrder = await prisma.order.findFirst({
-        where: {
-          userId,
-          status: {
-            in: ['PENDING', 'IN_PROGRESS'],
-          },
-          gameMode: gameMode,
-          service: {
-            type: 'RANK_BOOST',
-          },
-        },
-      })
-
-      if (existingOrder) {
-        const modeName = gameMode === 'PREMIER' ? 'Premier' : 'Gamers Club'
-        const statusName = existingOrder.status === 'PENDING' ? 'pendente' : 'em andamento'
-        return NextResponse.json(
-          {
-            message: `Você já possui um boost de rank ${modeName} ${statusName}. Finalize ou cancele o pedido anterior antes de criar um novo.`,
-          },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Buscar um admin ativo
-    const admin = await prisma.user.findFirst({
-      where: {
-        role: 'ADMIN',
-        active: true,
-      },
-    })
-
-    if (!admin) {
-      return NextResponse.json(
-        { message: 'Nenhum administrador ativo encontrado' },
-        { status: 400 }
-      )
-    }
-
-    // Buscar configuração de comissão ativa
-    let commissionConfig = await prisma.commissionConfig.findFirst({
-      where: { enabled: true },
-    })
-
-    if (!commissionConfig) {
-      commissionConfig = await prisma.commissionConfig.create({
-        data: {
-          boosterPercentage: 0.70,
-          adminPercentage: 0.30,
-          enabled: true,
-        },
-      })
-    }
-
-    const boosterPercentage = commissionConfig.boosterPercentage
-    const adminPercentage = commissionConfig.adminPercentage
-    const orderTotal = total
-    const adminRevenue = orderTotal * adminPercentage
-
-    // Preparar dados do pedido
-    const orderData: Record<string, unknown> = {
+    // Use OrderService to create order
+    const result = await OrderService.createOrder({
       userId,
-      serviceId,
-      adminId: admin.id,
-      total: orderTotal,
-      status: 'PENDING',
-      adminRevenue,
-      adminPercentage,
-      boosterPercentage,
-    }
-
-    // Adicionar metadados se fornecidos
-    if (data.currentRank) orderData.currentRank = data.currentRank
-    if (data.targetRank) orderData.targetRank = data.targetRank
-    if (data.currentRating !== undefined) orderData.currentRating = data.currentRating
-    if (data.targetRating !== undefined) orderData.targetRating = data.targetRating
-    if (data.gameMode) orderData.gameMode = data.gameMode
-    if (data.gameType) orderData.gameType = data.gameType
-    if (data.notes) orderData.notes = data.notes
-
-    // Criar order e receita do admin em uma transação
-    const order = await prisma.$transaction(async (tx: unknown) => {
-      const prismaClient = tx as typeof prisma
-      const newOrder = await prismaClient.order.create({
-        data: orderData as never,
-        include: {
-          service: true,
-        },
-      })
-
-      await prismaClient.adminRevenue.create({
-        data: {
-          orderId: newOrder.id,
-          adminId: admin.id,
-          orderTotal: orderTotal,
-          percentage: adminPercentage,
-          amount: adminRevenue,
-          status: 'PENDING',
-        },
-      })
-
-      return newOrder
+      game: data.game,
+      total: typeof data.total === 'number' ? data.total : parseFloat(String(data.total)),
+      currentRank: data.currentRank,
+      targetRank: data.targetRank,
+      currentRating: data.currentRating,
+      targetRating: data.targetRating,
+      gameMode: data.gameMode,
+      gameType: data.gameType,
+      metadata: data.metadata,
+      steamCredentials: data.steamCredentials,
+      steamProfileUrl: data.steamProfileUrl,
+      steamConsent: data.steamConsent,
     })
+
+    if (!result.success) {
+      // Map error codes to appropriate HTTP status
+      const statusMap: Record<string, number> = {
+        'DUPLICATE_ORDER': 400,
+        'VALIDATION_ERROR': 400,
+      }
+      const status = result.code ? statusMap[result.code] || 500 : 500
+
+      return NextResponse.json(
+        { message: result.error, code: result.code },
+        { status, headers: createRateLimitHeaders(rateLimitResult) }
+      )
+    }
 
     return NextResponse.json(
       {
         message: 'Solicitação criada com sucesso',
-        order,
+        order: result.data,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: createRateLimitHeaders(rateLimitResult)
+      }
     )
   } catch (error) {
-    console.error('Erro ao criar order:', error)
-    return NextResponse.json(
-      { message: 'Erro ao criar solicitação' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_CREATE_FAILED, 'POST /api/orders')
   }
 }

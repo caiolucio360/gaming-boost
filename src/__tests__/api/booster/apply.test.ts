@@ -13,6 +13,10 @@ jest.mock('@/lib/db', () => ({
             findUnique: jest.fn(),
             create: jest.fn(),
         },
+        user: {
+            update: jest.fn(),
+        },
+        $transaction: jest.fn(),
     },
 }))
 
@@ -28,14 +32,20 @@ describe('Booster Apply API', () => {
 
     it('should create a booster profile application', async () => {
         const mockUser = { id: 1 }
+        const mockProfile = {
+            id: 1,
+            userId: 1,
+            bio: 'Test Bio',
+            verificationStatus: 'PENDING',
+        }
+        const mockUpdatedUser = {
+            id: 1,
+            steamProfileUrl: 'https://steamcommunity.com/profiles/76561198012345678',
+            steamId: '76561198012345678',
+        }
             ; (verifyAuth as jest.Mock).mockResolvedValue({ authenticated: true, user: mockUser })
             ; (prisma.boosterProfile.findUnique as jest.Mock).mockResolvedValue(null)
-            ; (prisma.boosterProfile.create as jest.Mock).mockResolvedValue({
-                id: 1,
-                userId: 1,
-                bio: 'Test Bio',
-                verificationStatus: 'PENDING',
-            })
+            ; (prisma.$transaction as jest.Mock).mockResolvedValue([mockUpdatedUser, mockProfile])
 
         const req = new NextRequest('http://localhost:3000/api/booster/apply', {
             method: 'POST',
@@ -51,7 +61,7 @@ describe('Booster Apply API', () => {
         const data = await res.json()
 
         expect(res.status).toBe(201)
-        expect(prisma.boosterProfile.create).toHaveBeenCalled()
+        expect(prisma.$transaction).toHaveBeenCalled()
         expect(data.profile.verificationStatus).toBe('PENDING')
     })
 

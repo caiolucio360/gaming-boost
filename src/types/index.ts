@@ -1,21 +1,10 @@
-import { GameId, ServiceType } from '@/lib/games-config'
+import { GameId } from '@/lib/games-config'
 
 export interface User {
   id: number;
   email: string;
   name?: string;
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN';
-}
-
-export interface Service {
-  id: number;
-  game: GameId;
-  type: ServiceType;
-  name: string;
-  description: string;
-  price: number;
-  duration: string;
-  image?: string;
 }
 
 export interface GameRank {
@@ -29,13 +18,15 @@ export interface GameRank {
 export interface Order {
   id: number;
   userId: number;
-  serviceId: number;
+  game: GameId;
   boosterId?: number | null;
   status: 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   total: number;
+  currentRank?: string | null;
+  targetRank?: string | null;
+  gameMode?: string | null;
   createdAt: Date;
   updatedAt?: Date;
-  service?: Service;
   review?: {
     id: number;
     rating: number;
@@ -54,7 +45,6 @@ export interface Payment {
 
 // Item do carrinho
 export interface CartItem {
-  serviceId?: number; // ID do serviço do banco (se existir)
   game: GameId;
   serviceName: string;
   description?: string;

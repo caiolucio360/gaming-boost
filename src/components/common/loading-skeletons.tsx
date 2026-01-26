@@ -1,6 +1,6 @@
 'use client'
 
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton, SkeletonButton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 /**
@@ -8,11 +8,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
  */
 export function OrderCardSkeleton() {
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
       <CardHeader>
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-20 rounded-full" />
         </div>
         <Skeleton className="h-4 w-full mt-2" />
       </CardHeader>
@@ -32,9 +32,9 @@ export function OrderCardSkeleton() {
               <Skeleton className="h-6 w-20" />
             </div>
           </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
+          <div className="flex flex-wrap gap-2">
+            <SkeletonButton size="default" className="w-full md:w-auto" />
+            <SkeletonButton size="default" className="w-full md:w-auto" />
           </div>
         </div>
       </CardContent>
@@ -60,13 +60,14 @@ export function OrdersListSkeleton({ count = 3 }: { count?: number }) {
  */
 export function StatCardSkeleton() {
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
-      <CardContent className="pt-6">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-3 w-16" />
-        </div>
+    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-4 rounded" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-20 mb-1" />
+        <Skeleton className="h-3 w-32" />
       </CardContent>
     </Card>
   )
@@ -90,18 +91,24 @@ export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
  */
 export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="space-y-3">
+    <div className="w-full overflow-hidden rounded-lg border border-border-ds-brand/50">
       {/* Header */}
-      <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-        {Array.from({ length: cols }).map((_, i) => (
-          <Skeleton key={i} className="h-4 w-full" />
-        ))}
+      <div className="bg-surface-subtle border-b border-border-ds-brand/30 px-4 py-3">
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+          {Array.from({ length: cols }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
       </div>
       {/* Rows */}
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={rowIndex} className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+        <div
+          key={rowIndex}
+          className={`px-4 py-3 grid gap-4 ${rowIndex !== rows - 1 ? 'border-b border-border-ds-brand/20' : ''}`}
+          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+        >
           {Array.from({ length: cols }).map((_, colIndex) => (
-            <Skeleton key={colIndex} className="h-10 w-full" />
+            <Skeleton key={colIndex} className="h-6 w-full" />
           ))}
         </div>
       ))}
@@ -114,27 +121,84 @@ export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
  */
 export function ProfileSkeleton() {
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
-      <CardHeader>
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-64 mt-2" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full" />
+    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-5 w-16 rounded-full" />
           </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <Skeleton className="h-10 w-32" />
         </div>
+        <div className="mt-6 space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <SkeletonButton size="lg" className="w-full mt-2" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Skeleton para formulário
+ */
+export function FormSkeleton({ fields = 3 }: { fields?: number }) {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: fields }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      ))}
+      <SkeletonButton size="lg" className="w-full mt-2" />
+    </div>
+  )
+}
+
+/**
+ * Skeleton para card de pagamento PIX
+ */
+export function PaymentSkeleton() {
+  return (
+    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+      <CardHeader className="text-center pb-2">
+        <Skeleton className="h-7 w-48 mx-auto" />
+        <Skeleton className="h-5 w-32 mx-auto mt-2" />
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Status badge */}
+        <div className="flex justify-center">
+          <Skeleton className="h-10 w-48 rounded-lg" />
+        </div>
+        {/* Timer */}
+        <div className="flex justify-center">
+          <Skeleton className="h-5 w-32" />
+        </div>
+        {/* QR Code */}
+        <div className="flex justify-center">
+          <Skeleton className="w-48 h-48 md:w-64 md:h-64 rounded-xl" />
+        </div>
+        {/* Copy code section */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-40 mx-auto" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <SkeletonButton size="lg" className="w-full" />
+        </div>
+        {/* Verify button */}
+        <SkeletonButton size="default" className="w-full" />
       </CardContent>
     </Card>
   )
@@ -145,16 +209,55 @@ export function ProfileSkeleton() {
  */
 export function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-page py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-10 w-64 bg-purple-500/20" />
-          <Skeleton className="h-4 w-96 bg-purple-500/10" />
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-96" />
         </div>
         <StatsGridSkeleton count={4} />
         <OrdersListSkeleton count={3} />
       </div>
     </div>
+  )
+}
+
+/**
+ * Skeleton para card de calculadora/serviço
+ */
+export function CalculatorSkeleton() {
+  return (
+    <Card className="bg-surface-card/30 backdrop-blur-md border-border-ds-brand/50">
+      <CardHeader className="text-center">
+        <Skeleton className="h-8 w-56 mx-auto" />
+        <Skeleton className="h-4 w-72 mx-auto mt-2" />
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Tabs */}
+        <div className="flex gap-2 justify-center">
+          <Skeleton className="h-10 w-32 rounded-lg" />
+          <Skeleton className="h-10 w-32 rounded-lg" />
+        </div>
+        {/* Sliders/inputs */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+        </div>
+        {/* Price display */}
+        <div className="bg-surface-subtle rounded-lg p-4 space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        {/* CTA Button */}
+        <SkeletonButton size="lg" className="w-full" />
+      </CardContent>
+    </Card>
   )
 }
 

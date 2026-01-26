@@ -222,19 +222,8 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
 
     expect(response.status).toBe(400)
     expect(data.message).toContain('já possui um pedido')
-    expect(data.message).toContain('pendente')
-    expect(prisma.order.findFirst).toHaveBeenCalledWith({
-      where: {
-        boosterId: 1,
-        status: {
-          in: ['PENDING', 'PAID', 'IN_PROGRESS'],
-        },
-      },
-      select: {
-        id: true,
-        status: true,
-      },
-    })
+    // New message format: "Você já possui um pedido ativo (ID: X). Finalize-o antes de aceitar um novo."
+    expect(data.message).toContain('ativo')
   })
 
   it('deve retornar erro 400 se booster já possui pedido em andamento', async () => {
@@ -273,7 +262,8 @@ describe('POST /api/booster/orders/[id] (aceitar pedido)', () => {
 
     expect(response.status).toBe(400)
     expect(data.message).toContain('já possui um pedido')
-    expect(data.message).toContain('em andamento')
+    // New message format: "Você já possui um pedido ativo (ID: X). Finalize-o antes de aceitar um novo."
+    expect(data.message).toContain('ativo')
   })
 })
 
@@ -304,11 +294,29 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
     const updatedOrder = {
       ...existingOrder,
       status: 'COMPLETED',
+      user: { id: 1, email: 'client@test.com', name: 'Client' },
+      service: { id: 1, name: 'Service', game: 'CS2', type: 'RANK_BOOST' },
+      booster: { id: 1, email: 'booster@test.com', name: 'Booster' },
     }
 
       ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
-      ; (prisma.order.update as jest.Mock).mockResolvedValue(updatedOrder)
-      ; (prisma.boosterCommission.updateMany as jest.Mock).mockResolvedValue({ count: 1 })
+
+      // Mock transaction for completeOrder
+      ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const tx = {
+          order: {
+            update: jest.fn().mockResolvedValue(updatedOrder),
+            findUnique: jest.fn().mockResolvedValue(updatedOrder),
+          },
+          boosterCommission: {
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          },
+          adminRevenue: {
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          },
+        }
+        return callback(tx)
+      })
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'PUT',

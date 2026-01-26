@@ -1,6 +1,10 @@
 /**
  * Configuração de jogos suportados pela plataforma
  * Esta estrutura permite adicionar novos jogos facilmente
+ *
+ * IMPORTANT: Pricing is now managed via the PricingConfig database model.
+ * To calculate prices, use the /api/pricing/calculate endpoint.
+ * This config file contains only display metadata.
  */
 
 export type GameId = 'CS2' // Adicione novos jogos aqui conforme necessário
@@ -14,13 +18,14 @@ export interface GameModeConfig {
   name: string
   displayName: string
   description: string
-  pricingRules: {
-    basePrice: number
-    unit: string
-    calculation: (current: number, target: number) => number
+  // Pricing metadata for display purposes only
+  // Actual pricing calculated via /api/pricing/calculate using database
+  pricingInfo: {
+    unit: string // Display unit (e.g., "1000 pontos", "1 nível")
+    description: string // User-facing description of pricing
   }
   // Configurações específicas do modo
-  ratingPoints?: number[] // Pontos de rating disponíveis
+  ratingPoints?: number[] // Pontos de rating disponíveis para seleção
   ranks?: Array<{
     id: string
     name: string
@@ -39,12 +44,6 @@ export interface GameConfig {
   enabled: boolean
   supportedServiceTypes: ServiceType[]
   modes?: Record<GameMode, GameModeConfig> // Modos de jogo suportados
-  // Manter para compatibilidade com jogos que não têm modos
-  pricingRules?: {
-    basePrice?: number
-    unit?: string
-    calculation?: (current: number, target: number) => number
-  }
 }
 
 export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
@@ -62,51 +61,9 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
         name: 'Premier',
         displayName: 'Premier',
         description: 'Sistema de rating Premier do CS2',
-        pricingRules: {
-          basePrice: 25,
+        pricingInfo: {
           unit: '1000 pontos',
-          calculation: (current: number, target: number) => {
-            // Preços progressivos por faixa (mercado brasileiro)
-            // Baseado em pesquisa de concorrentes: DFGames, Desapego Games
-            const getPricePer1000 = (rating: number): number => {
-              if (rating < 5000) return 25 // 1K-4.999: R$ 25/1000
-              if (rating < 10000) return 35 // 5K-9.999: R$ 35/1000
-              if (rating < 15000) return 45 // 10K-14.999: R$ 45/1000
-              if (rating < 20000) return 50 // 15K-19.999: R$ 50/1000
-              if (rating < 25000) return 60 // 20K-24.999: R$ 60/1000
-              return 90 // 25K-26K: R$ 90/1000
-            }
-
-            let total = 0
-            let currentRating = current
-
-            // Calcular por faixas progressivas, do current para o target
-            while (currentRating < target) {
-              const pricePer1000 = getPricePer1000(currentRating)
-
-              // Determinar o próximo limite de faixa
-              const nextThreshold =
-                currentRating < 5000 ? 5000 :
-                  currentRating < 10000 ? 10000 :
-                    currentRating < 15000 ? 15000 :
-                      currentRating < 20000 ? 20000 :
-                        currentRating < 25000 ? 25000 :
-                          Infinity
-
-              // Calcular quantos pontos podemos processar nesta faixa
-              const maxPointsInRange = Math.min(target, nextThreshold) - currentRating
-              const pointsToProcess = Math.min(maxPointsInRange, target - currentRating)
-
-              // Calcular preço para esses pontos
-              const thousands = Math.ceil(pointsToProcess / 1000)
-              total += thousands * pricePer1000
-
-              // Avançar para a próxima faixa
-              currentRating += pointsToProcess
-            }
-
-            return total
-          },
+          description: 'Preços progressivos por faixa de rating',
         },
         ratingPoints: [
           1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
@@ -119,27 +76,9 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
         name: 'Gamers Club',
         displayName: 'Gamers Club',
         description: 'Sistema de ranqueamento do Gamers Club',
-        pricingRules: {
-          basePrice: 20,
+        pricingInfo: {
           unit: '1 nível',
-          calculation: (current: number, target: number) => {
-            // Preços progressivos por faixa (mercado brasileiro)
-            // Baseado em pesquisa de concorrentes: DFGames
-            const getPricePerLevel = (level: number): number => {
-              if (level <= 10) return 20 // Level 1-10: R$ 20/nível
-              if (level <= 14) return 40 // Level 11-14: R$ 40/nível
-              if (level <= 17) return 50 // Level 15-17: R$ 50/nível
-              if (level <= 19) return 70 // Level 18-19: R$ 70/nível
-              return 120 // Level 20: R$ 120/nível
-            }
-
-            let total = 0
-            for (let level = current + 1; level <= target; level++) {
-              total += getPricePerLevel(level)
-            }
-
-            return total
-          },
+          description: 'Preços progressivos por faixa de nível',
         },
         ranks: [
           { id: 'iniciante', name: 'Iniciante', minPoints: 1, maxPoints: 3 },
@@ -182,4 +121,3 @@ export function isGameEnabled(gameId: GameId): boolean {
 export function isServiceTypeSupported(gameId: GameId, serviceType: ServiceType): boolean {
   return GAMES_CONFIG[gameId]?.supportedServiceTypes.includes(serviceType) ?? false
 }
-

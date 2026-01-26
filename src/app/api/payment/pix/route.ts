@@ -4,9 +4,28 @@ import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createPixQrCode } from '@/lib/abacatepay'
 import { CreatePixSchema } from '@/schemas/payment'
 import { validateBody } from '@/lib/validate'
+import { paymentRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 PIX generation attempts per minute per IP (strict)
+    const identifier = getIdentifier(request)
+    const rateLimitResult = await paymentRateLimiter.check(identifier, 5)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: 'Muitas tentativas de pagamento. Aguarde um momento.',
+          error: 'RATE_LIMIT_EXCEEDED'
+        },
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rateLimitResult)
+        }
+      )
+    }
+
     const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
@@ -156,10 +175,16 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      return NextResponse.json({
-        payment,
-        message: 'PIX gerado com sucesso'
-      }, { status: 201 })
+      return NextResponse.json(
+        {
+          payment,
+          message: 'PIX gerado com sucesso'
+        },
+        {
+          status: 201,
+          headers: createRateLimitHeaders(rateLimitResult)
+        }
+      )
     } catch (error) {
       console.error('Erro ao gerar PIX QR Code:', error)
 
@@ -177,10 +202,6 @@ export async function POST(request: NextRequest) {
       )
     }
   } catch (error) {
-    console.error('Erro na rota PIX:', error)
-    return NextResponse.json(
-      { message: 'Erro ao processar pagamento' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.PAYMENT_PIX_FAILED, 'POST /api/payment/pix')
   }
 }

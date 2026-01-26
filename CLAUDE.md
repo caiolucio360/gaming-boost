@@ -76,10 +76,28 @@ npm run test:coverage    # Generate coverage report
 - `AdminRevenue` - Admin earnings per order (supports multiple admins)
 - `CommissionConfig` - Global commission percentages
 - `Withdrawal` - PIX withdrawal requests from boosters/admins
+- `PricingConfig` - Dynamic pricing tiers per game mode (admin-configurable)
+  - Stores price ranges (e.g., Premier 0-5K = R$25/1000 pts)
+  - Progressive pricing tiers
+  - Managed via `/admin/pricing` panel
+
+- `Service` - Available boost services (e.g., "CS2 Premier Rank Boost")
+  - Links to Game and ServiceType
+  - **IMPORTANT**: Services are NOT managed via admin UI for MVP simplicity
+  - Managed via database seeding: `npm run db:seed`
+  - To add/modify services: Update `prisma/seed.ts` and re-run seeding
+  - Admin service CRUD was intentionally removed to reduce complexity
 
 **Important Indexes:**
 - Orders indexed by `[userId, gameMode, status]` to prevent duplicate active orders in same game mode
 - Commissions/revenues indexed by `[userId, status]` for dashboard queries
+
+**Order Duplication Prevention:**
+- Backend validation: API prevents duplicate PENDING/PAID/IN_PROGRESS orders in same game mode (see `/api/orders/route.ts`)
+- Frontend warning: CS2 calculator displays prominent warning when user has active order in selected mode
+- UX flow: Warning banner + disabled "CONTRATAR AGORA" button + link to dashboard
+- Real-time check: Calculator fetches user's orders on mount and mode change via `/api/orders` GET endpoint
+- User guidance: Clear messaging directs users to finish/cancel existing order before creating new one
 
 **Prisma Client Location:**
 - Generated at `src/generated/prisma` (custom output path)
@@ -87,19 +105,27 @@ npm run test:coverage    # Generate coverage report
 
 ### Game Configuration System
 
-`src/lib/games-config.ts` defines all game modes and pricing:
+**IMPORTANT:** Game configuration and pricing are now separated:
+- `src/lib/games-config.ts` - Game metadata ONLY (no pricing logic)
+- `PricingConfig` database model - All pricing data (dynamic, admin-configurable)
 
 **CS2 Game Modes:**
 1. **Premier** - Rating-based (1K-26K points)
-   - Progressive pricing by rating tier (R$25-90 per 1000 points)
-   - Higher ratings = higher price per 1000 points
-
 2. **Gamers Club** - Level-based (1-20)
-   - Progressive pricing by level (R$20-120 per level)
 
-**Pricing Calculation:**
-- Each mode has a `calculation` function that computes total price from current → target
-- Prices increase progressively in tiers (not linear)
+**Pricing System (Database-Driven):**
+- All pricing stored in `PricingConfig` table
+- Configured via `/admin/pricing` admin panel
+- Price calculation via `/api/pricing/calculate` endpoint
+- `src/lib/pricing.ts` contains calculation logic
+- Progressive pricing by tier (prices increase at higher ratings/levels)
+- Default values seeded via `npm run db:seed`
+
+**Why Database-Driven Pricing:**
+- Admins can change prices without code deployments
+- Historical pricing preserved (can track changes over time)
+- No need to redeploy when adjusting market rates
+- Single source of truth (no dual config)
 
 ### Payment Integration (AbacatePay)
 
@@ -116,6 +142,28 @@ npm run test:coverage    # Generate coverage report
 2. Minimum R$3.50 (350 centavos)
 3. Supports multiple PIX key types: CPF, CNPJ, EMAIL, PHONE, RANDOM, BR_CODE
 
+**Auto-Refund System:**
+- Orders in PAID status without booster assignment are auto-refunded after configured timeout
+- Timeout configured via `ORDER_TIMEOUT_HOURS` environment variable (default: 24 hours)
+- Cron job runs hourly: `/api/cron/auto-refund/route.ts`
+- Vercel Cron configured in `vercel.json`
+- Secured with `CRON_SECRET` bearer token
+- Automatic email notification sent to customer on refund
+- Order status changes: PAID → CANCELLED
+- Payment status changes: PAID → REFUNDED
+- Uses `refundPixPayment()` from AbacatePay wrapper
+
+**Client-Initiated Cancellation & Refund:**
+- Clients can cancel orders via `/api/orders/[id]/cancel` (POST)
+- Only PENDING and PAID orders can be cancelled
+- IN_PROGRESS and COMPLETED orders cannot be cancelled (must use dispute system)
+- PAID orders automatically trigger refund processing
+- Refund processed synchronously - if it fails, cancellation is blocked
+- Order ownership verified before allowing cancellation
+- Email notification sent to client on successful cancellation
+- UI available in client dashboard with dynamic messaging
+- Rate limited: 5 cancellation attempts per minute per IP
+
 **Important:**
 - All amounts in AbacatePay are in **centavos** (cents), not reais
 - PIX codes expire (default 30 minutes)
@@ -128,18 +176,60 @@ npm run test:coverage    # Generate coverage report
 - Requires `ENCRYPTION_KEY` env var (64 hex chars = 256 bits)
 - Format: IV + AuthTag + Ciphertext (base64 encoded)
 
+**Rate Limiting** (`src/lib/rate-limit.ts`):
+- In-memory rate limiting to prevent abuse and DDoS attacks
+- Can be upgraded to Redis-based for multi-instance deployments
+- Returns standard rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+**Rate Limit Configurations:**
+1. **Authentication Endpoints** (`authRateLimiter`):
+   - Window: 15 minutes
+   - Login: 5 attempts per window
+   - Register: 3 attempts per window
+   - Forgot Password: 3 attempts per window
+   - Reset Password: 5 attempts per window
+
+2. **Payment Endpoints** (`paymentRateLimiter`):
+   - Window: 1 minute
+   - PIX Generation: 5 attempts per window (very strict)
+
+3. **Order Creation** (`apiRateLimiter`):
+   - Window: 1 minute
+   - Create Order: 10 attempts per window
+
+4. **Webhooks** (`webhookRateLimiter`):
+   - Window: 1 minute
+   - Webhook Calls: 100 attempts per window (lenient for legitimate services)
+
+**Rate Limit Response:**
+```json
+{
+  "message": "Muitas tentativas. Aguarde um momento.",
+  "error": "RATE_LIMIT_EXCEEDED"
+}
+```
+HTTP Status: 429 (Too Many Requests)
+
 **Environment Validation** (`src/lib/env.ts`):
 - Validates required env vars on startup
 - Throws errors if critical vars missing or malformed
 
 **Required Environment Variables:**
 ```
-DATABASE_URL           # PostgreSQL connection string
-NEXTAUTH_SECRET        # NextAuth session secret
-NEXT_PUBLIC_API_URL    # Public API URL
-JWT_SECRET             # JWT signing secret
-ENCRYPTION_KEY         # 64 hex chars for AES-256
-ABACATEPAY_API_KEY     # AbacatePay API key (optional in dev)
+# Critical (required)
+DATABASE_URL              # PostgreSQL connection string
+NEXTAUTH_SECRET           # NextAuth session secret
+NEXT_PUBLIC_API_URL       # Public API URL
+JWT_SECRET                # JWT signing secret
+ENCRYPTION_KEY            # 64 hex chars for AES-256
+
+# Optional but recommended
+ABACATEPAY_API_KEY        # AbacatePay API key (required for payments)
+RESEND_API_KEY            # Resend email service (required for emails)
+EMAIL_FROM                # Sender email address
+ORDER_TIMEOUT_HOURS       # Auto-refund timeout in hours (default: 24)
+CRON_SECRET               # Secret for securing cron endpoints
+LEETIFY_API_KEY           # Leetify API for CS2 stats (optional)
 ```
 
 ### Commission System
@@ -196,6 +286,7 @@ src/
 │   ├── abacatepay.ts        # AbacatePay API wrapper
 │   ├── games-config.ts      # Game modes and pricing
 │   ├── env.ts               # Environment validation
+│   ├── api-errors.ts        # API error response utilities
 │   └── ...
 ├── types/                   # TypeScript type definitions
 └── __tests__/               # Jest tests
@@ -233,6 +324,29 @@ if (session.user.role !== 'ADMIN') {
   return Response.json({ error: 'Forbidden' }, { status: 403 })
 }
 ```
+
+**Error Handling (IMPORTANT):**
+```typescript
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+
+export async function POST(request: NextRequest) {
+  try {
+    // ... route logic
+  } catch (error) {
+    // Automatically handles database connection errors, unique constraints, etc.
+    // Returns Portuguese error messages with appropriate HTTP status codes
+    return createApiErrorResponse(error, ErrorMessages.ORDER_CREATE_FAILED, 'POST /api/orders')
+  }
+}
+```
+
+Error handling utility provides:
+- Automatic detection of database connection errors (503 Service Unavailable)
+- Unique constraint violation detection (400 Bad Request)
+- Foreign key violation detection (400 Bad Request)
+- User-friendly Portuguese error messages
+- Consistent error response format across all endpoints
+- Proper logging with endpoint context
 
 ### Server Components vs Client Components
 
@@ -273,10 +387,13 @@ npm run test:coverage     # Generate coverage report
 ### Adding a New Game
 
 1. Add game to `Game` enum in `prisma/schema.prisma`
-2. Add game config to `GAMES_CONFIG` in `src/lib/games-config.ts`
-3. Define game modes and pricing calculation functions
+2. Add game config to `GAMES_CONFIG` in `src/lib/games-config.ts` (metadata only, NO pricing logic)
+3. Define game modes and display info (pricingInfo.unit and pricingInfo.description)
 4. Run `npm run db:push` to update database
-5. Add game-specific components in `src/components/games/`
+5. Configure pricing tiers via `/admin/pricing` admin panel (or add to seed.ts)
+6. Add game-specific components in `src/components/games/`
+
+**Note:** Pricing is now database-driven. Do NOT add calculation functions to games-config.ts.
 
 ### Adding a New Service Type
 
@@ -312,3 +429,4 @@ npm run test:coverage     # Generate coverage report
 - Commission percentages are stored as decimals (0.70 = 70%, not 70)
 - NextAuth session user object is extended with `id` and `role` fields via callbacks
 - Middleware protects routes - check `src/middleware.ts` config before adding new protected routes
+- **Pricing System:** All pricing is database-driven via `PricingConfig` model. NEVER add calculation functions to `games-config.ts`. Use `/api/pricing/calculate` endpoint for price calculations. Config only contains display metadata (pricingInfo.unit and pricingInfo.description)
