@@ -34,7 +34,6 @@ export async function GET(
             name: true,
           },
         },
-        service: true,
         booster: {
           select: {
             id: true,
@@ -174,7 +173,6 @@ export async function PUT(
             name: true,
           },
         },
-        service: true,
         booster: {
           select: {
             id: true,
