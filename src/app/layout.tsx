@@ -9,7 +9,7 @@ import { ToastProvider } from '@/components/providers/toast-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { SkipLink } from '@/components/common/skip-link'
 import { LiveRegion } from '@/components/common/live-region'
-import { MotionProvider } from '@/components/providers/motion-provider'
+
 import { QueryProvider } from '@/providers/query-provider'
 
 const orbitron = Orbitron({ 
@@ -72,7 +72,6 @@ export default function RootLayout({
       <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
         <QueryProvider>
           <AuthProviderWrapper>
-            <MotionProvider>
               <ToastProvider />
               <SkipLink />
               <LiveRegion message="" id="live-region" />
@@ -84,7 +83,6 @@ export default function RootLayout({
               <Footer />
               <MobileBottomNav />
             </div>
-            </MotionProvider>
           </AuthProviderWrapper>
         </QueryProvider>
         <AnalyticsProvider />

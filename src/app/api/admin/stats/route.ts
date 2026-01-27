@@ -13,6 +13,18 @@ export async function GET(request: NextRequest) {
 
     // Estatísticas gerais - executar queries de forma mais segura
     try {
+      const user = authResult.user as any
+      const isDevAdmin = user.isDevAdmin === true
+
+      // Admin count: only regular admins (isDevAdmin != true, handles false and null)
+      const adminCountWhere = {
+        role: 'ADMIN' as const,
+        isDevAdmin: { not: true }
+      }
+
+      // Total users filter: exclude dev-admin
+      const totalUsersWhere = { NOT: { isDevAdmin: true } }
+
       const [
         totalUsers,
         totalClients,
@@ -25,11 +37,12 @@ export async function GET(request: NextRequest) {
         cancelledOrders,
         totalRevenueResult,
         recentOrders,
+        devAdminRevenueResult,
       ] = await Promise.all([
-        prisma.user.count().catch(() => 0),
+        prisma.user.count({ where: totalUsersWhere }).catch(() => 0),
         prisma.user.count({ where: { role: 'CLIENT' } }).catch(() => 0),
         prisma.user.count({ where: { role: 'BOOSTER' } }).catch(() => 0),
-        prisma.user.count({ where: { role: 'ADMIN' } }).catch(() => 0),
+        prisma.user.count({ where: adminCountWhere }).catch(() => 0),
         prisma.order.count().catch(() => 0),
         prisma.order.count({ where: { status: 'PENDING' } }).catch(() => 0),
         prisma.order.count({ where: { status: 'IN_PROGRESS' } }).catch(() => 0),
@@ -46,9 +59,15 @@ export async function GET(request: NextRequest) {
             user: { select: { email: true, name: true } },
           },
         }).catch(() => []),
+        // Calculate Dev-Admin revenue ONLY if user is dev-admin
+        isDevAdmin ? prisma.devAdminRevenue.aggregate({
+          where: { devAdminId: user.id, status: 'PAID' },
+          _sum: { amount: true }
+        }).catch(() => ({ _sum: { amount: 0 } })) : Promise.resolve({ _sum: { amount: 0 } }),
       ])
 
       const totalRevenue = totalRevenueResult._sum?.total ?? 0
+      const devRevenue = devAdminRevenueResult._sum?.amount ?? 0
 
       const stats = {
         users: {
@@ -66,7 +85,9 @@ export async function GET(request: NextRequest) {
         },
         revenue: {
           total: totalRevenue || 0,
+          devRevenue: devRevenue || 0, // Include dev revenue in response
         },
+        isDevAdmin, // Flag to frontend
         recentOrders: recentOrders.map((order: any) => {
           // Garantir que createdAt seja uma string ISO
           let createdAtStr: string

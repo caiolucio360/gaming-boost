@@ -46,7 +46,9 @@ interface Stats {
   }
   revenue: {
     total: number
+    devRevenue?: number
   }
+  isDevAdmin?: boolean
   recentOrders: Array<{
     id: number
     status: string
@@ -141,7 +143,7 @@ export default function AdminDashboardPage() {
           <StatCard
             title="Total de Usuários"
             value={stats.users.total}
-            description={`${stats.users.clients} clientes • ${stats.users.boosters} boosters`}
+            description={`${stats.users.clients} clientes • ${stats.users.boosters} boosters • ${stats.users.admins} admins`}
             icon={Users}
           />
           <StatCard
@@ -157,6 +159,15 @@ export default function AdminDashboardPage() {
             icon={DollarSign}
             valueColor="text-[var(--action-primary-hover)]"
           />
+          {stats.isDevAdmin && (
+            <StatCard
+              title="Receita Dev"
+              value={formatPrice(stats.revenue.devRevenue || 0)}
+              description="Sua comissão (10%)"
+              icon={DollarSign}
+              valueColor="text-amber-400"
+            />
+          )}
         </div>
 
         {/* Cards de Ações Rápidas - Modern Design */}

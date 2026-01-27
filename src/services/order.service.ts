@@ -81,6 +81,8 @@ interface CommissionResult {
   boosterPercentage: number
   adminRevenue: number
   adminPercentage: number
+  devAdminRevenue: number
+  devAdminPercentage: number
 }
 
 // ============================================================================
@@ -254,9 +256,24 @@ export const OrderService = {
   /**
    * Get commission configuration for a booster
    */
-  async getCommissionConfig(boosterId?: number): Promise<Result<{ boosterPercentage: number; adminPercentage: number }>> {
+  async getCommissionConfig(boosterId?: number): Promise<Result<{ boosterPercentage: number; adminPercentage: number; devAdminPercentage: number }>> {
     try {
-      // Check for custom booster commission
+      const config = await prisma.commissionConfig.findFirst({
+        where: { enabled: true },
+      })
+
+      // Default values
+      let boosterPercentage = 0.70
+      let adminPercentage = 0.30
+      let devAdminPercentage = 0
+
+      if (config) {
+        boosterPercentage = config.boosterPercentage
+        adminPercentage = config.adminPercentage
+        devAdminPercentage = config.devAdminPercentage || 0
+      }
+
+      // Check for custom booster commission (overrides global booster %)
       if (boosterId) {
         const booster = await prisma.user.findUnique({
           where: { id: boosterId },
@@ -264,31 +281,19 @@ export const OrderService = {
         })
 
         if (booster?.boosterCommissionPercentage !== null && booster?.boosterCommissionPercentage !== undefined) {
-          return success({
-            boosterPercentage: booster.boosterCommissionPercentage,
-            adminPercentage: 1 - booster.boosterCommissionPercentage,
-          })
+          boosterPercentage = booster.boosterCommissionPercentage
+          // Recalculate admin percentage based on remaining AFTER dev admin cut
+          // Note context: adminPercentage used to be 1 - booster. Now it depends on the base.
+          // But wait, the split logic is: Total -> Dev -> Remaining -> Booster/Admin
+          // So Booster % applies to Remaining.
+          adminPercentage = 1 - boosterPercentage
         }
       }
 
-      // Get or create global commission config
-      let config = await prisma.commissionConfig.findFirst({
-        where: { enabled: true },
-      })
-
-      if (!config) {
-        config = await prisma.commissionConfig.create({
-          data: {
-            boosterPercentage: 0.70,
-            adminPercentage: 0.30,
-            enabled: true,
-          },
-        })
-      }
-
       return success({
-        boosterPercentage: config.boosterPercentage,
-        adminPercentage: config.adminPercentage,
+        boosterPercentage,
+        adminPercentage,
+        devAdminPercentage,
       })
     } catch (error) {
       console.error('Error getting commission config:', error)
@@ -299,12 +304,18 @@ export const OrderService = {
   /**
    * Calculate commission split for an order
    */
-  calculateCommission(total: number, boosterPercentage: number): CommissionResult {
-    const boosterCommission = total * boosterPercentage
-    const adminRevenue = total - boosterCommission
-    const adminPercentage = 1 - boosterPercentage
+  calculateCommission(total: number, boosterPercentage: number, adminPercentage: number, devAdminPercentage: number): CommissionResult {
+    // 1. Dev-Admin takes cut first
+    const devAdminRevenue = total * devAdminPercentage
+    const remaining = total - devAdminRevenue
+
+    // 2. Booster and Admin split the REMAINING amount
+    const boosterCommission = remaining * boosterPercentage
+    const adminRevenue = remaining * adminPercentage
 
     return {
+      devAdminRevenue: Math.round(devAdminRevenue * 100) / 100,
+      devAdminPercentage,
       boosterCommission: Math.round(boosterCommission * 100) / 100,
       boosterPercentage,
       adminRevenue: Math.round(adminRevenue * 100) / 100,
@@ -399,8 +410,8 @@ export const OrderService = {
       if (!configResult.success) {
         return configResult as Failure
       }
-      const { boosterPercentage, adminPercentage } = configResult.data
-      const commission = this.calculateCommission(order.total, boosterPercentage)
+      const { boosterPercentage, adminPercentage, devAdminPercentage } = configResult.data
+      const commission = this.calculateCommission(order.total, boosterPercentage, adminPercentage, devAdminPercentage)
 
       // Execute transaction
       const updatedOrder = await prisma.$transaction(async (tx: any) => {
@@ -433,7 +444,30 @@ export const OrderService = {
           },
         })
 
-        // Distribute admin revenue among all active admins
+        // Create dev-admin revenue (if applicable)
+        if (commission.devAdminRevenue > 0) {
+          // Find dev-admin user
+          const devAdmin = await tx.user.findFirst({
+            where: { isDevAdmin: true },
+            select: { id: true }
+          })
+
+          if (devAdmin) {
+            await tx.devAdminRevenue.create({
+              data: {
+                orderId,
+                devAdminId: devAdmin.id,
+                orderTotal: order.total,
+                percentage: devAdminPercentage,
+                amount: commission.devAdminRevenue,
+                status: 'PENDING',
+              },
+            })
+          }
+        }
+
+        // Distribute admin revenue among all active admins (excluding dev-admin logic handled usually by role, but here we split remaining)
+        // Note: AdminRevenue is for "regular" admin profit share. Dev-admin revenue is separate.
         const admins = await tx.user.findMany({
           where: { role: 'ADMIN', active: true },
           select: { id: true, adminProfitShare: true },
@@ -540,6 +574,12 @@ export const OrderService = {
 
         // Release admin revenue
         await tx.adminRevenue.updateMany({
+          where: { orderId, status: 'PENDING' },
+          data: { status: 'PAID', paidAt: new Date() },
+        })
+
+        // Release dev-admin revenue
+        await tx.devAdminRevenue.updateMany({
           where: { orderId, status: 'PENDING' },
           data: { status: 'PAID', paidAt: new Date() },
         })

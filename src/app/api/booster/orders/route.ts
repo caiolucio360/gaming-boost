@@ -67,7 +67,6 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
-        service: true,
         booster: {
           select: {
             id: true,
@@ -94,27 +93,21 @@ export async function GET(request: NextRequest) {
         where: {
           status: 'PAID',
           boosterId: null,
-          service: {
-            game: 'CS2',
-          },
+          game: 'CS2',
         },
       }),
       assigned: await prisma.order.count({
         where: {
           boosterId: userId,
           status: 'IN_PROGRESS',
-          service: {
-            game: 'CS2',
-          },
+          game: 'CS2',
         },
       }),
       completed: await prisma.order.count({
         where: {
           boosterId: userId,
           status: 'COMPLETED',
-          service: {
-            game: 'CS2',
-          },
+          game: 'CS2',
         },
       }),
       totalEarnings: await prisma.boosterCommission.aggregate({
@@ -137,9 +130,27 @@ export async function GET(request: NextRequest) {
       }),
     }
 
+    // Map orders to include constructed service object
+    const mappedOrders = orders.map((order: any) => {
+      const gameMode = order.gameMode || 'PREMIER'
+      const serviceName = gameMode === 'GAMERS_CLUB'
+        ? `Boost Gamers Club ${order.currentRank || ''} → ${order.targetRank || ''}`.trim()
+        : `Boost Premier ${order.currentRating || order.currentRank || ''} → ${order.targetRating || order.targetRank || ''}`.trim()
+
+      return {
+        ...order,
+        service: {
+          name: serviceName || 'Boost CS2',
+          game: order.game || 'CS2',
+          type: order.gameMode || 'Boost de Rank',
+          description: serviceName
+        }
+      }
+    })
+
     return NextResponse.json(
       {
-        orders,
+        orders: mappedOrders,
         stats: {
           available: stats.available,
           assigned: stats.assigned,

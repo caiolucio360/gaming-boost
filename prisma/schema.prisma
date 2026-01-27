@@ -29,6 +29,7 @@ model User {
   boosterCommissionPercentage Float? // Porcentagem de comissão personalizada (ex: 0.75 = 75%)
   // Porcentagem de divisão do lucro para admins (ex: 0.50 = 50% do lucro restante)
   adminProfitShare   Float?  @default(0) 
+  isDevAdmin         Boolean             @default(false) // Se o usuário é Dev-Admin (recebe porcentagem antes do split)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   orders             Order[] // Pedidos como cliente
@@ -36,8 +37,9 @@ model User {
   // adminOrders relation removed - AdminRevenue handles multi-admin revenue distribution
   boosterCommissions BoosterCommission[] // Comissões como booster
   adminRevenues      AdminRevenue[] // Receitas como admin
+  devAdminRevenues   DevAdminRevenue[]   @relation("DevAdminRevenues") // Receitas como dev-admin
   commissionHistory  BoosterCommissionHistory[] // Histórico de mudanças de comissão (como booster)
-  commissionChanges   BoosterCommissionHistory[] @relation("CommissionChanges") // Mudanças feitas (como admin)
+  commissionChanges  BoosterCommissionHistory[] @relation("CommissionChanges") // Mudanças feitas (como admin)
   boosterProfile     BoosterProfile?
   reviewsWritten     Review[]            @relation("ReviewAuthor")
   reviewsReceived    Review[]            @relation("ReviewTarget")
@@ -79,6 +81,7 @@ model Order {
   payments          Payment[] // Pagamentos associados ao pedido
   commission        BoosterCommission? // Comissão do booster
   revenues          AdminRevenue[] // Receitas dos admins (múltiplo - via AdminRevenue model)
+  devAdminRevenue   DevAdminRevenue? // Receita do dev-admin
   review            Review? // Avaliação do pedido
   dispute           Dispute? // Disputa do pedido
 
@@ -175,6 +178,25 @@ model AdminRevenue {
   @@index([status])
 }
 
+// Receita do dev-admin - criada quando pedido é criado
+model DevAdminRevenue {
+  id         Int           @id @default(autoincrement())
+  orderId    Int           @unique
+  devAdminId Int
+  orderTotal Float // Valor total do pedido
+  percentage Float // Porcentagem de receita (ex: 0.10 = 10%)
+  amount     Float // Valor da receita calculada
+  status     RevenueStatus @default(PENDING) // PENDING, PAID, CANCELLED
+  paidAt     DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  devAdmin   User          @relation("DevAdminRevenues", fields: [devAdminId], references: [id], onDelete: Cascade)
+
+  @@index([devAdminId, status])
+  @@index([status])
+}
+
 enum RevenueStatus {
   PENDING // Aguardando pagamento
   PAID // Pago
@@ -186,6 +208,7 @@ model CommissionConfig {
   id                Int      @id @default(autoincrement())
   boosterPercentage Float    @default(0.70) // Porcentagem do booster (70% padrão)
   adminPercentage   Float    @default(0.30) // Porcentagem do admin (30% padrão)
+  devAdminPercentage Float?   // Porcentagem do dev-admin (ex: 0.10 = 10% do total)
   enabled           Boolean  @default(true) // Se a configuração está ativa
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

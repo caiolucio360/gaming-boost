@@ -26,7 +26,6 @@ import { getEnabledGames } from '@/lib/games-config'
 import { getAuthToken } from '@/lib/api-client'
 
 import { NotificationBell } from '@/components/common/notification-bell'
-import { MotionToggle } from '@/components/common/motion-toggle'
 
 export function ElojobHeader() {
   const router = useRouter()
@@ -122,17 +121,17 @@ export function ElojobHeader() {
           ) : null}
           
           <Link
-            href="/testimonials"
+            href="/how-it-works"
             className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
           >
-            Depoimentos
+            Como Funciona
           </Link>
           
           <Link
-            href="/about"
+            href="/contact"
             className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
           >
-            Sobre
+            Contato
           </Link>
         </nav>
 
@@ -140,9 +139,6 @@ export function ElojobHeader() {
         <div className="hidden lg:flex items-center space-x-4">
           {(authLoading && hasToken) || (!authLoading && user) ? (
             <div className="flex items-center space-x-3">
-              {/* Motion Toggle - Acessibilidade */}
-              <MotionToggle />
-
               {/* Notification Bell */}
               <NotificationBell />
               
@@ -275,8 +271,6 @@ export function ElojobHeader() {
             </div>
           ) : !authLoading ? (
             <div className="flex items-center space-x-4">
-              {/* Motion Toggle - Acessibilidade */}
-              <MotionToggle />
               
               {/* Carrinho - visível mesmo sem login */}
               {cartItemsCount > 0 && (

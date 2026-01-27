@@ -17,14 +17,30 @@ async function main() {
     // 1. USERS
     console.log('👤 Creating users...')
 
+    const devAdmin = await prisma.user.upsert({
+        where: { email: 'dev.admin@gameboost.com' },
+        update: { isDevAdmin: true },
+        create: {
+            email: 'dev.admin@gameboost.com',
+            name: 'Dev Admin',
+            password: await bcrypt.hash('dev123', 10),
+            role: 'ADMIN',
+            isDevAdmin: true,
+            pixKey: '11977777777',
+            adminProfitShare: 0, // Recebe comissão direta (off-the-top), não participa do rateio de lucro
+        },
+    })
+    console.log('  ✓ Dev Admin:', devAdmin.email)
+
     const admin = await prisma.user.upsert({
         where: { email: 'admin@gameboost.com' },
-        update: {},
+        update: { isDevAdmin: false },
         create: {
             email: 'admin@gameboost.com',
             name: 'Admin',
             password: await bcrypt.hash('admin123', 10),
             role: 'ADMIN',
+            isDevAdmin: false,
             pixKey: '11999999999',
             adminProfitShare: 0.5,
         },
@@ -77,11 +93,25 @@ async function main() {
     const existingConfig = await prisma.commissionConfig.findFirst({ where: { enabled: true } })
     if (!existingConfig) {
         await prisma.commissionConfig.create({
-            data: { boosterPercentage: 0.70, adminPercentage: 0.30, enabled: true },
+            data: {
+                boosterPercentage: 0.60,
+                adminPercentage: 0.30,
+                devAdminPercentage: 0.10, // 10% para Dev
+                enabled: true
+            },
         })
-        console.log('  ✓ Commission: 70% booster / 30% admin')
+        console.log('  ✓ Commission: 60% booster / 30% admin / 10% dev')
     } else {
-        console.log('  ✓ Commission config exists')
+        // Update existing to include dev percentage if missing
+        if (existingConfig.devAdminPercentage === null || existingConfig.devAdminPercentage === undefined) {
+            await prisma.commissionConfig.update({
+                where: { id: existingConfig.id },
+                data: { devAdminPercentage: 0.10, boosterPercentage: 0.60 } // Ajustando para ter espaço pro dev
+            })
+            console.log('  ✓ Updated Commission with Dev %')
+        } else {
+            console.log('  ✓ Commission config exists')
+        }
     }
 
     // 4. PRICING CONFIG (CS2)
@@ -127,9 +157,10 @@ async function main() {
     console.log('✅ Seed completed!')
     console.log('='.repeat(50))
     console.log('\n📌 Test accounts:')
-    console.log('   Admin:   admin@gameboost.com / admin123')
-    console.log('   Booster: booster@gameboost.com / booster123')
-    console.log('   Client:  cliente@gameboost.com / cliente123')
+    console.log('   DevAdmin: dev.admin@gameboost.com / dev123')
+    console.log('   Admin:    admin@gameboost.com / admin123')
+    console.log('   Booster:  booster@gameboost.com / booster123')
+    console.log('   Client:   cliente@gameboost.com / cliente123')
 }
 
 main()

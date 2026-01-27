@@ -253,8 +253,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="bg-brand-black-light border border-white/5 hover:border-brand-purple/50 transition-colors">
-        <CardHeader>
-          <CardTitle className="text-xl md:text-3xl font-bold font-orbitron text-center">
+        <CardHeader className="py-3 pb-2">
+          <CardTitle className="text-lg md:text-2xl font-bold font-orbitron text-center">
             <span className="text-brand-purple-light">{gameConfig.displayName}</span>
             <span className="text-white"> CALCULATOR</span>
           </CardTitle>
@@ -262,12 +262,12 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         <CardContent>
           {/* Mode Selector */}
           {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
-            <div className="mb-6">
+            <div className="mb-4">
               <Tabs value={selectedMode} onValueChange={(value) => handleModeChange(value as GameMode)} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
                   <TabsTrigger
                     value="PREMIER"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
                       data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
                       data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
                   >
@@ -275,7 +275,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   </TabsTrigger>
                   <TabsTrigger
                     value="GAMERS_CLUB"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2.5 px-4
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
                       data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
                       data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
                   >
@@ -286,27 +286,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             </div>
           )}
 
-          {/* Mode Info */}
-          <Card className="bg-brand-purple/10 border border-brand-purple/30 mb-6">
-            <CardContent className="p-3 md:p-4">
-              <h3 className="text-base md:text-lg font-bold text-brand-purple-light font-orbitron mb-2">
-                Sistema {modeConfig.displayName}:
-              </h3>
-              <div className="text-xs md:text-sm text-brand-gray-300 font-rajdhani space-y-1">
-                {selectedMode === 'PREMIER' ? (
-                  <>
-                    <p><span className="text-brand-purple-light">• Pontuação:</span> 1k a 26k pontos</p>
-                    <p><span className="text-brand-purple-light">• Preço:</span> {modeConfig.pricingInfo.description}</p>
-                  </>
-                ) : (
-                  <>
-                    <p><span className="text-brand-purple-light">• Níveis:</span> 1 a 20</p>
-                    <p><span className="text-brand-purple-light">• Preço:</span> {modeConfig.pricingInfo.description}</p>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
 
           {/* Warning for Active Orders */}
           {user && hasActiveOrderInMode && (
@@ -334,15 +314,15 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             </Card>
           )}
 
-          <div className="space-y-6 md:space-y-8">
+          <div className="space-y-4">
             {/* Rating Selection - Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Current Rating */}
               <div>
-                <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4">
+                <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
                   {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
                 </h3>
-                <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
                   {currentRatingPoints.map((point) => {
                     const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
                     const isSelected = selectedCurrent === displayValue
@@ -351,7 +331,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <button
                         key={point.value}
                         onClick={() => handleCurrentSelect(point.value)}
-                        className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
+                        className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
                           ${isSelected
                             ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
                             : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
@@ -366,10 +346,10 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
               {/* Target Rating */}
               <div>
-                <h3 className="text-lg md:text-xl font-bold text-white font-orbitron mb-3 md:mb-4">
+                <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
                   {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
                 </h3>
-                <div className={`grid gap-2 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
                   {targetRatingPoints.map((point) => {
                     const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
                     const isSelected = selectedTarget === displayValue
@@ -378,7 +358,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <button
                         key={point.value}
                         onClick={() => handleTargetSelect(point.value)}
-                        className={`p-2 md:p-3 rounded-lg border-2 transition-all duration-200 font-rajdhani font-bold text-xs md:text-sm
+                        className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
                           ${isSelected
                             ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
                             : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
@@ -393,16 +373,16 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
             </div>
 
             {/* Calculate Button and Result */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Calculate Button */}
               <div className="flex justify-center lg:justify-start">
                 <button
                   onClick={calculatePrice}
                   disabled={!selectedCurrent || !selectedTarget || isCalculating}
-                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-8 rounded-lg transition-all 
+                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all 
                     shadow-glow hover:shadow-glow-hover
                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
-                    font-rajdhani text-sm md:text-base flex items-center gap-2"
+                    font-rajdhani text-sm flex items-center gap-2"
                 >
                   {isCalculating ? (
                     <>
@@ -422,14 +402,14 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
               </div>
 
               {/* Price Result */}
-              <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-4 md:p-6">
-                <h3 className="text-xl md:text-2xl font-bold font-orbitron mb-3 md:mb-4">
+              <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
+                <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
                   <span className="text-brand-purple-light">PREÇO</span>
                   <span className="text-white"> ESTIMADO</span>
                 </h3>
 
                 {isCalculating ? (
-                  <div className="text-center py-4">
+                  <div className="text-center py-2">
                     <div className="inline-flex items-center gap-3 text-brand-purple-light">
                       <svg className="animate-spin h-6 w-6 md:h-8 md:w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -442,10 +422,10 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   </div>
                 ) : price > 0 ? (
                   <div className="text-center">
-                    <div className="text-3xl md:text-5xl font-bold text-brand-purple-light font-orbitron mb-2">
+                    <div className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1">
                       R$ {price.toFixed(2)}
                     </div>
-                    <p className="text-sm md:text-base text-brand-gray-300 font-rajdhani mb-4">
+                    <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
                       {selectedMode === 'PREMIER'
                         ? `${selectedCurrent}K → ${selectedTarget}K pontos`
                         : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
