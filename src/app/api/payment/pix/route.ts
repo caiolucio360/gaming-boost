@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
       where: { id: parseInt(orderId) },
       include: {
         user: true,
-        service: true,
         payments: true,
       },
     })
@@ -140,7 +139,7 @@ export async function POST(request: NextRequest) {
 
       const pixData = await createPixQrCode({
         amount: Math.round(order.total * 100),
-        description: `Pedido #${order.id} - ${order.service.name}`,
+        description: `Pedido #${order.id} - ${order.serviceName || 'Boost'}`,
         expiresIn: 1800,
         customer: {
           name: order.user.name || 'Cliente',

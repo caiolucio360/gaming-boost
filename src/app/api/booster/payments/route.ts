@@ -40,13 +40,6 @@ export async function GET(request: NextRequest) {
                 name: true,
               },
             },
-            service: {
-              select: {
-                id: true,
-                name: true,
-                game: true,
-              },
-            },
           },
         },
       },

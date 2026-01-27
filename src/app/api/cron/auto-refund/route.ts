@@ -77,11 +77,6 @@ export async function POST(request: Request) {
             name: true,
           },
         },
-        service: {
-          select: {
-            name: true,
-          },
-        },
       },
     })
 
@@ -146,7 +141,7 @@ export async function POST(request: Request) {
         sendOrderCancelledEmail(
           order.user.email,
           order.id,
-          order.service.name,
+          order.serviceName || 'Boost',
           order.total
         ).catch((error) => {
           console.error(`❌ Failed to send email for order #${order.id}:`, error)

@@ -341,8 +341,8 @@ export default function DashboardPage() {
               return (
                 <DashboardCard
                   key={order.id}
-                  title={order.service?.name || 'Serviço'}
-                  description={order.service?.description || 'Descrição não disponível'}
+                  title={order.serviceName || 'Serviço'}
+                  description={`Boost CS2 - ${order.gameMode || 'Premier'}`}
                   status={order.status as 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -357,7 +357,7 @@ export default function DashboardPage() {
                         value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                       />
                       <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
-                      <OrderInfoItem label="Jogo" value={order.service?.game || 'N/A'} />
+                      <OrderInfoItem label="Jogo" value={order.game || 'CS2'} />
                     </div>
 
                     <div className="flex flex-wrap gap-2">

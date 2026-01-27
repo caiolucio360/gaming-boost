@@ -22,8 +22,11 @@ export interface Order {
   boosterId?: number | null;
   status: 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   total: number;
+  serviceName?: string | null;
   currentRank?: string | null;
   targetRank?: string | null;
+  currentRating?: number | null;
+  targetRating?: number | null;
   gameMode?: string | null;
   createdAt: Date;
   updatedAt?: Date;

@@ -77,11 +77,6 @@ export async function POST(
             name: true,
           },
         },
-        service: {
-          select: {
-            name: true,
-          },
-        },
         booster: {
           select: {
             id: true,
@@ -181,10 +176,6 @@ export async function POST(
           refundProcessed,
         }),
       },
-      include: {
-        service: true,
-        user: true,
-      },
     })
 
     // Update payment status if refund was processed
@@ -202,7 +193,7 @@ export async function POST(
     sendOrderCancelledEmail(
       order.user.email,
       order.id,
-      order.service.name,
+      order.serviceName || 'Boost',
       order.total
     ).catch((error) => {
       console.error(`❌ Failed to send cancellation email:`, error)

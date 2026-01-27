@@ -33,7 +33,6 @@ export async function GET(
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        service: true,
         booster: {
           select: {
             id: true,
@@ -100,9 +99,6 @@ export async function PUT(
     // Buscar o pedido
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        service: true,
-      },
     })
 
     if (!order) {
@@ -151,7 +147,6 @@ export async function PUT(
           status: 'CANCELLED',
         },
         include: {
-          service: true,
           booster: {
             select: {
               id: true,
