@@ -39,8 +39,8 @@ export function NotificationItem({ notification, onRead, compact = false }: Noti
         "flex gap-3 p-4 relative group cursor-pointer",
         "transition-all duration-300 ease-in-out",
         notification.read 
-          ? "bg-transparent hover:bg-purple-500/5" 
-          : "bg-gradient-to-r from-purple-500/15 to-purple-500/5 border-l-4 border-purple-500 hover:from-purple-500/20 hover:to-purple-500/10 hover:shadow-[0_0_15px_rgba(124,58,237,0.3)]",
+          ? "bg-transparent hover:bg-brand-purple/5" 
+          : "bg-gradient-to-r from-brand-purple/15 to-brand-purple/5 border-l-4 border-brand-purple hover:from-brand-purple/20 hover:to-brand-purple/10 hover:shadow-[0_0_15px_rgba(124,58,237,0.3)]",
         compact ? "text-sm p-3" : ""
       )}
       onClick={() => !notification.read && onRead?.(notification.id)}
@@ -67,7 +67,7 @@ export function NotificationItem({ notification, onRead, compact = false }: Noti
       </div>
       
       {!notification.read && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-brand-purple animate-pulse" />
       )}
     </div>
   )

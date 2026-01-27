@@ -26,10 +26,10 @@ export function ActionButton({
   ...props
 }: ActionButtonProps) {
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg border border-transparent hover:border-white/50',
+    primary: 'bg-gradient-to-r from-brand-purple-dark to-brand-purple text-white shadow-lg border border-transparent hover:border-white/50',
     danger: 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg border border-transparent hover:border-white/50',
     success: 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg border border-transparent hover:border-white/50',
-    outline: 'border-2 border-purple-500/50 text-purple-300 hover:border-purple-400',
+    outline: 'border-2 border-brand-purple/50 text-brand-purple-light hover:border-brand-purple-light',
   }
 
   return (

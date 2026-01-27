@@ -12,7 +12,7 @@ interface OrderInfoItemProps {
 export function OrderInfoItem({ label, value, valueClassName = 'text-white' }: OrderInfoItemProps) {
   return (
     <div>
-      <p className="text-sm text-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+      <p className="text-sm text-brand-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
         {label}
       </p>
       <p className={`text-sm font-rajdhani ${valueClassName}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>

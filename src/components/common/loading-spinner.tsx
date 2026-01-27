@@ -32,11 +32,11 @@ export function LoadingSpinner({
   const spinner = (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)} role="status" aria-label={text || "Carregando"}>
       <div className="relative">
-        <Loader2 className={cn(sizeClasses[size], 'animate-spin text-purple-500')} aria-hidden="true" />
-        <div className={cn('absolute inset-0 rounded-full border-2 border-purple-500/20 animate-pulse', sizeClasses[size])} aria-hidden="true" />
+        <Loader2 className={cn(sizeClasses[size], 'animate-spin text-brand-purple')} aria-hidden="true" />
+        <div className={cn('absolute inset-0 rounded-full border-2 border-brand-purple/20 animate-pulse', sizeClasses[size])} aria-hidden="true" />
       </div>
       {text ? (
-        <span className="text-sm text-gray-400 font-rajdhani animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+        <span className="text-sm text-brand-gray-400 font-rajdhani animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
           {text}
         </span>
       ) : (
@@ -51,7 +51,7 @@ export function LoadingSpinner({
         <div className="relative">
           {spinner}
           {/* Efeito de brilho pulsante */}
-          <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl animate-pulse" />
+          <div className="absolute inset-0 bg-brand-purple/20 rounded-full blur-xl animate-pulse" />
         </div>
       </div>
     )

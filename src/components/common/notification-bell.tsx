@@ -105,7 +105,7 @@ export function NotificationBell() {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative text-white hover:text-purple-300 hover:bg-purple-500/10 transition-colors duration-300">
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300">
                 <div className={`relative ${unreadCount > 0 ? 'animate-bellPulse' : ''}`}>
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
@@ -123,16 +123,16 @@ export function NotificationBell() {
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent className="bg-black/90 border-purple-500/50 text-white">
+          <TooltipContent className="bg-black/90 border-brand-purple/50 text-white">
             <p>{unreadCount > 0 ? `${unreadCount} notificação${unreadCount > 1 ? 'ões' : ''} não lida${unreadCount > 1 ? 's' : ''}` : 'Notificações'}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-purple-500/50 shadow-lg" align="end">
-        <div className="flex items-center justify-between p-4 border-b border-purple-500/20">
-          <h4 className="font-semibold font-orbitron text-purple-400">Notificações</h4>
+      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-brand-purple/50 shadow-lg" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-brand-purple/20">
+          <h4 className="font-semibold font-orbitron text-brand-purple-light">Notificações</h4>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-purple-300 hover:text-purple-200" onClick={markAllRead}>
+            <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-brand-purple-light hover:text-brand-purple-lighter" onClick={markAllRead}>
               Marcar todas como lidas
             </Button>
           )}
@@ -156,10 +156,10 @@ export function NotificationBell() {
             </div>
           )}
         </ScrollArea>
-        <div className="p-2 border-t border-purple-500/20 text-center">
+        <div className="p-2 border-t border-brand-purple/20 text-center">
           <Link 
             href="/notifications" 
-            className="text-xs text-purple-300 hover:text-purple-200 block w-full py-2 transition-colors duration-300"
+            className="text-xs text-brand-purple-light hover:text-brand-purple-lighter block w-full py-2 transition-colors duration-300"
             onClick={() => setIsOpen(false)}
           >
             Ver todas as notificações

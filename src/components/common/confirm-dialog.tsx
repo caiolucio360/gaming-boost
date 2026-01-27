@@ -47,7 +47,7 @@ export function ConfirmDialog({
       ? 'bg-red-500 text-white font-rajdhani border border-transparent hover:border-white/50'
       : variant === 'success'
       ? 'bg-green-500 text-white font-rajdhani border border-transparent hover:border-white/50'
-      : 'bg-purple-500 text-white font-rajdhani border border-transparent hover:border-white/50'
+      : 'bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50'
 
   const handleConfirm = async () => {
     await onConfirm()
@@ -56,19 +56,19 @@ export function ConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
-      <AlertDialogContent className="bg-black/90 border-purple-500/50">
+      <AlertDialogContent className="bg-black/90 border-brand-purple/50">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <AlertDialogDescription className="text-brand-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel 
+          <AlertDialogCancel
             disabled={loading}
-            className="border-purple-500/50 text-white hover:border-white/50 font-rajdhani" 
+            className="border-brand-purple/50 text-white hover:border-white/50 font-rajdhani"
             style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             {cancelLabel}

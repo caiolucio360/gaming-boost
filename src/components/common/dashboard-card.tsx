@@ -43,10 +43,10 @@ const statusBorderColors: Record<string, { border: string; hover: string; shadow
 }
 
 const defaultColors = {
-  border: 'border-purple-500/50',
-  hover: 'hover:border-purple-400/80',
-  shadow: 'hover:shadow-purple-500/20',
-  glow: 'from-purple-500/0 via-purple-500/5 to-purple-500/0',
+  border: 'border-brand-purple/50',
+  hover: 'hover:border-brand-purple-light/80',
+  shadow: 'hover:shadow-brand-purple/20',
+  glow: 'from-brand-purple/0 via-brand-purple/5 to-brand-purple/0',
 }
 
 export function DashboardCard({ title, description, children, className, status }: DashboardCardProps) {
@@ -58,11 +58,11 @@ export function DashboardCard({ title, description, children, className, status 
       <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none`} style={{ willChange: 'opacity' }} />
       
       <CardHeader className="relative z-10">
-        <CardTitle className="text-white font-orbitron group-hover:text-purple-200 transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <CardTitle className="text-white font-orbitron group-hover:text-brand-purple-lighter transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
           {title}
         </CardTitle>
         {description && (
-          <CardDescription className="text-gray-400 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <CardDescription className="text-brand-gray-400 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             {description}
           </CardDescription>
         )}

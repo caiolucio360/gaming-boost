@@ -430,3 +430,319 @@ npm run test:coverage     # Generate coverage report
 - NextAuth session user object is extended with `id` and `role` fields via callbacks
 - Middleware protects routes - check `src/middleware.ts` config before adding new protected routes
 - **Pricing System:** All pricing is database-driven via `PricingConfig` model. NEVER add calculation functions to `games-config.ts`. Use `/api/pricing/calculate` endpoint for price calculations. Config only contains display metadata (pricingInfo.unit and pricingInfo.description)
+
+## Design System
+
+### Tailwind CSS v4 Configuration
+
+**CRITICAL:** This project uses Tailwind CSS v4 with explicit config loading.
+
+```css
+/* src/app/globals.css - REQUIRED for Tailwind v4 */
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+```
+
+The `@config` directive is mandatory in Tailwind v4 to load the configuration file.
+
+### Brand Palette (RECOMMENDED)
+
+Use these brand palette classes throughout the codebase. They work reliably with Tailwind v4.
+
+**Background Colors:**
+```
+bg-brand-black        (#0A0A0A) - Main page backgrounds
+bg-brand-black-light  (#1A1A1A) - Cards, elevated surfaces
+```
+
+**Purple Variants:**
+```
+text-brand-purple-dark    (#4C1D95) - Strong/deep purple
+text-brand-purple         (#7C3AED) - Primary brand purple
+text-brand-purple-light   (#A855F7) - Accent/hover purple
+text-brand-purple-lighter (#C084FC) - Subtle purple
+border-brand-purple       - Purple borders
+bg-brand-purple           - Purple backgrounds
+```
+
+**Gray Variants:**
+```
+text-brand-gray-300  (#D1D5DB) - Secondary text
+text-brand-gray-400  (#9CA3AF) - Muted text
+text-brand-gray-500  (#6B7280) - Very muted text
+```
+
+**Status Colors (use standard Tailwind):**
+```
+green-500, green-300  - Success states
+yellow-500, amber-500 - Warning states
+red-500, red-300      - Error/danger states
+```
+
+### Color Mapping Reference
+
+When refactoring from hardcoded colors to brand palette:
+
+| Old Value | New Value |
+|-----------|-----------|
+| `purple-500` | `brand-purple` |
+| `purple-600` | `brand-purple-dark` |
+| `purple-400` / `purple-300` | `brand-purple-light` |
+| `bg-black` / `#0A0A0A` | `bg-brand-black` |
+| `bg-zinc-900` / `#1A1A1A` | `bg-brand-black-light` |
+| `gray-400` / `gray-500` | `brand-gray-500` |
+| `gray-300` | `brand-gray-300` |
+
+### CSS Variable Semantic Tokens (CAUTION)
+
+The design system includes semantic tokens defined in `globals.css`:
+
+```css
+/* Surface tokens */
+--surface-page: #0A0A0A;
+--surface-card: #1A1A1A;
+
+/* Action tokens */
+--action-primary: #7C3AED;
+--action-primary-hover: #A855F7;
+
+/* Text tokens */
+--text-primary: #FFFFFF;
+--text-muted: #6B7280;
+
+/* Status tokens */
+--status-success: #10B981;
+--status-warning: #F59E0B;
+--status-error: #DC2626;
+```
+
+**IMPORTANT:** While these tokens exist in `tailwind.config.js`, using them with Tailwind v4's arbitrary value syntax (e.g., `bg-[var(--surface-page)]`) has compatibility issues. **Prefer brand palette classes instead:**
+
+```tsx
+// ❌ AVOID - CSS variable syntax has issues in Tailwind v4
+<div className="bg-[var(--surface-page)] text-[var(--text-muted)]">
+
+// ✅ USE - Brand palette classes work reliably
+<div className="bg-brand-black text-brand-gray-500">
+```
+
+### Typography
+
+**Fonts (loaded via Next.js):**
+- **Orbitron** - Headings, titles, hero text (gaming/futuristic feel)
+- **Rajdhani** - Body text, descriptions, UI elements
+
+**Usage Pattern:**
+```tsx
+// Orbitron for titles
+<h1 className="font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+  TÍTULO
+</h1>
+
+// Rajdhani for body
+<p className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+  Descrição do conteúdo
+</p>
+```
+
+**Note:** The inline `style` attribute ensures font fallback works correctly.
+
+### Glassmorphism Patterns
+
+Cards and surfaces use glassmorphism effect:
+
+```tsx
+// Standard card glassmorphism
+<div className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+
+// Hero card glassmorphism
+<div className="bg-white/5 backdrop-blur-xl border-white/10">
+
+// Elevated surface
+<div className="bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md">
+```
+
+### Touch-Friendly Sizing
+
+Mobile-first design with touch target utilities:
+
+```
+min-h-touch     (44px) - iOS recommended touch target
+min-h-touch-lg  (48px) - Android recommended touch target
+min-w-touch     (44px)
+min-w-touch-lg  (48px)
+```
+
+### Glow Shadows
+
+Brand purple glow effects:
+
+```
+shadow-glow-sm    - Subtle glow (10px, 0.3 opacity)
+shadow-glow       - Standard glow (20px, 0.5 opacity)
+shadow-glow-lg    - Large glow (30px, 0.7 opacity)
+shadow-glow-hover - Hover state glow
+```
+
+### Animations
+
+**Built-in Animations (globals.css):**
+```
+animate-fadeIn           - Fade in
+animate-fadeInUp         - Fade in with upward motion
+animate-slideInFromLeft  - Slide from left
+animate-slideInFromRight - Slide from right
+animate-pulse            - Pulsing opacity
+animate-float            - Floating up/down
+animate-glow             - Pulsing purple glow
+animate-cartShake        - Cart icon shake
+animate-bellPulse        - Notification bell pulse
+animate-neonGlow         - Neon glow effect
+animate-shimmer          - Loading shimmer
+```
+
+**Tailwind Config Animations:**
+```
+animate-accordion-down/up - Accordion expand/collapse
+animate-fade-in           - Simple fade
+animate-fade-in-up        - Fade with motion
+animate-slide-in-left/right - Slide animations
+```
+
+### Micro-Interactions (globals.css)
+
+Utility classes for interactive elements:
+
+```css
+/* Lift effect - cards float up on hover */
+.hover-lift
+
+/* Glow effect - brand purple glow on hover */
+.hover-glow
+
+/* Scale effect - subtle scale up */
+.hover-scale
+
+/* Scale down on press */
+.active-scale
+
+/* Card interaction - combines lift + glow */
+.card-interactive
+
+/* Button press effect */
+.btn-press
+
+/* Icon bounce on hover */
+.icon-bounce
+
+/* Stagger children animation */
+.stagger-children
+
+/* Loading shimmer for skeletons */
+.shimmer
+
+/* Focus ring for accessibility */
+.focus-ring
+```
+
+### Gradient Utilities
+
+```css
+.bg-gradient-brand        /* Black to purple gradient */
+.bg-gradient-purple       /* Dark to light purple */
+.bg-gradient-purple-light /* Light purple variations */
+.bg-gradient-red          /* Red gradient for errors/danger */
+```
+
+### Common Component Patterns
+
+**Stat Card Pattern:**
+```tsx
+<Card className="bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-purple-500/50 hover:border-purple-400/80">
+  <CardHeader>
+    <CardTitle className="text-gray-400 font-rajdhani">Title</CardTitle>
+    <Icon className="text-brand-purple" />
+  </CardHeader>
+  <CardContent>
+    <div className="text-white font-orbitron">Value</div>
+  </CardContent>
+</Card>
+```
+
+**Page Header Pattern:**
+```tsx
+<PageHeader
+  highlight="HIGHLIGHTED"   // Purple text
+  title="TITLE"             // White text
+  description="Description" // Gray text
+/>
+```
+
+**Status Badge Colors:**
+```tsx
+// Success (green)
+<Badge className="bg-green-500/20 text-green-300 border-green-500/50">
+
+// Warning (yellow)
+<Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">
+
+// Error (red)
+<Badge className="bg-red-500/20 text-red-300 border-red-500/50">
+
+// Info (purple)
+<Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50">
+```
+
+### Responsive Breakpoints
+
+Custom breakpoints beyond Tailwind defaults:
+
+```
+notebook: 1024px  - Laptop screens
+desktop:  1366px  - Desktop monitors
+wide:     1920px  - Large displays
+```
+
+### Accessibility Features
+
+**Built-in Support:**
+- `prefers-reduced-motion` media query support
+- `.reduce-motion` class for manual control
+- `.sr-only` for screen reader text
+- `.focus-ring` for visible focus states
+- Proper cursor handling for interactive elements
+
+```css
+/* Reduced motion is automatically respected */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Common UI Components (src/components/common/)
+
+| Component | Purpose |
+|-----------|---------|
+| `StatCard` | Dashboard statistics display |
+| `PageHeader` | Consistent page headers |
+| `EmptyState` | Empty data states |
+| `LoadingSpinner` | Full-page loading |
+| `ButtonLoading` | Button with loading state |
+| `StatusBadge` | Order/payment status badges |
+| `DashboardCard` | Dashboard content cards |
+| `ConfirmDialog` | Confirmation modals |
+| `OrderInfoItem` | Order detail display |
+| `NotificationBell` | Header notification icon |
+| `LoadingSkeletons` | Skeleton loading states |
+
+### shadcn/ui Components (src/components/ui/)
+
+Base components from shadcn/ui (customized for brand):
+- `Button`, `Card`, `Dialog`, `Input`, `Label`
+- `Select`, `Tabs`, `Table`, `Badge`
+- `Alert`, `AlertDialog`, `Tooltip`, `Popover`
+- `DropdownMenu`, `NavigationMenu`, `Sheet`
+- `Form`, `Checkbox`, `Textarea`, `Skeleton`
