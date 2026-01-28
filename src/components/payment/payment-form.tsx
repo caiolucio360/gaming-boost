@@ -97,10 +97,10 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
   }
 
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-purple-500/50">
+    <Card className="bg-black/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-white font-orbitron">
-          Pagamento via <span className="text-purple-400">PIX</span>
+          Pagamento via <span className="text-brand-purple-light">PIX</span>
         </CardTitle>
         <CardDescription className="text-gray-400 font-rajdhani">
           Total: <span className="text-white font-bold">R$ {orderTotal.toFixed(2)}</span>
@@ -120,7 +120,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="(11) 99999-9999"
               required
               maxLength={15}
-              className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400"
+              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.phone && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.phone}</p>
@@ -142,7 +142,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="000.000.000-00"
               required
               maxLength={14}
-              className="bg-black/50 border-purple-500/50 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-purple-400"
+              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.taxId && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.taxId}</p>
@@ -152,7 +152,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
             </p>
           </div>
 
-          <Alert className="bg-purple-500/10 border-purple-500/30">
+          <Alert className="bg-brand-purple/10 border-brand-purple/30">
             <AlertDescription className="text-gray-300 text-sm font-rajdhani">
               ℹ️ Seus dados são usados apenas para processar o pagamento e não serão armazenados.
             </AlertDescription>
@@ -162,7 +162,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
             type="submit"
             loading={isLoading}
             loadingText="Gerando PIX..."
-            className="w-full bg-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani"
+            className="w-full bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani"
           >
             GERAR CÓDIGO PIX
           </ButtonLoading>

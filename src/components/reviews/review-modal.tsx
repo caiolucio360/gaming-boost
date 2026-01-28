@@ -90,7 +90,7 @@ export function ReviewModal({ orderId, trigger, onSuccess }: ReviewModalProps) {
       <DialogTrigger asChild>
         {trigger || <Button variant="outline">Avaliar Pedido</Button>}
       </DialogTrigger>
-      <DialogContent className="bg-black/90 border-purple-500/50 text-white sm:max-w-[425px]">
+      <DialogContent className="bg-black/90 border-brand-purple/50 text-white sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-orbitron text-xl">Avaliar Serviço</DialogTitle>
           <DialogDescription className="font-rajdhani text-gray-400">
@@ -132,7 +132,7 @@ export function ReviewModal({ orderId, trigger, onSuccess }: ReviewModalProps) {
             <Textarea
               id="comment"
               placeholder="O booster foi rápido, educado..."
-              className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
+              className="bg-black/50 border-brand-purple/30 text-white min-h-[100px]"
               {...register('comment')}
             />
           </div>
@@ -141,7 +141,7 @@ export function ReviewModal({ orderId, trigger, onSuccess }: ReviewModalProps) {
             <Button
               type="submit"
               disabled={isSubmitting || currentRating === 0}
-              className="w-full bg-purple-600 text-white font-bold border border-transparent hover:border-white/50"
+              className="w-full bg-brand-purple-dark text-white font-bold border border-transparent hover:border-white/50"
             >
               {isSubmitting ? (
                 <>

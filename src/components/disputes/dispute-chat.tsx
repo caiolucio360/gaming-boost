@@ -123,7 +123,7 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
       case 'CLOSED':
         return { label: 'Fechada', color: 'bg-gray-500/20 text-gray-300 border-gray-500/50', icon: XCircle }
       default:
-        return { label: status, color: 'bg-purple-500/20 text-purple-300 border-purple-500/50', icon: AlertCircle }
+        return { label: status, color: 'bg-brand-purple/20 text-brand-purple-light border-brand-purple/50', icon: AlertCircle }
     }
   }
 
@@ -168,10 +168,10 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
       {/* Sidebar - Dispute Info */}
       <div className="lg:col-span-1 space-y-4">
         {/* Status Card */}
-        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-purple-500/30">
+        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              <MessageCircle className="h-5 w-5 text-purple-400" />
+              <MessageCircle className="h-5 w-5 text-brand-purple-light" />
               Disputa #{dispute.id}
             </CardTitle>
           </CardHeader>
@@ -198,19 +198,19 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
         </Card>
 
         {/* Participants Card */}
-        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-purple-500/30">
+        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              <Users className="h-5 w-5 text-purple-400" />
+              <Users className="h-5 w-5 text-brand-purple-light" />
               Participantes
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {participants.map((participant, idx) => (
               <div key={idx} className="flex items-center gap-3">
-                <Avatar className="h-9 w-9 border-2 border-purple-500/30">
+                <Avatar className="h-9 w-9 border-2 border-brand-purple/30">
                   <AvatarImage src={participant.image || ''} />
-                  <AvatarFallback className="bg-purple-900/50 text-purple-200 text-xs">
+                  <AvatarFallback className="bg-brand-purple-dark/50 text-brand-purple-lighter text-xs">
                     {participant.name?.substring(0, 2).toUpperCase() || '??'}
                   </AvatarFallback>
                 </Avatar>
@@ -232,12 +232,12 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
 
       {/* Main Chat Area */}
       <div className="lg:col-span-3">
-        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-purple-500/30 h-[600px] flex flex-col">
+        <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30 h-[600px] flex flex-col">
           {/* Chat Header */}
-          <CardHeader className="border-b border-purple-500/20 pb-4 flex-shrink-0">
+          <CardHeader className="border-b border-brand-purple/20 pb-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                <MessageCircle className="h-5 w-5 text-purple-400" />
+                <MessageCircle className="h-5 w-5 text-brand-purple-light" />
                 Chat da Disputa
               </CardTitle>
               <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -253,8 +253,8 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
               <div className="space-y-4 pb-4">
                 {dispute.messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mb-4">
-                      <MessageCircle className="h-8 w-8 text-purple-400" />
+                    <div className="w-16 h-16 rounded-full bg-brand-purple/10 flex items-center justify-center mb-4">
+                      <MessageCircle className="h-8 w-8 text-brand-purple-light" />
                     </div>
                     <p className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                       Nenhuma mensagem ainda
@@ -274,9 +274,9 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
                         className={`flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
                       >
                         {showAvatar ? (
-                          <Avatar className="h-9 w-9 border-2 border-purple-500/30 flex-shrink-0">
+                          <Avatar className="h-9 w-9 border-2 border-brand-purple/30 flex-shrink-0">
                             <AvatarImage src={msg.author.image || ''} />
-                            <AvatarFallback className="bg-purple-900/50 text-purple-200 text-xs">
+                            <AvatarFallback className="bg-brand-purple-dark/50 text-brand-purple-lighter text-xs">
                               {msg.author.name?.substring(0, 2).toUpperCase() || 'U'}
                             </AvatarFallback>
                           </Avatar>
@@ -296,7 +296,7 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
                           )}
                           <div className={`rounded-2xl px-4 py-2.5 ${
                             isOwnMessage
-                              ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white'
+                              ? 'bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark text-white'
                               : 'bg-gray-800/80 border border-gray-700/50 text-gray-100'
                           }`}>
                             <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -317,20 +317,20 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
           </CardContent>
 
           {/* Message Input */}
-          <div className="p-4 border-t border-purple-500/20 flex-shrink-0">
+          <div className="p-4 border-t border-brand-purple/20 flex-shrink-0">
             {!isResolved ? (
               <form onSubmit={handleSendMessage} className="flex gap-3">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Digite sua mensagem..."
-                  className="bg-black/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400"
+                  className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 focus:border-brand-purple-light"
                   disabled={sending}
                 />
                 <Button
                   type="submit"
                   disabled={sending || !message.trim()}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6"
+                  className="bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white px-6"
                 >
                   {sending ? (
                     <LoadingSpinner size="sm" />

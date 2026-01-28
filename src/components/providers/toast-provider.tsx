@@ -23,10 +23,10 @@ export function ToastProvider() {
         closeButton
         toastOptions={{
           classNames: {
-            toast: 'bg-black/90 backdrop-blur-md border border-purple-500/50 font-rajdhani',
+            toast: 'bg-black/90 backdrop-blur-md border border-brand-purple/50 font-rajdhani',
             title: 'font-rajdhani font-bold text-white',
             description: 'font-rajdhani text-sm text-gray-300',
-            actionButton: 'bg-purple-500 border border-transparent hover:border-white/50 font-rajdhani',
+            actionButton: 'bg-brand-purple border border-transparent hover:border-white/50 font-rajdhani',
             cancelButton: 'bg-gray-500 border border-transparent hover:border-white/50 font-rajdhani',
             success: 'bg-green-500/10 border-green-500/50',
             error: 'bg-red-500/10 border-red-500/50',

@@ -40,7 +40,7 @@ export default function TermsPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-              <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">TERMOS</span>
+              <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">TERMOS</span>
               <span className="text-white"> DE USO</span>
             </h1>
             <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
@@ -54,8 +54,8 @@ export default function TermsPage() {
               <CardContent className="p-8 space-y-8 relative z-10">
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">1.</span> Aceitação dos Termos
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Aceitação dos Termos
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Ao acessar e utilizar a plataforma GameBoost, você concorda em cumprir e estar vinculado a estes Termos de Uso.
@@ -65,8 +65,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">2.</span> Definições
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">2.</span> Definições
                 </h2>
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li><strong className="text-white">Cliente:</strong> Usuário que contrata serviços de boost</li>
@@ -77,8 +77,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">3.</span> Descrição dos Serviços
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">3.</span> Descrição dos Serviços
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   A GameBoost é uma plataforma que conecta jogadores a profissionais qualificados para serviços de boost em jogos competitivos:
@@ -93,8 +93,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">4.</span> Cadastro e Conta de Usuário
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">4.</span> Cadastro e Conta de Usuário
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Para utilizar nossos serviços, você deve:
@@ -109,8 +109,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">5.</span> Pagamentos e Reembolsos
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">5.</span> Pagamentos e Reembolsos
                 </h2>
                 <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <p><strong className="text-white">5.1 Pagamentos:</strong> Todos os pagamentos são processados via PIX através da AbacatePay. Os preços são dinâmicos e configuráveis pela administração.</p>
@@ -121,8 +121,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">6.</span> Responsabilidades do Cliente
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">6.</span> Responsabilidades do Cliente
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   O cliente é responsável por:
@@ -137,8 +137,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">7.</span> Responsabilidades do Booster
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">7.</span> Responsabilidades do Booster
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   O booster é responsável por:
@@ -153,8 +153,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">8.</span> Sistema de Comissões
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">8.</span> Sistema de Comissões
                 </h2>
                 <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <p>As comissões são calculadas e distribuídas da seguinte forma:</p>
@@ -168,8 +168,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">9.</span> Disputas e Mediação
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Disputas e Mediação
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Em caso de conflitos entre cliente e booster, a plataforma oferece um sistema de disputa onde a administração
@@ -179,8 +179,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">10.</span> Privacidade e Segurança
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">10.</span> Privacidade e Segurança
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   A proteção de seus dados é nossa prioridade:
@@ -189,13 +189,13 @@ export default function TermsPage() {
                   <li>Credenciais de jogo são criptografadas com AES-256-GCM</li>
                   <li>Nunca compartilhamos informações com terceiros não autorizados</li>
                   <li>Conforme LGPD (Lei Geral de Proteção de Dados)</li>
-                  <li>Veja nossa <Link href="/privacy" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">Política de Privacidade</Link> completa</li>
+                  <li>Veja nossa <Link href="/privacy" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">Política de Privacidade</Link> completa</li>
                 </ul>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">11.</span> Limitação de Responsabilidade
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">11.</span> Limitação de Responsabilidade
                 </h2>
                 <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <p>A GameBoost não se responsabiliza por:</p>
@@ -211,8 +211,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">12.</span> Proibições e Conduta
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">12.</span> Proibições e Conduta
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   É estritamente proibido:
@@ -227,8 +227,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">13.</span> Suspensão e Encerramento
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">13.</span> Suspensão e Encerramento
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos, sem aviso prévio e sem
@@ -238,8 +238,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">14.</span> Modificações dos Termos
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">14.</span> Modificações dos Termos
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Reservamo-nos o direito de modificar estes termos a qualquer momento. Alterações significativas serão
@@ -249,8 +249,8 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">15.</span> Lei Aplicável
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">15.</span> Lei Aplicável
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Estes termos são regidos pelas leis da República Federativa do Brasil. Quaisquer disputas serão resolvidas
@@ -259,12 +259,12 @@ export default function TermsPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">16.</span> Contato
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">16.</span> Contato
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco através do{' '}
-                  <Link href="/contact" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">formulário de contato</Link>.
+                  <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">formulário de contato</Link>.
                 </p>
               </section>
 

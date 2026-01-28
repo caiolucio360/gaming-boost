@@ -90,7 +90,7 @@ export function ApplyForm() {
   }
 
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-purple-500/50 w-full max-w-2xl mx-auto">
+    <Card className="bg-black/30 backdrop-blur-md border-brand-purple/50 w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-white font-orbitron">
           Torne-se um Booster
@@ -108,7 +108,7 @@ export function ApplyForm() {
             <Textarea
               id="bio"
               placeholder="Conte sua experiência, ranks alcançados, etc..."
-              className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
+              className="bg-black/50 border-brand-purple/30 text-white min-h-[100px]"
               {...register('bio')}
             />
             {errors.bio && (
@@ -127,7 +127,7 @@ export function ApplyForm() {
                     onCheckedChange={(checked) =>
                       handleLanguageChange(lang.id, checked as boolean)
                     }
-                    className="border-purple-500 data-[state=checked]:bg-purple-600"
+                    className="border-brand-purple data-[state=checked]:bg-brand-purple-dark"
                   />
                   <Label
                     htmlFor={`lang-${lang.id}`}
@@ -144,7 +144,7 @@ export function ApplyForm() {
           </div>
 
           {/* Steam Profile Section */}
-          <div className="space-y-4 p-4 border border-purple-500/30 rounded-lg bg-black/20">
+          <div className="space-y-4 p-4 border border-brand-purple/30 rounded-lg bg-black/20">
             <div className="flex items-center justify-between">
               <Label htmlFor="steamProfileUrl" className="text-white font-rajdhani text-lg">
                 Perfil Steam
@@ -165,7 +165,7 @@ export function ApplyForm() {
             <Input
               id="steamProfileUrl"
               placeholder="https://steamcommunity.com/profiles/76561198..."
-              className="bg-black/50 border-purple-500/30 text-white"
+              className="bg-black/50 border-brand-purple/30 text-white"
               {...register('steamProfileUrl')}
             />
             {errors.steamProfileUrl && (
@@ -183,7 +183,7 @@ export function ApplyForm() {
             <Input
               id="portfolioUrl"
               placeholder="https://imgur.com/..."
-              className="bg-black/50 border-purple-500/30 text-white"
+              className="bg-black/50 border-brand-purple/30 text-white"
               {...register('portfolioUrl')}
             />
             {errors.portfolioUrl && (
@@ -195,7 +195,7 @@ export function ApplyForm() {
             type="submit"
             loading={isSubmitting}
             loadingText="Enviando..."
-            className="w-full bg-purple-600 text-white font-bold py-3 border border-transparent hover:border-white/50"
+            className="w-full bg-brand-purple-dark text-white font-bold py-3 border border-transparent hover:border-white/50"
           >
             Enviar Aplicação
           </ButtonLoading>

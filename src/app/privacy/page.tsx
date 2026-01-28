@@ -41,7 +41,7 @@ export default function PrivacyPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-              <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">POLÍTICA</span>
+              <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">POLÍTICA</span>
               <span className="text-white"> DE PRIVACIDADE</span>
             </h1>
             <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
@@ -55,8 +55,8 @@ export default function PrivacyPage() {
               <CardContent className="p-8 space-y-8 relative z-10">
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">1.</span> Introdução e Compromisso com a LGPD
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Introdução e Compromisso com a LGPD
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   A GameBoost respeita sua privacidade e está comprometida com a proteção de seus dados pessoais em conformidade
@@ -68,8 +68,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">2.</span> Dados Pessoais Coletados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">2.</span> Dados Pessoais Coletados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Coletamos as seguintes categorias de dados pessoais:
@@ -115,8 +115,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">3.</span> Finalidade do Tratamento de Dados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">3.</span> Finalidade do Tratamento de Dados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Utilizamos seus dados pessoais exclusivamente para as seguintes finalidades:
@@ -133,8 +133,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">4.</span> Base Legal para Tratamento
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">4.</span> Base Legal para Tratamento
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Conforme a LGPD, tratamos seus dados pessoais com base nas seguintes hipóteses legais:
@@ -148,8 +148,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">5.</span> Compartilhamento de Dados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">5.</span> Compartilhamento de Dados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <strong className="text-white">Nunca vendemos ou alugamos seus dados pessoais.</strong> Compartilhamos dados apenas quando estritamente necessário:
@@ -163,8 +163,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">6.</span> Segurança e Proteção de Dados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">6.</span> Segurança e Proteção de Dados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Implementamos medidas técnicas e organizacionais rigorosas para proteger seus dados:
@@ -182,8 +182,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">7.</span> Seus Direitos (LGPD)
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">7.</span> Seus Direitos (LGPD)
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   De acordo com a LGPD, você possui os seguintes direitos sobre seus dados pessoais:
@@ -200,14 +200,14 @@ export default function PrivacyPage() {
                 </ul>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Para exercer seus direitos, entre em contato através do nosso{' '}
-                  <Link href="/contact" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">formulário de contato</Link>.
+                  <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">formulário de contato</Link>.
                   Responderemos sua solicitação em até 15 dias.
                 </p>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">8.</span> Retenção de Dados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">8.</span> Retenção de Dados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Mantemos seus dados pessoais apenas pelo tempo necessário para cumprir as finalidades descritas:
@@ -224,8 +224,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">9.</span> Cookies e Tecnologias Similares
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Cookies e Tecnologias Similares
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Utilizamos cookies e tecnologias similares para:
@@ -241,8 +241,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">10.</span> Transferência Internacional de Dados
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">10.</span> Transferência Internacional de Dados
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Nossos servidores e parceiros podem estar localizados fora do Brasil. Quando houver transferência internacional
@@ -252,8 +252,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">11.</span> Privacidade de Menores
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">11.</span> Privacidade de Menores
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Nossos serviços são destinados a pessoas com 18 anos ou mais. Não coletamos intencionalmente dados de menores
@@ -263,8 +263,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">12.</span> Alterações nesta Política
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">12.</span> Alterações nesta Política
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Podemos atualizar esta Política de Privacidade ocasionalmente para refletir mudanças em nossas práticas ou
@@ -274,8 +274,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">13.</span> Incidentes de Segurança
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">13.</span> Incidentes de Segurança
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Em caso de incidente de segurança que possa acarretar risco ou dano relevante aos titulares de dados,
@@ -285,8 +285,8 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-purple-200 transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">14.</span> Contato e Encarregado de Dados (DPO)
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">14.</span> Contato e Encarregado de Dados (DPO)
                 </h2>
                 <div className="text-gray-300 font-rajdhani leading-relaxed space-y-3 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <p>
@@ -295,7 +295,7 @@ export default function PrivacyPage() {
                   </p>
                   <p>
                     <strong className="text-white">Formulário de Contato:</strong>{' '}
-                    <Link href="/contact" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">
+                    <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">
                       Clique aqui
                     </Link>
                   </p>

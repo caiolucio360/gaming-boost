@@ -100,9 +100,9 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               aria-pressed={isSelected}
               className={`group relative cursor-pointer transition-all duration-300 overflow-hidden ${
                 isSelected
-                  ? 'ring-2 ring-purple-500 shadow-lg shadow-purple-500/50 scale-105' 
-                  : 'hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 hover:border-purple-400/50'
-              } bg-gradient-to-br from-gray-900/50 via-gray-800/50 to-gray-900/50 border-purple-500/30`}
+                  ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/50 scale-105' 
+                  : 'hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 hover:border-brand-purple-light/50'
+              } bg-gradient-to-br from-gray-900/50 via-gray-800/50 to-gray-900/50 border-brand-purple/30`}
               onClick={() => handleRankSelect(rank)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -113,7 +113,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
             >
               {/* Efeito de brilho no hover */}
               {!isSelected && (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/10 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
               )}
               
               <CardContent className="p-4 text-center relative z-10">
@@ -125,11 +125,11 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                     className="object-contain drop-shadow-lg"
                   />
                 </div>
-                <h3 className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-purple-300 font-bold' : 'text-white group-hover:text-purple-200'}`}>
+                <h3 className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-brand-purple-light font-bold' : 'text-white group-hover:text-brand-purple-lighter'}`}>
                   {rank.name}
                 </h3>
                 {rank.tier && (
-                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-purple-400' : 'text-gray-400 group-hover:text-gray-300'}`}>
+                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-gray-400 group-hover:text-gray-300'}`}>
                     {rank.tier}
                   </p>
                 )}

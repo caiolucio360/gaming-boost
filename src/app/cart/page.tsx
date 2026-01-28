@@ -243,7 +243,7 @@ export default function CartPage() {
             <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 sticky top-24">
               <CardHeader>
                 <CardTitle className="text-white font-orbitron">
-                  <span className="text-purple-300">RESUMO</span> DO PEDIDO
+                  <span className="text-brand-purple-light">RESUMO</span> DO PEDIDO
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

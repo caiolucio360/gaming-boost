@@ -96,10 +96,10 @@ export default function SteamCredentialsForm({
     }
 
     return (
-        <Card className="bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-purple-500/30">
+        <Card className="bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30">
             <CardHeader>
                 <CardTitle className="text-white font-orbitron flex items-center gap-3" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
                         <Lock className="h-5 w-5 text-white" />
                     </div>
                     Credenciais Steam
@@ -131,7 +131,7 @@ export default function SteamCredentialsForm({
                             id="steamProfileUrl"
                             type="url"
                             placeholder="https://steamcommunity.com/id/seuusuario"
-                            className="bg-black/50 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500"
                             {...register('steamProfileUrl')}
                         />
                         {errors.steamProfileUrl && (
@@ -148,7 +148,7 @@ export default function SteamCredentialsForm({
                             id="username"
                             type="text"
                             placeholder="Seu usuário de login da Steam"
-                            className="bg-black/50 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500"
                             autoComplete="off"
                             {...register('username')}
                         />
@@ -167,7 +167,7 @@ export default function SteamCredentialsForm({
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Sua senha da Steam"
-                                className="bg-black/50 border-purple-500/30 text-white placeholder:text-gray-500 pr-10"
+                                className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 pr-10"
                                 autoComplete="new-password"
                                 {...register('password')}
                             />
@@ -185,12 +185,12 @@ export default function SteamCredentialsForm({
                     </div>
 
                     {/* Consent Checkbox */}
-                    <div className="flex items-start space-x-3 p-4 rounded-lg bg-black/30 border border-purple-500/20">
+                    <div className="flex items-start space-x-3 p-4 rounded-lg bg-black/30 border border-brand-purple/20">
                         <Checkbox
                             id="consent"
                             checked={consentValue}
                             onCheckedChange={(checked) => setValue('consent', checked === true)}
-                            className="mt-1 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                            className="mt-1 data-[state=checked]:bg-brand-purple-dark data-[state=checked]:border-brand-purple-dark"
                         />
                         <div className="space-y-1">
                             <Label 
@@ -215,7 +215,7 @@ export default function SteamCredentialsForm({
                         type="submit"
                         loading={loading}
                         disabled={!consentValue}
-                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-rajdhani"
+                        className="w-full bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white font-rajdhani"
                         style={{ fontFamily: 'Rajdhani, sans-serif' }}
                     >
                         <Lock className="mr-2 h-4 w-4" />

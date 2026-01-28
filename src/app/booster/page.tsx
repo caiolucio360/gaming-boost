@@ -413,7 +413,7 @@ export default function BoosterDashboardPage() {
               value={formatPrice(stats.totalEarnings)}
               description="Total recebido"
               icon={DollarSign}
-              valueColor="text-purple-300"
+              valueColor="text-brand-purple-light"
             />
             <StatCard
               title="Ganhos Pendentes"

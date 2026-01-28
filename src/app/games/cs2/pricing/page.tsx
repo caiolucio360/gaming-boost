@@ -21,7 +21,7 @@ export default function CS2PricingPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
-            <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">PREÇOS</span>
+            <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">PREÇOS</span>
             <span className="text-white"> CS2</span>
           </h1>
           <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>

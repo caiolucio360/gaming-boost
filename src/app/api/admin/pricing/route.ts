@@ -5,6 +5,37 @@ import { db } from '@/lib/db'
 import { Game } from '@/generated/prisma/client'
 
 /**
+ * Helper to check if a new range overlaps with existing ranges
+ * Overlap condition: (NewStart <= ExistingEnd) AND (NewEnd >= ExistingStart)
+ */
+async function checkRangeOverlap(
+  game: Game,
+  gameMode: string,
+  rangeStart: number,
+  rangeEnd: number,
+  excludeId?: number
+): Promise<{ overlaps: boolean; overlappingRange?: { id: number; rangeStart: number; rangeEnd: number } }> {
+  const existingRanges = await db.pricingConfig.findMany({
+    where: {
+      game,
+      gameMode,
+      enabled: true,
+      ...(excludeId ? { id: { not: excludeId } } : {})
+    },
+    select: { id: true, rangeStart: true, rangeEnd: true }
+  })
+
+  for (const existing of existingRanges) {
+    // Check overlap: new range overlaps if it starts before existing ends AND ends after existing starts
+    if (rangeStart <= existing.rangeEnd && rangeEnd >= existing.rangeStart) {
+      return { overlaps: true, overlappingRange: existing }
+    }
+  }
+
+  return { overlaps: false }
+}
+
+/**
  * GET /api/admin/pricing
  * Lista todas as configurações de preços
  */
@@ -68,19 +99,16 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'price must be greater than 0' }, { status: 400 })
     }
 
-    // Verificar se já existe uma config para esse range
-    const existing = await db.pricingConfig.findUnique({
-      where: {
-        game_gameMode_rangeStart: {
-          game,
-          gameMode,
-          rangeStart
-        }
-      }
-    })
+    // Check for overlapping ranges
+    const parsedRangeStart = parseInt(rangeStart)
+    const parsedRangeEnd = parseInt(rangeEnd)
+    const overlapCheck = await checkRangeOverlap(game, gameMode, parsedRangeStart, parsedRangeEnd)
 
-    if (existing) {
-      return Response.json({ error: 'Pricing config for this range already exists' }, { status: 409 })
+    if (overlapCheck.overlaps) {
+      const existing = overlapCheck.overlappingRange!
+      return Response.json({
+        error: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`
+      }, { status: 409 })
     }
 
     const pricingConfig = await db.pricingConfig.create({

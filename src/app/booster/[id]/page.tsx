@@ -113,7 +113,7 @@ export default async function BoosterProfilePage({ params }: BoosterProfilePageP
         {/* Reviews Section */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-white font-orbitron flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-purple-400" />
+            <MessageSquare className="h-6 w-6 text-brand-purple-light" />
             Avaliações Recentes
           </h2>
 

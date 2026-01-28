@@ -21,6 +21,9 @@ interface PricingRange {
  */
 export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<PricingRange[]> {
   try {
+    console.log(`[PRICING] Fetching pricing config for ${game} ${gameMode}...`)
+    const startTime = Date.now()
+
     const configs = await db.pricingConfig.findMany({
       where: {
         game,
@@ -31,6 +34,8 @@ export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<
         rangeStart: 'asc'
       }
     })
+
+    console.log(`[PRICING] Query completed in ${Date.now() - startTime}ms, found ${configs.length} ranges`)
 
     if (configs.length === 0) {
       console.error(`⚠️  No pricing configuration found for ${game} ${gameMode}`)
@@ -47,6 +52,7 @@ export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<
       unit: config.unit
     }))
   } catch (error) {
+    console.error(`[PRICING] Error fetching pricing config:`, error)
     // Re-throw the error with context
     if (error instanceof Error) {
       throw error
@@ -73,20 +79,51 @@ export async function calculatePremierPrice(current: number, target: number): Pr
   let total = 0
   let currentRating = current
 
+  // Safety guard contra loops infinitos
+  const MAX_ITERATIONS = 1000
+  let iterations = 0
+
   // Calcular por faixas progressivas
   while (currentRating < target) {
+    iterations++
+    if (iterations > MAX_ITERATIONS) {
+      console.error(`[PRICING] Infinite loop detected: current=${current}, target=${target}, currentRating=${currentRating}`)
+      throw new Error('Erro no cálculo de preço. Por favor, tente novamente.')
+    }
+
     // Encontrar a faixa atual
-    const currentRange = ranges.find(
-      r => currentRating >= r.rangeStart && currentRating <= r.rangeEnd
+    // Prioridade 1: Faixa onde estamos DENTRO (não no fim)
+    let currentRange = ranges.find(
+      r => currentRating >= r.rangeStart && currentRating < r.rangeEnd
     )
+
+    // Prioridade 2: Faixa que COMEÇA exatamente onde estamos
+    if (!currentRange) {
+      currentRange = ranges.find(r => r.rangeStart === currentRating)
+    }
+
+    // Prioridade 3: Próxima faixa disponível (para gaps)
+    if (!currentRange) {
+      currentRange = ranges.find(r => r.rangeStart > currentRating)
+      if (currentRange) {
+        // Pular para o início da próxima faixa (gap nos ranges)
+        currentRating = currentRange.rangeStart
+      }
+    }
 
     if (!currentRange) {
       throw new Error(`No pricing range found for rating ${currentRating}`)
     }
 
     // Determinar quantos pontos processar nesta faixa
-    const maxPointsInRange = Math.min(target, currentRange.rangeEnd) - currentRating
-    const pointsToProcess = Math.min(maxPointsInRange, target - currentRating)
+    const rangeEnd = Math.min(target, currentRange.rangeEnd)
+    const pointsToProcess = rangeEnd - currentRating
+
+    // Garantir que sempre avançamos (evitar loop infinito)
+    if (pointsToProcess <= 0) {
+      console.error(`[PRICING] Zero points to process: currentRating=${currentRating}, rangeEnd=${rangeEnd}, range=${JSON.stringify(currentRange)}`)
+      throw new Error('Erro no cálculo de preço: configuração de faixas inválida.')
+    }
 
     // Calcular preço para esses pontos (preço é por 1000 pontos)
     const thousands = Math.ceil(pointsToProcess / 1000)

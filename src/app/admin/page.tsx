@@ -280,6 +280,28 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
+          {/* Configuração de Preços */}
+          <Link href="/admin/pricing" className="group">
+            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-1 card-interactive">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25 group-hover:scale-110 group-hover:shadow-cyan-500/40 transition-all duration-300">
+                  <DollarSign className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-cyan-200 transition-colors">
+                  Preços
+                </h3>
+                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
+                  Configurar preços do calculador de boost
+                </p>
+                <div className="flex items-center mt-4 text-cyan-400 text-sm font-medium group-hover:text-cyan-300 transition-colors">
+                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
         </div>
 
         {/* Pedidos Recentes */}

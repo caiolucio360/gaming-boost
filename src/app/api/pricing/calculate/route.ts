@@ -8,9 +8,13 @@ import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
  * Calcula o preço de um boost baseado nas configurações do banco de dados
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  console.log('[API /pricing/calculate] Request received')
+
   try {
     const body = await request.json()
     const { game, gameMode, current, target } = body
+    console.log(`[API /pricing/calculate] Params: game=${game}, mode=${gameMode}, current=${current}, target=${target}`)
 
     // Validações
     if (!game || !gameMode || current === undefined || target === undefined) {
@@ -29,12 +33,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar se existe configuração para o range
+    console.log('[API /pricing/calculate] Starting validation...')
     const validation = await validatePricingRange(
       game as Game,
       gameMode,
       currentValue,
       targetValue
     )
+    console.log(`[API /pricing/calculate] Validation completed: ${JSON.stringify(validation)}`)
 
     if (!validation.valid) {
       return Response.json({
@@ -43,12 +49,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Calcular preço
+    console.log('[API /pricing/calculate] Starting price calculation...')
     const price = await calculatePrice(
       game as Game,
       gameMode,
       currentValue,
       targetValue
     )
+    console.log(`[API /pricing/calculate] Price calculated: ${price} in ${Date.now() - startTime}ms`)
 
     return Response.json({
       data: {
@@ -60,6 +68,7 @@ export async function POST(request: NextRequest) {
       }
     }, { status: 200 })
   } catch (error) {
+    console.error(`[API /pricing/calculate] Error after ${Date.now() - startTime}ms:`, error)
     return createApiErrorResponse(error, ErrorMessages.PRICING_CALCULATE_FAILED, 'POST /api/pricing/calculate')
   }
 }

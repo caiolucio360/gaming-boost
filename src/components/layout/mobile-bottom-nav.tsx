@@ -88,13 +88,13 @@ export function MobileBottomNav() {
       {/* Glassmorphism background with gradient overlay */}
       <div className="relative mx-3 mb-3 rounded-2xl overflow-hidden">
         {/* Gradient border glow effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/50 via-purple-400/30 to-purple-500/50 rounded-2xl blur-sm" />
+        <div className="absolute -inset-[1px] bg-gradient-to-r from-brand-purple/50 via-brand-purple-light/30 to-brand-purple/50 rounded-2xl blur-sm" />
         
         {/* Main background with glass effect */}
-        <div className="relative bg-black/80 backdrop-blur-xl rounded-2xl border border-purple-500/30">
+        <div className="relative bg-black/80 backdrop-blur-xl rounded-2xl border border-brand-purple/30">
           {/* Animated pill indicator that slides behind active item */}
           <motion.div 
-            className="absolute top-2 bottom-2 rounded-xl bg-gradient-to-br from-purple-600/40 to-purple-800/40 border border-purple-500/40"
+            className="absolute top-2 bottom-2 rounded-xl bg-gradient-to-br from-brand-purple-dark/40 to-brand-purple-dark/40 border border-brand-purple/40"
             initial={false}
             animate={{ 
               left: `calc(${(activeIndex / navItems.length) * 100}% + 8px)`,
@@ -140,7 +140,7 @@ export function MobileBottomNav() {
                     <AnimatePresence>
                       {isActive && (
                         <motion.div
-                          className="absolute inset-0 bg-purple-500/40 rounded-full blur-md"
+                          className="absolute inset-0 bg-brand-purple/40 rounded-full blur-md"
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1.8 }}
                           exit={{ opacity: 0, scale: 0.5 }}
@@ -162,7 +162,7 @@ export function MobileBottomNav() {
                       {/* Badge for cart */}
                       {item.showBadge && (
                         <motion.span 
-                          className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 text-[10px] font-bold bg-purple-500 text-white rounded-full"
+                          className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 text-[10px] font-bold bg-brand-purple text-white rounded-full"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: 'spring', stiffness: 500, damping: 25 }}

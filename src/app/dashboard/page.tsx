@@ -354,7 +354,7 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                       <OrderInfoItem
                         label="Valor Total"
-                        value={<span className="text-lg font-bold text-purple-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                        value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
                       />
                       <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
                       <OrderInfoItem label="Jogo" value={order.game || 'CS2'} />
