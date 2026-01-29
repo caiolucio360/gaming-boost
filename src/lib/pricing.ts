@@ -92,12 +92,12 @@ export async function calculatePremierPrice(current: number, target: number): Pr
     }
 
     // Encontrar a faixa atual
-    // Prioridade 1: Faixa onde estamos DENTRO (não no fim)
+    // Prioridade 1: Faixa onde estamos DENTRO (agora inclusivo no final)
     let currentRange = ranges.find(
-      r => currentRating >= r.rangeStart && currentRating < r.rangeEnd
+      r => currentRating >= r.rangeStart && currentRating <= r.rangeEnd
     )
 
-    // Prioridade 2: Faixa que COMEÇA exatamente onde estamos
+    // Prioridade 2: Faixa que COMEÇA exatamente onde estamos (caso redundancy)
     if (!currentRange) {
       currentRange = ranges.find(r => r.rangeStart === currentRating)
     }
@@ -107,6 +107,8 @@ export async function calculatePremierPrice(current: number, target: number): Pr
       currentRange = ranges.find(r => r.rangeStart > currentRating)
       if (currentRange) {
         // Pular para o início da próxima faixa (gap nos ranges)
+        const gapSize = currentRange.rangeStart - currentRating
+        console.warn(`[PRICING] Detected gap of ${gapSize} points. Jumping from ${currentRating} to ${currentRange.rangeStart}`)
         currentRating = currentRange.rangeStart
       }
     }
@@ -116,12 +118,18 @@ export async function calculatePremierPrice(current: number, target: number): Pr
     }
 
     // Determinar quantos pontos processar nesta faixa
-    const rangeEnd = Math.min(target, currentRange.rangeEnd)
-    const pointsToProcess = rangeEnd - currentRating
+    // Nota: rangeEnd é inclusivo (ex: 4999), então o limite é rangeEnd + 1 (5000)
+    const rangeLimit = currentRange.rangeEnd + 1
+    const endPoint = Math.min(target, rangeLimit)
+    const pointsToProcess = endPoint - currentRating
 
     // Garantir que sempre avançamos (evitar loop infinito)
     if (pointsToProcess <= 0) {
-      console.error(`[PRICING] Zero points to process: currentRating=${currentRating}, rangeEnd=${rangeEnd}, range=${JSON.stringify(currentRange)}`)
+      // Se chegamos aqui, target <= currentRating (já tratado) ou algo muito errado
+      // Mas se acabamos de pular um gap para start, rangeStart pode ser >= target?
+      if (currentRating >= target) break
+
+      console.error(`[PRICING] Zero points to process: currentRating=${currentRating}, rangeLimit=${rangeLimit}, range=${JSON.stringify(currentRange)}`)
       throw new Error('Erro no cálculo de preço: configuração de faixas inválida.')
     }
 

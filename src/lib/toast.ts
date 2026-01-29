@@ -1,20 +1,9 @@
 /**
  * Utilitários para exibir notificações toast
  * Usa Sonner para notificações modernas e não intrusivas
- *
- * Styling uses Design System tokens (see docs/design_system.md)
  */
 
 import { toast } from 'sonner'
-
-// Toast styling using design system semantic classes
-const toastStyles = {
-  success: 'bg-status-success/10 border-status-success/50 text-status-success',
-  error: 'bg-status-error/10 border-status-error/50 text-status-error',
-  warning: 'bg-status-warning/10 border-status-warning/50 text-status-warning',
-  info: 'bg-action-primary/10 border-action-primary/50 text-text-brand',
-  loading: 'bg-action-primary/10 border-action-primary/50 text-text-brand',
-}
 
 /**
  * Exibe uma notificação de sucesso
@@ -23,7 +12,6 @@ export function showSuccess(message: string, description?: string) {
   toast.success(message, {
     description,
     duration: 4000,
-    className: toastStyles.success,
   })
 }
 
@@ -34,7 +22,6 @@ export function showError(message: string, description?: string) {
   toast.error(message, {
     description,
     duration: 5000,
-    className: toastStyles.error,
   })
 }
 
@@ -45,7 +32,6 @@ export function showInfo(message: string, description?: string) {
   toast.info(message, {
     description,
     duration: 4000,
-    className: toastStyles.info,
   })
 }
 
@@ -56,7 +42,6 @@ export function showWarning(message: string, description?: string) {
   toast.warning(message, {
     description,
     duration: 4000,
-    className: toastStyles.warning,
   })
 }
 
@@ -64,9 +49,7 @@ export function showWarning(message: string, description?: string) {
  * Exibe uma notificação de loading
  */
 export function showLoading(message: string) {
-  return toast.loading(message, {
-    className: toastStyles.loading,
-  })
+  return toast.loading(message)
 }
 
 /**
@@ -77,7 +60,6 @@ export function updateToSuccess(toastId: string | number, message: string, descr
     id: toastId,
     description,
     duration: 4000,
-    className: toastStyles.success,
   })
 }
 
@@ -89,7 +71,6 @@ export function updateToError(toastId: string | number, message: string, descrip
     id: toastId,
     description,
     duration: 5000,
-    className: toastStyles.error,
   })
 }
 
@@ -116,7 +97,7 @@ export async function handleApiResponse<T>(
 ): Promise<T | null> {
   try {
     const data = await response.json()
-    
+
     if (response.ok) {
       if (successMessage) {
         showSuccess(successMessage)
@@ -132,4 +113,3 @@ export async function handleApiResponse<T>(
     return null
   }
 }
-
