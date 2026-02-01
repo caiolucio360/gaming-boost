@@ -463,19 +463,15 @@ export default function BoosterDashboardPage() {
                       <CardContent className="relative z-10">
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem 
-                              label="Valor Total" 
-                              value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
-                            />
                             {order.commission && (
-                              <OrderInfoItem 
-                                label="Sua Comissão" 
+                              <OrderInfoItem
+                                label="Sua Comissão"
                                 value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
                               />
                             )}
                             {order.boosterCommission && !order.commission && (
-                              <OrderInfoItem 
-                                label="Sua Comissão" 
+                              <OrderInfoItem
+                                label="Sua Comissão"
                                 value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                               />
                             )}
@@ -548,19 +544,15 @@ export default function BoosterDashboardPage() {
                       <CardContent className="relative z-10">
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem 
-                              label="Valor Total" 
-                              value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
-                            />
                             {order.commission && (
-                              <OrderInfoItem 
-                                label="Sua Comissão" 
+                              <OrderInfoItem
+                                label="Sua Comissão"
                                 value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
                               />
                             )}
                             {order.boosterCommission && !order.commission && (
-                              <OrderInfoItem 
-                                label="Sua Comissão" 
+                              <OrderInfoItem
+                                label="Sua Comissão"
                                 value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                               />
                             )}
@@ -632,19 +624,15 @@ export default function BoosterDashboardPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <OrderInfoItem 
-                            label="Valor Total" 
-                            value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
-                          />
                           {order.commission && (
-                            <OrderInfoItem 
-                              label="Sua Comissão" 
+                            <OrderInfoItem
+                              label="Sua Comissão"
                               value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%) {order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}</span>}
                             />
                           )}
                           {order.boosterCommission && !order.commission && (
-                            <OrderInfoItem 
-                              label="Sua Comissão" 
+                            <OrderInfoItem
+                              label="Sua Comissão"
                               value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                             />
                           )}

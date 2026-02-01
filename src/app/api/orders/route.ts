@@ -15,7 +15,7 @@ const CreateOrderSchema = z.object({
   targetRating: z.number().or(z.string().transform(Number)).optional(),
   gameMode: z.string().optional(),
   gameType: z.string().optional(),
-  metadata: z.string().optional(),
+  metadata: z.string().or(z.record(z.string(), z.unknown()).transform(obj => JSON.stringify(obj))).optional(),
   steamCredentials: z.string().optional(),
   steamProfileUrl: z.string().optional(),
   steamConsent: z.boolean().optional(),

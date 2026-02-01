@@ -105,7 +105,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     }
 
     try {
-      const orderCreated = await handleServiceHire(
+      const result = await handleServiceHire(
         cartItem,
         !!user,
         addItem,
@@ -114,9 +114,11 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         }
       )
 
-      if (orderCreated || user) {
-        router.replace('/cart')
+      // Se o pedido foi criado, redirecionar direto para pagamento
+      if (result.orderCreated && result.orderId) {
+        router.replace(`/payment?orderId=${result.orderId}&total=${result.price}`)
       }
+      // Se não foi criado (usuário não logado), o redirect já foi feito para /login
     } catch (error) {
       console.error('Erro ao contratar serviço:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro ao contratar serviço. Tente novamente.'

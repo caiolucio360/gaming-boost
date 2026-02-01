@@ -4,18 +4,30 @@ import { CartItem } from '@/types'
 import { GameId } from '@/lib/games-config'
 
 /**
+ * Resultado da contratação de serviço
+ */
+export interface HireResult {
+  /** Se o pedido foi criado (true) ou adicionado ao carrinho (false) */
+  orderCreated: boolean
+  /** ID do pedido criado (se orderCreated for true) */
+  orderId?: number
+  /** Preço do pedido */
+  price: number
+}
+
+/**
  * Função para contratar um serviço
- * Se o usuário estiver logado, cria a order diretamente
+ * Se o usuário estiver logado, cria a order diretamente e retorna o ID
  * Se não estiver, adiciona ao carrinho e redireciona para login
- * 
- * @returns true se o pedido foi criado com sucesso (usuário logado), false se foi adicionado ao carrinho (usuário não logado)
+ *
+ * @returns Objeto com informações do resultado
  */
 export async function handleServiceHire(
   item: CartItem,
   isLoggedIn: boolean,
   addToCart: (item: CartItem) => { success: boolean; error?: string },
   redirectToLogin: () => void
-): Promise<boolean> {
+): Promise<HireResult> {
   if (!isLoggedIn) {
     // Adicionar ao carrinho e redirecionar para login
     const result = addToCart(item)
@@ -23,7 +35,7 @@ export async function handleServiceHire(
       throw new Error(result.error || 'Erro ao adicionar ao carrinho')
     }
     redirectToLogin()
-    return false // Retorna false indicando que foi adicionado ao carrinho
+    return { orderCreated: false, price: item.price }
   }
 
   // Se estiver logado, verificar se já existe uma order ativa (PENDING ou IN_PROGRESS) para a mesma modalidade
@@ -56,7 +68,7 @@ export async function handleServiceHire(
   // Se estiver logado, criar order diretamente
   try {
     const metadata = item.metadata || {}
-    await createOrder(
+    const orderId = await createOrder(
       item.game,
       item.price,
       {
@@ -69,7 +81,7 @@ export async function handleServiceHire(
         metadata: metadata,
       }
     )
-    return true
+    return { orderCreated: true, orderId, price: item.price }
   } catch (error) {
     console.error('Erro ao criar order:', error)
     throw error
@@ -78,6 +90,7 @@ export async function handleServiceHire(
 
 /**
  * Função auxiliar para criar uma order
+ * @returns O ID da order criada
  */
 export async function createOrder(
   game: GameId = 'CS2',
@@ -91,7 +104,7 @@ export async function createOrder(
     gameType?: string
     metadata?: Record<string, any>
   }
-): Promise<void> {
+): Promise<number> {
   const body: any = {
     game,
     total,
@@ -120,4 +133,7 @@ export async function createOrder(
     const error = await response.json()
     throw new Error(error.message || 'Erro ao criar solicitação')
   }
+
+  const data = await response.json()
+  return data.order.id
 }

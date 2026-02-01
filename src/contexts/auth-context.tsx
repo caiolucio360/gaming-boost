@@ -49,12 +49,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       const currentSession = await update()
       const userRole = currentSession?.user?.role || session?.user?.role
-      
+
       if (userRole === 'ADMIN') {
         window.location.href = '/admin'
       } else if (userRole === 'BOOSTER') {
         window.location.href = '/booster'
       } else {
+        // Para clientes, verificar se há itens no carrinho para processar
+        // O callback processCartAfterLogin será chamado pelo CartAuthIntegration
+        const processCart = (window as any).__processCartAfterLogin
+        if (processCart) {
+          try {
+            const cartResult = await processCart()
+            if (cartResult?.success && cartResult?.orderId) {
+              // Redirecionar para pagamento com o ID do pedido
+              window.location.href = `/payment?orderId=${cartResult.orderId}&total=${cartResult.total}`
+              return
+            }
+          } catch (error) {
+            console.error('Erro ao processar carrinho:', error)
+          }
+        }
+        // Se não há carrinho ou erro, ir para dashboard
         window.location.href = '/dashboard'
       }
     }

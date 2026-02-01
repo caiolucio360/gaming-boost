@@ -523,6 +523,21 @@ export const OrderService = {
         })
       }
 
+      // Create notification for client that booster accepted order
+      if (updatedOrder.user?.id && updatedOrder.booster?.name) {
+        prisma.notification.create({
+          data: {
+            userId: updatedOrder.user.id,
+            type: 'BOOSTER_ASSIGNED',
+            title: 'Booster Atribuído!',
+            message: `${updatedOrder.booster.name} aceitou seu pedido #${orderId} e começará o boost em breve.`,
+            metadata: JSON.stringify({ orderId, boosterId }),
+          },
+        }).catch((error) => {
+          console.error('Failed to create notification for order accepted:', error)
+        })
+      }
+
       return success(updatedOrder as OrderWithRelations)
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'ORDER_ALREADY_ACCEPTED') {
@@ -607,6 +622,22 @@ export const OrderService = {
           serviceName
         ).catch((error) => {
           console.error('Failed to send order completed email:', error)
+        })
+      }
+
+      // Create notification for client that order is complete
+      if (updatedOrder.user?.id) {
+        const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
+        prisma.notification.create({
+          data: {
+            userId: updatedOrder.user.id,
+            type: 'ORDER_UPDATE',
+            title: 'Pedido Concluído!',
+            message: `Seu pedido #${orderId} de ${serviceName} foi concluído com sucesso! Avalie sua experiência.`,
+            metadata: JSON.stringify({ orderId }),
+          },
+        }).catch((error) => {
+          console.error('Failed to create notification for order completed:', error)
         })
       }
 

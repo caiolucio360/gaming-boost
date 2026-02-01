@@ -237,13 +237,9 @@ export default function BoosterPaymentsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <OrderInfoItem 
-                          label="Valor da Comissão" 
+                        <OrderInfoItem
+                          label="Valor da Comissão"
                           value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.amount)} ({(commission.percentage * 100).toFixed(0)}%)</span>}
-                        />
-                        <OrderInfoItem 
-                          label="Valor Total do Pedido" 
-                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.orderTotal)}</span>}
                         />
                         <OrderInfoItem label="Cliente" value={commission.order.user.name || commission.order.user.email} />
                         {commission.status === 'PAID' && commission.paidAt && (

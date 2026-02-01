@@ -3,12 +3,21 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { CartItem } from '@/types'
 
+interface ProcessCartResult {
+  /** Se algum pedido foi criado */
+  success: boolean
+  /** ID do primeiro pedido criado (para redirecionamento) */
+  orderId?: number
+  /** Preço total do pedido */
+  total?: number
+}
+
 interface CartContextType {
   items: CartItem[]
   addItem: (item: CartItem) => { success: boolean; error?: string }
   removeItem: (index: number) => void
   clearCart: () => void
-  processCartAfterLogin: () => Promise<void>
+  processCartAfterLogin: () => Promise<ProcessCartResult>
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -74,47 +83,61 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const processCartAfterLogin = useCallback(async () => {
+  const processCartAfterLogin = useCallback(async (): Promise<ProcessCartResult> => {
     // Esta função será chamada após o login
-    // Ela processa todos os itens do carrinho e cria as orders
-    if (items.length === 0) return
+    // Ela processa o primeiro item do carrinho e cria a order
+    // Retorna o ID da order para redirecionar para pagamento
+    if (items.length === 0) return { success: false }
 
-    for (const item of items) {
-      try {
-        const body: any = {
-          game: item.game,
-          total: item.price,
-        }
-
-        // Adicionar metadados se existirem
-        if (item.currentRank) body.currentRank = item.currentRank
-        if (item.targetRank) body.targetRank = item.targetRank
-        if (item.metadata) {
-          if (item.metadata.currentRating !== undefined) body.currentRating = item.metadata.currentRating
-          if (item.metadata.targetRating !== undefined) body.targetRating = item.metadata.targetRating
-          if (item.metadata.mode) body.gameMode = item.metadata.mode
-          if (item.metadata.gameType) body.gameType = item.metadata.gameType
-          body.metadata = JSON.stringify(item.metadata)
-        }
-
-        const response = await fetch('/api/orders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        })
-
-        if (!response.ok) {
-          console.error('Erro ao criar order para item:', item)
-        }
-      } catch (error) {
-        console.error('Erro ao processar item do carrinho:', error)
+    // Processar apenas o primeiro item (fluxo direto para pagamento)
+    const item = items[0]
+    try {
+      const body: any = {
+        game: item.game,
+        total: item.price,
       }
-    }
 
-    // Limpar carrinho após processar (mesmo se alguns falharem)
-    clearCart()
+      // Adicionar metadados se existirem
+      if (item.currentRank) body.currentRank = item.currentRank
+      if (item.targetRank) body.targetRank = item.targetRank
+      if (item.metadata) {
+        if (item.metadata.currentRating !== undefined) body.currentRating = item.metadata.currentRating
+        if (item.metadata.targetRating !== undefined) body.targetRating = item.metadata.targetRating
+        if (item.metadata.mode) body.gameMode = item.metadata.mode
+        if (item.metadata.gameType) body.gameType = item.metadata.gameType
+        body.metadata = JSON.stringify(item.metadata)
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+
+      if (!response.ok) {
+        console.error('Erro ao criar order para item:', item)
+        clearCart()
+        return { success: false }
+      }
+
+      const data = await response.json()
+      const orderId = data.order?.id
+
+      // Limpar carrinho após processar com sucesso
+      clearCart()
+
+      return {
+        success: true,
+        orderId,
+        total: item.price,
+      }
+    } catch (error) {
+      console.error('Erro ao processar item do carrinho:', error)
+      clearCart()
+      return { success: false }
+    }
   }, [items, clearCart])
 
   return (
