@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar receitas
-    const revenues = await prisma.adminRevenue.findMany({
+    const rawRevenues = await prisma.adminRevenue.findMany({
       where,
       include: {
         order: {
@@ -49,6 +49,21 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: 'desc' },
     })
+
+    // Mapear revenues para incluir service virtual no order
+    const revenues = rawRevenues.map((revenue: typeof rawRevenues[number]) => ({
+      ...revenue,
+      order: {
+        ...revenue.order,
+        service: {
+          id: revenue.order.id,
+          name: revenue.order.gameMode
+            ? `${revenue.order.game} ${revenue.order.gameMode.replace('_', ' ')} Boost`
+            : `${revenue.order.game} Boost`,
+          game: revenue.order.game,
+        },
+      },
+    }))
 
     // Calcular estatísticas
     const stats = {

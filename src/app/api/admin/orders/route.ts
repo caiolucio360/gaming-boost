@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       where.status = status
     }
 
-    const [orders, total] = await Promise.all([
+    const [rawOrders, total] = await Promise.all([
       prisma.order.findMany({
         where,
         include: {
@@ -52,6 +52,19 @@ export async function GET(request: NextRequest) {
       }),
       prisma.order.count({ where }),
     ])
+
+    // Mapear orders para incluir service virtual baseado nos campos do Order
+    const orders = rawOrders.map((order: typeof rawOrders[number]) => ({
+      ...order,
+      service: {
+        id: order.id,
+        name: order.gameMode
+          ? `${order.game} ${order.gameMode.replace('_', ' ')} Boost`
+          : `${order.game} Boost`,
+        game: order.game,
+        type: order.gameMode || 'BOOST',
+      },
+    }))
 
     return NextResponse.json(
       { orders, total, limit, offset },
