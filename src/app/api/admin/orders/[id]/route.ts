@@ -24,7 +24,7 @@ export async function GET(
       )
     }
 
-    const order = await prisma.order.findUnique({
+    const rawOrder = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
         user: {
@@ -41,14 +41,62 @@ export async function GET(
             name: true,
           },
         },
+        payments: {
+          select: {
+            id: true,
+            status: true,
+            total: true,
+            createdAt: true,
+          },
+        },
+        commission: {
+          select: {
+            id: true,
+            amount: true,
+            percentage: true,
+            status: true,
+          },
+        },
+        revenues: {
+          where: {
+            admin: {
+              isDevAdmin: false,
+            },
+          },
+          select: {
+            id: true,
+            amount: true,
+            percentage: true,
+            status: true,
+            admin: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    if (!order) {
+    if (!rawOrder) {
       return NextResponse.json(
         { message: 'Pedido não encontrado' },
         { status: 404 }
       )
+    }
+
+    // Mapear order para incluir service virtual
+    const order = {
+      ...rawOrder,
+      service: {
+        id: rawOrder.id,
+        name: rawOrder.gameMode
+          ? `${rawOrder.game} ${rawOrder.gameMode.replace('_', ' ')} Boost`
+          : `${rawOrder.game} Boost`,
+        game: rawOrder.game,
+        type: rawOrder.gameMode || 'BOOST',
+      },
     }
 
     return NextResponse.json({ order }, { status: 200 })
