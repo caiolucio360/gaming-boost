@@ -9,7 +9,9 @@ import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import type { RegisterInput, LoginInput } from '@/schemas/auth'
 import { sendWelcomeEmail } from '@/lib/email'
+import { VerificationService } from './verification.service'
 import { Result, success, failure } from './types'
+
 
 // ============================================================================
 // Types
@@ -70,24 +72,24 @@ export const AuthService = {
         },
       })
 
-      // Send welcome email (don't await - send in background)
-      sendWelcomeEmail(user.email, user.name || 'Usuário', user.role)
-        .then((sent) => {
-          if (sent) {
-            console.log(`✅ Welcome email sent to ${user.email}`)
-          } else {
-            console.error(`❌ Failed to send welcome email to ${user.email}`)
-          }
-        })
-        .catch((error) => {
-          console.error(`❌ Error sending welcome email to ${user.email}:`, error)
-        })
+      // Generate verification code
+      const codeResult = await VerificationService.generateCode(user.id, user.email)
+
+      if (!codeResult.success) {
+        // Log error but don't fail registration completely? 
+        // Or fail? Better to fail so user knows something went wrong.
+        // But user is already created... 
+        console.error('Failed to generate verification code:', codeResult.error)
+      }
+
+      // Note: VerificationService handles sending the email
 
       return success({
         id: user.id,
         name: user.name || '',
         email: user.email || '',
         role: user.role,
+        active: user.active
       })
     } catch (error) {
       console.error('Error registering user:', error)
@@ -116,6 +118,11 @@ export const AuthService = {
 
       if (!isPasswordValid) {
         return failure('Credenciais inválidas', 'UNAUTHORIZED')
+      }
+
+      // Check if user is active
+      if (!user.active) {
+        return failure('Conta não verificada', 'USER_NOT_VERIFIED')
       }
 
       return success({
@@ -209,6 +216,76 @@ export const AuthService = {
     } catch (error) {
       console.error('Error updating password:', error)
       return failure('Erro ao atualizar senha', 'DATABASE_ERROR')
+    }
+  },
+
+  /**
+   * Delete user account (Soft Delete)
+   * 
+   * Anonymizes user data and marks as inactive.
+   * Prevents deletion if user has active orders.
+   */
+  async deleteUser(userId: number): Promise<Result<boolean>> {
+    try {
+      // 1. Check for active orders (as client)
+      const activeOrders = await prisma.order.count({
+        where: {
+          userId,
+          status: {
+            in: ['PENDING', 'PAID', 'IN_PROGRESS']
+          }
+        }
+      })
+
+      if (activeOrders > 0) {
+        return failure('Não é possível excluir a conta com pedidos em andamento.', 'USER_HAS_ACTIVE_ORDERS')
+      }
+
+      // 2. Check for active orders (as booster) - if applicable
+      const user = await prisma.user.findUnique({ where: { id: userId } })
+
+      if (user?.role === 'BOOSTER') {
+        const activeBoosterOrders = await prisma.order.count({
+          where: {
+            boosterId: userId,
+            status: {
+              in: ['IN_PROGRESS']
+            }
+          }
+        })
+
+        if (activeBoosterOrders > 0) {
+          return failure('Não é possível excluir a conta com trabalhos em andamento.', 'USER_HAS_ACTIVE_ORDERS')
+        }
+      }
+
+      // 3. Perform Soft Delete (Anonymization)
+      const timestamp = new Date().getTime()
+      const anonymousEmail = `deleted_${timestamp}_${userId}@deleted.com`
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name: 'Usuário Deletado',
+          email: anonymousEmail,
+          password: await bcrypt.hash(`deleted_${timestamp}`, 10), // Scramble password
+          phone: null,
+          taxId: null,
+          pixKey: null,
+          steamProfileUrl: null,
+          steamId: null,
+          image: null,
+          metadata: null,
+          active: false,
+          // We keep the relations to orders/commissions for financial records
+        }
+      })
+
+      return success(true)
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+      return failure(`Erro ao excluir conta: ${errorMessage}`, 'DATABASE_ERROR')
     }
   },
 }

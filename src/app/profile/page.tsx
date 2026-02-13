@@ -18,12 +18,26 @@ import {
   AlertCircle,
   CheckCircle2,
   Lock,
-  CreditCard
+  CreditCard,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
+import { getAuthToken } from '@/lib/api-client'
 import { ProfileSkeleton } from '@/components/common/loading-skeletons'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface UserProfile {
   id: number
@@ -41,7 +55,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { user: authUser, loading: authLoading, refreshUser } = useAuth()
+  const { user: authUser, loading: authLoading, refreshUser, logout } = useAuth()
   const router = useRouter()
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [saving, setSaving] = useState(false)
@@ -202,6 +216,45 @@ export default function ProfilePage() {
     }
   }
 
+
+  const handleDeleteAccount = async () => {
+    try {
+      setSaving(true)
+      setAlert(null)
+
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Sessão inválida')
+      }
+
+      const response = await fetch('/api/user/delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao excluir conta')
+      }
+
+      // Logout and redirect
+      logout()
+      router.push('/login?deleted=true')
+
+    } catch (error: any) {
+      console.error('Erro ao excluir conta:', error)
+      setAlert({
+        title: 'Erro ao excluir conta',
+        description: error.message || 'Não foi possível excluir sua conta. Verifique se não há pedidos em andamento.',
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   if (authLoading) {
     return <LoadingSpinner />
@@ -451,6 +504,60 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
+          
+          {/* Zona de Perigo / Excluir Conta */}
+          <Card className="group relative bg-brand-red/5 border-brand-red/30 backdrop-blur-md hover:border-brand-red/50 hover:shadow-xl hover:shadow-brand-red/10 transition-colors duration-200 overflow-hidden mt-8">
+            <CardHeader className="relative z-10">
+              <CardTitle className="text-brand-red flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-brand-red/10 group-hover:bg-brand-red/20 transition-colors duration-300">
+                  <AlertTriangle className="h-5 w-5 text-brand-red" />
+                </div>
+                Zona de Perigo
+              </CardTitle>
+              <CardDescription className="text-brand-gray-500">
+                Ações irreversíveis para sua conta
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 relative z-10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-white font-medium mb-1">Excluir Conta</h4>
+                  <p className="text-sm text-brand-gray-500 max-w-md">
+                    Ao excluir sua conta, seus dados pessoais serão anonimizados e você perderá acesso ao histórico. Esta ação não pode ser desfeita.
+                  </p>
+                </div>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="bg-brand-red/10 text-brand-red border border-brand-red/50 hover:bg-brand-red hover:text-white transition-all">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Excluir Minha Conta
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-brand-black border-brand-purple/20">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white font-orbitron">Tem certeza absoluta?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-brand-gray-400">
+                        Esta ação não pode ser desfeita. Isso irá anonimizar permanentemente seus dados pessoais e remover seu acesso à conta.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-transparent text-white border-brand-purple/50 hover:bg-brand-purple/10 hover:text-white">
+                        Cancelar
+                      </AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeleteAccount}
+                        className="bg-brand-red hover:bg-brand-red/80 text-white border-none"
+                      >
+                        Sim, excluir minha conta
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
+
           </>
         )}
       </div>

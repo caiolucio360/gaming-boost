@@ -21,7 +21,7 @@ model User {
   role               Role                @default(CLIENT)
   phone              String? // Telefone de contato
   taxId              String? // CPF/CNPJ para pagamentos
-  active             Boolean             @default(true) // Se a conta está ativa
+  active             Boolean             @default(false) // Se a conta está ativa (requer verificação de email)
   metadata           String? // JSON com metadados adicionais
   // Chave PIX (para BOOSTER e ADMIN)
   pixKey             String? // Chave PIX para recebimento
@@ -51,7 +51,9 @@ model User {
   // Steam profile
   steamProfileUrl    String?              // URL do perfil Steam
   steamId            String?              // Steam64 ID
+  verificationCodes  VerificationCode[]   // Códigos de verificação
 }
+
 
 model Order {
   id                Int                @id @default(autoincrement())
@@ -386,3 +388,17 @@ model PricingConfig {
   @@index([game, gameMode, enabled])
 }
 
+
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String   // Código de 6 dígitos
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([code])
+}

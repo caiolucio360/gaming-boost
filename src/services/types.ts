@@ -46,9 +46,11 @@ export type ErrorCode =
   | 'PAYMENT_NOT_FOUND'
   | 'USER_NOT_FOUND'
   | 'SERVICE_NOT_FOUND'
+  | 'USER_NOT_VERIFIED'
   // Validation
   | 'VALIDATION_ERROR'
   | 'INVALID_INPUT'
+  | 'INVALID_CODE'
   | 'INVALID_STATUS_TRANSITION'
   // Authorization
   | 'UNAUTHORIZED'
@@ -57,6 +59,7 @@ export type ErrorCode =
   | 'DUPLICATE_ORDER'
   | 'ORDER_ALREADY_ACCEPTED'
   | 'ORDER_NOT_CANCELLABLE'
+  | 'USER_HAS_ACTIVE_ORDERS'
   | 'INSUFFICIENT_BALANCE'
   // External Services
   | 'PAYMENT_PROVIDER_ERROR'

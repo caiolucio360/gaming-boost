@@ -36,6 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (result?.error) {
+      if (result.error.includes('Conta não verificada') || result.error === 'USER_NOT_VERIFIED') {
+        window.location.href = `/verify?email=${encodeURIComponent(email)}`
+        return
+      }
       throw new Error(result.error)
     }
 
@@ -91,12 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(error.message || 'Erro ao criar conta')
     }
 
-    // Após criar conta, fazer login automaticamente
-    await login(email, password)
-    
-    // Registro sempre cria como CLIENT, então redireciona para dashboard
+    // Registro agora redireciona para verificação, não faz login automático imediato
     if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard'
+      window.location.href = `/verify?email=${encodeURIComponent(email)}`
     }
   }
 
