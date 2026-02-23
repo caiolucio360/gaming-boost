@@ -1,3 +1,8 @@
+---
+name: senior-dev-workflow
+description: "Applies strict, senior-level developer standards and structured workflow orchestration. Use this skill when asked to build features, fix bugs, refactor code, or handle any non-trivial software development task. It enforces upfront planning, subagent delegation, rigorous verification before completion, autonomous problem-solving, and continuous self-improvement via tasks/todo.md and tasks/lessons.md."
+---
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default

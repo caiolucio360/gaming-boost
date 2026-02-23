@@ -5,6 +5,7 @@
 
 // Services
 export { AuthService } from './auth.service'
+export { ChatService } from './chat.service'
 export { OrderService } from './order.service'
 export { PaymentService } from './payment.service'
 export { UserService } from './user.service'

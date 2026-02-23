@@ -441,8 +441,6 @@ export const endpoints = {
       targetRating?: number
       currentRank?: string
       targetRank?: string
-      steamUsername?: string
-      steamPassword?: string
     }) =>
       api.post<Order>('/api/orders', data, {
         successMessage: 'Pedido criado com sucesso!',

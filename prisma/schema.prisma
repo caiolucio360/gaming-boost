@@ -46,6 +46,7 @@ model User {
   notifications      Notification[]
   disputesCreated    Dispute[]           @relation("DisputeCreator")
   disputeMessages    DisputeMessage[]    @relation("MessageAuthor")
+  orderMessages      OrderMessage[]      @relation("OrderMessageAuthor") // Mensagens do chat de pedidos
   withdrawals        Withdrawal[]        // Saques solicitados
   image              String? // Avatar URL
   // Steam profile
@@ -71,11 +72,6 @@ model Order {
   gameMode          String? // Modo do jogo (ex: "PREMIER", "GAMERS_CLUB")
   gameType          String? // Tipo do jogo com modo (ex: "CS2_PREMIER")
   metadata          String? // JSON com metadados adicionais
-  // Credenciais Steam do cliente (criptografadas)
-  steamCredentials  String?            // Credenciais criptografadas (username + password)
-  steamProfileUrl   String?            // URL do perfil Steam do cliente
-  steamConsent      Boolean            @default(false) // Cliente consentiu compartilhar credenciais
-  steamConsentAt    DateTime?          // Data do consentimento
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -86,6 +82,7 @@ model Order {
   devAdminRevenue   DevAdminRevenue? // Receita do dev-admin
   review            Review? // Avaliação do pedido
   dispute           Dispute? // Disputa do pedido
+  chat              OrderChat? // Chat seguro entre cliente e booster
 
   // Índices para otimizar queries
   @@index([userId, gameMode, status]) // Para validação de modalidade duplicada (buscar pedidos ativos por modalidade)
@@ -401,4 +398,33 @@ model VerificationCode {
 
   @@index([userId])
   @@index([code])
+}
+
+// Chat seguro entre cliente e booster para um pedido
+model OrderChat {
+  id        Int             @id @default(autoincrement())
+  orderId   Int             @unique
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  messages  OrderMessage[]
+  isActive  Boolean         @default(true) // Chat ativo para novas mensagens
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([orderId])
+}
+
+// Mensagens do chat de pedido (criptografadas com AES-256-GCM)
+model OrderMessage {
+  id          Int        @id @default(autoincrement())
+  chatId      Int
+  chat        OrderChat  @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  authorId    Int
+  author      User       @relation("OrderMessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  content     String     // Conteúdo criptografado com AES-256-GCM
+  isEncrypted Boolean    @default(true) // Flag indicando se o conteúdo está criptografado
+  createdAt   DateTime   @default(now())
+
+  @@index([chatId])
+  @@index([authorId])
+  @@index([createdAt])
 }

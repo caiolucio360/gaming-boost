@@ -39,7 +39,6 @@ interface Order {
   targetRank: string | null
   currentRating: number | null
   targetRating: number | null
-  steamProfileUrl: string | null
   user: {
     id: number
     email: string
@@ -304,21 +303,6 @@ export default function AdminOrderDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <OrderInfoItem label="Nome" value={order.user.name || '-'} />
               <OrderInfoItem label="Email" value={order.user.email} />
-              {order.steamProfileUrl && (
-                <OrderInfoItem
-                  label="Steam"
-                  value={
-                    <a
-                      href={order.steamProfileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brand-purple-light hover:underline"
-                    >
-                      Ver Perfil
-                    </a>
-                  }
-                />
-              )}
             </div>
           </CardContent>
         </Card>

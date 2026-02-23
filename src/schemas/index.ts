@@ -45,3 +45,11 @@ export {
     type WithdrawRequestInput,
     type PaymentWebhookInput,
 } from './payment'
+
+// Chat schemas
+export {
+    SendMessageSchema,
+    ChatQuerySchema,
+    type SendMessageInput,
+    type ChatQueryInput,
+} from './chat'

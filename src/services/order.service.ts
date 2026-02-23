@@ -34,9 +34,6 @@ interface CreateOrderInput {
   gameMode?: string
   gameType?: string
   metadata?: string
-  steamCredentials?: string
-  steamProfileUrl?: string
-  steamConsent?: boolean
 }
 
 interface AcceptOrderInput {

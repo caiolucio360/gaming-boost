@@ -47,6 +47,7 @@ export type ErrorCode =
   | 'USER_NOT_FOUND'
   | 'SERVICE_NOT_FOUND'
   | 'USER_NOT_VERIFIED'
+  | 'CHAT_NOT_FOUND'
   // Validation
   | 'VALIDATION_ERROR'
   | 'INVALID_INPUT'
@@ -55,18 +56,21 @@ export type ErrorCode =
   // Authorization
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
+  | 'CHAT_ACCESS_DENIED'
   // Business Logic
   | 'DUPLICATE_ORDER'
   | 'ORDER_ALREADY_ACCEPTED'
   | 'ORDER_NOT_CANCELLABLE'
   | 'USER_HAS_ACTIVE_ORDERS'
   | 'INSUFFICIENT_BALANCE'
+  | 'CHAT_DISABLED'
   // External Services
   | 'PAYMENT_PROVIDER_ERROR'
   | 'EMAIL_SERVICE_ERROR'
   // Generic
   | 'INTERNAL_ERROR'
   | 'DATABASE_ERROR'
+  | 'ENCRYPTION_ERROR'
 
 // ============================================================================
 // Helper Functions

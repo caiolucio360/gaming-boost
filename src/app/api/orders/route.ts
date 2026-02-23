@@ -16,9 +16,6 @@ const CreateOrderSchema = z.object({
   gameMode: z.string().optional(),
   gameType: z.string().optional(),
   metadata: z.string().or(z.record(z.string(), z.unknown()).transform(obj => JSON.stringify(obj))).optional(),
-  steamCredentials: z.string().optional(),
-  steamProfileUrl: z.string().optional(),
-  steamConsent: z.boolean().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -113,9 +110,6 @@ export async function POST(request: NextRequest) {
       gameMode: data.gameMode,
       gameType: data.gameType,
       metadata: data.metadata,
-      steamCredentials: data.steamCredentials,
-      steamProfileUrl: data.steamProfileUrl,
-      steamConsent: data.steamConsent,
     })
 
     if (!result.success) {
