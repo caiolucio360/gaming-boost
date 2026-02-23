@@ -75,7 +75,7 @@ export async function PUT(
     const { id } = await params
     const boosterId = authResult.user.id
     const body = await request.json()
-    const { status } = body
+    const { status, completionProofUrl } = body
 
     // Parse order ID
     const orderId = parseInt(id, 10)
@@ -94,10 +94,20 @@ export async function PUT(
       )
     }
 
+    // Require proof screenshot when completing
+    if (status === 'COMPLETED') {
+      if (!completionProofUrl || typeof completionProofUrl !== 'string' || !completionProofUrl.startsWith('http')) {
+        return NextResponse.json(
+          { message: 'É obrigatório enviar um print comprovando o rank atingido para concluir o pedido.' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Use OrderService for status updates
     let result
     if (status === 'COMPLETED') {
-      result = await OrderService.completeOrder({ orderId, boosterId })
+      result = await OrderService.completeOrder({ orderId, boosterId, completionProofUrl })
     } else {
       // For other status updates, we need to verify ownership first
       const orderResult = await OrderService.getOrderById(orderId)

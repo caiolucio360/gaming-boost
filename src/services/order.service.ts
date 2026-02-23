@@ -44,6 +44,7 @@ interface AcceptOrderInput {
 interface CompleteOrderInput {
   orderId: number
   boosterId: number
+  completionProofUrl: string
 }
 
 interface OrderWithRelations {
@@ -549,7 +550,7 @@ export const OrderService = {
    * Booster completes an order - releases commissions
    */
   async completeOrder(input: CompleteOrderInput): Promise<Result<OrderWithRelations>> {
-    const { orderId, boosterId } = input
+    const { orderId, boosterId, completionProofUrl } = input
 
     try {
       // Verify order
@@ -572,10 +573,10 @@ export const OrderService = {
 
       // Execute transaction
       const updatedOrder = await prisma.$transaction(async (tx: any) => {
-        // Update order status
+        // Update order status with completion proof
         await tx.order.update({
           where: { id: orderId },
-          data: { status: OrderStatus.COMPLETED },
+          data: { status: OrderStatus.COMPLETED, completionProofUrl },
         })
 
         // Release booster commission

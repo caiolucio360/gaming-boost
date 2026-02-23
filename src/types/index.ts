@@ -28,6 +28,7 @@ export interface Order {
   currentRating?: number | null;
   targetRating?: number | null;
   gameMode?: string | null;
+  completionProofUrl?: string | null;
   createdAt: Date;
   updatedAt?: Date;
   review?: {

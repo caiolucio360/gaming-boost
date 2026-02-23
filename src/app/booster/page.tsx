@@ -1,17 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import {
   Package,
   CheckCircle2,
   DollarSign,
   Check,
   Loader2,
+  Upload,
+  ImageIcon,
+  X,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
@@ -89,6 +93,11 @@ export default function BoosterDashboardPage() {
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [alert, setAlert] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null)
+  // Proof upload state
+  const [proofFile, setProofFile] = useState<File | null>(null)
+  const [proofPreview, setProofPreview] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -238,31 +247,72 @@ export default function BoosterDashboardPage() {
 
   const handleCompleteOrderClick = (orderId: number) => {
     setOrderToAction(orderId)
+    setProofFile(null)
+    setProofPreview(null)
     setCompleteDialogOpen(true)
   }
 
-  const handleCompleteOrder = async () => {
-    if (!orderToAction) return
+  const handleProofFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setProofFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setProofPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
 
-    setIsCompleting(true)
+  const handleRemoveProof = () => {
+    setProofFile(null)
+    setProofPreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCompleteOrder = async () => {
+    if (!orderToAction || !proofFile) return
+
+    setIsUploading(true)
     try {
+      // 1. Upload the proof screenshot
+      const formData = new FormData()
+      formData.append('file', proofFile)
+      const uploadResponse = await fetch('/api/upload/completion-proof', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) {
+        const uploadData = await uploadResponse.json()
+        setAlert({
+          title: 'Erro no upload',
+          description: uploadData.message || 'Erro ao enviar o print. Tente novamente.',
+          variant: 'destructive',
+        })
+        setTimeout(() => setAlert(null), 6000)
+        return
+      }
+
+      const { url: completionProofUrl } = await uploadResponse.json()
+
+      // 2. Mark order as completed with the proof URL
+      setIsUploading(false)
+      setIsCompleting(true)
       const response = await fetch(`/api/booster/orders/${orderToAction}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'COMPLETED' }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'COMPLETED', completionProofUrl }),
       })
 
       if (response.ok) {
         setCompleteDialogOpen(false)
         setOrderToAction(null)
+        setProofFile(null)
+        setProofPreview(null)
         setAlert({
           title: 'Sucesso',
           description: 'Pedido marcado como concluído!',
           variant: 'default',
         })
-        fetchOrders(true) // Refresh sem loading completo
+        fetchOrders(true)
         setTimeout(() => setAlert(null), 5000)
       } else {
         const data = await response.json()
@@ -274,14 +324,15 @@ export default function BoosterDashboardPage() {
         setTimeout(() => setAlert(null), 5000)
       }
     } catch (error) {
-      console.error('Erro ao atualizar pedido:', error)
+      console.error('Erro ao concluir pedido:', error)
       setAlert({
         title: 'Erro',
-        description: 'Erro ao atualizar pedido',
+        description: 'Erro ao concluir pedido',
         variant: 'destructive',
       })
       setTimeout(() => setAlert(null), 5000)
     } finally {
+      setIsUploading(false)
       setIsCompleting(false)
     }
   }
@@ -568,17 +619,90 @@ export default function BoosterDashboardPage() {
                           >
                             Marcar como Concluído
                           </ActionButton>
-                          <ConfirmDialog
+
+                          {/* Completion proof dialog */}
+                          <Dialog
                             open={completeDialogOpen && orderToAction === order.id}
-                            onOpenChange={setCompleteDialogOpen}
-                            title="Concluir Pedido"
-                            description="Tem certeza que deseja marcar este pedido como concluído? Esta ação finaliza o serviço."
-                            confirmLabel="Concluir"
-                            cancelLabel="Cancelar"
-                            onConfirm={handleCompleteOrder}
-                            variant="success"
-                            loading={isCompleting}
-                          />
+                            onOpenChange={(open) => {
+                              if (!open) { setProofFile(null); setProofPreview(null) }
+                              setCompleteDialogOpen(open)
+                            }}
+                          >
+                            <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
+                              <DialogHeader>
+                                <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                  Comprovante de Conclusão
+                                </DialogTitle>
+                                <DialogDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                  Anexe um print da tela mostrando que o cliente atingiu o rank/rating contratado. Isso é obrigatório para concluir o pedido.
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <div className="space-y-4 py-2">
+                                {proofPreview ? (
+                                  <div className="relative">
+                                    <img
+                                      src={proofPreview}
+                                      alt="Preview do comprovante"
+                                      className="w-full rounded-lg border border-brand-purple/30 object-cover max-h-56"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleRemoveProof}
+                                      className="absolute top-2 right-2 bg-black/70 rounded-full p-1 hover:bg-red-600/80 transition-colors"
+                                    >
+                                      <X className="h-4 w-4 text-white" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 flex flex-col items-center gap-3 transition-colors cursor-pointer bg-brand-purple/5 hover:bg-brand-purple/10"
+                                  >
+                                    <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
+                                    <span className="text-brand-gray-400 font-rajdhani text-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                      Clique para selecionar o print
+                                    </span>
+                                    <span className="text-brand-gray-500 font-rajdhani text-xs" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                      JPG, PNG ou WebP — máx. 5 MB
+                                    </span>
+                                  </button>
+                                )}
+                                <input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                                  className="hidden"
+                                  onChange={handleProofFileChange}
+                                />
+                              </div>
+
+                              <DialogFooter className="gap-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => { setCompleteDialogOpen(false); setProofFile(null); setProofPreview(null) }}
+                                  className="border-brand-purple/40 text-brand-gray-300 hover:bg-brand-purple/10"
+                                  disabled={isUploading || isCompleting}
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  onClick={handleCompleteOrder}
+                                  disabled={!proofFile || isUploading || isCompleting}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  {isUploading ? (
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando print...</>
+                                  ) : isCompleting ? (
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Concluindo...</>
+                                  ) : (
+                                    <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluir Pedido</>
+                                  )}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </CardContent>
                     </Card>

@@ -16,6 +16,8 @@ import {
   GamepadIcon,
   TrendingUp,
   DollarSign,
+  ImageIcon,
+  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -55,6 +57,7 @@ interface Order {
     game: string
     type: string
   }
+  completionProofUrl: string | null
   payments: {
     id: number
     status: string
@@ -429,6 +432,40 @@ export default function AdminOrderDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Comprovante de Conclusão */}
+        {order.completionProofUrl && (
+          <Card className="bg-brand-black/30 backdrop-blur-md border-green-500/40 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <ImageIcon className="h-5 w-5 text-green-400" />
+                Comprovante de Conclusão
+              </CardTitle>
+              <CardDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Print enviado pelo booster comprovando o rank atingido
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <img
+                  src={order.completionProofUrl}
+                  alt="Comprovante de conclusão"
+                  className="w-full max-w-lg rounded-lg border border-green-500/30 object-cover"
+                />
+                <a
+                  href={order.completionProofUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-brand-purple-light hover:text-brand-purple-lighter font-rajdhani"
+                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Ver em tamanho original
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Datas */}
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">

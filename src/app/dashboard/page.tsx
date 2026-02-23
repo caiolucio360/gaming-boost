@@ -8,7 +8,7 @@ import { apiGet } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { 
+import {
   ArrowRight,
   Package,
   X,
@@ -20,6 +20,8 @@ import {
   Loader2,
   CreditCard,
   ArrowUpDown,
+  ImageIcon,
+  ExternalLink,
 } from 'lucide-react'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { PageHeader } from '@/components/common/page-header'
@@ -393,6 +395,30 @@ export default function DashboardPage() {
                         >
                           Cancelar e Solicitar Reembolso
                         </ActionButton>
+                      )}
+
+                      {order.status === 'COMPLETED' && order.completionProofUrl && (
+                        <div className="w-full space-y-2 p-3 rounded-lg border border-green-500/30 bg-green-500/5">
+                          <p className="text-xs text-green-400 font-rajdhani font-semibold flex items-center gap-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            Comprovante do booster
+                          </p>
+                          <img
+                            src={order.completionProofUrl}
+                            alt="Comprovante de conclusão"
+                            className="w-full max-w-xs rounded-md border border-green-500/20 object-cover"
+                          />
+                          <a
+                            href={order.completionProofUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-brand-purple-light hover:text-brand-purple-lighter font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Ver em tamanho original
+                          </a>
+                        </div>
                       )}
 
                       {order.status === 'COMPLETED' && !order.review && (
