@@ -19,8 +19,8 @@ jest.mock('@/lib/db', () => ({
       aggregate: jest.fn(),
       findMany: jest.fn(),
     },
-    service: {
-      count: jest.fn(),
+    devAdminRevenue: {
+      aggregate: jest.fn(),
     },
   },
 }))
@@ -70,8 +70,6 @@ describe('GET /api/admin/stats', () => {
       .mockResolvedValueOnce(10) // inProgressOrders
       .mockResolvedValueOnce(8) // completedOrders
       .mockResolvedValueOnce(2) // cancelledOrders
-
-    ;(prisma.service.count as jest.Mock).mockResolvedValue(3)
 
     ;(prisma.order.aggregate as jest.Mock).mockResolvedValue({
       _sum: { total: 5000 },

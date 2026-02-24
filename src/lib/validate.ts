@@ -4,6 +4,7 @@
  */
 
 import { ZodSchema, ZodError } from 'zod'
+import { NextResponse } from 'next/server'
 
 /**
  * Validation error structure
@@ -58,9 +59,6 @@ export function validateBody<T>(
  * Helper to standardize error responses across API routes
  */
 export function createValidationErrorResponse(errors: ValidationError[]) {
-    // Dynamically import to avoid issues in non-Next.js contexts
-    const { NextResponse } = require('next/server')
-
     return NextResponse.json(
         {
             message: 'Dados inválidos',

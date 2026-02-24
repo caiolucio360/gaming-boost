@@ -94,7 +94,7 @@ describe('POST /api/auth/login', () => {
     const data = await response.json()
 
     expect(response.status).toBe(403)
-    expect(data.message).toContain('desativada')
+    expect(data.message).toContain('verificada')
   })
 
   it('deve retornar erro 401 para credenciais inválidas', async () => {

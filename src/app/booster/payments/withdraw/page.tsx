@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Wallet, Clock, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Wallet, Clock, CheckCircle2, XCircle, RefreshCw, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { showSuccess, showError } from '@/lib/toast'
 import { formatPrice, formatDate } from '@/lib/utils'
@@ -33,6 +33,13 @@ interface Stats {
   totalWithdrawn: number
 }
 
+interface LockedCommission {
+  id: number
+  amount: number
+  availableForWithdrawalAt: string
+  orderId: number
+}
+
 export default function BoosterWithdrawPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
@@ -40,6 +47,8 @@ export default function BoosterWithdrawPage() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [availableBalance, setAvailableBalance] = useState(0)
+  const [lockedBalance, setLockedBalance] = useState(0)
+  const [lockedCommissions, setLockedCommissions] = useState<LockedCommission[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -70,6 +79,8 @@ export default function BoosterWithdrawPage() {
         setWithdrawals(data.withdrawals || [])
         setStats(data.stats || null)
         setAvailableBalance(data.availableBalance || 0)
+        setLockedBalance(data.lockedBalance || 0)
+        setLockedCommissions(data.lockedCommissions || [])
       } else {
         showError('Erro ao carregar saques')
       }
@@ -119,6 +130,7 @@ export default function BoosterWithdrawPage() {
         showSuccess('Saque solicitado com sucesso!')
         setAmount('')
         setPixKey('')
+        setPixKeyType('')
         fetchWithdrawals()
       } else {
         showError(data.message || 'Erro ao solicitar saque')
@@ -173,25 +185,93 @@ export default function BoosterWithdrawPage() {
           </div>
         </div>
 
-        {/* Saldo disponível */}
-        <Card className="bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/10 border-brand-purple/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Wallet className="w-8 h-8 text-brand-purple-light" />
-                <div>
-                  <p className="text-gray-400 text-sm font-rajdhani">Saldo Disponível</p>
-                  <p className="text-2xl font-bold text-white font-orbitron">
-                    {formatPrice(availableBalance / 100)}
-                  </p>
+        {/* Saldo disponível e bloqueado */}
+        <div className={`grid gap-4 ${lockedBalance > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+          <Card className="bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/10 border-brand-purple/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Wallet className="w-8 h-8 text-brand-purple-light" />
+                  <div>
+                    <p className="text-gray-400 text-sm font-rajdhani">Saldo Disponível</p>
+                    <p className="text-2xl font-bold text-white font-orbitron">
+                      {formatPrice(availableBalance / 100)}
+                    </p>
+                  </div>
                 </div>
+                <Button variant="outline" size="sm" onClick={fetchWithdrawals}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={fetchWithdrawals}>
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {lockedBalance > 0 && (
+            <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-500/40">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <Lock className="w-8 h-8 text-yellow-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm font-rajdhani">Saldo Bloqueado</p>
+                    <p className="text-2xl font-bold text-yellow-300 font-orbitron">
+                      {formatPrice(lockedBalance / 100)}
+                    </p>
+                    <p className="text-xs text-yellow-500 font-rajdhani mt-1">Aguardando período de espera</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Comissões em período de espera */}
+        {lockedCommissions.length > 0 && (
+          <Card className="bg-brand-black/30 backdrop-blur-md border-yellow-500/30">
+            <CardHeader>
+              <CardTitle className="text-yellow-300 font-orbitron flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Comissões em Período de Espera
+              </CardTitle>
+              <CardDescription className="text-gray-400 font-rajdhani">
+                Estas comissões serão liberadas para saque nas datas abaixo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {lockedCommissions.map((commission) => {
+                  const releaseDate = new Date(commission.availableForWithdrawalAt)
+                  const now = new Date()
+                  const diffMs = releaseDate.getTime() - now.getTime()
+                  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+                  const diffHours = Math.ceil(diffMs / (1000 * 60 * 60))
+                  return (
+                    <div
+                      key={commission.id}
+                      className="flex items-center justify-between p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/20"
+                    >
+                      <div>
+                        <p className="text-white font-bold font-orbitron">{formatPrice(commission.amount)}</p>
+                        <p className="text-gray-400 text-xs font-rajdhani">Pedido #{commission.orderId}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-yellow-300 text-sm font-medium">
+                          {diffDays === 0
+                            ? (diffHours <= 1 ? 'Libera em breve' : `Libera em ${diffHours}h`)
+                            : diffDays === 1
+                            ? 'Libera amanhã'
+                            : `Libera em ${diffDays} dias`}
+                        </p>
+                        <p className="text-gray-500 text-xs font-rajdhani">
+                          {formatDate(commission.availableForWithdrawalAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Formulário de saque */}
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">

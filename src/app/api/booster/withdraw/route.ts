@@ -52,18 +52,21 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Calcular saldo disponível do booster
-        const pendingCommissions = await prisma.boosterCommission.aggregate({
+        // Calcular saldo disponível do booster (comissões PAID e já liberadas para saque)
+        const now = new Date()
+        const availableAgg = await prisma.boosterCommission.aggregate({
             where: {
                 boosterId: userId,
-                status: 'PENDING',
+                status: 'PAID',
+                OR: [
+                    { availableForWithdrawalAt: null },
+                    { availableForWithdrawalAt: { lte: now } },
+                ],
             },
-            _sum: {
-                amount: true,
-            },
+            _sum: { amount: true },
         })
 
-        const availableBalance = pendingCommissions._sum.amount || 0
+        const availableBalance = availableAgg._sum.amount || 0
 
         // Converter valor para centavos
         const amountInCents = Math.round(amount)
@@ -187,23 +190,54 @@ export async function GET(request: NextRequest) {
                 .reduce((acc: any, w: any) => acc + w.amount, 0),
         }
 
-        // Calcular saldo disponível
-        const pendingCommissions = await prisma.boosterCommission.aggregate({
+        // Calcular saldo disponível e bloqueado
+        const now = new Date()
+
+        const availableAgg = await prisma.boosterCommission.aggregate({
             where: {
                 boosterId: userId,
-                status: 'PENDING',
+                status: 'PAID',
+                OR: [
+                    { availableForWithdrawalAt: null },
+                    { availableForWithdrawalAt: { lte: now } },
+                ],
             },
-            _sum: {
-                amount: true,
-            },
+            _sum: { amount: true },
         })
 
-        const availableBalance = (pendingCommissions._sum.amount || 0) * 100 // Em centavos
+        const lockedAgg = await prisma.boosterCommission.aggregate({
+            where: {
+                boosterId: userId,
+                status: 'PAID',
+                availableForWithdrawalAt: { gt: now },
+            },
+            _sum: { amount: true },
+        })
+
+        const lockedCommissions = await prisma.boosterCommission.findMany({
+            where: {
+                boosterId: userId,
+                status: 'PAID',
+                availableForWithdrawalAt: { gt: now },
+            },
+            select: {
+                id: true,
+                amount: true,
+                availableForWithdrawalAt: true,
+                orderId: true,
+            },
+            orderBy: { availableForWithdrawalAt: 'asc' },
+        })
+
+        const availableBalance = (availableAgg._sum.amount || 0) * 100 // Em centavos
+        const lockedBalance = (lockedAgg._sum.amount || 0) * 100 // Em centavos
 
         return NextResponse.json({
             withdrawals,
             stats,
             availableBalance,
+            lockedBalance,
+            lockedCommissions,
         })
     } catch (error) {
         console.error('Erro ao listar saques:', error)

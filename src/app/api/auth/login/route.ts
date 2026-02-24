@@ -47,6 +47,12 @@ export async function POST(request: NextRequest) {
     const result = await AuthService.validateCredentials(validation.data)
 
     if (!result.success) {
+      if (result.code === 'USER_NOT_VERIFIED') {
+        return NextResponse.json(
+          { message: 'Conta não verificada. Verifique seu e-mail antes de fazer login.' },
+          { status: 403 }
+        )
+      }
       return NextResponse.json(
         { message: 'Email ou senha incorretos' },
         { status: 401 }
@@ -54,14 +60,6 @@ export async function POST(request: NextRequest) {
     }
 
     const user = result.data
-
-    // Check if user is active
-    if (!user.active) {
-      return NextResponse.json(
-        { message: 'Conta desativada. Entre em contato com o suporte.' },
-        { status: 403 }
-      )
-    }
 
     // Generate JWT token
     const token = generateToken({

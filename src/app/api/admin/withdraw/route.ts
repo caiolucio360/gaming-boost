@@ -52,18 +52,18 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Calcular saldo disponível do admin
-        const pendingRevenues = await prisma.adminRevenue.aggregate({
+        // Calcular saldo disponível do admin (revenues marcadas como PAID estão disponíveis para saque)
+        const paidRevenues = await prisma.adminRevenue.aggregate({
             where: {
                 adminId: userId,
-                status: 'PENDING',
+                status: 'PAID',
             },
             _sum: {
                 amount: true,
             },
         })
 
-        const availableBalance = pendingRevenues._sum.amount || 0
+        const availableBalance = paidRevenues._sum.amount || 0
 
         // Converter valor para centavos
         const amountInCents = Math.round(amount)
@@ -187,18 +187,18 @@ export async function GET(request: NextRequest) {
                 .reduce((acc: any, w: any) => acc + w.amount, 0),
         }
 
-        // Calcular saldo disponível
-        const pendingRevenues = await prisma.adminRevenue.aggregate({
+        // Calcular saldo disponível (revenues marcadas como PAID estão disponíveis para saque)
+        const paidRevenues = await prisma.adminRevenue.aggregate({
             where: {
                 adminId: userId,
-                status: 'PENDING',
+                status: 'PAID',
             },
             _sum: {
                 amount: true,
             },
         })
 
-        const availableBalance = (pendingRevenues._sum.amount || 0) * 100 // Em centavos
+        const availableBalance = (paidRevenues._sum.amount || 0) * 100 // Em centavos
 
         return NextResponse.json({
             withdrawals,

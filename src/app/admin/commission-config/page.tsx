@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   ArrowLeft,
   Percent,
+  Clock,
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -27,6 +28,7 @@ interface CommissionConfig {
   id: number
   boosterPercentage: number
   adminPercentage: number
+  withdrawalWaitingDays: number
   enabled: boolean
   createdAt: string
   updatedAt: string
@@ -40,6 +42,7 @@ export default function CommissionConfigPage() {
   const [config, setConfig] = useState<CommissionConfig | null>(null)
   const [boosterPercentage, setBoosterPercentage] = useState('70')
   const [adminPercentage, setAdminPercentage] = useState('30')
+  const [withdrawalWaitingDays, setWithdrawalWaitingDays] = useState('7')
   const [alert, setAlert] = useState<{ 
     title: string
     description: string
@@ -75,6 +78,7 @@ export default function CommissionConfigPage() {
           setConfig(data.config)
           setBoosterPercentage((data.config.boosterPercentage * 100).toFixed(0))
           setAdminPercentage((data.config.adminPercentage * 100).toFixed(0))
+          setWithdrawalWaitingDays(String(data.config.withdrawalWaitingDays ?? 7))
         } else {
           setAlert({
             title: 'Erro',
@@ -101,6 +105,7 @@ export default function CommissionConfigPage() {
       // Validar valores
       const booster = parseFloat(boosterPercentage)
       const admin = parseFloat(adminPercentage)
+      const waitingDays = parseInt(withdrawalWaitingDays, 10)
 
       if (isNaN(booster) || isNaN(admin)) {
         setAlert({
@@ -129,6 +134,15 @@ export default function CommissionConfigPage() {
         return
       }
 
+      if (isNaN(waitingDays) || waitingDays < 0) {
+        setAlert({
+          title: 'Erro',
+          description: 'Período de espera deve ser um número inteiro não negativo',
+          variant: 'destructive',
+        })
+        return
+      }
+
       const response = await fetch('/api/admin/commission-config', {
         method: 'PUT',
         headers: {
@@ -137,6 +151,7 @@ export default function CommissionConfigPage() {
         body: JSON.stringify({
           boosterPercentage: booster / 100,
           adminPercentage: admin / 100,
+          withdrawalWaitingDays: waitingDays,
         }),
       })
 
@@ -319,6 +334,30 @@ export default function CommissionConfigPage() {
                 </div>
               </div>
             )}
+
+            {/* Período de Espera para Saque */}
+            <div className="pt-4 border-t border-brand-purple/30">
+              <div className="space-y-2">
+                <Label htmlFor="withdrawalWaitingDays" className="text-gray-400 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Período de Espera para Saque (dias)
+                </Label>
+                <Input
+                  id="withdrawalWaitingDays"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="7"
+                  value={withdrawalWaitingDays}
+                  onChange={(e) => setWithdrawalWaitingDays(e.target.value)}
+                  className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold max-w-xs"
+                />
+                <p className="text-xs text-gray-500">
+                  Quantos dias após a conclusão de um pedido o booster deve aguardar para sacar a comissão.
+                  Use <span className="text-brand-purple-light font-medium">0</span> para liberação imediata.
+                </p>
+              </div>
+            </div>
 
             <Button
               onClick={handleSave}

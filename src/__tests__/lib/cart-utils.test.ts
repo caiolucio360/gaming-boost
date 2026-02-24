@@ -11,7 +11,6 @@ describe('cart-utils', () => {
 
   describe('handleServiceHire', () => {
     const mockItem: CartItem = {
-      serviceId: 'service123',
       game: 'CS2',
       serviceName: 'Boost CS2 Premier: 10K → 15K',
       price: 89.90,
@@ -24,7 +23,7 @@ describe('cart-utils', () => {
     const mockRedirectToLogin = jest.fn()
 
     it('deve adicionar ao carrinho e redirecionar para login se não estiver logado', async () => {
-      await handleServiceHire(
+      const result = await handleServiceHire(
         mockItem,
         false, // não logado
         mockAddToCart,
@@ -33,21 +32,22 @@ describe('cart-utils', () => {
 
       expect(mockAddToCart).toHaveBeenCalledWith(mockItem)
       expect(mockRedirectToLogin).toHaveBeenCalled()
+      expect(result.orderCreated).toBe(false)
     })
 
-    it('deve criar order diretamente se estiver logado e tiver serviceId', async () => {
+    it('deve criar order diretamente se estiver logado', async () => {
       // Mock fetch para verificar orders (sem orders ativas)
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ orders: [] }),
       })
-      
+
       // Mock fetch para criar order
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           message: 'Solicitação criada com sucesso',
-          order: { id: 'order123' },
+          order: { id: 123 },
         }),
       })
 
@@ -58,28 +58,39 @@ describe('cart-utils', () => {
         mockRedirectToLogin
       )
 
-      expect(result).toBe(true)
+      expect(result.orderCreated).toBe(true)
+      expect(result.orderId).toBe(123)
       expect(global.fetch).toHaveBeenCalledWith('/api/orders')
       expect(mockAddToCart).not.toHaveBeenCalled()
       expect(mockRedirectToLogin).not.toHaveBeenCalled()
     })
 
-    it('deve adicionar ao carrinho mesmo logado se não tiver serviceId', async () => {
-      const itemWithoutServiceId: CartItem = {
+    it('deve criar order mesmo sem metadados de modalidade', async () => {
+      const itemWithoutMode: CartItem = {
         game: 'CS2',
         serviceName: 'Boost CS2 Premier: 10K → 15K',
         price: 89.90,
       }
 
+      // Mock fetch para criar order (sem verificação de duplicatas pois sem metadata.mode)
+      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          message: 'Solicitação criada com sucesso',
+          order: { id: 456 },
+        }),
+      })
+
       const result = await handleServiceHire(
-        itemWithoutServiceId,
+        itemWithoutMode,
         true, // logado
         mockAddToCart,
         mockRedirectToLogin
       )
 
-      expect(result).toBe(false)
-      expect(mockAddToCart).toHaveBeenCalledWith(itemWithoutServiceId)
+      expect(result.orderCreated).toBe(true)
+      expect(result.orderId).toBe(456)
+      expect(mockAddToCart).not.toHaveBeenCalled()
     })
 
     it('deve verificar orders pendentes antes de criar quando logado com modalidade', async () => {
@@ -90,13 +101,13 @@ describe('cart-utils', () => {
           orders: [],
         }),
       })
-      
+
       // Mock fetch para criar order
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           message: 'Solicitação criada com sucesso',
-          order: { id: 'order123' },
+          order: { id: 123 },
         }),
       })
 
@@ -108,7 +119,7 @@ describe('cart-utils', () => {
       )
 
       expect(global.fetch).toHaveBeenCalledWith('/api/orders')
-      expect(result).toBe(true)
+      expect(result.orderCreated).toBe(true)
     })
 
     it('deve lançar erro se já existir order ativa para a mesma modalidade', async () => {
@@ -150,13 +161,13 @@ describe('cart-utils', () => {
           ],
         }),
       })
-      
+
       // Mock fetch para criar order
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           message: 'Solicitação criada com sucesso',
-          order: { id: 'order123' },
+          order: { id: 123 },
         }),
       })
 
@@ -167,7 +178,7 @@ describe('cart-utils', () => {
         mockRedirectToLogin
       )
 
-      expect(result).toBe(true)
+      expect(result.orderCreated).toBe(true)
     })
   })
 
@@ -178,22 +189,23 @@ describe('cart-utils', () => {
         json: async () => ({
           message: 'Solicitação criada com sucesso',
           order: {
-            id: 'order123',
-            serviceId: 'service123',
+            id: 123,
+            game: 'CS2',
             total: 89.90,
           },
         }),
       })
 
-      await createOrder('service123', 89.90)
+      const orderId = await createOrder('CS2', 89.90)
 
+      expect(orderId).toBe(123)
       expect(global.fetch).toHaveBeenCalledWith('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          serviceId: 'service123',
+          game: 'CS2',
           total: 89.90,
         }),
       })
@@ -205,14 +217,14 @@ describe('cart-utils', () => {
         json: async () => ({
           message: 'Solicitação criada com sucesso',
           order: {
-            id: 'order123',
-            serviceId: 'service123',
+            id: 456,
+            game: 'CS2',
             total: 89.90,
           },
         }),
       })
 
-      await createOrder('service123', 89.90, {
+      await createOrder('CS2', 89.90, {
         currentRank: '10K',
         targetRank: '15K',
         currentRating: 10000,
@@ -227,7 +239,7 @@ describe('cart-utils', () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          serviceId: 'service123',
+          game: 'CS2',
           total: 89.90,
           currentRank: '10K',
           targetRank: '15K',
@@ -247,10 +259,9 @@ describe('cart-utils', () => {
         }),
       })
 
-      await expect(createOrder('service123', 49.90)).rejects.toThrow(
+      await expect(createOrder('CS2', 49.90)).rejects.toThrow(
         'Erro ao criar solicitação'
       )
     })
   })
 })
-

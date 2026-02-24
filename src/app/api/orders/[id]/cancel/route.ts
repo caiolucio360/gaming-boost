@@ -163,30 +163,31 @@ export async function POST(
       }
     }
 
-    // Update order status
-    const updatedOrder = await db.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'CANCELLED',
-        metadata: JSON.stringify({
-          ...(order.metadata ? JSON.parse(order.metadata as string) : {}),
-          cancelledAt: new Date().toISOString(),
-          cancelledBy: 'CLIENT',
-          cancellationReason,
-          refundProcessed,
-        }),
-      },
-    })
-
-    // Update payment status if refund was processed
-    if (payment && refundProcessed) {
-      await db.payment.update({
-        where: { id: payment.id },
+    // Update order and payment status atomically in a transaction
+    const { updatedOrder } = await db.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: orderId },
         data: {
-          status: 'REFUNDED',
+          status: 'CANCELLED',
+          metadata: JSON.stringify({
+            ...(order.metadata ? JSON.parse(order.metadata as string) : {}),
+            cancelledAt: new Date().toISOString(),
+            cancelledBy: 'CLIENT',
+            cancellationReason,
+            refundProcessed,
+          }),
         },
       })
-    }
+
+      if (payment && refundProcessed) {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: 'REFUNDED' },
+        })
+      }
+
+      return { updatedOrder: updated }
+    })
 
     // Send cancellation email to client
     console.log(`📧 Sending cancellation email to ${order.user.email}`)

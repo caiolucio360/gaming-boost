@@ -92,7 +92,7 @@ class RateLimiter {
     return {
       success: isAllowed,
       limit,
-      remaining: Math.max(0, limit - validTokens.length - (isAllowed ? 1 : 0)),
+      remaining: Math.max(0, limit - validTokens.length),
       reset,
     }
   }

@@ -571,6 +571,13 @@ export const OrderService = {
         return failure('Pedido não está em andamento', 'INVALID_STATUS_TRANSITION')
       }
 
+      // Fetch withdrawal waiting days config
+      const config = await prisma.commissionConfig.findFirst({
+        where: { enabled: true },
+        select: { withdrawalWaitingDays: true },
+      })
+      const waitingDays = config?.withdrawalWaitingDays ?? 7
+
       // Execute transaction
       const updatedOrder = await prisma.$transaction(async (tx: any) => {
         // Update order status with completion proof
@@ -579,10 +586,15 @@ export const OrderService = {
           data: { status: OrderStatus.COMPLETED, completionProofUrl },
         })
 
-        // Release booster commission
+        // Release booster commission with withdrawal availability date
+        const paidAt = new Date()
+        const availableForWithdrawalAt = waitingDays === 0
+          ? paidAt
+          : new Date(paidAt.getTime() + waitingDays * 24 * 60 * 60 * 1000)
+
         await tx.boosterCommission.updateMany({
           where: { orderId, status: 'PENDING' },
-          data: { status: 'PAID', paidAt: new Date() },
+          data: { status: 'PAID', paidAt, availableForWithdrawalAt },
         })
 
         // Release admin revenue

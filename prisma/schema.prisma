@@ -136,20 +136,22 @@ enum OrderStatus {
 
 // Comissão do booster - criada quando pedido é aceito
 model BoosterCommission {
-  id         Int              @id @default(autoincrement())
-  orderId    Int              @unique
-  boosterId  Int
-  orderTotal Float // Valor total do pedido
-  percentage Float // Porcentagem de comissão (ex: 0.70 = 70%)
-  amount     Float // Valor da comissão calculada
-  status     CommissionStatus @default(PENDING) // PENDING, PAID, CANCELLED
-  paidAt     DateTime?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  order      Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  booster    User             @relation(fields: [boosterId], references: [id], onDelete: Cascade)
+  id                       Int              @id @default(autoincrement())
+  orderId                  Int              @unique
+  boosterId                Int
+  orderTotal               Float // Valor total do pedido
+  percentage               Float // Porcentagem de comissão (ex: 0.70 = 70%)
+  amount                   Float // Valor da comissão calculada
+  status                   CommissionStatus @default(PENDING) // PENDING, PAID, CANCELLED
+  paidAt                   DateTime?
+  availableForWithdrawalAt DateTime? // Data a partir da qual o booster pode sacar (null = imediato para registros antigos)
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  order                    Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  booster                  User             @relation(fields: [boosterId], references: [id], onDelete: Cascade)
 
   @@index([boosterId, status])
+  @@index([boosterId, availableForWithdrawalAt])
   @@index([status])
 }
 
@@ -205,13 +207,14 @@ enum RevenueStatus {
 
 // Configuração de comissões (porcentagens)
 model CommissionConfig {
-  id                Int      @id @default(autoincrement())
-  boosterPercentage Float    @default(0.70) // Porcentagem do booster (70% padrão)
-  adminPercentage   Float    @default(0.30) // Porcentagem do admin (30% padrão)
-  devAdminPercentage Float?   // Porcentagem do dev-admin (ex: 0.10 = 10% do total)
-  enabled           Boolean  @default(true) // Se a configuração está ativa
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    Int      @id @default(autoincrement())
+  boosterPercentage     Float    @default(0.70) // Porcentagem do booster (70% padrão)
+  adminPercentage       Float    @default(0.30) // Porcentagem do admin (30% padrão)
+  devAdminPercentage    Float?   // Porcentagem do dev-admin (ex: 0.10 = 10% do total)
+  withdrawalWaitingDays Int      @default(7) // Dias de espera antes do booster poder sacar (0 = imediato)
+  enabled               Boolean  @default(true) // Se a configuração está ativa
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 // Histórico de mudanças de comissão dos boosters

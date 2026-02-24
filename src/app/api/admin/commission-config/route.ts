@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
         data: {
           boosterPercentage: 0.70,
           adminPercentage: 0.30,
+          withdrawalWaitingDays: 7,
           enabled: true,
         },
       })
@@ -45,7 +46,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { boosterPercentage, adminPercentage } = body
+    const { boosterPercentage, adminPercentage, withdrawalWaitingDays } = body
 
     // Validar porcentagens
     if (
@@ -71,6 +72,15 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validar período de espera
+    if (withdrawalWaitingDays !== undefined &&
+        (!Number.isInteger(withdrawalWaitingDays) || withdrawalWaitingDays < 0)) {
+      return NextResponse.json(
+        { message: 'Período de espera deve ser um inteiro não negativo (0 = imediato)' },
+        { status: 400 }
+      )
+    }
+
     // Desabilitar configurações antigas e criar nova
     // Using any due to Prisma custom output path type resolution issues
     const config = await prisma.$transaction(async (tx: any) => {
@@ -85,6 +95,7 @@ export async function PUT(request: NextRequest) {
         data: {
           boosterPercentage,
           adminPercentage,
+          ...(withdrawalWaitingDays !== undefined && { withdrawalWaitingDays }),
           enabled: true,
         },
       })
