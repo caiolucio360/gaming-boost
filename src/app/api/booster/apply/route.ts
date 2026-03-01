@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { z } from 'zod'
 import { SteamProfileUrlSchema } from '@/schemas/steam'
-import { validateSteamProfileUrl, fetchCS2Stats, extractSteam64Id } from '@/services/steam.service'
+import { validateSteamProfileUrl, extractSteam64Id } from '@/services/steam.service'
 
 const applySchema = z.object({
     bio: z.string().min(10, 'Bio deve ter pelo menos 10 caracteres'),
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         const steamId = extractSteam64Id(steamProfileUrl)
 
         // Update user with Steam profile info and create booster profile
-        const [updatedUser, profile] = await prisma.$transaction([
+        const [, profile] = await prisma.$transaction([
             // Store Steam info on User model
             prisma.user.update({
                 where: { id: userId },

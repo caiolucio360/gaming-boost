@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Send, AlertCircle, MessageCircle, Users, Clock, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
 import { showError } from '@/lib/toast'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatMessageTime } from '@/lib/utils'
 
 interface DisputeMessage {
   id: number
@@ -58,7 +58,6 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
-  const scrollRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const fetchDispute = async () => {
@@ -125,11 +124,6 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
       default:
         return { label: status, color: 'bg-brand-purple/20 text-brand-purple-light border-brand-purple/50', icon: AlertCircle }
     }
-  }
-
-  const formatMessageTime = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
   if (loading) {
@@ -249,7 +243,7 @@ export function DisputeChat({ disputeId }: DisputeChatProps) {
 
           {/* Messages Area */}
           <CardContent className="flex-1 overflow-hidden p-0">
-            <ScrollArea className="h-full p-4" ref={scrollRef}>
+            <ScrollArea className="h-full p-4">
               <div className="space-y-4 pb-4">
                 {dispute.messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">

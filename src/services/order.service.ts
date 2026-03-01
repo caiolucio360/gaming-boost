@@ -7,7 +7,7 @@
 
 import { prisma } from '@/lib/db'
 import { OrderStatus } from '@/generated/prisma/client'
-import { Result, Success, Failure, success, failure, PaginatedResult, paginatedSuccess } from './types'
+import { Result, Failure, success, failure, PaginatedResult, paginatedSuccess } from './types'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
 
 // ============================================================================

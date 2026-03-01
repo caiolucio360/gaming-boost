@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         let pollTimeout: NodeJS.Timeout | null = null
 
         // Função para enviar evento
-        const sendEvent = (event: string, data: any) => {
+        const sendEvent = (event: string, data: Record<string, unknown>) => {
           if (isClosed) return // Não enviar se stream está fechado
 
           // Verificar se controller ainda está ativo
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
           try {
             const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
             controller.enqueue(encoder.encode(message))
-          } catch (error) {
+          } catch {
             // Controller fechado - comportamento esperado quando cliente desconecta
             isClosed = true
           }
@@ -221,7 +221,7 @@ export async function GET(request: NextRequest) {
           }
           try {
             sendEvent('heartbeat', { timestamp: Date.now() })
-          } catch (error) {
+          } catch {
             isClosed = true
             clearInterval(heartbeatInterval)
           }
@@ -234,7 +234,7 @@ export async function GET(request: NextRequest) {
           clearInterval(heartbeatInterval)
           try {
             controller.close()
-          } catch (e) {
+          } catch {
             // Ignorar erro se já estiver fechado
           }
         }

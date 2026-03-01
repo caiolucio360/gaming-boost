@@ -30,8 +30,17 @@ jest.mock('@/lib/db', () => ({
     adminRevenue: {
       updateMany: jest.fn(),
     },
+    notification: {
+      create: jest.fn().mockResolvedValue({}),
+    },
     $transaction: jest.fn(),
   },
+}))
+
+// Mock do email
+jest.mock('@/lib/email', () => ({
+  sendOrderAcceptedEmail: jest.fn().mockResolvedValue(undefined),
+  sendOrderCompletedEmail: jest.fn().mockResolvedValue(undefined),
 }))
 
 // Mock do auth-middleware
@@ -301,6 +310,9 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
 
       ; (prisma.order.findUnique as jest.Mock).mockResolvedValue(existingOrder)
 
+      // Mock commissionConfig for withdrawal waiting days
+      ; (prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue({ withdrawalWaitingDays: 7 })
+
       // Mock transaction for completeOrder
       ; (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const tx = {
@@ -314,9 +326,38 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
           adminRevenue: {
             updateMany: jest.fn().mockResolvedValue({ count: 1 }),
           },
+          devAdminRevenue: {
+            updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
         }
         return callback(tx)
       })
+
+    const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
+      method: 'PUT',
+      body: JSON.stringify({
+        status: 'COMPLETED',
+        completionProofUrl: 'https://example.com/proof.png',
+      }),
+    })
+
+    const response = await PUT(request, { params: Promise.resolve({ id: '1' }) })
+    const data = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(data.order).toBeDefined()
+    expect(data.order.status).toBe('COMPLETED')
+  })
+
+  it('deve retornar erro 400 se COMPLETED sem completionProofUrl', async () => {
+    ; (verifyBooster as jest.Mock).mockResolvedValue({
+      authenticated: true,
+      user: {
+        id: 1,
+        email: 'booster@test.com',
+        role: 'BOOSTER',
+      },
+    })
 
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'PUT',
@@ -328,9 +369,8 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
     const response = await PUT(request, { params: Promise.resolve({ id: '1' }) })
     const data = await response.json()
 
-    expect(response.status).toBe(200)
-    expect(data.order).toBeDefined()
-    expect(data.order.status).toBe('COMPLETED')
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('print comprovando')
   })
 
   it('deve retornar erro 404 se pedido não existir', async () => {
@@ -348,7 +388,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
     const request = new NextRequest('http://localhost:3000/api/booster/orders/999', {
       method: 'PUT',
       body: JSON.stringify({
-        status: 'COMPLETED',
+        status: 'IN_PROGRESS',
       }),
     })
 
@@ -383,7 +423,7 @@ describe('PUT /api/booster/orders/[id] (atualizar status)', () => {
     const request = new NextRequest('http://localhost:3000/api/booster/orders/1', {
       method: 'PUT',
       body: JSON.stringify({
-        status: 'COMPLETED',
+        status: 'IN_PROGRESS',
       }),
     })
 

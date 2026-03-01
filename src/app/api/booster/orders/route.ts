@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') // 'available' | 'assigned' | 'completed'
     const status = searchParams.get('status')
 
-    // Build where clause - using any due to Prisma custom output type issues
     let where: any = {}
 
     if (type === 'available') {

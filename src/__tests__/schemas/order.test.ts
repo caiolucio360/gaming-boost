@@ -1,6 +1,5 @@
 /**
  * Tests for order Zod schemas
- * TDD: Write tests first, then implement
  */
 
 import {
@@ -12,7 +11,7 @@ import {
 describe('Order Schemas', () => {
     describe('CreateOrderSchema', () => {
         const validData = {
-            serviceId: 'clh4ptu8g0000ym2x6qwt2xp3',
+            game: 'CS2' as const,
             total: 99.90,
         }
 
@@ -26,20 +25,23 @@ describe('Order Schemas', () => {
                 ...validData,
                 currentRank: 'Gold',
                 targetRank: 'Platinum',
-                notes: 'Please rush',
+                gameMode: 'PREMIER',
             }
             const result = CreateOrderSchema.safeParse(dataWithOptional)
             expect(result.success).toBe(true)
         })
 
-        it('should reject missing serviceId', () => {
+        it('should use default game CS2 when not provided', () => {
             const data = { total: 99.90 }
             const result = CreateOrderSchema.safeParse(data)
-            expect(result.success).toBe(false)
+            expect(result.success).toBe(true)
+            if (result.success) {
+                expect(result.data.game).toBe('CS2')
+            }
         })
 
         it('should reject missing total', () => {
-            const data = { serviceId: 'clh4ptu8g0000ym2x6qwt2xp3' }
+            const data = { game: 'CS2' }
             const result = CreateOrderSchema.safeParse(data)
             expect(result.success).toBe(false)
         })

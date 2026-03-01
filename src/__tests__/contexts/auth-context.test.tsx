@@ -161,20 +161,11 @@ describe('AuthContext', () => {
     ).rejects.toThrow('Credenciais inválidas')
   })
 
-  it('deve fazer registro com sucesso e fazer login automaticamente', async () => {
-    const mockUpdate = jest.fn().mockResolvedValue({
-      user: {
-        id: 1,
-        email: 'novo@teste.com',
-        name: 'Novo Usuário',
-        role: 'CLIENT',
-      },
-    })
-
+  it('deve fazer registro com sucesso e redirecionar para verificação', async () => {
     ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'unauthenticated',
-      update: mockUpdate,
+      update: jest.fn(),
     })
 
     // Mock para registro
@@ -186,12 +177,6 @@ describe('AuthContext', () => {
       }),
     }
     ;(global.fetch as jest.Mock).mockResolvedValueOnce(registerResponse)
-
-    // Mock para login após registro
-    ;(signIn as jest.Mock).mockResolvedValue({
-      ok: true,
-      error: null,
-    })
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthProvider>{children}</AuthProvider>
@@ -219,11 +204,9 @@ describe('AuthContext', () => {
       }),
     })
 
-    expect(signIn).toHaveBeenCalledWith('credentials', {
-      email: 'novo@teste.com',
-      password: '123456',
-      redirect: false,
-    })
+    // Registro agora redireciona para verificação, não faz login automático
+    expect(signIn).not.toHaveBeenCalled()
+    expect(mockLocation.href).toContain('/verify?email=novo%40teste.com')
   })
 
   it('deve fazer logout usando NextAuth', async () => {

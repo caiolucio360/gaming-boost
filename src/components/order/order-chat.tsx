@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { showError } from '@/lib/toast'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { formatMessageTime } from '@/lib/utils'
 
 interface ChatMessage {
   id: number
@@ -114,11 +115,6 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
     } finally {
       setSending(false)
     }
-  }
-
-  const formatMessageTime = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
   const getRoleBadge = (role: string) => {

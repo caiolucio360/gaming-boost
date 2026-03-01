@@ -102,7 +102,7 @@ describe('DisputeChat', () => {
     render(<DisputeChat disputeId={1} />)
 
     await waitFor(() => {
-      expect(screen.getByText(/disputa foi resolvida/i)).toBeInTheDocument()
+      expect(screen.getByText(/Disputa Resolvida/i)).toBeInTheDocument()
     })
 
     expect(screen.queryByPlaceholderText(/Digite sua mensagem/i)).not.toBeInTheDocument()

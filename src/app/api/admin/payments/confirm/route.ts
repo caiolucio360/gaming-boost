@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se há pagamento confirmado
-    const paidPayment = order.payments.find((p: any) => p.status === 'PAID')
+    const paidPayment = order.payments.find((p: { status: string }) => p.status === 'PAID')
 
     if (!paidPayment) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Using any due to Prisma custom output path type resolution issues
-    const result = await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx: any) => {
       // Atualizar comissão do booster se existir e estiver pendente
       if (order.commission && order.commission.status === 'PENDING') {
         await tx.boosterCommission.update({
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Atualizar receitas dos admins se existirem e estiverem pendentes
-      const pendingRevenues = order.revenues.filter((r: any) => r.status === 'PENDING')
+      const pendingRevenues = order.revenues.filter((r: { id: number; status: string }) => r.status === 'PENDING')
       for (const revenue of pendingRevenues) {
         await tx.adminRevenue.update({
           where: { id: revenue.id },

@@ -28,8 +28,17 @@ jest.mock('@/lib/db', () => ({
     adminRevenue: {
       updateMany: jest.fn(),
     },
+    notification: {
+      create: jest.fn().mockResolvedValue({}),
+    },
     $transaction: jest.fn(),
   },
+}))
+
+// Mock do email
+jest.mock('@/lib/email', () => ({
+  sendOrderAcceptedEmail: jest.fn().mockResolvedValue(undefined),
+  sendOrderCompletedEmail: jest.fn().mockResolvedValue(undefined),
 }))
 
 // Mock do auth-middleware
@@ -369,13 +378,10 @@ describe('/api/booster/orders/[id] - Comissão Personalizada', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(prisma.commissionConfig.create).toHaveBeenCalledWith({
-        data: {
-          boosterPercentage: 0.70,
-          adminPercentage: 0.30,
-          enabled: true,
-        },
-      })
+      // When no config exists, getCommissionConfig uses defaults (0.70/0.30)
+      // It does NOT create a new config record
+      expect(data.order).toBeDefined()
+      expect(data.order.status).toBe('IN_PROGRESS')
     })
   })
 })

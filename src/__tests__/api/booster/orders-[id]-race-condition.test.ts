@@ -28,8 +28,17 @@ jest.mock('@/lib/db', () => ({
     adminRevenue: {
       updateMany: jest.fn(),
     },
+    notification: {
+      create: jest.fn().mockResolvedValue({}),
+    },
     $transaction: jest.fn(),
   },
+}))
+
+// Mock do email
+jest.mock('@/lib/email', () => ({
+  sendOrderAcceptedEmail: jest.fn().mockResolvedValue(undefined),
+  sendOrderCompletedEmail: jest.fn().mockResolvedValue(undefined),
 }))
 
 // Mock do auth-middleware

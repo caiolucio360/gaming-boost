@@ -45,7 +45,7 @@ export async function handleServiceHire(
       const ordersResponse = await fetch('/api/orders')
       if (ordersResponse.ok) {
         const ordersData = await ordersResponse.json()
-        const existingOrder = ordersData.orders?.find((o: any) =>
+        const existingOrder = ordersData.orders?.find((o: { status: string; gameMode: string }) =>
           (o.status === 'PENDING' || o.status === 'IN_PROGRESS') && o.gameMode === item.metadata?.mode
         )
 
@@ -102,10 +102,10 @@ export async function createOrder(
     targetRating?: number
     gameMode?: string
     gameType?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }
 ): Promise<number> {
-  const body: any = {
+  const body: Record<string, unknown> = {
     game,
     total,
   }

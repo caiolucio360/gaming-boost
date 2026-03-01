@@ -5,7 +5,14 @@
       "Bash(npm test:*)",
       "Bash(cd \"C:\\\\Users\\\\caiol\\\\source\\\\repos\\\\boosT\\\\gaming-boost\" && npm run db:push 2>&1)",
       "Bash(grep:*)",
-      "Bash(grep TypeError:*)"
+      "Bash(grep TypeError:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx next build:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell -File:*)",
+      "Bash(powershell:*)",
+      "Bash(node:*)"
     ]
   }
 }

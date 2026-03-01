@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { rateLimit, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { rateLimit, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import { ChatService } from '@/services'
 import { SendMessageSchema, ChatQuerySchema } from '@/schemas'

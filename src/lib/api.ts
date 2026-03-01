@@ -192,7 +192,7 @@ async function request<T>(
 
     // Handle HTTP errors
     if (!response.ok) {
-      const errorResult = handleHttpError<T>(response.status, data, mergedConfig)
+      const errorResult = handleHttpError(response.status, data, mergedConfig)
       return errorResult
     }
 
@@ -227,7 +227,7 @@ async function request<T>(
   }
 }
 
-function handleHttpError<T>(
+function handleHttpError(
   status: number,
   data: unknown,
   config: ApiRequestConfig

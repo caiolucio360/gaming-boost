@@ -96,9 +96,6 @@ describe('AdminDashboardPage', () => {
         completed: 8,
         cancelled: 2,
       },
-      services: {
-        total: 3,
-      },
       revenue: {
         total: 5000,
       },
@@ -131,8 +128,6 @@ describe('AdminDashboardPage', () => {
       expect(screen.getByText('10')).toBeInTheDocument() // Total de usuários
       expect(screen.getByText('Total de Pedidos')).toBeInTheDocument()
       expect(screen.getByText('25')).toBeInTheDocument() // Total de pedidos
-      expect(screen.getByText('Serviços Disponíveis')).toBeInTheDocument()
-      expect(screen.getByText('3')).toBeInTheDocument() // Total de serviços
       expect(screen.getByText('Receita Total')).toBeInTheDocument()
     })
   })
@@ -159,7 +154,7 @@ describe('AdminDashboardPage', () => {
     const mockStats = {
       users: { total: 1, clients: 1, boosters: 0, admins: 0 },
       orders: { total: 1, pending: 1, inProgress: 0, completed: 0, cancelled: 0 },
-      services: { total: 1 },
+
       revenue: { total: 100 },
       recentOrders: [
         {
@@ -196,7 +191,7 @@ describe('AdminDashboardPage', () => {
     const mockStats = {
       users: { total: 1, clients: 1, boosters: 0, admins: 0 },
       orders: { total: 0, pending: 0, inProgress: 0, completed: 0, cancelled: 0 },
-      services: { total: 0 },
+
       revenue: { total: 0 },
       recentOrders: [],
     }
@@ -223,7 +218,7 @@ describe('AdminDashboardPage', () => {
     const mockStats = {
       users: { total: 1, clients: 1, boosters: 0, admins: 0 },
       orders: { total: 1, pending: 0, inProgress: 0, completed: 1, cancelled: 0 },
-      services: { total: 1 },
+
       revenue: { total: 1250.5 },
       recentOrders: [],
     }
@@ -251,7 +246,7 @@ describe('AdminDashboardPage', () => {
     const mockStats = {
       users: { total: 1, clients: 1, boosters: 0, admins: 0 },
       orders: { total: 1, pending: 1, inProgress: 0, completed: 0, cancelled: 0 },
-      services: { total: 1 },
+
       revenue: { total: 100 },
       recentOrders: [
         {

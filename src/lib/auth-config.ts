@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
       // Na primeira vez que o token é criado (login), incluir dados do usuário
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
+        token.role = (user as { role: 'CLIENT' | 'BOOSTER' | 'ADMIN' }).role
       }
       return token
     },

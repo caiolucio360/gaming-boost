@@ -8,7 +8,6 @@
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import type { RegisterInput, LoginInput } from '@/schemas/auth'
-import { sendWelcomeEmail } from '@/lib/email'
 import { VerificationService } from './verification.service'
 import { Result, success, failure } from './types'
 

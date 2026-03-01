@@ -4,33 +4,16 @@
 
 import { GET, POST } from '@/app/api/orders/route'
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db'
-import { verifyAuth } from '@/lib/auth-middleware'
 
-// Mock do prisma
-jest.mock('@/lib/db', () => ({
-  prisma: {
-    order: {
-      findMany: jest.fn(),
-      findFirst: jest.fn(),
-      create: jest.fn(),
-    },
-    service: {
-      findUnique: jest.fn(),
-    },
-    user: {
-      findFirst: jest.fn(),
-    },
-    commissionConfig: {
-      findFirst: jest.fn(),
-      create: jest.fn(),
-    },
-    adminRevenue: {
-      create: jest.fn(),
-    },
-    $transaction: jest.fn(),
+// Mock OrderService
+jest.mock('@/services', () => ({
+  OrderService: {
+    getUserCS2Orders: jest.fn(),
+    createOrder: jest.fn(),
   },
 }))
+
+import { OrderService } from '@/services'
 
 // Mock do auth-middleware
 jest.mock('@/lib/auth-middleware', () => ({
@@ -38,11 +21,13 @@ jest.mock('@/lib/auth-middleware', () => ({
   verifyRole: jest.fn(),
   verifyAdmin: jest.fn(),
   verifyBooster: jest.fn(),
-  createAuthErrorResponse: jest.fn((message, status) => {
+  createAuthErrorResponse: jest.fn((message: string, status: number) => {
     const { NextResponse } = require('next/server')
     return NextResponse.json({ message }, { status })
   }),
 }))
+
+import { verifyAuth } from '@/lib/auth-middleware'
 
 describe('GET /api/orders', () => {
   beforeEach(() => {
@@ -63,19 +48,17 @@ describe('GET /api/orders', () => {
       {
         id: 1,
         userId: 1,
-        serviceId: 1,
+        game: 'CS2',
         status: 'PENDING',
         total: 89.90,
         createdAt: new Date(),
-        service: {
-          id: 1,
-          name: 'Boost CS2 Premier: 10K → 15K',
-          game: 'CS2',
-        },
       },
     ]
 
-    ;(prisma.order.findMany as jest.Mock).mockResolvedValue(mockOrders)
+    ;(OrderService.getUserCS2Orders as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockOrders,
+    })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'GET',
@@ -106,7 +89,6 @@ describe('GET /api/orders', () => {
 
     expect(response.status).toBe(401)
     expect(data.message).toContain('Não autenticado')
-    expect(prisma.order.findMany).not.toHaveBeenCalled()
   })
 })
 
@@ -125,31 +107,26 @@ describe('POST /api/orders', () => {
       },
     })
 
-    const mockService = {
-      id: 1,
-      name: 'Boost CS2 Premier: 10K → 15K',
-      price: 89.90,
-    }
-
     const mockOrder = {
       id: 1,
       userId: 1,
-      serviceId: 1,
+      game: 'CS2',
       status: 'PENDING',
-        total: 89.90,
+      total: 89.90,
       createdAt: new Date(),
-      service: mockService,
     }
 
-    ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(mockService)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Não há order ativa existente
-    ;(prisma.order.create as jest.Mock).mockResolvedValue(mockOrder)
+    ;(OrderService.createOrder as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockOrder,
+    })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        serviceId: 1,
+        game: 'CS2',
         total: 89.90,
+        gameMode: 'PREMIER',
       }),
     })
 
@@ -162,7 +139,7 @@ describe('POST /api/orders', () => {
     expect(data.order.total).toBe(89.90)
   })
 
-  it('deve retornar erro 400 se já existir um pedido ativo (PENDING ou IN_PROGRESS) para a mesma modalidade', async () => {
+  it('deve retornar erro 400 se já existir um pedido ativo para a mesma modalidade', async () => {
     ;(verifyAuth as jest.Mock).mockResolvedValue({
       authenticated: true,
       user: {
@@ -172,27 +149,16 @@ describe('POST /api/orders', () => {
       },
     })
 
-    const mockService = {
-      id: 1,
-      name: 'Boost CS2 Premier: 10K → 15K',
-      price: 89.90,
-      type: 'RANK_BOOST',
-    }
-
-    const existingOrder = {
-      id: 2,
-      userId: 1,
-      status: 'PENDING',
-      gameMode: 'PREMIER',
-    }
-
-    ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(mockService)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(existingOrder) // Já existe order ativa
+    ;(OrderService.createOrder as jest.Mock).mockResolvedValue({
+      success: false,
+      error: 'Você já possui um boost de rank Premier pendente ou em andamento',
+      code: 'DUPLICATE_ORDER',
+    })
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        serviceId: 1,
+        game: 'CS2',
         total: 89.90,
         gameMode: 'PREMIER',
       }),
@@ -203,71 +169,17 @@ describe('POST /api/orders', () => {
 
     expect(response.status).toBe(400)
     expect(data.message).toContain('já possui um boost de rank Premier')
-    expect(prisma.order.create).not.toHaveBeenCalled()
+    expect(OrderService.createOrder).toHaveBeenCalled()
   })
 
-  it('deve permitir criar novo pedido se o anterior for COMPLETED', async () => {
-    ;(verifyAuth as jest.Mock).mockResolvedValue({
-      authenticated: true,
-      user: {
-        id: 1,
-        email: 'teste@teste.com',
-        role: 'CLIENT',
-      },
-    })
-
-    const mockService = {
-      id: 1,
-      name: 'Boost CS2 Premier: 10K → 15K',
-      price: 89.90,
-      type: 'RANK_BOOST',
-    }
-
-    const mockOrder = {
-      id: 1,
-      userId: 1,
-      serviceId: 1,
-      status: 'PENDING',
-      total: 89.90,
-      createdAt: new Date(),
-      service: mockService,
-    }
-
-    ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(mockService)
-    ;(prisma.order.findFirst as jest.Mock).mockResolvedValue(null) // Não há order ativa (a anterior está COMPLETED)
-    ;(prisma.commissionConfig.findFirst as jest.Mock).mockResolvedValue({
-      id: 1,
-      boosterPercentage: 0.70,
-      adminPercentage: 0.30,
-      enabled: true,
-    })
-    ;(prisma.adminRevenue.create as jest.Mock).mockResolvedValue({ id: 1 })
-    ;(prisma.order.create as jest.Mock).mockResolvedValue(mockOrder)
-
-    const request = new NextRequest('http://localhost:3000/api/orders', {
-      method: 'POST',
-      body: JSON.stringify({
-        serviceId: 1,
-        total: 89.90,
-        gameMode: 'PREMIER',
-      }),
-    })
-
-    const response = await POST(request)
-    const data = await response.json()
-
-    expect(response.status).toBe(201)
-    expect(data.order).toBeDefined()
-  })
-
-  it('deve retornar erro 400 se serviceId ou total estiver faltando', async () => {
+  it('deve retornar erro 400 se total estiver faltando', async () => {
     const request = new NextRequest('http://localhost:3000/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serviceId: 1,
+        game: 'CS2',
         // total faltando
       }),
     })
@@ -276,28 +188,7 @@ describe('POST /api/orders', () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.message).toContain('obrigatórios')
-  })
-
-  it('deve retornar erro 404 se o serviço não existir', async () => {
-    ;(prisma.service.findUnique as jest.Mock).mockResolvedValue(null)
-
-    const request = new NextRequest('http://localhost:3000/api/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serviceId: 999,
-        total: 89.90,
-      }),
-    })
-
-    const response = await POST(request)
-    const data = await response.json()
-
-    expect(response.status).toBe(404)
-    expect(data.message).toContain('não encontrado')
+    expect(data.message).toContain('total')
   })
 
   it('deve retornar erro 401 se o usuário não estiver autenticado', async () => {
@@ -312,7 +203,7 @@ describe('POST /api/orders', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serviceId: 1,
+        game: 'CS2',
         total: 89.90,
       }),
     })
@@ -324,4 +215,3 @@ describe('POST /api/orders', () => {
     expect(data.message).toContain('Não autenticado')
   })
 })
-

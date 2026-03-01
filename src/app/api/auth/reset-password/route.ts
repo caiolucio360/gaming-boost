@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           targetUser = user
           break
         }
-      } catch (e) {
+      } catch {
         // Invalid JSON, skip
         continue
       }

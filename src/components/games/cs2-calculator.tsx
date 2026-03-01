@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
-import { getGameConfig, GameId, GameMode, GameModeConfig } from '@/lib/games-config'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ButtonLoading } from '@/components/common/button-loading'
+import { getGameConfig, GameId, GameMode } from '@/lib/games-config'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { showError } from '@/lib/toast'
 import { AlertCircle, Calculator, Zap } from 'lucide-react'
 import Link from 'next/link'
@@ -19,17 +17,20 @@ interface GameCalculatorProps {
   gameId?: GameId
 }
 
+interface ActiveOrder {
+  id: number
+  status: string
+  gameMode: string
+}
+
 export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode>('PREMIER')
-  const [currentRating, setCurrentRating] = useState('')
-  const [targetRating, setTargetRating] = useState('')
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
   const [selectedTarget, setSelectedTarget] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
-  const [activeOrders, setActiveOrders] = useState<any[]>([])
-  const [isCheckingOrders, setIsCheckingOrders] = useState(false)
+  const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
@@ -45,7 +46,6 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         return
       }
 
-      setIsCheckingOrders(true)
       try {
         const response = await fetch('/api/orders', {
           method: 'GET',
@@ -59,7 +59,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           const orders = data.orders || []
 
           // Filter for active orders (PENDING, PAID, IN_PROGRESS) in current game mode
-          const activeInMode = orders.filter((order: any) =>
+          const activeInMode = orders.filter((order: ActiveOrder) =>
             ['PENDING', 'PAID', 'IN_PROGRESS'].includes(order.status) &&
             order.gameMode === selectedMode
           )
@@ -68,8 +68,6 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         }
       } catch (error) {
         console.error('Error checking active orders:', error)
-      } finally {
-        setIsCheckingOrders(false)
       }
     }
 
@@ -133,8 +131,6 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     if (mode === selectedMode) return
     
     setSelectedMode(mode)
-    setCurrentRating('')
-    setTargetRating('')
     setSelectedCurrent('')
     setSelectedTarget('')
     setPrice(0)
@@ -231,13 +227,11 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const handleCurrentSelect = (value: number) => {
     const displayValue = selectedMode === 'PREMIER' ? (value / 1000).toString() : value.toString()
     setSelectedCurrent(displayValue)
-    setCurrentRating(displayValue)
   }
 
   const handleTargetSelect = (value: number) => {
     const displayValue = selectedMode === 'PREMIER' ? (value / 1000).toString() : value.toString()
     setSelectedTarget(displayValue)
-    setTargetRating(displayValue)
   }
 
   if (!gameConfig || !modeConfig) {

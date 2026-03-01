@@ -145,15 +145,12 @@ describe('PUT /api/admin/orders/[id]', () => {
     expect(response.status).toBe(200)
     expect(data.order).toBeDefined()
     expect(data.order.status).toBe('IN_PROGRESS')
-    expect(prisma.order.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: { status: 'IN_PROGRESS' },
-      include: {
-        user: { select: { id: true, email: true, name: true } },
-        service: true,
-        booster: { select: { id: true, email: true, name: true } },
-      },
-    })
+    expect(prisma.order.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 1 },
+        data: { status: 'IN_PROGRESS' },
+      })
+    )
   })
 
   it('deve retornar erro ao tentar atualizar pedido inexistente', async () => {

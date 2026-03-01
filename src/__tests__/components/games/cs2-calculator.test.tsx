@@ -6,6 +6,7 @@ import { CS2Calculator } from '@/components/games/cs2-calculator'
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
+    replace: jest.fn(),
   }),
 }))
 
@@ -55,19 +56,32 @@ jest.mock('@/lib/games-config', () => ({
   }),
 }))
 
+// Mock toast
+jest.mock('@/lib/toast', () => ({
+  showError: jest.fn(),
+  showSuccess: jest.fn(),
+}))
+
 // Mock pricing API
 const mockFetch = jest.fn()
 global.fetch = mockFetch
 
 beforeEach(() => {
-  mockFetch.mockImplementation((url) => {
+  mockFetch.mockImplementation((url: string, options?: any) => {
     if (url.includes('/api/pricing/calculate')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ price: 40, pricePerUnit: 10, breakdown: [] }),
+        json: () => Promise.resolve({ data: { price: 40, pricePerUnit: 10, breakdown: [] } }),
       })
     }
     if (url.includes('/api/orders')) {
+      // POST creates an order, GET lists orders
+      if (options?.method === 'POST') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ order: { id: 1 } }),
+        })
+      }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ orders: [] }),

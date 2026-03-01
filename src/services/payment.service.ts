@@ -7,7 +7,7 @@
 
 import { prisma } from '@/lib/db'
 import { PaymentStatus, OrderStatus, WithdrawalStatus } from '@/generated/prisma/client'
-import { Result, success, failure, ErrorCode } from './types'
+import { Result, success, failure } from './types'
 import type { CreatePixInput } from '@/schemas/payment'
 import { sendPaymentConfirmationEmail } from '@/lib/email'
 
@@ -43,13 +43,15 @@ interface WebhookEventResult {
   orderId?: number
 }
 
-type WebhookEventType =
-  | 'billing.paid'
-  | 'withdraw.done'
-  | 'withdraw.failed'
-  | 'payment.refunded'
-  | 'payment.expired'
-  | 'payment.cancelled'
+// Webhook event types from AbacatePay
+// Used for documentation — actual webhook handling uses string comparison
+// type WebhookEventType =
+//   | 'billing.paid'
+//   | 'withdraw.done'
+//   | 'withdraw.failed'
+//   | 'payment.refunded'
+//   | 'payment.expired'
+//   | 'payment.cancelled'
 
 interface WebhookData {
   event?: string

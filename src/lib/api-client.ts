@@ -3,8 +3,6 @@
  * Gerencia automaticamente o token JWT do localStorage
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
-
 /**
  * Obtém o token do localStorage
  */
@@ -98,7 +96,7 @@ export async function authenticatedFetch(
 /**
  * Helper para fazer requisições GET autenticadas
  */
-export async function apiGet<T = any>(url: string, options?: RequestOptions): Promise<T> {
+export async function apiGet<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
   const response = await authenticatedFetch(url, {
     ...options,
     method: 'GET',
@@ -115,9 +113,9 @@ export async function apiGet<T = any>(url: string, options?: RequestOptions): Pr
 /**
  * Helper para fazer requisições POST autenticadas
  */
-export async function apiPost<T = any>(
+export async function apiPost<T = unknown>(
   url: string,
-  data?: any,
+  data?: unknown,
   options?: RequestOptions
 ): Promise<T> {
   const response = await authenticatedFetch(url, {
@@ -137,9 +135,9 @@ export async function apiPost<T = any>(
 /**
  * Helper para fazer requisições PUT autenticadas
  */
-export async function apiPut<T = any>(
+export async function apiPut<T = unknown>(
   url: string,
-  data?: any,
+  data?: unknown,
   options?: RequestOptions
 ): Promise<T> {
   const response = await authenticatedFetch(url, {
@@ -159,7 +157,7 @@ export async function apiPut<T = any>(
 /**
  * Helper para fazer requisições DELETE autenticadas
  */
-export async function apiDelete<T = any>(url: string, options?: RequestOptions): Promise<T> {
+export async function apiDelete<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
   const response = await authenticatedFetch(url, {
     ...options,
     method: 'DELETE',

@@ -164,7 +164,7 @@ export async function POST(
     }
 
     // Update order and payment status atomically in a transaction
-    const { updatedOrder } = await db.$transaction(async (tx) => {
+    const { updatedOrder } = await db.$transaction(async (tx: any) => {
       const updated = await tx.order.update({
         where: { id: orderId },
         data: {

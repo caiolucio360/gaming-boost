@@ -110,6 +110,7 @@ describe('/api/admin/commission-config', () => {
         data: {
           boosterPercentage: 0.70,
           adminPercentage: 0.30,
+          withdrawalWaitingDays: 7,
           enabled: true,
         },
       })

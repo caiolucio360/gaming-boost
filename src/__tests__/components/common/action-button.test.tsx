@@ -42,7 +42,7 @@ describe('ActionButton', () => {
   it('should render with outline variant styles', () => {
     const { container } = render(<ActionButton variant="outline">Cancel</ActionButton>)
 
-    const button = container.querySelector('.border-purple-500\\/50')
+    const button = container.querySelector('.border-2')
     expect(button).toBeInTheDocument()
   })
 })

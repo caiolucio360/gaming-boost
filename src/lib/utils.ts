@@ -21,3 +21,8 @@ export function formatDate(date: string | Date): string {
     minute: '2-digit',
   })
 }
+
+export function formatMessageTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}

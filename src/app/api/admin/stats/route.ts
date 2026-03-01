@@ -3,6 +3,20 @@ import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
+interface RecentOrder {
+  id: number
+  status: string
+  total: number
+  game: string
+  gameMode: string | null
+  currentRank: string | null
+  targetRank: string | null
+  currentRating: number | null
+  targetRating: number | null
+  createdAt: Date | string
+  user: { email: string; name: string | null } | null
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verificar se é admin
@@ -13,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Estatísticas gerais - executar queries de forma mais segura
     try {
-      const user = authResult.user as any
+      const user = authResult.user as { id: number; email: string; role: string; isDevAdmin?: boolean }
       const isDevAdmin = user.isDevAdmin === true
 
       // Admin count: only regular admins (isDevAdmin != true, handles false and null)
@@ -88,7 +102,7 @@ export async function GET(request: NextRequest) {
           devRevenue: devRevenue || 0, // Include dev revenue in response
         },
         isDevAdmin, // Flag to frontend
-        recentOrders: recentOrders.map((order: any) => {
+        recentOrders: (recentOrders as RecentOrder[]).map((order) => {
           // Garantir que createdAt seja uma string ISO
           let createdAtStr: string
           if (order.createdAt instanceof Date) {

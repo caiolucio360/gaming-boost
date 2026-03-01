@@ -43,7 +43,7 @@ export function verifyToken(token: string): JWTPayload | null {
     }) as JWTPayload
 
     return decoded
-  } catch (error) {
+  } catch {
     // Token inválido, expirado ou malformado
     return null
   }
@@ -57,7 +57,7 @@ export function decodeToken(token: string): JWTPayload | null {
   try {
     const decoded = jwt.decode(token) as JWTPayload | null
     return decoded
-  } catch (error) {
+  } catch {
     return null
   }
 }
