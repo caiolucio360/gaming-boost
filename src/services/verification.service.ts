@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
 import { Result, success, failure } from './types'
+import { ErrorCodes } from '@/lib/error-constants'
 
 export const VerificationService = {
   /**
@@ -62,7 +63,7 @@ export const VerificationService = {
       return success(code)
     } catch (error) {
       console.error('Error generating verification code:', error)
-      return failure('Erro ao gerar código de verificação', 'DATABASE_ERROR')
+      return failure('Erro ao gerar código de verificação', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -81,7 +82,7 @@ export const VerificationService = {
       })
 
       if (!validCode) {
-        return failure('Código inválido ou expirado', 'INVALID_CODE')
+        return failure('Código inválido ou expirado', ErrorCodes.INVALID_CODE)
       }
 
       // Mark code as used
@@ -99,7 +100,7 @@ export const VerificationService = {
       return success(true)
     } catch (error) {
       console.error('Error validating verification code:', error)
-      return failure('Erro ao validar código', 'DATABASE_ERROR')
+      return failure('Erro ao validar código', ErrorCodes.DATABASE_ERROR)
     }
   }
 }

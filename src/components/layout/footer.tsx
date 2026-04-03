@@ -86,11 +86,11 @@ export function Footer() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link href="/contact" className="text-xs md:text-sm text-brand-gray-400 hover:text-brand-purple transition-colors">
-                          Contato
+                          Suporte
                         </Link>
                       </TooltipTrigger>
                       <TooltipContent className="bg-brand-black-light border-brand-purple/50 text-white">
-                        <p>Entre em contato conosco</p>
+                        <p>Suporte via Discord</p>
                       </TooltipContent>
                     </Tooltip>
                   </li>

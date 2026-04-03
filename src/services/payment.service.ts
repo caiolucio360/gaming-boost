@@ -8,6 +8,7 @@
 import { prisma } from '@/lib/db'
 import { PaymentStatus, OrderStatus, WithdrawalStatus } from '@/generated/prisma/client'
 import { Result, success, failure } from './types'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import type { CreatePixInput } from '@/schemas/payment'
 import { sendPaymentConfirmationEmail } from '@/lib/email'
 
@@ -125,7 +126,7 @@ export const PaymentService = {
       return success(payment as PaymentWithOrder | null)
     } catch (error) {
       console.error('Error getting payment by ID:', error)
-      return failure('Erro ao buscar pagamento', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pagamento', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -146,7 +147,7 @@ export const PaymentService = {
       return success(payment as PaymentWithOrder | null)
     } catch (error) {
       console.error('Error getting payment by provider ID:', error)
-      return failure('Erro ao buscar pagamento', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pagamento', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -163,7 +164,7 @@ export const PaymentService = {
       return success(payments)
     } catch (error) {
       console.error('Error getting payments by order ID:', error)
-      return failure('Erro ao buscar pagamentos', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pagamentos', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -180,11 +181,11 @@ export const PaymentService = {
       })
 
       if (!order) {
-        return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
       }
 
       if (order.userId !== userId) {
-        return failure('Pedido não pertence ao usuário', 'FORBIDDEN')
+        return failure(ErrorMessages.ORDER_NOT_BELONGS_TO_USER, ErrorCodes.FORBIDDEN)
       }
 
       // Create payment record
@@ -193,14 +194,13 @@ export const PaymentService = {
           orderId: parseInt(orderId),
           total,
           status: PaymentStatus.PENDING,
-          method: 'PIX',
         },
       })
 
       return success(payment)
     } catch (error) {
       console.error('Error creating payment:', error)
-      return failure('Erro ao criar pagamento', 'DATABASE_ERROR')
+      return failure('Erro ao criar pagamento', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -217,13 +217,13 @@ export const PaymentService = {
       })
 
       if (!existingPayment) {
-        return failure('Pagamento não encontrado', 'PAYMENT_NOT_FOUND')
+        return failure(ErrorMessages.PAYMENT_NOT_FOUND, ErrorCodes.PAYMENT_NOT_FOUND)
       }
 
       if (!this.canTransitionStatus(existingPayment.status, status)) {
         return failure(
           `Transição de ${existingPayment.status} para ${status} não permitida`,
-          'INVALID_STATUS_TRANSITION'
+          ErrorCodes.INVALID_STATUS_TRANSITION
         )
       }
 
@@ -235,7 +235,7 @@ export const PaymentService = {
       return success(payment)
     } catch (error) {
       console.error('Error updating payment status:', error)
-      return failure('Erro ao atualizar status do pagamento', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar status do pagamento', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -279,7 +279,7 @@ export const PaymentService = {
       }
     } catch (error) {
       console.error('Error processing webhook event:', error)
-      return failure('Erro ao processar evento do webhook', 'INTERNAL_ERROR')
+      return failure('Erro ao processar evento do webhook', ErrorCodes.INTERNAL_ERROR)
     }
   },
 
@@ -296,7 +296,7 @@ export const PaymentService = {
 
       if (!payment) {
         console.error('Payment not found for providerId:', providerId)
-        return failure('Pagamento não encontrado', 'PAYMENT_NOT_FOUND')
+        return failure(ErrorMessages.PAYMENT_NOT_FOUND, ErrorCodes.PAYMENT_NOT_FOUND)
       }
 
       // Idempotency: check if already processed
@@ -348,7 +348,7 @@ export const PaymentService = {
       })
     } catch (error) {
       console.error('Error confirming payment:', error)
-      return failure('Erro ao confirmar pagamento', 'DATABASE_ERROR')
+      return failure('Erro ao confirmar pagamento', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -407,7 +407,7 @@ export const PaymentService = {
       return success({ processed: true, message: 'Saque concluído' })
     } catch (error) {
       console.error('Error processing withdraw.done:', error)
-      return failure('Erro ao processar saque', 'DATABASE_ERROR')
+      return failure('Erro ao processar saque', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -447,7 +447,7 @@ export const PaymentService = {
       return success({ processed: true, message: 'Saque falhou' })
     } catch (error) {
       console.error('Error processing withdraw.failed:', error)
-      return failure('Erro ao processar falha do saque', 'DATABASE_ERROR')
+      return failure('Erro ao processar falha do saque', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -526,7 +526,7 @@ export const PaymentService = {
       return success({ processed: true, message: 'Nenhuma ação necessária' })
     } catch (error) {
       console.error('Error handling payment status change:', error)
-      return failure('Erro ao processar mudança de status', 'DATABASE_ERROR')
+      return failure('Erro ao processar mudança de status', ErrorCodes.DATABASE_ERROR)
     }
   },
 

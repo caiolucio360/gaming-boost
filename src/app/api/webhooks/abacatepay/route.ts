@@ -63,12 +63,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate webhook signature (if configured)
-    const signature = request.headers.get('x-signature') || request.headers.get('x-abacatepay-signature')
+    // Validate webhook signature (mandatory)
     const webhookSecret = process.env.ABACATEPAY_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      console.error('[WEBHOOK] ABACATEPAY_WEBHOOK_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Webhook validation not configured' },
+        { status: 500 }
+      )
+    }
 
-    if (webhookSecret && !validateWebhookSignature(bodyText, signature, webhookSecret)) {
-      console.error('Invalid webhook signature')
+    const signature = request.headers.get('x-signature') || request.headers.get('x-abacatepay-signature')
+    if (!validateWebhookSignature(bodyText, signature, webhookSecret)) {
+      console.error('[WEBHOOK] Invalid signature')
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }

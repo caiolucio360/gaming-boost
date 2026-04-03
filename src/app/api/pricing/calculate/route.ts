@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { calculatePrice, validatePricingRange } from '@/lib/pricing'
-import { Game } from '@/generated/prisma/client'
+import { Game, ServiceType } from '@/generated/prisma/client'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 /**
@@ -13,8 +13,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { game, gameMode, current, target } = body
-    console.log(`[API /pricing/calculate] Params: game=${game}, mode=${gameMode}, current=${current}, target=${target}`)
+    const { game, gameMode, current, target, serviceType: rawServiceType } = body
+    const serviceType: ServiceType = rawServiceType === 'DUO_BOOST' ? 'DUO_BOOST' : 'RANK_BOOST'
+    console.log(`[API /pricing/calculate] Params: game=${game}, mode=${gameMode}, serviceType=${serviceType}, current=${current}, target=${target}`)
 
     // Validações
     if (!game || !gameMode || current === undefined || target === undefined) {
@@ -38,7 +39,8 @@ export async function POST(request: NextRequest) {
       game as Game,
       gameMode,
       currentValue,
-      targetValue
+      targetValue,
+      serviceType
     )
     console.log(`[API /pricing/calculate] Validation completed: ${JSON.stringify(validation)}`)
 
@@ -54,7 +56,8 @@ export async function POST(request: NextRequest) {
       game as Game,
       gameMode,
       currentValue,
-      targetValue
+      targetValue,
+      serviceType
     )
     console.log(`[API /pricing/calculate] Price calculated: ${price} in ${Date.now() - startTime}ms`)
 

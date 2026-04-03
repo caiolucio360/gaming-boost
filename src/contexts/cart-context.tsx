@@ -10,6 +10,8 @@ interface ProcessCartResult {
   orderId?: number
   /** Preço total do pedido */
   total?: number
+  /** Mensagem de erro quando success é false */
+  error?: string
 }
 
 interface CartContextType {
@@ -117,9 +119,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (!response.ok) {
-        console.error('Erro ao criar order para item:', item)
-        clearCart()
-        return { success: false }
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Erro ao criar order para item:', item, errorData)
+        return { success: false, error: errorData.message || 'Erro ao criar pedido' }
       }
 
       const data = await response.json()
@@ -135,8 +137,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Erro ao processar item do carrinho:', error)
-      clearCart()
-      return { success: false }
+      return { success: false, error: 'Erro de conexão. Tente novamente.' }
     }
   }, [items, clearCart])
 

@@ -1,10 +1,13 @@
 import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth-config'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 
 /**
  * Resultado da verificação de autenticação
  */
+export type AuthErrorCode = typeof ErrorCodes.UNAUTHENTICATED | typeof ErrorCodes.FORBIDDEN | typeof ErrorCodes.AUTH_ERROR
+
 export interface AuthResult {
   authenticated: boolean
   user?: {
@@ -13,6 +16,7 @@ export interface AuthResult {
     role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
   }
   error?: string
+  code?: AuthErrorCode
 }
 
 /**
@@ -26,7 +30,8 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
     if (!session || !session.user) {
       return {
         authenticated: false,
-        error: 'Não autenticado',
+        error: ErrorMessages.AUTH_UNAUTHENTICATED,
+        code: ErrorCodes.UNAUTHENTICATED,
       }
     }
 
@@ -41,7 +46,8 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
   } catch (error) {
     return {
       authenticated: false,
-      error: 'Erro ao verificar autenticação',
+      error: ErrorMessages.AUTH_VERIFY_ERROR,
+      code: ErrorCodes.AUTH_ERROR,
     }
   }
 }
@@ -62,7 +68,8 @@ export async function verifyRole(
   if (!allowedRoles.includes(authResult.user.role)) {
     return {
       authenticated: false,
-      error: 'Acesso negado. Permissão insuficiente.',
+      error: ErrorMessages.AUTH_FORBIDDEN,
+      code: ErrorCodes.FORBIDDEN,
     }
   }
 
@@ -81,15 +88,12 @@ export function createAuthErrorResponse(message: string, status: number = 401): 
 
 /**
  * Helper para criar resposta de erro baseado no resultado de autenticação
- * Retorna 403 se for erro de permissão, 401 caso contrário
+ * Usa o campo `code` para determinar o HTTP status — nunca string matching.
  */
 export function createAuthErrorResponseFromResult(authResult: AuthResult): NextResponse {
-  const isPermissionError = authResult.error?.includes('Acesso negado') || 
-                           authResult.error?.includes('Permissão') ||
-                           authResult.error?.includes('insuficiente')
-  const status = isPermissionError ? 403 : 401
+  const status = authResult.code === ErrorCodes.FORBIDDEN ? 403 : 401
   return createAuthErrorResponse(
-    authResult.error || 'Não autenticado',
+    authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
     status
   )
 }

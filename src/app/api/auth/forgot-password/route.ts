@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const { email } = body
 
     if (!email) {
-      return Response.json({ error: 'Email é obrigatório' }, { status: 400 })
+      return Response.json({ message:'Email é obrigatório' }, { status: 400 })
     }
 
     // Find user by email

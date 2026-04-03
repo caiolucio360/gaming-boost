@@ -9,7 +9,7 @@
 
 export type GameId = 'CS2' // Adicione novos jogos aqui conforme necessário
 
-export type ServiceType = 'RANK_BOOST' | 'PLACEMENT' | 'COACHING' | 'ACCOUNT_LEVELING' // Tipos de serviços disponíveis
+export type ServiceType = 'RANK_BOOST' | 'DUO_BOOST' | 'PLACEMENT' | 'COACHING' | 'ACCOUNT_LEVELING'
 
 export type GameMode = 'PREMIER' | 'GAMERS_CLUB'
 
@@ -34,6 +34,12 @@ export interface GameModeConfig {
   }>
 }
 
+export interface ServiceTypeInfo {
+  displayName: string
+  description: string
+  requiresSteamCredentials: boolean
+}
+
 export interface GameConfig {
   id: GameId
   name: string
@@ -43,6 +49,7 @@ export interface GameConfig {
   href: string
   enabled: boolean
   supportedServiceTypes: ServiceType[]
+  serviceTypeInfo?: Partial<Record<ServiceType, ServiceTypeInfo>>
   modes?: Record<GameMode, GameModeConfig> // Modos de jogo suportados
 }
 
@@ -54,7 +61,19 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
     description: 'Boost de rank Premier do CS2',
     href: '/games/cs2',
     enabled: true,
-    supportedServiceTypes: ['RANK_BOOST'],
+    supportedServiceTypes: ['RANK_BOOST', 'DUO_BOOST'],
+    serviceTypeInfo: {
+      RANK_BOOST: {
+        displayName: 'Rank Boost',
+        description: 'Booster joga na sua conta para subir de rank',
+        requiresSteamCredentials: true,
+      },
+      DUO_BOOST: {
+        displayName: 'Duo Boost',
+        description: 'Jogue junto com o booster na sua própria conta',
+        requiresSteamCredentials: false,
+      },
+    },
     modes: {
       PREMIER: {
         id: 'PREMIER',

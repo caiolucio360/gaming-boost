@@ -5,6 +5,8 @@
  * This pattern provides type-safe success/failure responses without exceptions.
  */
 
+import type { ErrorCode } from '@/lib/error-constants'
+
 // ============================================================================
 // Core Result Type
 // ============================================================================
@@ -33,44 +35,10 @@ export interface Failure {
 export type Result<T> = Success<T> | Failure
 
 // ============================================================================
-// Error Codes
+// Error Codes — re-exported from the single source of truth
 // ============================================================================
 
-/**
- * Standardized error codes for the service layer
- */
-export type ErrorCode =
-  // Not Found
-  | 'NOT_FOUND'
-  | 'ORDER_NOT_FOUND'
-  | 'PAYMENT_NOT_FOUND'
-  | 'USER_NOT_FOUND'
-  | 'SERVICE_NOT_FOUND'
-  | 'USER_NOT_VERIFIED'
-  | 'CHAT_NOT_FOUND'
-  // Validation
-  | 'VALIDATION_ERROR'
-  | 'INVALID_INPUT'
-  | 'INVALID_CODE'
-  | 'INVALID_STATUS_TRANSITION'
-  // Authorization
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'CHAT_ACCESS_DENIED'
-  // Business Logic
-  | 'DUPLICATE_ORDER'
-  | 'ORDER_ALREADY_ACCEPTED'
-  | 'ORDER_NOT_CANCELLABLE'
-  | 'USER_HAS_ACTIVE_ORDERS'
-  | 'INSUFFICIENT_BALANCE'
-  | 'CHAT_DISABLED'
-  // External Services
-  | 'PAYMENT_PROVIDER_ERROR'
-  | 'EMAIL_SERVICE_ERROR'
-  // Generic
-  | 'INTERNAL_ERROR'
-  | 'DATABASE_ERROR'
-  | 'ENCRYPTION_ERROR'
+export { ErrorCodes, type ErrorCode } from '@/lib/error-constants'
 
 // ============================================================================
 // Helper Functions

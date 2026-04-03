@@ -2,6 +2,18 @@
 
 import { CartItem } from '@/types'
 import { GameId } from '@/lib/games-config'
+import { ErrorCodes } from '@/lib/error-constants'
+
+/**
+ * Erro de validação de negócio com código estruturado.
+ * Permite controle de fluxo via instanceof, sem string matching.
+ */
+export class BusinessError extends Error {
+  constructor(message: string, public code: string) {
+    super(message)
+    this.name = 'BusinessError'
+  }
+}
 
 /**
  * Resultado da contratação de serviço
@@ -46,21 +58,24 @@ export async function handleServiceHire(
       if (ordersResponse.ok) {
         const ordersData = await ordersResponse.json()
         const existingOrder = ordersData.orders?.find((o: { status: string; gameMode: string }) =>
-          (o.status === 'PENDING' || o.status === 'IN_PROGRESS') && o.gameMode === item.metadata?.mode
+          (['PENDING', 'PAID', 'IN_PROGRESS'].includes(o.status)) && o.gameMode === item.metadata?.mode
         )
 
         if (existingOrder) {
           const modeName = item.metadata.mode === 'PREMIER' ? 'Premier' : 'Gamers Club'
           const statusName = existingOrder.status === 'PENDING' ? 'pendente' : 'em andamento'
-          throw new Error(`Você já possui um boost de rank ${modeName} ${statusName}. Finalize ou cancele o pedido anterior antes de criar um novo.`)
+          throw new BusinessError(
+            `Você já possui um boost de rank ${modeName} ${statusName}. Finalize ou cancele o pedido anterior antes de criar um novo.`,
+            ErrorCodes.DUPLICATE_ORDER
+          )
         }
       }
     } catch (error) {
-      // Se o erro já é uma mensagem de validação, re-lançar
-      if (error instanceof Error && error.message.includes('já possui')) {
+      // Re-lançar erros de validação de negócio
+      if (error instanceof BusinessError) {
         throw error
       }
-      // Se for outro erro, continuar (não bloquear por erro de rede)
+      // Se for outro erro (rede, etc.), continuar sem bloquear
       console.error('Erro ao verificar orders pendentes:', error)
     }
   }
@@ -102,6 +117,7 @@ export async function createOrder(
     targetRating?: number
     gameMode?: string
     gameType?: string
+    serviceType?: string
     metadata?: Record<string, unknown>
   }
 ): Promise<number> {
@@ -118,6 +134,7 @@ export async function createOrder(
     if (metadata.targetRating !== undefined) body.targetRating = metadata.targetRating
     if (metadata.gameMode) body.gameMode = metadata.gameMode
     if (metadata.gameType) body.gameType = metadata.gameType
+    if (metadata.serviceType) body.serviceType = metadata.serviceType
     if (metadata.metadata) body.metadata = metadata.metadata
   }
 
@@ -130,8 +147,11 @@ export async function createOrder(
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Erro ao criar solicitação')
+    const errorData = await response.json()
+    if (errorData.code) {
+      throw new BusinessError(errorData.message || 'Erro ao criar solicitação', errorData.code)
+    }
+    throw new Error(errorData.message || 'Erro ao criar solicitação')
   }
 
   const data = await response.json()

@@ -9,6 +9,7 @@
  */
 
 import { showError, showSuccess } from './toast'
+import { ErrorCodes, ErrorMessages, type ErrorCode } from '@/lib/error-constants'
 
 // ============================================
 // Result<T> Type Definitions
@@ -42,16 +43,7 @@ export interface ApiError {
 /**
  * Known API error codes for type-safe error handling
  */
-export type ApiErrorCode =
-  | 'NETWORK_ERROR'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'NOT_FOUND'
-  | 'VALIDATION_ERROR'
-  | 'DUPLICATE_ENTRY'
-  | 'RATE_LIMIT_EXCEEDED'
-  | 'SERVER_ERROR'
-  | 'UNKNOWN_ERROR'
+export type ApiErrorCode = ErrorCode
 
 /**
  * Result type - either Success<T> or Failure
@@ -209,21 +201,21 @@ async function request<T>(
     // Network/timeout errors
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        const result = fail('NETWORK_ERROR', 'A requisição expirou. Tente novamente.')
+        const result = fail(ErrorCodes.NETWORK_ERROR, ErrorMessages.CLIENT_NETWORK_TIMEOUT)
         if (mergedConfig.showErrorToast) {
           showError('Tempo esgotado', result.error.message)
         }
         return result
       }
 
-      const result = fail('NETWORK_ERROR', 'Erro de conexão. Verifique sua internet.')
+      const result = fail(ErrorCodes.NETWORK_ERROR, ErrorMessages.CLIENT_NETWORK_ERROR)
       if (mergedConfig.showErrorToast) {
         showError('Erro de conexão', result.error.message)
       }
       return result
     }
 
-    return fail('UNKNOWN_ERROR', 'Erro desconhecido')
+    return fail(ErrorCodes.UNKNOWN_ERROR, ErrorMessages.CLIENT_UNKNOWN)
   }
 }
 
@@ -238,7 +230,7 @@ function handleHttpError(
 
   switch (status) {
     case 401:
-      result = fail('UNAUTHORIZED', message || 'Sessão expirada. Faça login novamente.')
+      result = fail(ErrorCodes.UNAUTHORIZED, message || ErrorMessages.CLIENT_SESSION_EXPIRED)
       // Clear token and redirect
       removeToken()
       if (typeof window !== 'undefined') {
@@ -250,35 +242,35 @@ function handleHttpError(
       break
 
     case 403:
-      result = fail('FORBIDDEN', message || 'Você não tem permissão para esta ação.')
+      result = fail(ErrorCodes.FORBIDDEN, message || ErrorMessages.CLIENT_FORBIDDEN)
       break
 
     case 404:
-      result = fail('NOT_FOUND', message || 'Recurso não encontrado.')
+      result = fail(ErrorCodes.NOT_FOUND, message || ErrorMessages.DATABASE_NOT_FOUND)
       break
 
     case 400:
       const errorCode = extractErrorCode(data)
-      if (errorCode === 'DUPLICATE_ENTRY') {
-        result = fail('DUPLICATE_ENTRY', message || 'Este registro já existe.')
+      if (errorCode === ErrorCodes.DUPLICATE_ENTRY) {
+        result = fail(ErrorCodes.DUPLICATE_ENTRY, message || ErrorMessages.DATABASE_DUPLICATE_ENTRY)
       } else {
-        result = fail('VALIDATION_ERROR', message || 'Dados inválidos.')
+        result = fail(ErrorCodes.VALIDATION_ERROR, message || ErrorMessages.CLIENT_VALIDATION)
       }
       break
 
     case 429:
-      result = fail('RATE_LIMIT_EXCEEDED', message || 'Muitas tentativas. Aguarde um momento.')
+      result = fail(ErrorCodes.RATE_LIMIT_EXCEEDED, message || ErrorMessages.RATE_LIMIT_GENERIC)
       break
 
     case 500:
     case 502:
     case 503:
     case 504:
-      result = fail('SERVER_ERROR', message || 'Erro no servidor. Tente novamente.')
+      result = fail(ErrorCodes.SERVER_ERROR, message || ErrorMessages.CLIENT_SERVER_ERROR)
       break
 
     default:
-      result = fail('UNKNOWN_ERROR', message || 'Ocorreu um erro inesperado.')
+      result = fail(ErrorCodes.UNKNOWN_ERROR, message || ErrorMessages.CLIENT_UNKNOWN)
   }
 
   if (config.showErrorToast && status !== 401) {

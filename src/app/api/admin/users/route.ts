@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const role = searchParams.get('role')
     const search = searchParams.get('search')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
     const where: any = {}
 
@@ -30,25 +32,30 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const users = await prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        boosterCommissionPercentage: true,
-        adminProfitShare: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: { orders: true },
+    const [users, total] = await prisma.$transaction([
+      prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          boosterCommissionPercentage: true,
+          adminProfitShare: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: {
+            select: { orders: true },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.user.count({ where }),
+    ])
 
-    return NextResponse.json({ users }, { status: 200 })
+    return NextResponse.json({ users, pagination: { total, limit, offset } }, { status: 200 })
   } catch (error) {
     console.error('Erro ao buscar usuários:', error)
     return NextResponse.json(

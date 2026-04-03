@@ -25,17 +25,27 @@ export const maxDuration = 60 // Maximum execution time for this serverless func
  */
 export async function POST(request: Request) {
   try {
-    // Verify cron secret in production
-    const authHeader = request.headers.get('authorization')
+    // Verify cron secret (mandatory in all environments)
     const cronSecret = process.env.CRON_SECRET
 
-    if (process.env.NODE_ENV === 'production' && cronSecret) {
-      if (authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      }
+    if (!cronSecret) {
+      console.error('[CRON] CRON_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Cron secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    const authHeader = request.headers.get('authorization')
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.warn('[CRON] Unauthorized access attempt', {
+        ip: request.headers.get('x-forwarded-for'),
+        timestamp: new Date().toISOString(),
+      })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
     // Check if auto-refund is enabled

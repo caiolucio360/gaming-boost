@@ -131,7 +131,7 @@ export function ElojobHeader() {
             href="/contact"
             className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
           >
-            Contato
+            Suporte
           </Link>
         </nav>
 

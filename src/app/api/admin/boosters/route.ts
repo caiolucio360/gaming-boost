@@ -5,22 +5,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
     try {
-        const authResult = await verifyAuth(request)
+        const authResult = await verifyAdmin(request)
 
         if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(authResult.error || 'Não autenticado', 401)
-        }
-
-        // Only admins can access this endpoint
-        if (authResult.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { message: 'Acesso negado. Apenas administradores.' },
-                { status: 403 }
-            )
+            return createAuthErrorResponseFromResult(authResult)
         }
 
         const { searchParams } = new URL(request.url)

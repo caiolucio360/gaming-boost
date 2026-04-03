@@ -164,11 +164,11 @@ export async function PUT(
     // Permitir atualizar share de lucro do admin (apenas para usuários com role ADMIN)
     const { adminProfitShare } = body
     if (adminProfitShare !== undefined) {
-      // Validar se é um número positivo
+      // Validar se é um número entre 0 e 1
       const share = parseFloat(adminProfitShare)
-      if (isNaN(share) || share < 0) {
+      if (isNaN(share) || share < 0 || share > 1) {
         return NextResponse.json(
-          { message: 'Share de lucro deve ser um número positivo' },
+          { message: 'Share de lucro deve ser um número entre 0 e 1 (ex: 0.5 para 50%)' },
           { status: 400 }
         )
       }

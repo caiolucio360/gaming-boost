@@ -1,10 +1,10 @@
 /**
  * Sistema de cálculo de preços baseado em configurações do banco de dados
- * Permite que admins configurem preços dinamicamente por faixa
+ * Permite que admins configurem preços dinamicamente por faixa e tipo de serviço
  */
 
 import { db } from '@/lib/db'
-import { Game, PricingConfig } from '@/generated/prisma/client'
+import { Game, PricingConfig, ServiceType } from '@/generated/prisma/client'
 
 export type GameMode = 'PREMIER' | 'GAMERS_CLUB'
 
@@ -19,15 +19,20 @@ interface PricingRange {
 /**
  * Busca as configurações de preço do banco de dados
  */
-export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<PricingRange[]> {
+export async function getPricingRanges(
+  game: Game,
+  gameMode: GameMode,
+  serviceType: ServiceType = 'RANK_BOOST'
+): Promise<PricingRange[]> {
   try {
-    console.log(`[PRICING] Fetching pricing config for ${game} ${gameMode}...`)
+    console.log(`[PRICING] Fetching pricing config for ${game} ${gameMode} ${serviceType}...`)
     const startTime = Date.now()
 
     const configs = await db.pricingConfig.findMany({
       where: {
         game,
         gameMode,
+        serviceType,
         enabled: true
       },
       orderBy: {
@@ -38,10 +43,10 @@ export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<
     console.log(`[PRICING] Query completed in ${Date.now() - startTime}ms, found ${configs.length} ranges`)
 
     if (configs.length === 0) {
-      console.error(`⚠️  No pricing configuration found for ${game} ${gameMode}`)
+      console.error(`⚠️  No pricing configuration found for ${game} ${gameMode} ${serviceType}`)
       console.error(`   Admin must configure pricing at /admin/pricing`)
       console.error(`   Run 'npm run db:seed' to populate default pricing`)
-      throw new Error(`Pricing not configured for ${game} ${gameMode}. Please contact support.`)
+      throw new Error(`Pricing not configured for ${game} ${gameMode} ${serviceType}. Please contact support.`)
     }
 
     return configs.map((config: PricingConfig) => ({
@@ -53,7 +58,6 @@ export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<
     }))
   } catch (error) {
     console.error(`[PRICING] Error fetching pricing config:`, error)
-    // Re-throw the error with context
     if (error instanceof Error) {
       throw error
     }
@@ -65,12 +69,16 @@ export async function getPricingRanges(game: Game, gameMode: GameMode): Promise<
  * Calcula o preço total para Premier (baseado em pontos)
  * Exemplo: De 10.000 para 15.000 pontos
  */
-export async function calculatePremierPrice(current: number, target: number): Promise<number> {
+export async function calculatePremierPrice(
+  current: number,
+  target: number,
+  serviceType: ServiceType = 'RANK_BOOST'
+): Promise<number> {
   if (current >= target) {
     return 0
   }
 
-  const ranges = await getPricingRanges('CS2', 'PREMIER')
+  const ranges = await getPricingRanges('CS2', 'PREMIER', serviceType)
 
   if (ranges.length === 0) {
     throw new Error('No pricing configuration found for CS2 Premier')
@@ -125,8 +133,6 @@ export async function calculatePremierPrice(current: number, target: number): Pr
 
     // Garantir que sempre avançamos (evitar loop infinito)
     if (pointsToProcess <= 0) {
-      // Se chegamos aqui, target <= currentRating (já tratado) ou algo muito errado
-      // Mas se acabamos de pular um gap para start, rangeStart pode ser >= target?
       if (currentRating >= target) break
 
       console.error(`[PRICING] Zero points to process: currentRating=${currentRating}, rangeLimit=${rangeLimit}, range=${JSON.stringify(currentRange)}`)
@@ -148,12 +154,16 @@ export async function calculatePremierPrice(current: number, target: number): Pr
  * Calcula o preço total para Gamers Club (baseado em níveis)
  * Exemplo: Do nível 5 para o nível 10
  */
-export async function calculateGamersClubPrice(current: number, target: number): Promise<number> {
+export async function calculateGamersClubPrice(
+  current: number,
+  target: number,
+  serviceType: ServiceType = 'RANK_BOOST'
+): Promise<number> {
   if (current >= target) {
     return 0
   }
 
-  const ranges = await getPricingRanges('CS2', 'GAMERS_CLUB')
+  const ranges = await getPricingRanges('CS2', 'GAMERS_CLUB', serviceType)
 
   if (ranges.length === 0) {
     throw new Error('No pricing configuration found for CS2 Gamers Club')
@@ -185,13 +195,14 @@ export async function calculatePrice(
   game: Game,
   gameMode: GameMode,
   current: number,
-  target: number
+  target: number,
+  serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<number> {
   switch (gameMode) {
     case 'PREMIER':
-      return calculatePremierPrice(current, target)
+      return calculatePremierPrice(current, target, serviceType)
     case 'GAMERS_CLUB':
-      return calculateGamersClubPrice(current, target)
+      return calculateGamersClubPrice(current, target, serviceType)
     default:
       throw new Error(`Unsupported game mode: ${gameMode}`)
   }
@@ -204,10 +215,11 @@ export async function validatePricingRange(
   game: Game,
   gameMode: GameMode,
   current: number,
-  target: number
+  target: number,
+  serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<{ valid: boolean; error?: string }> {
   try {
-    const ranges = await getPricingRanges(game, gameMode)
+    const ranges = await getPricingRanges(game, gameMode, serviceType)
 
     if (ranges.length === 0) {
       return {

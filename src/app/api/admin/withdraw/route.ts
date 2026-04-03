@@ -63,17 +63,17 @@ export async function POST(request: NextRequest) {
             },
         })
 
-        const availableBalance = paidRevenues._sum.amount || 0
+        // DB stores amounts in reais (Float); convert to centavos for comparison
+        const availableBalanceInReais = paidRevenues._sum.amount || 0
+        const availableBalanceInCents = Math.round(availableBalanceInReais * 100)
 
-        // Converter valor para centavos
-        const amountInCents = Math.round(amount)
-
-        if (amountInCents > availableBalance * 100) {
+        // `amount` from request body is already in centavos (minimum check: 350 = R$3.50)
+        if (amount > availableBalanceInCents) {
             return NextResponse.json(
                 {
                     message: 'Saldo insuficiente',
-                    availableBalance: availableBalance,
-                    requestedAmount: amount / 100
+                    availableBalance: availableBalanceInCents,
+                    requestedAmount: amount,
                 },
                 { status: 400 }
             )
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
             // Criar saque no AbacatePay
             const withdrawResult = await createWithdrawal({
                 externalId,
-                amount: amountInCents,
+                amount: amount, // centavos, as required by AbacatePay
                 pix: {
                     type: pixKeyType as PixKeyType,
                     key: pixKey,
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
                     userId,
                     providerId: withdrawResult.id,
                     externalId,
-                    amount: amountInCents,
+                    amount: amount, // centavos
                     platformFee: withdrawResult.platformFee,
                     pixKeyType,
                     pixKey,

@@ -4,6 +4,8 @@ import { LoginSchema } from '@/schemas/auth'
 import { validateBody } from '@/lib/validate'
 import { AuthService } from '@/services'
 import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorCodes } from '@/lib/error-constants'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,8 +16,8 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          message: 'Muitas tentativas de login. Tente novamente mais tarde.',
-          error: 'RATE_LIMIT_EXCEEDED'
+          message: ErrorMessages.RATE_LIMIT_LOGIN,
+          error: ErrorCodes.RATE_LIMIT_EXCEEDED
         },
         {
           status: 429,
@@ -32,13 +34,13 @@ export async function POST(request: NextRequest) {
     if (!validation.success) {
       if (!body.email || !body.password) {
         return NextResponse.json(
-          { message: 'Email e senha são obrigatórios' },
+          { message: ErrorMessages.AUTH_EMAIL_PASSWORD_REQUIRED },
           { status: 400 }
         )
       }
 
       return NextResponse.json(
-        { message: 'Dados inválidos', errors: validation.errors },
+        { message: ErrorMessages.INVALID_DATA, errors: validation.errors },
         { status: 400 }
       )
     }
@@ -47,14 +49,14 @@ export async function POST(request: NextRequest) {
     const result = await AuthService.validateCredentials(validation.data)
 
     if (!result.success) {
-      if (result.code === 'USER_NOT_VERIFIED') {
+      if (result.code === ErrorCodes.USER_NOT_VERIFIED) {
         return NextResponse.json(
-          { message: 'Conta não verificada. Verifique seu e-mail antes de fazer login.' },
+          { message: ErrorMessages.AUTH_NOT_VERIFIED, code: ErrorCodes.USER_NOT_VERIFIED },
           { status: 403 }
         )
       }
       return NextResponse.json(
-        { message: 'Email ou senha incorretos' },
+        { message: ErrorMessages.AUTH_CREDENTIALS_INVALID },
         { status: 401 }
       )
     }
@@ -94,21 +96,6 @@ export async function POST(request: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('Erro ao fazer login:', error)
-
-    // Check for specific database errors
-    if (error instanceof Error) {
-      if (error.message.includes('connect') || error.message.includes('timeout')) {
-        return NextResponse.json(
-          { message: 'Erro de conexão com o banco de dados. Tente novamente em instantes.' },
-          { status: 503 }
-        )
-      }
-    }
-
-    return NextResponse.json(
-      { message: 'Ocorreu um erro inesperado ao processar seu login. Por favor, tente novamente.' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.AUTH_LOGIN_FAILED, 'POST /api/auth/login')
   }
 }

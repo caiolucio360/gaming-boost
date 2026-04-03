@@ -3,6 +3,27 @@
  * Gerencia automaticamente o token JWT do localStorage
  */
 
+import { ErrorMessages } from '@/lib/error-constants'
+
+/**
+ * Erro de API com código estruturado.
+ * Permite controle de fluxo via instanceof e error.code, sem string matching.
+ */
+export class ApiError extends Error {
+  constructor(message: string, public code?: string, public status?: number) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+function throwApiError(errorData: { message?: string; code?: string }, status: number): never {
+  throw new ApiError(
+    errorData.message || ErrorMessages.CLIENT_REQUEST_ERROR,
+    errorData.code,
+    status
+  )
+}
+
 /**
  * Obtém o token do localStorage
  */
@@ -103,8 +124,8 @@ export async function apiGet<T = unknown>(url: string, options?: RequestOptions)
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Erro na requisição' }))
-    throw new Error(error.message || 'Erro na requisição')
+    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
+    throwApiError(errorData, response.status)
   }
 
   return response.json()
@@ -125,8 +146,8 @@ export async function apiPost<T = unknown>(
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Erro na requisição' }))
-    throw new Error(error.message || 'Erro na requisição')
+    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
+    throwApiError(errorData, response.status)
   }
 
   return response.json()
@@ -147,8 +168,8 @@ export async function apiPut<T = unknown>(
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Erro na requisição' }))
-    throw new Error(error.message || 'Erro na requisição')
+    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
+    throwApiError(errorData, response.status)
   }
 
   return response.json()
@@ -164,8 +185,8 @@ export async function apiDelete<T = unknown>(url: string, options?: RequestOptio
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Erro na requisição' }))
-    throw new Error(error.message || 'Erro na requisição')
+    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
+    throwApiError(errorData, response.status)
   }
 
   return response.json()

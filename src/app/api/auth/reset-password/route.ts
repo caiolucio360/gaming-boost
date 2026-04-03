@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 /**
  * POST /api/auth/reset-password
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return Response.json(
         {
-          error: 'Muitas tentativas. Tente novamente mais tarde.'
+          error: ErrorMessages.RATE_LIMIT_PASSWORD_RESET
         },
         {
           status: 429,
@@ -31,13 +32,13 @@ export async function POST(request: NextRequest) {
 
     if (!token || !password) {
       return Response.json({
-        error: 'Token e senha são obrigatórios'
+        message:ErrorMessages.AUTH_TOKEN_AND_PASSWORD_REQUIRED
       }, { status: 400 })
     }
 
     if (password.length < 6) {
       return Response.json({
-        error: 'A senha deve ter no mínimo 6 caracteres'
+        message:ErrorMessages.AUTH_PASSWORD_TOO_SHORT
       }, { status: 400 })
     }
 
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (users.length === 0) {
       return Response.json({
-        error: 'Token inválido ou expirado'
+        message:ErrorMessages.AUTH_TOKEN_INVALID_OR_EXPIRED
       }, { status: 400 })
     }
 
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     if (!targetUser) {
       return Response.json({
-        error: 'Token inválido ou expirado'
+        message:ErrorMessages.AUTH_TOKEN_INVALID_OR_EXPIRED
       }, { status: 400 })
     }
 
@@ -115,19 +116,6 @@ export async function POST(request: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('Error in reset-password:', error)
-
-    // Check for specific errors
-    if (error instanceof Error) {
-      if (error.message.includes('connect') || error.message.includes('timeout')) {
-        return Response.json({
-          error: 'Erro de conexão temporário. Por favor, tente novamente em instantes.'
-        }, { status: 503 })
-      }
-    }
-
-    return Response.json({
-      error: 'Não foi possível redefinir sua senha no momento. Por favor, solicite um novo link de recuperação.'
-    }, { status: 500 })
+    return createApiErrorResponse(error, ErrorMessages.AUTH_RESET_PASSWORD_FAILED, 'POST /api/auth/reset-password')
   }
 }

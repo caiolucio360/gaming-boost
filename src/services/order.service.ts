@@ -7,8 +7,21 @@
 
 import { prisma } from '@/lib/db'
 import { OrderStatus } from '@/generated/prisma/client'
-import { Result, Failure, success, failure, PaginatedResult, paginatedSuccess } from './types'
+import { Result, Failure, success, failure, ErrorCode, PaginatedResult, paginatedSuccess } from './types'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
+import { ChatService } from './chat.service'
+
+/**
+ * Erro de serviço tipado com código estruturado.
+ * Usado internamente para controle de fluxo via instanceof — sem string matching.
+ */
+class ServiceError extends Error {
+  constructor(message: string, public code: ErrorCode) {
+    super(message)
+    this.name = 'ServiceError'
+  }
+}
 
 // ============================================================================
 // Types
@@ -26,6 +39,7 @@ interface GetOrdersParams {
 interface CreateOrderInput {
   userId: number
   game?: 'CS2'
+  serviceType?: 'RANK_BOOST' | 'DUO_BOOST'
   total: number
   currentRank?: string
   targetRank?: string
@@ -126,7 +140,7 @@ export const OrderService = {
       return paginatedSuccess(orders as OrderWithRelations[], total, page, limit)
     } catch (error) {
       console.error('Error getting orders:', error)
-      return failure('Erro ao buscar pedidos', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pedidos', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -152,7 +166,7 @@ export const OrderService = {
       return success(order as OrderWithRelations | null)
     } catch (error) {
       console.error('Error getting order by ID:', error)
-      return failure('Erro ao buscar pedido', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -175,7 +189,7 @@ export const OrderService = {
       return success(orders as OrderWithRelations[])
     } catch (error) {
       console.error('Error getting user CS2 orders:', error)
-      return failure('Erro ao buscar pedidos', 'DATABASE_ERROR')
+      return failure('Erro ao buscar pedidos', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -204,7 +218,7 @@ export const OrderService = {
       return success({ hasActive: false })
     } catch (error) {
       console.error('Error checking active order:', error)
-      return failure('Erro ao verificar pedidos ativos', 'DATABASE_ERROR')
+      return failure('Erro ao verificar pedidos ativos', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -228,7 +242,7 @@ export const OrderService = {
       return success({ hasActive: false })
     } catch (error) {
       console.error('Error checking booster active order:', error)
-      return failure('Erro ao verificar pedidos ativos do booster', 'DATABASE_ERROR')
+      return failure('Erro ao verificar pedidos ativos do booster', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -295,7 +309,7 @@ export const OrderService = {
       })
     } catch (error) {
       console.error('Error getting commission config:', error)
-      return failure('Erro ao buscar configuração de comissão', 'DATABASE_ERROR')
+      return failure('Erro ao buscar configuração de comissão', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -329,10 +343,10 @@ export const OrderService = {
    * Create a new order with validation
    */
   async createOrder(input: CreateOrderInput): Promise<Result<OrderWithRelations>> {
-    const { userId, game = 'CS2', total, gameMode, ...rest } = input
+    const { userId, game = 'CS2', serviceType = 'RANK_BOOST', total, gameMode, ...rest } = input
 
     try {
-      // Check for duplicate orders in same game mode
+      // Check for duplicate orders in same game mode (only 1 active per mode regardless of service type)
       if (gameMode && (gameMode === 'PREMIER' || gameMode === 'GAMERS_CLUB')) {
         const activeCheck = await this.hasActiveOrderInGameMode(userId, gameMode)
         if (!activeCheck.success) {
@@ -342,7 +356,7 @@ export const OrderService = {
           const modeName = gameMode === 'PREMIER' ? 'Premier' : 'Gamers Club'
           return failure(
             `Você já possui um boost de rank ${modeName} ativo. Finalize ou cancele o pedido anterior antes de criar um novo.`,
-            'DUPLICATE_ORDER'
+            ErrorCodes.DUPLICATE_ORDER
           )
         }
       }
@@ -352,6 +366,7 @@ export const OrderService = {
         data: {
           userId,
           game,
+          serviceType,
           total,
           status: OrderStatus.PENDING,
           gameMode,
@@ -362,7 +377,7 @@ export const OrderService = {
       return success(order as OrderWithRelations)
     } catch (error) {
       console.error('Error creating order:', error)
-      return failure('Erro ao criar pedido', 'DATABASE_ERROR')
+      return failure('Erro ao criar pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -380,15 +395,15 @@ export const OrderService = {
       })
 
       if (!order) {
-        return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
       }
 
       if (order.status !== OrderStatus.PAID) {
-        return failure('Pedido não está pago e disponível para aceitação', 'INVALID_STATUS_TRANSITION')
+        return failure(ErrorMessages.ORDER_NOT_PAID, ErrorCodes.INVALID_STATUS_TRANSITION)
       }
 
       if (order.boosterId) {
-        return failure('Pedido já foi atribuído a outro booster', 'ORDER_ALREADY_ACCEPTED')
+        return failure(ErrorMessages.ORDER_ALREADY_ACCEPTED, ErrorCodes.ORDER_ALREADY_ACCEPTED)
       }
 
       // Check if booster already has an active order
@@ -399,7 +414,7 @@ export const OrderService = {
       if (activeCheck.data.hasActive) {
         return failure(
           `Você já possui um pedido ativo (ID: ${activeCheck.data.orderId}). Finalize-o antes de aceitar um novo.`,
-          'DUPLICATE_ORDER'
+          ErrorCodes.DUPLICATE_ORDER
         )
       }
 
@@ -427,7 +442,7 @@ export const OrderService = {
         })
 
         if (updateResult.count === 0) {
-          throw new Error('ORDER_ALREADY_ACCEPTED')
+          throw new ServiceError(ErrorMessages.ORDER_ALREADY_ACCEPTED, ErrorCodes.ORDER_ALREADY_ACCEPTED)
         }
 
         // Create booster commission
@@ -505,7 +520,7 @@ export const OrderService = {
       })
 
       if (!updatedOrder) {
-        return failure('Erro ao buscar pedido atualizado', 'DATABASE_ERROR')
+        return failure('Erro ao buscar pedido atualizado', ErrorCodes.DATABASE_ERROR)
       }
 
       // Send email notification (async, non-blocking)
@@ -538,11 +553,11 @@ export const OrderService = {
 
       return success(updatedOrder as OrderWithRelations)
     } catch (error: unknown) {
-      if (error instanceof Error && error.message === 'ORDER_ALREADY_ACCEPTED') {
-        return failure('Pedido já foi atribuído a outro booster', 'ORDER_ALREADY_ACCEPTED')
+      if (error instanceof ServiceError) {
+        return failure(error.message, error.code)
       }
       console.error('Error accepting order:', error)
-      return failure('Erro ao aceitar pedido', 'DATABASE_ERROR')
+      return failure('Erro ao aceitar pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -560,15 +575,15 @@ export const OrderService = {
       })
 
       if (!order) {
-        return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
       }
 
       if (order.boosterId !== boosterId) {
-        return failure('Acesso negado. Este pedido não foi atribuído a você.', 'FORBIDDEN')
+        return failure(ErrorMessages.ORDER_ACCESS_DENIED, ErrorCodes.FORBIDDEN)
       }
 
       if (order.status !== OrderStatus.IN_PROGRESS) {
-        return failure('Pedido não está em andamento', 'INVALID_STATUS_TRANSITION')
+        return failure(ErrorMessages.ORDER_NOT_IN_PROGRESS, ErrorCodes.INVALID_STATUS_TRANSITION)
       }
 
       // Fetch withdrawal waiting days config
@@ -620,8 +635,13 @@ export const OrderService = {
       })
 
       if (!updatedOrder) {
-        return failure('Erro ao buscar pedido atualizado', 'DATABASE_ERROR')
+        return failure('Erro ao buscar pedido atualizado', ErrorCodes.DATABASE_ERROR)
       }
+
+      // Wipe Steam credentials from chat (non-blocking, best-effort)
+      ChatService.wipeSteamCredentials(orderId).catch((error) => {
+        console.error('Failed to wipe Steam credentials:', error)
+      })
 
       // Send email notification (async, non-blocking)
       if (updatedOrder.user?.email) {
@@ -654,7 +674,7 @@ export const OrderService = {
       return success(updatedOrder as OrderWithRelations)
     } catch (error) {
       console.error('Error completing order:', error)
-      return failure('Erro ao concluir pedido', 'DATABASE_ERROR')
+      return failure('Erro ao concluir pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -668,13 +688,13 @@ export const OrderService = {
       })
 
       if (!existingOrder) {
-        return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
       }
 
       if (!this.canTransitionStatus(existingOrder.status, status)) {
         return failure(
           `Transição de ${existingOrder.status} para ${status} não permitida`,
-          'INVALID_STATUS_TRANSITION'
+          ErrorCodes.INVALID_STATUS_TRANSITION
         )
       }
 
@@ -690,7 +710,7 @@ export const OrderService = {
       return success(order as OrderWithRelations)
     } catch (error) {
       console.error('Error updating order status:', error)
-      return failure('Erro ao atualizar status do pedido', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar status do pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -705,15 +725,15 @@ export const OrderService = {
       })
 
       if (!order) {
-        return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
       }
 
       if (order.userId !== userId) {
-        return failure('Pedido não pertence ao usuário', 'FORBIDDEN')
+        return failure(ErrorMessages.ORDER_NOT_BELONGS_TO_USER, ErrorCodes.FORBIDDEN)
       }
 
       if (!this.canTransitionStatus(order.status, OrderStatus.CANCELLED)) {
-        return failure('Este pedido não pode ser cancelado', 'ORDER_NOT_CANCELLABLE')
+        return failure(ErrorMessages.ORDER_NOT_CANCELLABLE, ErrorCodes.ORDER_NOT_CANCELLABLE)
       }
 
       const updatedOrder = await prisma.order.update({
@@ -728,7 +748,7 @@ export const OrderService = {
       return success(updatedOrder as OrderWithRelations)
     } catch (error) {
       console.error('Error cancelling order:', error)
-      return failure('Erro ao cancelar pedido', 'DATABASE_ERROR')
+      return failure('Erro ao cancelar pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 }

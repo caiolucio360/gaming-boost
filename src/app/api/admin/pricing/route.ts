@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { db } from '@/lib/db'
-import { Game } from '@/generated/prisma/client'
+import { Game, ServiceType } from '@/generated/prisma/client'
 
 /**
  * Helper to check if a new range overlaps with existing ranges
@@ -13,12 +13,14 @@ async function checkRangeOverlap(
   gameMode: string,
   rangeStart: number,
   rangeEnd: number,
-  excludeId?: number
+  excludeId?: number,
+  serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<{ overlaps: boolean; overlappingRange?: { id: number; rangeStart: number; rangeEnd: number } }> {
   const existingRanges = await db.pricingConfig.findMany({
     where: {
       game,
       gameMode,
+      serviceType,
       enabled: true,
       ...(excludeId ? { id: { not: excludeId } } : {})
     },
@@ -50,10 +52,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const game = searchParams.get('game') as Game | null
     const gameMode = searchParams.get('gameMode')
+    const serviceType = searchParams.get('serviceType') as ServiceType | null
 
     const where: any = {}
     if (game) where.game = game
     if (gameMode) where.gameMode = gameMode
+    if (serviceType) where.serviceType = serviceType
 
     const pricingConfigs = await db.pricingConfig.findMany({
       where,
@@ -84,7 +88,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { game, gameMode, rangeStart, rangeEnd, price, unit, enabled } = body
+    const { game, gameMode, serviceType: bodyServiceType, rangeStart, rangeEnd, price, unit, enabled } = body
+    const svcType: ServiceType = bodyServiceType === 'DUO_BOOST' ? 'DUO_BOOST' : 'RANK_BOOST'
 
     // Validações
     if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price || !unit) {
@@ -102,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Check for overlapping ranges
     const parsedRangeStart = parseInt(rangeStart)
     const parsedRangeEnd = parseInt(rangeEnd)
-    const overlapCheck = await checkRangeOverlap(game, gameMode, parsedRangeStart, parsedRangeEnd)
+    const overlapCheck = await checkRangeOverlap(game, gameMode, parsedRangeStart, parsedRangeEnd, undefined, svcType)
 
     if (overlapCheck.overlaps) {
       const existing = overlapCheck.overlappingRange!
@@ -115,6 +120,7 @@ export async function POST(request: NextRequest) {
       data: {
         game,
         gameMode,
+        serviceType: svcType,
         rangeStart: parseInt(rangeStart),
         rangeEnd: parseInt(rangeEnd),
         price: parseFloat(price),

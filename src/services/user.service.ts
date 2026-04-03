@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db'
 import { Role } from '@/generated/prisma/client'
 import type { UpdateProfileInput } from '@/schemas/auth'
 import { Result, success, failure } from './types'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 
 // ============================================================================
 // Types
@@ -79,7 +80,7 @@ export const UserService = {
       return success(user)
     } catch (error) {
       console.error('Error getting user by ID:', error)
-      return failure('Erro ao buscar usuário', 'DATABASE_ERROR')
+      return failure('Erro ao buscar usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -107,7 +108,7 @@ export const UserService = {
       return success(user)
     } catch (error) {
       console.error('Error getting user by email:', error)
-      return failure('Erro ao buscar usuário', 'DATABASE_ERROR')
+      return failure('Erro ao buscar usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -124,7 +125,7 @@ export const UserService = {
       })
 
       if (!existingUser) {
-        return failure('Usuário não encontrado', 'USER_NOT_FOUND')
+        return failure(ErrorMessages.USER_NOT_FOUND, ErrorCodes.USER_NOT_FOUND)
       }
 
       const updateData: Record<string, unknown> = {}
@@ -157,7 +158,7 @@ export const UserService = {
       return success(user)
     } catch (error) {
       console.error('Error updating profile:', error)
-      return failure('Erro ao atualizar perfil', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar perfil', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -174,13 +175,13 @@ export const UserService = {
       })
 
       if (!existingUser) {
-        return failure('Usuário não encontrado', 'USER_NOT_FOUND')
+        return failure(ErrorMessages.USER_NOT_FOUND, ErrorCodes.USER_NOT_FOUND)
       }
 
       if (!this.canPromoteRole(existingUser.role, newRole)) {
         return failure(
           `Promoção de ${existingUser.role} para ${newRole} não permitida`,
-          'FORBIDDEN'
+          ErrorCodes.FORBIDDEN
         )
       }
 
@@ -200,7 +201,7 @@ export const UserService = {
       return success(user)
     } catch (error) {
       console.error('Error updating role:', error)
-      return failure('Erro ao atualizar role', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar role', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -217,7 +218,7 @@ export const UserService = {
       return success(true)
     } catch (error) {
       console.error('Error updating user active status:', error)
-      return failure('Erro ao atualizar status do usuário', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar status do usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -254,7 +255,7 @@ export const UserService = {
       return success({ users, total })
     } catch (error) {
       console.error('Error getting all users:', error)
-      return failure('Erro ao buscar usuários', 'DATABASE_ERROR')
+      return failure('Erro ao buscar usuários', ErrorCodes.DATABASE_ERROR)
     }
   },
 }

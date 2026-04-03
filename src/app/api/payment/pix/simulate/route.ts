@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { ErrorMessages } from '@/lib/error-constants'
 import { simulatePixPayment } from '@/lib/abacatepay'
 
 export async function POST(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
 
         if (!authResult.authenticated || !authResult.user) {
             return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
+                authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
                 401
             )
         }
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
         if (!payment) {
             return NextResponse.json(
-                { message: 'Pagamento não encontrado' },
+                { message: ErrorMessages.PAYMENT_NOT_FOUND },
                 { status: 404 }
             )
         }
@@ -115,15 +116,6 @@ export async function POST(request: NextRequest) {
             })
         } catch (error) {
             console.error('Erro ao simular pagamento:', error)
-
-            // Erro específico para quando não está em dev mode
-            if (error instanceof Error && error.message.includes('dev')) {
-                return NextResponse.json(
-                    { message: 'Simulação só funciona em ambiente de desenvolvimento' },
-                    { status: 400 }
-                )
-            }
-
             return NextResponse.json(
                 {
                     message: 'Erro ao simular pagamento',

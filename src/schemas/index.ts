@@ -49,7 +49,9 @@ export {
 // Chat schemas
 export {
     SendMessageSchema,
+    SendCredentialsSchema,
     ChatQuerySchema,
     type SendMessageInput,
+    type SendCredentialsInput,
     type ChatQueryInput,
 } from './chat'

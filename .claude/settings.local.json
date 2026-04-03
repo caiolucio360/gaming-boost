@@ -12,7 +12,13 @@
       "Bash(powershell -Command:*)",
       "Bash(powershell -File:*)",
       "Bash(powershell:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(find:*)",
+      "Bash(npm run db:generate:*)",
+      "Bash(npm run:*)",
+      "Bash(npx dotenv:*)",
+      "Bash(set DATABASE_URL=\"postgresql://admin:npg_gW8cqQFyAoY1@ep-damp-glitter-adipnz27-pooler.c-2.us-east-1.aws.neon.tech/gameboost?sslmode=require&channel_binding=require\")",
+      "Bash(npx prisma:*)"
     ]
   }
 }

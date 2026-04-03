@@ -344,7 +344,7 @@ export default function DashboardPage() {
                 <DashboardCard
                   key={order.id}
                   title={order.serviceName || 'Serviço'}
-                  description={`Boost CS2 - ${order.gameMode || 'Premier'}`}
+                  description={`${order.serviceType === 'DUO_BOOST' ? 'Duo Boost' : 'Boost'} CS2 - ${order.gameMode || 'Premier'}`}
                   status={order.status as 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'}
                 >
                   <div className="flex items-start justify-between mb-4">

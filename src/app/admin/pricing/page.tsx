@@ -59,6 +59,7 @@ interface PricingConfig {
   id: number
   game: string
   gameMode: string
+  serviceType: string
   rangeStart: number
   rangeEnd: number
   price: number
@@ -97,13 +98,17 @@ function PricingPageSkeleton() {
             <Skeleton className="h-6 w-20 bg-white/5" />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Skeleton className="h-4 w-12 bg-white/5" />
                 <Skeleton className="h-10 w-full bg-white/5" />
               </div>
               <div className="space-y-2">
                 <Skeleton className="h-4 w-24 bg-white/5" />
+                <Skeleton className="h-10 w-full bg-white/5" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28 bg-white/5" />
                 <Skeleton className="h-10 w-full bg-white/5" />
               </div>
             </div>
@@ -196,6 +201,7 @@ export default function PricingConfigPage() {
   const [configs, setConfigs] = useState<PricingConfig[]>([])
   const [selectedGame, setSelectedGame] = useState<string>('CS2')
   const [selectedMode, setSelectedMode] = useState<string>('PREMIER')
+  const [selectedServiceType, setSelectedServiceType] = useState<string>('RANK_BOOST')
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -234,7 +240,7 @@ export default function PricingConfigPage() {
       fetchConfigs()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, selectedGame, selectedMode])
+  }, [user?.id, selectedGame, selectedMode, selectedServiceType])
 
   // Auto-fill unit when mode changes (only if not editing)
   useEffect(() => {
@@ -282,6 +288,7 @@ export default function PricingConfigPage() {
         const params = new URLSearchParams()
         if (selectedGame) params.append('game', selectedGame)
         if (selectedMode) params.append('gameMode', selectedMode)
+        if (selectedServiceType) params.append('serviceType', selectedServiceType)
 
         const response = await fetch(`/api/admin/pricing?${params}`)
         if (response.ok) {
@@ -311,6 +318,7 @@ export default function PricingConfigPage() {
       const body = {
         game: selectedGame,
         gameMode: selectedMode,
+        serviceType: selectedServiceType,
         rangeStart: parseInt(rangeStart),
         rangeEnd: parseInt(rangeEnd),
         price: parseFloat(price),
@@ -468,6 +476,7 @@ export default function PricingConfigPage() {
         body: JSON.stringify({
           game: selectedGame,
           gameMode: selectedMode,
+          serviceType: selectedServiceType,
           current: currentValue,
           target: targetValue,
         }),
@@ -542,7 +551,7 @@ export default function PricingConfigPage() {
             <CardTitle className="text-white font-orbitron text-lg">Filtros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-brand-gray-300">Jogo</Label>
                 <Select value={selectedGame} onValueChange={setSelectedGame}>
@@ -568,6 +577,23 @@ export default function PricingConfigPage() {
                   <SelectContent position="popper" sideOffset={4}>
                     <SelectItem value="PREMIER">Premier</SelectItem>
                     <SelectItem value="GAMERS_CLUB">Gamers Club</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-brand-gray-300">Tipo de Serviço</Label>
+                <Select value={selectedServiceType} onValueChange={(value) => {
+                  setSelectedServiceType(value)
+                  setCalcCurrent('')
+                  setCalcTarget('')
+                  setCalcResult(null)
+                }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" sideOffset={4}>
+                    <SelectItem value="RANK_BOOST">Rank Boost</SelectItem>
+                    <SelectItem value="DUO_BOOST">Duo Boost</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -4,6 +4,8 @@ import { RegisterSchema } from '@/schemas/auth'
 import { validateBody } from '@/lib/validate'
 import { AuthService } from '@/services'
 import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorCodes } from '@/lib/error-constants'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,8 +16,8 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          message: 'Muitas tentativas de registro. Tente novamente mais tarde.',
-          error: 'RATE_LIMIT_EXCEEDED'
+          message: ErrorMessages.RATE_LIMIT_REGISTER,
+          error: ErrorCodes.RATE_LIMIT_EXCEEDED
         },
         {
           status: 429,
@@ -36,27 +38,27 @@ export async function POST(request: NextRequest) {
 
       if (!body.email || !body.password) {
         return NextResponse.json(
-          { message: 'Email e senha são obrigatórios' },
+          { message: ErrorMessages.AUTH_EMAIL_PASSWORD_REQUIRED },
           { status: 400 }
         )
       }
 
       if (hasPasswordError) {
         return NextResponse.json(
-          { message: 'A senha deve ter pelo menos 6 caracteres' },
+          { message: ErrorMessages.AUTH_PASSWORD_TOO_SHORT },
           { status: 400 }
         )
       }
 
       if (hasEmailError) {
         return NextResponse.json(
-          { message: 'Email inválido' },
+          { message: ErrorMessages.AUTH_INVALID_EMAIL },
           { status: 400 }
         )
       }
 
       return NextResponse.json(
-        { message: 'Dados inválidos', errors },
+        { message: ErrorMessages.INVALID_DATA, errors },
         { status: 400 }
       )
     }
@@ -92,27 +94,6 @@ export async function POST(request: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('Erro ao registrar usuário:', error)
-
-    // Check for specific database errors
-    if (error instanceof Error) {
-      if (error.message.includes('connect') || error.message.includes('timeout')) {
-        return NextResponse.json(
-          { message: 'Erro de conexão com o banco de dados. Tente novamente em instantes.' },
-          { status: 503 }
-        )
-      }
-      if (error.message.includes('Unique constraint')) {
-        return NextResponse.json(
-          { message: 'Este email já está cadastrado. Tente fazer login ou use outro email.' },
-          { status: 400 }
-        )
-      }
-    }
-
-    return NextResponse.json(
-      { message: 'Não foi possível criar sua conta no momento. Por favor, tente novamente.' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.AUTH_REGISTER_FAILED, 'POST /api/auth/register')
   }
 }

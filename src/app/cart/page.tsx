@@ -17,7 +17,8 @@ import {
 } from 'lucide-react'
 import { CartItem } from '@/types'
 import { showSuccess, showWarning, showLoading, updateToSuccess, updateToError } from '@/lib/toast'
-import { apiPost } from '@/lib/api-client'
+import { apiPost, ApiError } from '@/lib/api-client'
+import { ErrorCodes } from '@/lib/error-constants'
 import { formatPrice } from '@/lib/utils'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 
@@ -83,13 +84,13 @@ export default function CartPage() {
             failedItems.push(item.serviceName || 'Item sem nome')
             console.error('Erro ao criar order para item: resposta inválida', item)
           }
-        } catch (error: any) {
-          const errorMessage = error?.message || 'Erro desconhecido ao criar pedido'
-          console.error('Erro ao criar order para item:', item, errorMessage)
-          
+        } catch (error: unknown) {
           const itemName = item.serviceName || 'Item sem nome'
-          if (errorMessage.includes('já possui') || errorMessage.includes('modalidade')) {
-            failedItems.push(`${itemName} (${errorMessage})`)
+          console.error('Erro ao criar order para item:', item, error)
+
+          // Erros de negócio (duplicata, validação) — mostrar mensagem detalhada ao usuário
+          if (error instanceof ApiError && (error.code === ErrorCodes.DUPLICATE_ORDER || error.code === ErrorCodes.VALIDATION_ERROR)) {
+            failedItems.push(`${itemName} (${error.message})`)
           } else {
             failedItems.push(itemName)
           }

@@ -12,6 +12,7 @@ import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { refundPixPayment } from '@/lib/abacatepay'
 import { sendOrderCancelledEmail } from '@/lib/email'
 import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { ChatService } from '@/services'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -29,7 +30,7 @@ export async function POST(
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          error: 'Muitas tentativas. Aguarde um momento.',
+          message: 'Muitas tentativas. Aguarde um momento.',
         },
         {
           status: 429,
@@ -56,7 +57,7 @@ export async function POST(
 
     if (isNaN(orderId)) {
       return NextResponse.json(
-        { error: 'ID de pedido inválido' },
+        { message: 'ID de pedido inválido' },
         { status: 400 }
       )
     }
@@ -89,7 +90,7 @@ export async function POST(
 
     if (!order) {
       return NextResponse.json(
-        { error: 'Pedido não encontrado' },
+        { message: 'Pedido não encontrado' },
         { status: 404 }
       )
     }
@@ -97,7 +98,7 @@ export async function POST(
     // Verify ownership: only the order owner can cancel
     if (order.userId !== userId) {
       return NextResponse.json(
-        { error: 'Você não tem permissão para cancelar este pedido' },
+        { message: 'Você não tem permissão para cancelar este pedido' },
         { status: 403 }
       )
     }
@@ -105,14 +106,14 @@ export async function POST(
     // Check if order can be cancelled
     if (order.status === 'CANCELLED') {
       return NextResponse.json(
-        { error: 'Este pedido já foi cancelado' },
+        { message: 'Este pedido já foi cancelado' },
         { status: 400 }
       )
     }
 
     if (order.status === 'COMPLETED') {
       return NextResponse.json(
-        { error: 'Pedidos já concluídos não podem ser cancelados. Use o sistema de disputas se houver algum problema.' },
+        { message: 'Pedidos já concluídos não podem ser cancelados. Use o sistema de disputas se houver algum problema.' },
         { status: 400 }
       )
     }
@@ -120,7 +121,7 @@ export async function POST(
     if (order.status === 'IN_PROGRESS') {
       return NextResponse.json(
         {
-          error: 'Este pedido já está em andamento e não pode ser cancelado. Entre em contato com o suporte ou abra uma disputa se necessário.',
+          message: 'Este pedido já está em andamento e não pode ser cancelado. Entre em contato com o suporte ou abra uma disputa se necessário.',
           canDispute: true,
         },
         { status: 400 }
@@ -155,7 +156,7 @@ export async function POST(
         // Let admin handle it manually
         return NextResponse.json(
           {
-            error: 'Não foi possível processar o reembolso automaticamente. Entre em contato com o suporte.',
+            message: 'Não foi possível processar o reembolso automaticamente. Entre em contato com o suporte.',
             details: refundError,
           },
           { status: 500 }
@@ -187,6 +188,11 @@ export async function POST(
       }
 
       return { updatedOrder: updated }
+    })
+
+    // Wipe Steam credentials from chat (non-blocking, best-effort)
+    ChatService.wipeSteamCredentials(orderId).catch((error) => {
+      console.error(`Failed to wipe Steam credentials for order #${orderId}:`, error)
     })
 
     // Send cancellation email to client
@@ -223,7 +229,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        error: 'Erro ao cancelar pedido. Tente novamente ou entre em contato com o suporte.',
+        message: 'Erro ao cancelar pedido. Tente novamente ou entre em contato com o suporte.',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

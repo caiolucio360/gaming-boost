@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { db } from '@/lib/db'
-import { Game } from '@/generated/prisma/client'
+import { Game, ServiceType } from '@/generated/prisma/client'
 
 /**
  * Helper to check if a range overlaps with existing ranges
@@ -12,12 +12,14 @@ async function checkRangeOverlap(
   gameMode: string,
   rangeStart: number,
   rangeEnd: number,
-  excludeId: number
+  excludeId: number,
+  serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<{ overlaps: boolean; overlappingRange?: { id: number; rangeStart: number; rangeEnd: number } }> {
   const existingRanges = await db.pricingConfig.findMany({
     where: {
       game,
       gameMode,
+      serviceType,
       enabled: true,
       id: { not: excludeId }
     },
@@ -87,7 +89,8 @@ export async function PUT(
         existing.gameMode,
         newRangeStart,
         newRangeEnd,
-        id
+        id,
+        existing.serviceType
       )
 
       if (overlapCheck.overlaps) {
@@ -162,7 +165,8 @@ export async function PATCH(
         existing.gameMode,
         existing.rangeStart,
         existing.rangeEnd,
-        id
+        id,
+        existing.serviceType
       )
 
       if (overlapCheck.overlaps) {

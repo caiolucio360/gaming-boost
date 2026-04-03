@@ -128,12 +128,12 @@ async function main() {
 
     for (const r of premierPricing) {
         await prisma.pricingConfig.upsert({
-            where: { game_gameMode_rangeStart: { game: 'CS2', gameMode: 'PREMIER', rangeStart: r.rangeStart } },
+            where: { game_gameMode_serviceType_rangeStart: { game: 'CS2', gameMode: 'PREMIER', serviceType: 'RANK_BOOST', rangeStart: r.rangeStart } },
             update: { rangeEnd: r.rangeEnd, price: r.price },
-            create: { game: 'CS2', gameMode: 'PREMIER', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1000 pontos', enabled: true },
+            create: { game: 'CS2', gameMode: 'PREMIER', serviceType: 'RANK_BOOST', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1000 pontos', enabled: true },
         })
     }
-    console.log('  ✓ Premier pricing (6 ranges)')
+    console.log('  ✓ Premier Rank Boost pricing (6 ranges)')
 
     const gcPricing = [
         { rangeStart: 1, rangeEnd: 10, price: 20 },
@@ -145,12 +145,48 @@ async function main() {
 
     for (const r of gcPricing) {
         await prisma.pricingConfig.upsert({
-            where: { game_gameMode_rangeStart: { game: 'CS2', gameMode: 'GAMERS_CLUB', rangeStart: r.rangeStart } },
+            where: { game_gameMode_serviceType_rangeStart: { game: 'CS2', gameMode: 'GAMERS_CLUB', serviceType: 'RANK_BOOST', rangeStart: r.rangeStart } },
             update: { rangeEnd: r.rangeEnd, price: r.price },
-            create: { game: 'CS2', gameMode: 'GAMERS_CLUB', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1 nível', enabled: true },
+            create: { game: 'CS2', gameMode: 'GAMERS_CLUB', serviceType: 'RANK_BOOST', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1 nível', enabled: true },
         })
     }
-    console.log('  ✓ Gamers Club pricing (5 ranges)')
+    console.log('  ✓ Gamers Club Rank Boost pricing (5 ranges)')
+
+    // Duo Boost pricing (higher prices than Rank Boost)
+    const premierDuoPricing = [
+        { rangeStart: 0, rangeEnd: 4999, price: 35 },
+        { rangeStart: 5000, rangeEnd: 9999, price: 50 },
+        { rangeStart: 10000, rangeEnd: 14999, price: 65 },
+        { rangeStart: 15000, rangeEnd: 19999, price: 75 },
+        { rangeStart: 20000, rangeEnd: 24999, price: 90 },
+        { rangeStart: 25000, rangeEnd: 26000, price: 130 },
+    ]
+
+    for (const r of premierDuoPricing) {
+        await prisma.pricingConfig.upsert({
+            where: { game_gameMode_serviceType_rangeStart: { game: 'CS2', gameMode: 'PREMIER', serviceType: 'DUO_BOOST', rangeStart: r.rangeStart } },
+            update: { rangeEnd: r.rangeEnd, price: r.price },
+            create: { game: 'CS2', gameMode: 'PREMIER', serviceType: 'DUO_BOOST', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1000 pontos', enabled: true },
+        })
+    }
+    console.log('  ✓ Premier Duo Boost pricing (6 ranges)')
+
+    const gcDuoPricing = [
+        { rangeStart: 1, rangeEnd: 10, price: 30 },
+        { rangeStart: 11, rangeEnd: 14, price: 55 },
+        { rangeStart: 15, rangeEnd: 17, price: 70 },
+        { rangeStart: 18, rangeEnd: 19, price: 100 },
+        { rangeStart: 20, rangeEnd: 20, price: 170 },
+    ]
+
+    for (const r of gcDuoPricing) {
+        await prisma.pricingConfig.upsert({
+            where: { game_gameMode_serviceType_rangeStart: { game: 'CS2', gameMode: 'GAMERS_CLUB', serviceType: 'DUO_BOOST', rangeStart: r.rangeStart } },
+            update: { rangeEnd: r.rangeEnd, price: r.price },
+            create: { game: 'CS2', gameMode: 'GAMERS_CLUB', serviceType: 'DUO_BOOST', rangeStart: r.rangeStart, rangeEnd: r.rangeEnd, price: r.price, unit: '1 nível', enabled: true },
+        })
+    }
+    console.log('  ✓ Gamers Club Duo Boost pricing (5 ranges)')
 
     // SUMMARY
     console.log('\n' + '='.repeat(50))

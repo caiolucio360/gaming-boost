@@ -3,7 +3,7 @@ import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { rateLimit, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import { ChatService } from '@/services'
-import { SendMessageSchema, ChatQuerySchema } from '@/schemas'
+import { SendMessageSchema, SendCredentialsSchema, ChatQuerySchema } from '@/schemas'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -132,6 +132,47 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Parse and validate request body
     const body = await request.json()
+
+    // Route to appropriate handler based on messageType
+    if (body?.messageType === 'STEAM_CREDENTIALS') {
+      const parseResult = SendCredentialsSchema.safeParse(body)
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: parseResult.error.issues[0]?.message || 'Dados inválidos' },
+          { status: 400, headers: createRateLimitHeaders(rateLimitResult) }
+        )
+      }
+
+      const { credentials } = parseResult.data
+      const result = await ChatService.sendMessage({
+        orderId,
+        authorId: userId,
+        messageType: 'STEAM_CREDENTIALS',
+        credentials,
+      })
+
+      if (!result.success) {
+        const statusMap: Record<string, number> = {
+          'ORDER_NOT_FOUND': 404,
+          'USER_NOT_FOUND': 404,
+          'CHAT_ACCESS_DENIED': 403,
+          'CHAT_DISABLED': 400,
+          'ENCRYPTION_ERROR': 500,
+          'INVALID_DATA': 400,
+        }
+        const status = result.code ? statusMap[result.code] || 500 : 500
+        return NextResponse.json(
+          { message: result.error, code: result.code },
+          { status, headers: createRateLimitHeaders(rateLimitResult) }
+        )
+      }
+
+      return NextResponse.json(
+        { message: result.data },
+        { status: 201, headers: createRateLimitHeaders(rateLimitResult) }
+      )
+    }
+
     const parseResult = SendMessageSchema.safeParse(body)
 
     if (!parseResult.success) {

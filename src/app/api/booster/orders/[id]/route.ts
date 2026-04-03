@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { getStatusForError } from '@/lib/error-constants'
 import { OrderService } from '@/services'
 
 // POST - Accept an available order
@@ -12,7 +13,7 @@ export async function POST(
     const authResult = await verifyBooster(request)
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
+        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
         401
       )
     }
@@ -34,14 +35,7 @@ export async function POST(
 
     if (!result.success) {
       // Map error codes to appropriate HTTP status
-      const statusMap: Record<string, number> = {
-        'ORDER_NOT_FOUND': 404,
-        'ORDER_ALREADY_ACCEPTED': 400,
-        'INVALID_STATUS_TRANSITION': 400,
-        'DUPLICATE_ORDER': 400,
-        'FORBIDDEN': 403,
-      }
-      const status = result.code ? statusMap[result.code] || 500 : 500
+      const status = result.code ? getStatusForError(result.code) : 500
 
       return NextResponse.json(
         { message: result.error, code: result.code },
@@ -67,7 +61,7 @@ export async function PUT(
     const authResult = await verifyBooster(request)
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
+        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
         401
       )
     }
@@ -113,13 +107,13 @@ export async function PUT(
       const orderResult = await OrderService.getOrderById(orderId)
       if (!orderResult.success || !orderResult.data) {
         return NextResponse.json(
-          { message: 'Pedido não encontrado' },
+          { message: ErrorMessages.ORDER_NOT_FOUND },
           { status: 404 }
         )
       }
       if (orderResult.data.boosterId !== boosterId) {
         return NextResponse.json(
-          { message: 'Acesso negado. Este pedido não foi atribuído a você.' },
+          { message: ErrorMessages.ORDER_ACCESS_DENIED },
           { status: 403 }
         )
       }
@@ -128,12 +122,7 @@ export async function PUT(
 
     if (!result.success) {
       // Map error codes to appropriate HTTP status
-      const statusMap: Record<string, number> = {
-        'ORDER_NOT_FOUND': 404,
-        'INVALID_STATUS_TRANSITION': 400,
-        'FORBIDDEN': 403,
-      }
-      const statusCode = result.code ? statusMap[result.code] || 500 : 500
+      const statusCode = result.code ? getStatusForError(result.code) : 500
 
       return NextResponse.json(
         { message: result.error, code: result.code },

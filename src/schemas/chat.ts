@@ -11,7 +11,7 @@ import { z } from 'zod'
 const MAX_MESSAGE_LENGTH = 2000
 
 /**
- * Schema for sending a chat message
+ * Schema for sending a regular text chat message
  */
 export const SendMessageSchema = z.object({
   content: z
@@ -19,6 +19,17 @@ export const SendMessageSchema = z.object({
     .min(1, 'Mensagem não pode estar vazia')
     .max(MAX_MESSAGE_LENGTH, `Mensagem deve ter no máximo ${MAX_MESSAGE_LENGTH} caracteres`)
     .trim(),
+})
+
+/**
+ * Schema for sending Steam credentials via chat
+ */
+export const SendCredentialsSchema = z.object({
+  messageType: z.literal('STEAM_CREDENTIALS'),
+  credentials: z.object({
+    username: z.string().min(1, 'Usuário Steam é obrigatório').max(100),
+    password: z.string().min(1, 'Senha Steam é obrigatória').max(200),
+  }),
 })
 
 /**
@@ -31,4 +42,5 @@ export const ChatQuerySchema = z.object({
 
 // Type exports
 export type SendMessageInput = z.infer<typeof SendMessageSchema>
+export type SendCredentialsInput = z.infer<typeof SendCredentialsSchema>
 export type ChatQueryInput = z.infer<typeof ChatQuerySchema>

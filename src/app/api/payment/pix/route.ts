@@ -164,7 +164,6 @@ export async function POST(request: NextRequest) {
       const payment = await prisma.payment.create({
         data: {
           orderId: order.id,
-          method: 'PIX',
           providerId: pixData.id,
           pixCode: pixData.brCode,
           qrCode: pixData.brCodeBase64,

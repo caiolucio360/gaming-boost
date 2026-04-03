@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 // GET - Listar pedidos disponíveis e atribuídos ao booster
 export async function GET(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     const authResult = await verifyBooster(request)
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
+        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
         401
       )
     }
@@ -20,6 +21,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') // 'available' | 'assigned' | 'completed'
     const status = searchParams.get('status')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
     let where: any = {}
 
@@ -56,35 +59,40 @@ export async function GET(request: NextRequest) {
       where.status = status
     }
 
-    const orders = await prisma.order.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          booster: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          commission: {
+            select: {
+              id: true,
+              amount: true,
+              percentage: true,
+              status: true,
+              paidAt: true,
+            },
           },
         },
-        booster: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-        commission: {
-          select: {
-            id: true,
-            amount: true,
-            percentage: true,
-            status: true,
-            paidAt: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.order.count({ where }),
+    ])
 
     // Calcular estatísticas
     const stats = {
@@ -132,9 +140,11 @@ export async function GET(request: NextRequest) {
     // Map orders to include constructed service object
     const mappedOrders = orders.map((order: any) => {
       const gameMode = order.gameMode || 'PREMIER'
+      const isDuo = order.serviceType === 'DUO_BOOST'
+      const typeLabel = isDuo ? 'Duo Boost' : 'Boost'
       const serviceName = gameMode === 'GAMERS_CLUB'
-        ? `Boost Gamers Club ${order.currentRank || ''} → ${order.targetRank || ''}`.trim()
-        : `Boost Premier ${order.currentRating || order.currentRank || ''} → ${order.targetRating || order.targetRank || ''}`.trim()
+        ? `${typeLabel} Gamers Club ${order.currentRank || ''} → ${order.targetRank || ''}`.trim()
+        : `${typeLabel} Premier ${order.currentRating || order.currentRank || ''} → ${order.targetRating || order.targetRank || ''}`.trim()
 
       return {
         ...order,
@@ -142,6 +152,7 @@ export async function GET(request: NextRequest) {
           name: serviceName || 'Boost CS2',
           game: order.game || 'CS2',
           type: order.gameMode || 'Boost de Rank',
+          serviceType: order.serviceType || 'RANK_BOOST',
           description: serviceName
         }
       }
@@ -157,14 +168,11 @@ export async function GET(request: NextRequest) {
           totalEarnings: stats.totalEarnings._sum.amount || 0,
           pendingEarnings: stats.pendingEarnings._sum.amount || 0,
         },
+        pagination: { total, limit, offset },
       },
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao buscar pedidos do booster:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pedidos' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/booster/orders')
   }
 }

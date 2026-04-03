@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs'
 import type { RegisterInput, LoginInput } from '@/schemas/auth'
 import { VerificationService } from './verification.service'
 import { Result, success, failure } from './types'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 
 
 // ============================================================================
@@ -50,7 +51,7 @@ export const AuthService = {
       })
 
       if (existingUser) {
-        return failure('Email já cadastrado', 'VALIDATION_ERROR')
+        return failure(ErrorMessages.AUTH_EMAIL_ALREADY_EXISTS, ErrorCodes.VALIDATION_ERROR)
       }
 
       // Hash password
@@ -92,7 +93,7 @@ export const AuthService = {
       })
     } catch (error) {
       console.error('Error registering user:', error)
-      return failure('Erro ao criar usuário', 'DATABASE_ERROR')
+      return failure('Erro ao criar usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -109,19 +110,19 @@ export const AuthService = {
       })
 
       if (!user) {
-        return failure('Credenciais inválidas', 'UNAUTHORIZED')
+        return failure(ErrorMessages.AUTH_CREDENTIALS_INVALID, ErrorCodes.UNAUTHORIZED)
       }
 
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password || '')
 
       if (!isPasswordValid) {
-        return failure('Credenciais inválidas', 'UNAUTHORIZED')
+        return failure(ErrorMessages.AUTH_CREDENTIALS_INVALID, ErrorCodes.UNAUTHORIZED)
       }
 
       // Check if user is active
       if (!user.active) {
-        return failure('Conta não verificada', 'USER_NOT_VERIFIED')
+        return failure(ErrorMessages.AUTH_NOT_VERIFIED, ErrorCodes.USER_NOT_VERIFIED)
       }
 
       return success({
@@ -133,7 +134,7 @@ export const AuthService = {
       })
     } catch (error) {
       console.error('Error validating credentials:', error)
-      return failure('Erro ao validar credenciais', 'DATABASE_ERROR')
+      return failure('Erro ao validar credenciais', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -164,7 +165,7 @@ export const AuthService = {
       })
     } catch (error) {
       console.error('Error getting user by ID:', error)
-      return failure('Erro ao buscar usuário', 'DATABASE_ERROR')
+      return failure('Erro ao buscar usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -195,7 +196,7 @@ export const AuthService = {
       })
     } catch (error) {
       console.error('Error getting user by email:', error)
-      return failure('Erro ao buscar usuário', 'DATABASE_ERROR')
+      return failure('Erro ao buscar usuário', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -214,7 +215,7 @@ export const AuthService = {
       return success(true)
     } catch (error) {
       console.error('Error updating password:', error)
-      return failure('Erro ao atualizar senha', 'DATABASE_ERROR')
+      return failure('Erro ao atualizar senha', ErrorCodes.DATABASE_ERROR)
     }
   },
 
@@ -237,7 +238,7 @@ export const AuthService = {
       })
 
       if (activeOrders > 0) {
-        return failure('Não é possível excluir a conta com pedidos em andamento.', 'USER_HAS_ACTIVE_ORDERS')
+        return failure('Não é possível excluir a conta com pedidos em andamento.', ErrorCodes.USER_HAS_ACTIVE_ORDERS)
       }
 
       // 2. Check for active orders (as booster) - if applicable
@@ -254,7 +255,7 @@ export const AuthService = {
         })
 
         if (activeBoosterOrders > 0) {
-          return failure('Não é possível excluir a conta com trabalhos em andamento.', 'USER_HAS_ACTIVE_ORDERS')
+          return failure('Não é possível excluir a conta com trabalhos em andamento.', ErrorCodes.USER_HAS_ACTIVE_ORDERS)
         }
       }
 
@@ -284,7 +285,7 @@ export const AuthService = {
     } catch (error) {
       console.error('Error deleting user:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-      return failure(`Erro ao excluir conta: ${errorMessage}`, 'DATABASE_ERROR')
+      return failure(`Erro ao excluir conta: ${errorMessage}`, ErrorCodes.DATABASE_ERROR)
     }
   },
 }

@@ -7,11 +7,12 @@ import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
-import { getGameConfig, GameId, GameMode } from '@/lib/games-config'
+import { getGameConfig, GameId, GameMode, ServiceType } from '@/lib/games-config'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { showError } from '@/lib/toast'
 import { AlertCircle, Calculator, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface GameCalculatorProps {
   gameId?: GameId
@@ -24,6 +25,7 @@ interface ActiveOrder {
 }
 
 export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType>('RANK_BOOST')
   const [selectedMode, setSelectedMode] = useState<GameMode>('PREMIER')
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
@@ -31,12 +33,48 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
+  const [dynamicPoints, setDynamicPoints] = useState<number[] | null>(null)
+  const [isLoadingRanges, setIsLoadingRanges] = useState(false)
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
 
   const gameConfig = getGameConfig(gameId)
   const modeConfig = gameConfig?.modes?.[selectedMode]
+  const serviceTypeInfo = gameConfig?.serviceTypeInfo?.[selectedServiceType]
+
+  // Fetch dynamic rating points from API
+  useEffect(() => {
+    const fetchRanges = async () => {
+      setIsLoadingRanges(true)
+      try {
+        const params = new URLSearchParams({
+          game: gameId,
+          gameMode: selectedMode,
+          serviceType: selectedServiceType,
+        })
+        const response = await fetch(`/api/pricing/ranges?${params}`)
+        if (response.ok) {
+          const data = await response.json()
+          const points = data.data?.points
+          if (points && points.length > 0) {
+            setDynamicPoints(points)
+          } else {
+            // No configs for this combination — fall back to static
+            setDynamicPoints(null)
+          }
+        } else {
+          setDynamicPoints(null)
+        }
+      } catch {
+        setDynamicPoints(null)
+      } finally {
+        setIsLoadingRanges(false)
+      }
+    }
+
+    fetchRanges()
+  }, [gameId, selectedMode, selectedServiceType])
 
   // Check for active orders when user is logged in or mode changes
   useEffect(() => {
@@ -82,14 +120,15 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     setIsLoading(true)
     const currentValue = selectedMode === 'PREMIER' ? parseInt(selectedCurrent) * 1000 : parseInt(selectedCurrent)
     const targetValue = selectedMode === 'PREMIER' ? parseInt(selectedTarget) * 1000 : parseInt(selectedTarget)
-    
+
     const displayCurrent = selectedMode === 'PREMIER' ? `${selectedCurrent}K` : `Nível ${selectedCurrent}`
     const displayTarget = selectedMode === 'PREMIER' ? `${selectedTarget}K` : `Nível ${selectedTarget}`
+    const typeLabel = serviceTypeInfo?.displayName || 'Boost'
 
     const cartItem: CartItem = {
       game: gameId,
-      serviceName: `Boost ${gameConfig.displayName} ${modeConfig.displayName}: ${displayCurrent} → ${displayTarget}`,
-      description: `Boost profissional no ${gameConfig.name} ${modeConfig.name} de ${displayCurrent} para ${displayTarget}`,
+      serviceName: `${typeLabel} ${gameConfig.displayName} ${modeConfig.displayName}: ${displayCurrent} → ${displayTarget}`,
+      description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} de ${displayCurrent} para ${displayTarget}`,
       currentRank: displayCurrent,
       targetRank: displayTarget,
       price,
@@ -99,6 +138,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         targetRating: targetValue,
         gameType: `${gameId}_${selectedMode}`,
         mode: selectedMode,
+        serviceType: selectedServiceType,
       },
     }
 
@@ -129,44 +169,53 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   // Reset seleções ao mudar de modo com transição
   const handleModeChange = (mode: GameMode) => {
     if (mode === selectedMode) return
-    
+
     setSelectedMode(mode)
     setSelectedCurrent('')
     setSelectedTarget('')
     setPrice(0)
   }
 
-  // Obter pontos de rating baseado no modo
+  // Reset seleções ao mudar de tipo de serviço
+  const handleServiceTypeChange = (type: ServiceType) => {
+    if (type === selectedServiceType) return
+
+    setSelectedServiceType(type)
+    setSelectedCurrent('')
+    setSelectedTarget('')
+    setPrice(0)
+  }
+
+  // Obter pontos de rating baseado no modo (dynamic from API or fallback to static)
   const getRatingPoints = (isTarget: boolean = false) => {
     if (!modeConfig) return []
-    
-    if (modeConfig.ratingPoints) {
-      // Filtrar pontos baseado nos limites
-      let filteredPoints = modeConfig.ratingPoints
-      
-      if (selectedMode === 'PREMIER') {
-        // Current: até 25K, Target: até 26K
-        filteredPoints = isTarget 
-          ? modeConfig.ratingPoints // Target pode ir até 26K
-          : modeConfig.ratingPoints.filter(p => p <= 25000) // Current até 25K
-      } else if (selectedMode === 'GAMERS_CLUB') {
-        // Current: até 19, Target: até 20
-        filteredPoints = isTarget
-          ? modeConfig.ratingPoints // Target pode ir até 20
-          : modeConfig.ratingPoints.filter(p => p <= 19) // Current até 19
-      }
-      
-      return filteredPoints.map(value => {
-        // Display value based on mode
-        const display = selectedMode === 'PREMIER' 
-          ? `${value / 1000}K` 
-          : value.toString()
-        
-        return { value, display }
-      })
+
+    // Use dynamic points if available, otherwise fall back to static config
+    const basePoints = dynamicPoints || modeConfig.ratingPoints
+    if (!basePoints) return []
+
+    let filteredPoints = basePoints
+
+    if (selectedMode === 'PREMIER') {
+      // Current: all except last, Target: all except first
+      filteredPoints = isTarget
+        ? basePoints
+        : basePoints.filter(p => p < basePoints[basePoints.length - 1])
+    } else if (selectedMode === 'GAMERS_CLUB') {
+      // Current: all except last, Target: all except first
+      filteredPoints = isTarget
+        ? basePoints
+        : basePoints.filter(p => p < basePoints[basePoints.length - 1])
     }
-    
-    return []
+
+    return filteredPoints.map(value => {
+      // Display value based on mode
+      const display = selectedMode === 'PREMIER'
+        ? `${value / 1000}K`
+        : value.toString()
+
+      return { value, display }
+    })
   }
 
   const currentRatingPoints = getRatingPoints(false)
@@ -201,6 +250,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         body: JSON.stringify({
           game: gameId,
           gameMode: selectedMode,
+          serviceType: selectedServiceType,
           current: currentValue,
           target: targetValue,
         }),
@@ -256,6 +306,39 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Service Type Selector */}
+          {gameConfig.supportedServiceTypes && gameConfig.supportedServiceTypes.length > 1 && (
+            <div className="mb-4">
+              <Tabs value={selectedServiceType} onValueChange={(value) => handleServiceTypeChange(value as ServiceType)} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
+                  <TabsTrigger
+                    value="RANK_BOOST"
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
+                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+                  >
+                    Rank Boost
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="DUO_BOOST"
+                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
+                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+                  >
+                    Duo Boost
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+
+          {/* Service Type Description */}
+          {serviceTypeInfo && (
+            <p className="text-xs text-brand-gray-400 text-center mb-3 font-rajdhani">
+              {serviceTypeInfo.description}
+            </p>
+          )}
+
           {/* Mode Selector */}
           {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
             <div className="mb-4">
@@ -312,61 +395,82 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
           <div className="space-y-4">
             {/* Rating Selection - Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Current Rating */}
-              <div>
-                <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                  {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
-                </h3>
-                <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                  {currentRatingPoints.map((point) => {
-                    const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                    const isSelected = selectedCurrent === displayValue
-
-                    return (
-                      <button
-                        key={point.value}
-                        onClick={() => handleCurrentSelect(point.value)}
-                        className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                          ${isSelected
-                            ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
-                            : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                          }`}
-                      >
-                        {point.display}
-                      </button>
-                    )
-                  })}
+            {isLoadingRanges ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
+                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                    {Array.from({ length: selectedMode === 'PREMIER' ? 10 : 12 }).map((_, i) => (
+                      <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Skeleton className="h-6 w-44 mb-2 bg-white/5" />
+                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                    {Array.from({ length: selectedMode === 'PREMIER' ? 10 : 12 }).map((_, i) => (
+                      <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
+                    ))}
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Current Rating */}
+                <div>
+                  <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
+                    {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
+                  </h3>
+                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                    {currentRatingPoints.map((point) => {
+                      const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
+                      const isSelected = selectedCurrent === displayValue
 
-              {/* Target Rating */}
-              <div>
-                <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                  {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
-                </h3>
-                <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                  {targetRatingPoints.map((point) => {
-                    const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                    const isSelected = selectedTarget === displayValue
+                      return (
+                        <button
+                          key={point.value}
+                          onClick={() => handleCurrentSelect(point.value)}
+                          className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
+                            ${isSelected
+                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                              : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
+                            }`}
+                        >
+                          {point.display}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
 
-                    return (
-                      <button
-                        key={point.value}
-                        onClick={() => handleTargetSelect(point.value)}
-                        className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                          ${isSelected
-                            ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
-                            : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                          }`}
-                      >
-                        {point.display}
-                      </button>
-                    )
-                  })}
+                {/* Target Rating */}
+                <div>
+                  <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
+                    {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
+                  </h3>
+                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
+                    {targetRatingPoints.map((point) => {
+                      const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
+                      const isSelected = selectedTarget === displayValue
+
+                      return (
+                        <button
+                          key={point.value}
+                          onClick={() => handleTargetSelect(point.value)}
+                          className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
+                            ${isSelected
+                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                              : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
+                            }`}
+                        >
+                          {point.display}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Calculate Button and Result */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -375,7 +479,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                 <button
                   onClick={calculatePrice}
                   disabled={!selectedCurrent || !selectedTarget || isCalculating}
-                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all 
+                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all
                     shadow-glow hover:shadow-glow-hover
                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
                     font-rajdhani text-sm flex items-center gap-2"
@@ -425,6 +529,9 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       {selectedMode === 'PREMIER'
                         ? `${selectedCurrent}K → ${selectedTarget}K pontos`
                         : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
+                      {selectedServiceType === 'DUO_BOOST' && (
+                        <span className="text-brand-purple-light ml-1">(Duo Boost)</span>
+                      )}
                     </p>
                     {user && hasActiveOrderInMode ? (
                       <div>
@@ -442,7 +549,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <button
                         onClick={handleHire}
                         disabled={isLoading}
-                        className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all 
+                        className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all
                           shadow-glow hover:shadow-glow-hover
                           disabled:opacity-50 disabled:cursor-not-allowed
                           font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"

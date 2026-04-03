@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     // Buscar parâmetros de query
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // PENDING, PAID, CANCELLED
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
     const where: any = {
       adminId,
@@ -25,30 +27,35 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar receitas
-    const rawRevenues = await prisma.adminRevenue.findMany({
-      where,
-      include: {
-        order: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
+    const [rawRevenues, total] = await prisma.$transaction([
+      prisma.adminRevenue.findMany({
+        where,
+        include: {
+          order: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                },
               },
-            },
-            booster: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
+              booster: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.adminRevenue.count({ where }),
+    ])
 
     // Mapear revenues para incluir service virtual no order
     const revenues = rawRevenues.map((revenue: typeof rawRevenues[number]) => ({
@@ -114,6 +121,7 @@ export async function GET(request: NextRequest) {
           paidRevenues: stats.paidRevenues,
           pendingRevenues: stats.pendingRevenues,
         },
+        pagination: { total, limit, offset },
       },
       { status: 200 }
     )

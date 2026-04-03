@@ -17,6 +17,8 @@ import { Result, success, failure } from './types'
 interface ChatMessage {
   id: number
   content: string
+  messageType: 'TEXT' | 'STEAM_CREDENTIALS'
+  isExpired: boolean
   authorId: number
   author: {
     id: number
@@ -43,7 +45,9 @@ interface ChatWithMessages {
 interface SendMessageInput {
   orderId: number
   authorId: number
-  content: string
+  content?: string
+  messageType?: 'TEXT' | 'STEAM_CREDENTIALS'
+  credentials?: { username: string; password: string }
 }
 
 interface GetMessagesInput {
@@ -188,7 +192,8 @@ export const ChatService = {
    * Message content is encrypted before storage
    */
   async sendMessage(input: SendMessageInput): Promise<Result<ChatMessage>> {
-    const { orderId, authorId, content } = input
+    const { orderId, authorId, messageType = 'TEXT', credentials } = input
+    const content = input.content
 
     try {
       // Validate access
@@ -209,19 +214,61 @@ export const ChatService = {
         return failure(enabledResult.data.reason || 'Chat desabilitado', 'CHAT_DISABLED')
       }
 
+      // STEAM_CREDENTIALS: only the client (order owner) can send
+      if (messageType === 'STEAM_CREDENTIALS') {
+        if (accessResult.data.role !== 'client') {
+          return failure('Apenas o cliente pode enviar credenciais Steam', 'CHAT_ACCESS_DENIED')
+        }
+        if (!credentials?.username || !credentials?.password) {
+          return failure('Usuário e senha são obrigatórios', 'VALIDATION_ERROR')
+        }
+      } else {
+        // TEXT: content is required
+        if (!content || content.trim().length === 0) {
+          return failure('Mensagem não pode estar vazia', 'VALIDATION_ERROR')
+        }
+      }
+
       // Get or create chat
       const chatResult = await this.getOrCreateChat(orderId)
       if (!chatResult.success) {
         return chatResult
       }
 
-      // Encrypt message content
       let encryptedContent: string
-      try {
-        encryptedContent = encrypt(content)
-      } catch (error) {
-        console.error('Error encrypting message:', error)
-        return failure('Erro ao criptografar mensagem', 'ENCRYPTION_ERROR')
+      let plainContent: string
+
+      if (messageType === 'STEAM_CREDENTIALS') {
+        // Expire any existing active credential messages for this order
+        await prisma.orderMessage.updateMany({
+          where: {
+            chat: { orderId },
+            messageType: 'STEAM_CREDENTIALS',
+            isExpired: false,
+          },
+          data: {
+            content: '[Credenciais substituídas]',
+            isEncrypted: false,
+            isExpired: true,
+          },
+        })
+
+        // Encrypt credentials as JSON (never log the plaintext)
+        plainContent = JSON.stringify({ username: credentials!.username, password: credentials!.password })
+        try {
+          encryptedContent = encrypt(plainContent)
+        } catch (error) {
+          console.error('Error encrypting credentials')
+          return failure('Erro ao criptografar credenciais', 'ENCRYPTION_ERROR')
+        }
+      } else {
+        plainContent = content!
+        try {
+          encryptedContent = encrypt(plainContent)
+        } catch (error) {
+          console.error('Error encrypting message:', error)
+          return failure('Erro ao criptografar mensagem', 'ENCRYPTION_ERROR')
+        }
       }
 
       // Create message
@@ -231,6 +278,7 @@ export const ChatService = {
           authorId,
           content: encryptedContent,
           isEncrypted: true,
+          messageType,
         },
         include: {
           author: {
@@ -245,8 +293,8 @@ export const ChatService = {
         select: { userId: true, boosterId: true },
       })
 
-      // Create notification for the other party
-      if (order) {
+      // Create notification for the other party (skip for credential messages to avoid leaking info)
+      if (order && messageType === 'TEXT') {
         const recipientId = authorId === order.userId ? order.boosterId : order.userId
         if (recipientId) {
           prisma.notification.create({
@@ -263,10 +311,11 @@ export const ChatService = {
         }
       }
 
-      // Decrypt content for response
       return success({
         id: message.id,
-        content, // Return original content (decrypted)
+        content: plainContent, // Return original content (decrypted)
+        messageType,
+        isExpired: false,
         authorId: message.authorId,
         author: {
           id: message.author.id,
@@ -324,9 +373,35 @@ export const ChatService = {
         return success(null)
       }
 
+      // Determine requester role for access control on STEAM_CREDENTIALS
+      const requesterRole = accessResult.data.role
+
       // Decrypt messages
       const decryptedMessages: ChatMessage[] = []
       for (const message of chat.messages) {
+        const msgType = (message.messageType as 'TEXT' | 'STEAM_CREDENTIALS') || 'TEXT'
+        const isExpired = message.isExpired ?? false
+
+        // STEAM_CREDENTIALS: admin never sees the content
+        if (msgType === 'STEAM_CREDENTIALS' && requesterRole === 'admin') {
+          decryptedMessages.push({
+            id: message.id,
+            content: '[Credenciais Steam - acesso restrito]',
+            messageType: msgType,
+            isExpired,
+            authorId: message.authorId,
+            author: {
+              id: message.author.id,
+              name: message.author.name,
+              image: message.author.image,
+              role: message.author.role,
+            },
+            createdAt: message.createdAt,
+          })
+          continue
+        }
+
+        // Expired credentials: content is already plain placeholder (isEncrypted=false)
         let content = message.content
         if (message.isEncrypted) {
           try {
@@ -340,6 +415,8 @@ export const ChatService = {
         decryptedMessages.push({
           id: message.id,
           content,
+          messageType: msgType,
+          isExpired,
           authorId: message.authorId,
           author: {
             id: message.author.id,
@@ -383,6 +460,41 @@ export const ChatService = {
     } catch (error) {
       console.error('Error disabling chat:', error)
       return failure('Erro ao desabilitar chat', 'DATABASE_ERROR')
+    }
+  },
+
+  /**
+   * Wipe Steam credentials from chat when order closes (COMPLETED or CANCELLED)
+   * Replaces encrypted content with a plain placeholder and marks as expired
+   */
+  async wipeSteamCredentials(orderId: number): Promise<Result<void>> {
+    try {
+      const chat = await prisma.orderChat.findUnique({
+        where: { orderId },
+        select: { id: true },
+      })
+
+      if (!chat) {
+        return success(undefined) // No chat, nothing to wipe
+      }
+
+      await prisma.orderMessage.updateMany({
+        where: {
+          chatId: chat.id,
+          messageType: 'STEAM_CREDENTIALS',
+          isExpired: false,
+        },
+        data: {
+          content: '[Credenciais removidas após conclusão do pedido]',
+          isEncrypted: false,
+          isExpired: true,
+        },
+      })
+
+      return success(undefined)
+    } catch (error) {
+      console.error('Error wiping Steam credentials:', error)
+      return failure('Erro ao remover credenciais', 'DATABASE_ERROR')
     }
   },
 }

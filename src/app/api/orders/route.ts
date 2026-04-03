@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorCodes, getStatusForError } from '@/lib/error-constants'
 import { OrderService } from '@/services'
 import { z } from 'zod'
 
 // Schema for order creation
 const CreateOrderSchema = z.object({
   game: z.enum(['CS2']).default('CS2'),
-  total: z.number().or(z.string().transform(Number)),
+  serviceType: z.enum(['RANK_BOOST', 'DUO_BOOST']).default('RANK_BOOST'),
+  total: z.number().positive().or(z.string().transform(Number).pipe(z.number().positive())),
   currentRank: z.string().optional(),
   targetRank: z.string().optional(),
   currentRating: z.number().or(z.string().transform(Number)).optional(),
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
+        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
         401
       )
     }
@@ -57,8 +59,8 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          message: 'Muitas tentativas. Aguarde um momento e tente novamente.',
-          error: 'RATE_LIMIT_EXCEEDED'
+          message: ErrorMessages.RATE_LIMIT_GENERIC,
+          error: ErrorCodes.RATE_LIMIT_EXCEEDED
         },
         {
           status: 429,
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
+        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
         401
       )
     }
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
         )
       }
       return NextResponse.json(
-        { message: 'Dados inválidos' },
+        { message: ErrorMessages.INVALID_DATA },
         { status: 400 }
       )
     }
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
     const result = await OrderService.createOrder({
       userId,
       game: data.game,
+      serviceType: data.serviceType,
       total: typeof data.total === 'number' ? data.total : parseFloat(String(data.total)),
       currentRank: data.currentRank,
       targetRank: data.targetRank,
@@ -114,11 +117,7 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       // Map error codes to appropriate HTTP status
-      const statusMap: Record<string, number> = {
-        'DUPLICATE_ORDER': 400,
-        'VALIDATION_ERROR': 400,
-      }
-      const status = result.code ? statusMap[result.code] || 500 : 500
+      const status = result.code ? getStatusForError(result.code) : 500
 
       return NextResponse.json(
         { message: result.error, code: result.code },

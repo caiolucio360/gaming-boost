@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
     // Buscar parâmetros de query
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // PENDING, PAID, CANCELLED
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
     const where: any = {
       boosterId,
@@ -28,23 +30,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar comissões
-    const commissions = await prisma.boosterCommission.findMany({
-      where,
-      include: {
-        order: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
+    const [commissions, total] = await prisma.$transaction([
+      prisma.boosterCommission.findMany({
+        where,
+        include: {
+          order: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.boosterCommission.count({ where }),
+    ])
 
     // Calcular estatísticas
     const stats = {
@@ -95,6 +102,7 @@ export async function GET(request: NextRequest) {
           paidCommissions: stats.paidCommissions,
           pendingCommissions: stats.pendingCommissions,
         },
+        pagination: { total, limit, offset },
       },
       { status: 200 }
     )

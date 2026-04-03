@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
+import { ChatService } from '@/services'
 
 // GET - Buscar pedido específico
 export async function GET(
@@ -133,14 +135,59 @@ export async function PUT(
       )
     }
 
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
 
-    if (status && ['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
+    // Validate status transition if status is being changed
+    if (status) {
+      const VALID_TRANSITIONS: Record<string, string[]> = {
+        PENDING: ['PAID', 'CANCELLED'],
+        PAID: ['IN_PROGRESS', 'CANCELLED'],
+        IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+        COMPLETED: [],
+        CANCELLED: [],
+      }
+
+      // Fetch current order to validate transition
+      const currentOrder = await prisma.order.findUnique({
+        where: { id: orderIdNum },
+        select: { status: true, boosterId: true },
+      })
+
+      if (!currentOrder) {
+        return NextResponse.json(
+          { message: ErrorMessages.ORDER_NOT_FOUND, error: ErrorCodes.ORDER_NOT_FOUND },
+          { status: 404 }
+        )
+      }
+
+      const allowed = VALID_TRANSITIONS[currentOrder.status]
+      if (!allowed || !allowed.includes(status)) {
+        return NextResponse.json(
+          {
+            message: ErrorMessages.ADMIN_INVALID_STATUS_TRANSITION,
+            error: ErrorCodes.INVALID_STATUS_TRANSITION,
+            currentStatus: currentOrder.status,
+            requestedStatus: status,
+          },
+          { status: 400 }
+        )
+      }
+
+      // COMPLETED requires an assigned booster
+      if (status === 'COMPLETED' && !currentOrder.boosterId && !boosterId) {
+        return NextResponse.json(
+          {
+            message: ErrorMessages.ADMIN_ORDER_REQUIRES_BOOSTER,
+            error: ErrorCodes.INVALID_STATUS_TRANSITION,
+          },
+          { status: 400 }
+        )
+      }
+
       updateData.status = status
 
       // Se estiver marcando como COMPLETED, liberar automaticamente as comissões/receitas
       if (status === 'COMPLETED') {
-        // Liberar automaticamente comissão do booster (disponível para saque)
         await prisma.boosterCommission.updateMany({
           where: {
             orderId: orderIdNum,
@@ -152,7 +199,6 @@ export async function PUT(
           },
         })
 
-        // Liberar automaticamente receita do admin (disponível para saque)
         await prisma.adminRevenue.updateMany({
           where: {
             orderId: orderIdNum,
@@ -230,6 +276,13 @@ export async function PUT(
         },
       },
     })
+
+    // Wipe Steam credentials when order closes
+    if (status === 'COMPLETED' || status === 'CANCELLED') {
+      ChatService.wipeSteamCredentials(orderIdNum).catch((error) => {
+        console.error('Failed to wipe Steam credentials:', error)
+      })
+    }
 
     return NextResponse.json(
       { message: 'Status atualizado com sucesso', order },

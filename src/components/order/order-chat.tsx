@@ -15,6 +15,9 @@ import {
   AlertCircle,
   RefreshCw,
   Shield,
+  Eye,
+  EyeOff,
+  KeyRound,
 } from 'lucide-react'
 import { showError } from '@/lib/toast'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -23,6 +26,8 @@ import { formatMessageTime } from '@/lib/utils'
 interface ChatMessage {
   id: number
   content: string
+  messageType?: 'TEXT' | 'STEAM_CREDENTIALS'
+  isExpired?: boolean
   authorId: number
   author: {
     id: number
@@ -31,6 +36,107 @@ interface ChatMessage {
     role: string
   }
   createdAt: string
+}
+
+function SteamCredentialsCard({
+  content,
+  isExpired,
+  isOwnMessage,
+}: {
+  content: string
+  isExpired?: boolean
+  isOwnMessage: boolean
+}) {
+  const [revealed, setRevealed] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!revealed) return
+    setTimeLeft(30)
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timer)
+          setRevealed(false)
+          return null
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [revealed])
+
+  if (isExpired) {
+    return (
+      <div className="rounded-2xl px-4 py-3 bg-gray-800/50 border border-gray-700/50">
+        <p className="text-sm text-gray-500 italic">[Credenciais removidas após conclusão do pedido]</p>
+      </div>
+    )
+  }
+
+  let username = ''
+  let password = ''
+  try {
+    const parsed = JSON.parse(content)
+    username = parsed.username
+    password = parsed.password
+  } catch {
+    // Admin-restricted or parse error — show as plain text
+    return (
+      <div className="rounded-2xl px-4 py-3 bg-gray-800/50 border border-gray-700/50">
+        <div className="flex items-center gap-2 mb-1">
+          <Shield className="h-4 w-4 text-brand-purple-light" />
+          <span className="text-xs font-semibold text-brand-purple-light">Credenciais Steam</span>
+        </div>
+        <p className="text-sm text-gray-500">{content}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`rounded-2xl px-4 py-3 border ${
+        isOwnMessage
+          ? 'bg-brand-purple-dark/30 border-brand-purple/50'
+          : 'bg-gray-800/80 border-gray-700/50'
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Shield className="h-4 w-4 text-brand-purple-light" />
+        <span className="text-xs font-semibold text-brand-purple-light">Credenciais Steam</span>
+      </div>
+      <div className="space-y-2">
+        <div>
+          <p className="text-xs text-gray-500 mb-0.5">Usuário</p>
+          <p className="text-sm text-white font-mono">{username}</p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 mb-0.5">Senha</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-white font-mono">
+              {revealed ? password : '••••••••'}
+            </p>
+            <button
+              onClick={() => setRevealed((r) => !r)}
+              className="text-xs text-brand-purple-light hover:text-brand-purple underline flex items-center gap-1"
+            >
+              {revealed ? (
+                <>
+                  <EyeOff className="h-3 w-3" />
+                  {timeLeft !== null ? `Ocultar (${timeLeft}s)` : 'Ocultar'}
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3 w-3" />
+                  Revelar
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 interface OrderChatData {
@@ -60,6 +166,9 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const [credentialMode, setCredentialMode] = useState(false)
+  const [credUsername, setCredUsername] = useState('')
+  const [credPassword, setCredPassword] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const fetchChat = useCallback(async () => {
@@ -112,6 +221,37 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
       await fetchChat()
     } catch (error) {
       showError('Erro', error instanceof Error ? error.message : 'Erro ao enviar mensagem')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const handleSendCredentials = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!credUsername.trim() || !credPassword.trim() || sending) return
+
+    setSending(true)
+    try {
+      const response = await fetch(`/api/orders/${orderId}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageType: 'STEAM_CREDENTIALS',
+          credentials: { username: credUsername, password: credPassword },
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erro ao enviar credenciais')
+      }
+
+      setCredUsername('')
+      setCredPassword('')
+      setCredentialMode(false)
+      await fetchChat()
+    } catch (error) {
+      showError('Erro', error instanceof Error ? error.message : 'Erro ao enviar credenciais')
     } finally {
       setSending(false)
     }
@@ -225,16 +365,22 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
                           </p>
                         </div>
                       )}
-                      <div
-                        className={`rounded-2xl px-4 py-2.5 ${
+                      <div className={msg.messageType !== 'STEAM_CREDENTIALS' ? `rounded-2xl px-4 py-2.5 ${
                           isOwnMessage
                             ? 'bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark text-white'
                             : 'bg-gray-800/80 border border-gray-700/50 text-gray-100'
-                        }`}
-                      >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {msg.content}
-                        </p>
+                        }` : ''}>
+                        {msg.messageType === 'STEAM_CREDENTIALS' ? (
+                          <SteamCredentialsCard
+                            content={msg.content}
+                            isExpired={msg.isExpired}
+                            isOwnMessage={isOwnMessage}
+                          />
+                        ) : (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {msg.content}
+                          </p>
+                        )}
                       </div>
                       {!showAvatar && (
                         <p className={`text-xs text-gray-600 mt-1 ${isOwnMessage ? 'text-right' : ''}`}>
@@ -254,30 +400,88 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
       {/* Message Input */}
       <div className="p-4 border-t border-brand-purple/20 flex-shrink-0">
         {chatEnabled ? (
-          <form onSubmit={handleSendMessage} className="flex gap-3">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Digite sua mensagem..."
-              className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 focus:border-brand-purple-light"
-              disabled={sending}
-              maxLength={2000}
-            />
-            <Button
-              type="submit"
-              disabled={sending || !message.trim()}
-              className="bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white px-6"
-            >
-              {sending ? (
-                <LoadingSpinner size="sm" />
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar
-                </>
-              )}
-            </Button>
-          </form>
+          <div className="space-y-2">
+            {/* Credential form toggle for CLIENT */}
+            {user?.role === 'CLIENT' && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setCredentialMode((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs text-brand-purple-light hover:text-brand-purple transition-colors"
+                >
+                  <KeyRound className="h-3.5 w-3.5" />
+                  {credentialMode ? 'Cancelar credenciais' : 'Enviar credenciais Steam'}
+                </button>
+              </div>
+            )}
+
+            {credentialMode && user?.role === 'CLIENT' ? (
+              <form onSubmit={handleSendCredentials} className="space-y-2">
+                <div className="p-3 bg-brand-purple/5 border border-brand-purple/30 rounded-lg space-y-2">
+                  <p className="text-xs text-brand-purple-light flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5" />
+                    Credenciais criptografadas — apenas o booster designado poderá ver
+                  </p>
+                  <Input
+                    value={credUsername}
+                    onChange={(e) => setCredUsername(e.target.value)}
+                    placeholder="Usuário Steam"
+                    className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 focus:border-brand-purple-light"
+                    disabled={sending}
+                    autoComplete="off"
+                  />
+                  <Input
+                    type="password"
+                    value={credPassword}
+                    onChange={(e) => setCredPassword(e.target.value)}
+                    placeholder="Senha Steam"
+                    className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 focus:border-brand-purple-light"
+                    disabled={sending}
+                    autoComplete="new-password"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={sending || !credUsername.trim() || !credPassword.trim()}
+                  className="w-full bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white"
+                >
+                  {sending ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Enviar credenciais com segurança
+                    </>
+                  )}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleSendMessage} className="flex gap-3">
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Digite sua mensagem..."
+                  className="bg-black/50 border-brand-purple/30 text-white placeholder:text-gray-500 focus:border-brand-purple-light"
+                  disabled={sending}
+                  maxLength={2000}
+                />
+                <Button
+                  type="submit"
+                  disabled={sending || !message.trim()}
+                  className="bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white px-6"
+                >
+                  {sending ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+          </div>
         ) : (
           <div className="flex items-center gap-3 bg-gray-800/50 border border-gray-700/50 rounded-lg p-4">
             <AlertCircle className="h-5 w-5 text-gray-400 flex-shrink-0" />

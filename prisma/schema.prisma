@@ -61,6 +61,7 @@ model Order {
   userId            Int
   boosterId         Int? // Booster atribuído ao pedido
   game              Game               @default(CS2) // Jogo do pedido
+  serviceType       ServiceType        @default(RANK_BOOST) // Tipo de serviço (Rank Boost ou Duo Boost)
   status            OrderStatus        @default(PENDING)
   total             Float
 
@@ -102,20 +103,26 @@ enum Game {
   CS2
 }
 
+enum ServiceType {
+  RANK_BOOST
+  DUO_BOOST
+}
+
 model Payment {
   id        Int       @id @default(autoincrement())
   orderId   Int
   order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  method    String    @default("PIX") // Método de pagamento
-  providerId String? // ID externo do provider (AbacatePay, etc)
+  providerId String?       @unique // ID externo do provider (AbacatePay, etc)
   pixCode   String? // Código PIX
   qrCode    String? // Base64 do QR Code
   status    PaymentStatus @default(PENDING)
   total     Float
   expiresAt DateTime?
   paidAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([orderId, status])
 }
 
 enum PaymentStatus {
@@ -176,6 +183,7 @@ model AdminRevenue {
   order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   admin      User          @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
+  @@unique([orderId, adminId])
   @@index([adminId, status])
   @@index([status])
 }
@@ -237,7 +245,7 @@ model BoosterCommissionHistory {
 model BoosterProfile {
   id                Int                  @id @default(autoincrement())
   userId            Int                  @unique
-  user              User                 @relation(fields: [userId], references: [id])
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   bio               String?
   languages         String[] // Array de idiomas
   verificationStatus VerificationStatus  @default(PENDING)
@@ -266,9 +274,9 @@ model Review {
   orderId   Int      @unique
   order     Order    @relation(fields: [orderId], references: [id])
   authorId  Int
-  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   boosterId Int
-  booster   User     @relation("ReviewTarget", fields: [boosterId], references: [id])
+  booster   User     @relation("ReviewTarget", fields: [boosterId], references: [id], onDelete: Cascade)
   rating    Int // 1-5
   comment   String?
   createdAt DateTime @default(now())
@@ -280,7 +288,7 @@ model Review {
 model Notification {
   id        Int              @id @default(autoincrement())
   userId    Int
-  user      User             @relation(fields: [userId], references: [id])
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      NotificationType
   title     String
   message   String
@@ -307,7 +315,7 @@ model Dispute {
   orderId   Int              @unique
   order     Order            @relation(fields: [orderId], references: [id])
   creatorId Int
-  creator   User             @relation("DisputeCreator", fields: [creatorId], references: [id])
+  creator   User             @relation("DisputeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   reason    String
   status    DisputeStatus    @default(OPEN)
   messages  DisputeMessage[]
@@ -324,7 +332,7 @@ model DisputeMessage {
   disputeId Int
   dispute   Dispute  @relation(fields: [disputeId], references: [id])
   authorId  Int
-  author    User     @relation("MessageAuthor", fields: [authorId], references: [id])
+  author    User     @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
 
@@ -349,7 +357,7 @@ model Withdrawal {
   externalId  String           @unique  // ID único no nosso sistema
   amount      Int              // Valor em centavos
   platformFee Int?             // Taxa da plataforma
-  pixKeyType  String           // CPF, CNPJ, EMAIL, PHONE, RANDOM, BR_CODE
+  pixKeyType  PixKeyType       // CPF, CNPJ, EMAIL, PHONE, RANDOM, BR_CODE
   pixKey      String           // Valor da chave PIX
   status      WithdrawalStatus @default(PENDING)
   receiptUrl  String?
@@ -371,22 +379,32 @@ enum WithdrawalStatus {
   CANCELLED
 }
 
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  RANDOM
+  BR_CODE
+}
+
 // Configuração de preços por faixa
 // Cada faixa representa um range (ex: Premier 0-5000 = R$25/1000, GC Level 1-10 = R$20/level)
 model PricingConfig {
-  id          Int      @id @default(autoincrement())
-  game        Game     // CS2, etc
-  gameMode    String   // PREMIER, GAMERS_CLUB
-  rangeStart  Int      // Início da faixa (ex: 0, 5000, 10000 para Premier ou 1, 11, 15 para GC)
-  rangeEnd    Int      // Fim da faixa (ex: 4999, 9999, 14999 para Premier ou 10, 14, 17 para GC)
-  price       Float    // Preço por unidade (ex: 25.00 por 1000 pontos ou 20.00 por nível)
-  unit        String   // Descrição da unidade (ex: "1000 pontos", "1 nível")
-  enabled     Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int         @id @default(autoincrement())
+  game        Game        // CS2, etc
+  gameMode    String      // PREMIER, GAMERS_CLUB
+  serviceType ServiceType @default(RANK_BOOST) // Tipo de serviço
+  rangeStart  Int         // Início da faixa (ex: 0, 5000, 10000 para Premier ou 1, 11, 15 para GC)
+  rangeEnd    Int         // Fim da faixa (ex: 4999, 9999, 14999 para Premier ou 10, 14, 17 para GC)
+  price       Float       // Preço por unidade (ex: 25.00 por 1000 pontos ou 20.00 por nível)
+  unit        String      // Descrição da unidade (ex: "1000 pontos", "1 nível")
+  enabled     Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  @@unique([game, gameMode, rangeStart]) // Não pode ter duas configs para o mesmo range
-  @@index([game, gameMode, enabled])
+  @@unique([game, gameMode, serviceType, rangeStart]) // Não pode ter duas configs para o mesmo range + tipo
+  @@index([game, gameMode, serviceType, enabled])
 }
 
 
@@ -402,6 +420,11 @@ model VerificationCode {
 
   @@index([userId])
   @@index([code])
+}
+
+enum MessageType {
+  TEXT
+  STEAM_CREDENTIALS
 }
 
 // Chat seguro entre cliente e booster para um pedido
@@ -424,9 +447,11 @@ model OrderMessage {
   chat        OrderChat  @relation(fields: [chatId], references: [id], onDelete: Cascade)
   authorId    Int
   author      User       @relation("OrderMessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  content     String     // Conteúdo criptografado com AES-256-GCM
-  isEncrypted Boolean    @default(true) // Flag indicando se o conteúdo está criptografado
-  createdAt   DateTime   @default(now())
+  content     String      // Conteúdo criptografado com AES-256-GCM
+  isEncrypted Boolean     @default(true) // Flag indicando se o conteúdo está criptografado
+  messageType MessageType @default(TEXT) // Tipo da mensagem
+  isExpired   Boolean     @default(false) // Credenciais expiradas/removidas
+  createdAt   DateTime    @default(now())
 
   @@index([chatId])
   @@index([authorId])

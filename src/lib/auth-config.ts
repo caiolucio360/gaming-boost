@@ -25,9 +25,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email ou senha incorretos')
         }
 
-        // Verificar se o usuário está ativo
+        // Verificar se o usuário está ativo (email não verificado)
         if (!user.active) {
-          throw new Error('Conta desativada. Entre em contato com o suporte.')
+          throw new Error('Conta não verificada')
         }
 
         // Verificar senha

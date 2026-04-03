@@ -183,7 +183,7 @@ export async function fetchCS2Stats(steam64Id: string): Promise<CS2StatsResult> 
         }
     } catch (error) {
         if (error instanceof Error) {
-            if (error.name === 'AbortError' || error.message.includes('timeout')) {
+            if (error.name === 'AbortError') {
                 return { success: false, error: 'timeout - API Leetify não respondeu' }
             }
             return { success: false, error: error.message }

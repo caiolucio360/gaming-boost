@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -18,18 +18,10 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const authResult = await verifyAuth(request)
+        const authResult = await verifyAdmin(request)
 
         if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(authResult.error || 'Não autenticado', 401)
-        }
-
-        // Only admins can access this endpoint
-        if (authResult.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { message: 'Acesso negado. Apenas administradores.' },
-                { status: 403 }
-            )
+            return createAuthErrorResponseFromResult(authResult)
         }
 
         const { id } = await params

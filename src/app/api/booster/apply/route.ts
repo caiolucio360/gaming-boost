@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { z } from 'zod'
 import { SteamProfileUrlSchema } from '@/schemas/steam'
 import { validateSteamProfileUrl, extractSteam64Id } from '@/services/steam.service'
@@ -18,6 +19,16 @@ const applySchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limiting: 5 applications per minute per IP
+        const identifier = getIdentifier(request)
+        const rateLimitResult = await apiRateLimiter.check(identifier, 5)
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                { message: 'Muitas tentativas. Aguarde um momento.' },
+                { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+            )
+        }
+
         const authResult = await verifyAuth(request)
 
         if (!authResult.authenticated || !authResult.user) {
