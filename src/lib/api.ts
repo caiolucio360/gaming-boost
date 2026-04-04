@@ -357,7 +357,7 @@ export interface Order {
   currentRating?: number
   targetRating?: number
   price: number
-  status: 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'DISPUTED'
+  status: 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   createdAt: string
   updatedAt: string
 }

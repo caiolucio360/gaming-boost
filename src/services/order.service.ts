@@ -159,7 +159,6 @@ export const OrderService = {
             select: { id: true, name: true, email: true },
           },
           payments: true,
-          review: true,
         },
       })
 
@@ -181,7 +180,6 @@ export const OrderService = {
           game: 'CS2',
         },
         include: {
-          review: true,
         },
         orderBy: { createdAt: 'desc' },
       })

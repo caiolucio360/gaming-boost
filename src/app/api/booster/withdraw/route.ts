@@ -52,79 +52,87 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Calcular saldo disponível do booster (comissões PAID e já liberadas para saque)
+        // Gerar ID externo único antes da transação
+        const externalId = `withdraw-booster-${userId}-${crypto.randomUUID()}`
         const now = new Date()
-        const availableAgg = await prisma.boosterCommission.aggregate({
-            where: {
-                boosterId: userId,
-                status: 'PAID',
-                OR: [
-                    { availableForWithdrawalAt: null },
-                    { availableForWithdrawalAt: { lte: now } },
-                ],
-            },
-            _sum: { amount: true },
-        })
 
-        // DB stores amounts in reais (Float); convert to centavos for comparison
-        const availableBalanceInReais = availableAgg._sum.amount || 0
-        const availableBalanceInCents = Math.round(availableBalanceInReais * 100)
-
-        // `amount` from request body is already in centavos (minimum check: 350 = R$3.50)
-        if (amount > availableBalanceInCents) {
-            return NextResponse.json(
-                {
-                    message: 'Saldo insuficiente',
-                    availableBalance: availableBalanceInCents,
-                    requestedAmount: amount,
-                },
-                { status: 400 }
-            )
-        }
-
-        // Verificar se há saques pendentes
-        const pendingWithdrawal = await prisma.withdrawal.findFirst({
-            where: {
-                userId,
-                status: { in: ['PENDING', 'PROCESSING'] }
-            }
-        })
-
-        if (pendingWithdrawal) {
-            return NextResponse.json(
-                { message: 'Você já tem um saque pendente. Aguarde a conclusão.' },
-                { status: 400 }
-            )
-        }
-
+        // Atomicamente verificar saldo + criar registro provisional
+        // Isto previne que duas requisições simultâneas passem na verificação de saldo
+        let provisional: { id: number }
         try {
-            // Gerar ID externo único
-            const externalId = `withdraw-booster-${userId}-${crypto.randomUUID()}`
+            provisional = await prisma.$transaction(async (tx: any) => {
+                // Re-verificar saldo dentro da transação
+                const agg = await tx.boosterCommission.aggregate({
+                    where: {
+                        boosterId: userId,
+                        status: 'PAID',
+                        OR: [
+                            { availableForWithdrawalAt: null },
+                            { availableForWithdrawalAt: { lte: now } },
+                        ],
+                    },
+                    _sum: { amount: true },
+                })
+                const available = Math.round((agg._sum.amount || 0) * 100)
+                if (amount > available) {
+                    const err: any = new Error('Saldo insuficiente')
+                    err.code = 'INSUFFICIENT'
+                    err.availableBalance = available
+                    throw err
+                }
 
-            // Criar saque no AbacatePay
+                // Re-verificar saques pendentes dentro da transação
+                const pending = await tx.withdrawal.findFirst({
+                    where: { userId, status: { in: ['PENDING', 'PROCESSING'] } },
+                })
+                if (pending) {
+                    const err: any = new Error('Você já tem um saque pendente. Aguarde a conclusão.')
+                    err.code = 'PENDING_EXISTS'
+                    throw err
+                }
+
+                // Criar registro provisional (sem providerId — será preenchido após AbacatePay)
+                return tx.withdrawal.create({
+                    data: {
+                        userId,
+                        externalId,
+                        amount,
+                        pixKeyType,
+                        pixKey,
+                        status: 'PENDING',
+                        description: description || `Saque de comissões - Booster #${userId}`,
+                    },
+                })
+            })
+        } catch (err: any) {
+            if (err.code === 'INSUFFICIENT') {
+                return NextResponse.json(
+                    { message: err.message, availableBalance: err.availableBalance, requestedAmount: amount },
+                    { status: 400 }
+                )
+            }
+            if (err.code === 'PENDING_EXISTS') {
+                return NextResponse.json({ message: err.message }, { status: 400 })
+            }
+            throw err
+        }
+
+        // Chamar AbacatePay fora da transação (operação externa)
+        try {
             const withdrawResult = await createWithdrawal({
                 externalId,
-                amount: amount, // centavos, as required by AbacatePay
-                pix: {
-                    type: pixKeyType as PixKeyType,
-                    key: pixKey,
-                },
+                amount,
+                pix: { type: pixKeyType as PixKeyType, key: pixKey },
                 description: description || `Saque de comissões - Booster #${userId}`,
             })
 
-            // Salvar saque no banco
-            const withdrawal = await prisma.withdrawal.create({
+            // Atualizar registro com dados do provedor
+            const withdrawal = await prisma.withdrawal.update({
+                where: { id: provisional.id },
                 data: {
-                    userId,
                     providerId: withdrawResult.id,
-                    externalId,
-                    amount: amount, // centavos
                     platformFee: withdrawResult.platformFee,
-                    pixKeyType,
-                    pixKey,
-                    status: 'PENDING',
                     receiptUrl: withdrawResult.receiptUrl,
-                    description: description || `Saque de comissões - Booster #${userId}`,
                 },
             })
 
@@ -134,6 +142,8 @@ export async function POST(request: NextRequest) {
                 message: 'Saque solicitado com sucesso!'
             }, { status: 201 })
         } catch (error) {
+            // AbacatePay falhou — remover registro provisional para não bloquear futuros saques
+            await prisma.withdrawal.delete({ where: { id: provisional.id } }).catch(() => {})
             console.error('Erro ao criar saque:', error)
             return NextResponse.json(
                 {

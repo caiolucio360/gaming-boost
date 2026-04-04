@@ -5,6 +5,13 @@ import { ErrorMessages } from '@/lib/error-constants'
 import { simulatePixPayment } from '@/lib/abacatepay'
 
 export async function POST(request: NextRequest) {
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+            { message: 'Simulação de pagamento não disponível em produção' },
+            { status: 403 }
+        )
+    }
+
     try {
         const authResult = await verifyAuth(request)
 

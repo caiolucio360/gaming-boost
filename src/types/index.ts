@@ -32,11 +32,6 @@ export interface Order {
   completionProofUrl?: string | null;
   createdAt: Date;
   updatedAt?: Date;
-  review?: {
-    id: number;
-    rating: number;
-    comment?: string | null;
-  } | null;
 }
 
 export interface Payment {

@@ -127,12 +127,6 @@ export function ElojobHeader() {
             Como Funciona
           </Link>
           
-          <Link
-            href="/contact"
-            className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
-          >
-            Suporte
-          </Link>
         </nav>
 
         {/* Auth Section - Hidden on mobile */}

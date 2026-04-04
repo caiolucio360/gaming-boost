@@ -113,17 +113,14 @@ export async function POST(
 
     if (order.status === 'COMPLETED') {
       return NextResponse.json(
-        { message: 'Pedidos já concluídos não podem ser cancelados. Use o sistema de disputas se houver algum problema.' },
+        { message: 'Pedidos já concluídos não podem ser cancelados. Entre em contato com o suporte se houver algum problema.' },
         { status: 400 }
       )
     }
 
     if (order.status === 'IN_PROGRESS') {
       return NextResponse.json(
-        {
-          message: 'Este pedido já está em andamento e não pode ser cancelado. Entre em contato com o suporte ou abra uma disputa se necessário.',
-          canDispute: true,
-        },
+        { message: 'Este pedido já está em andamento e não pode ser cancelado. Entre em contato com o suporte.' },
         { status: 400 }
       )
     }

@@ -85,18 +85,6 @@ export function Footer() {
                   <li>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Link href="/contact" className="text-xs md:text-sm text-brand-gray-400 hover:text-brand-purple transition-colors">
-                          Suporte
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-brand-black-light border-brand-purple/50 text-white">
-                        <p>Suporte via Discord</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
                         <Link href="/terms" className="text-xs md:text-sm text-brand-gray-400 hover:text-brand-purple transition-colors">
                           Termos de Uso
                         </Link>

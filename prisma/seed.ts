@@ -82,7 +82,6 @@ async function main() {
             userId: booster.id,
             bio: 'Booster profissional',
             verificationStatus: 'VERIFIED',
-            rating: 5.0,
             completedOrders: 0,
         },
     })

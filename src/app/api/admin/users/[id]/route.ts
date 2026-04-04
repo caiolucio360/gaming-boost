@@ -137,27 +137,6 @@ export async function PUT(
         )
       }
 
-      const previousPercentage = existingUser.boosterCommissionPercentage
-
-      // Registrar histórico se a comissão mudou
-      // Comparar valores numéricos para evitar problemas de comparação
-      const hasChanged = previousPercentage === null || previousPercentage === undefined
-        ? true
-        : Math.abs(previousPercentage - percentage) > 0.0001
-
-      if (hasChanged) {
-        const { reason } = body
-        await prisma.boosterCommissionHistory.create({
-          data: {
-            boosterId: userId,
-            previousPercentage: previousPercentage ?? null,
-            newPercentage: percentage,
-            changedBy: authResult.user.id,
-            reason: reason || null,
-          },
-        })
-      }
-
       updateData.boosterCommissionPercentage = percentage
     }
 

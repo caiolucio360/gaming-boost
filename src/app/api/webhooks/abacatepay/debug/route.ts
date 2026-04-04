@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 
 /**
  * Endpoint de debug para verificar status de pagamentos e webhooks
  * GET /api/webhooks/abacatepay/debug?providerId=xxx
  */
 export async function GET(request: NextRequest) {
+  const authResult = await verifyAdmin(request)
+  if (!authResult.authenticated) {
+    return createAuthErrorResponseFromResult(authResult)
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const providerId = searchParams.get('providerId')

@@ -38,14 +38,8 @@ model User {
   boosterCommissions BoosterCommission[] // Comissões como booster
   adminRevenues      AdminRevenue[] // Receitas como admin
   devAdminRevenues   DevAdminRevenue[]   @relation("DevAdminRevenues") // Receitas como dev-admin
-  commissionHistory  BoosterCommissionHistory[] // Histórico de mudanças de comissão (como booster)
-  commissionChanges  BoosterCommissionHistory[] @relation("CommissionChanges") // Mudanças feitas (como admin)
   boosterProfile     BoosterProfile?
-  reviewsWritten     Review[]            @relation("ReviewAuthor")
-  reviewsReceived    Review[]            @relation("ReviewTarget")
   notifications      Notification[]
-  disputesCreated    Dispute[]           @relation("DisputeCreator")
-  disputeMessages    DisputeMessage[]    @relation("MessageAuthor")
   orderMessages      OrderMessage[]      @relation("OrderMessageAuthor") // Mensagens do chat de pedidos
   withdrawals        Withdrawal[]        // Saques solicitados
   image              String? // Avatar URL
@@ -82,8 +76,6 @@ model Order {
   commission        BoosterCommission? // Comissão do booster
   revenues          AdminRevenue[] // Receitas dos admins (múltiplo - via AdminRevenue model)
   devAdminRevenue   DevAdminRevenue? // Receita do dev-admin
-  review            Review? // Avaliação do pedido
-  dispute           Dispute? // Disputa do pedido
   chat              OrderChat? // Chat seguro entre cliente e booster
 
   // Índices para otimizar queries
@@ -225,23 +217,6 @@ model CommissionConfig {
   updatedAt             DateTime @updatedAt
 }
 
-// Histórico de mudanças de comissão dos boosters
-model BoosterCommissionHistory {
-  id                    Int      @id @default(autoincrement())
-  boosterId             Int
-  booster               User     @relation(fields: [boosterId], references: [id], onDelete: Cascade)
-  previousPercentage    Float?   // Porcentagem anterior (null se primeira vez)
-  newPercentage         Float    // Nova porcentagem
-  changedBy             Int      // ID do admin que fez a mudança
-  changedByUser         User     @relation("CommissionChanges", fields: [changedBy], references: [id], onDelete: Restrict)
-  reason                String?  // Motivo da mudança (opcional)
-  createdAt             DateTime @default(now())
-
-  @@index([boosterId])
-  @@index([changedBy])
-  @@index([createdAt])
-}
-
 model BoosterProfile {
   id                Int                  @id @default(autoincrement())
   userId            Int                  @unique
@@ -249,8 +224,6 @@ model BoosterProfile {
   bio               String?
   languages         String[] // Array de idiomas
   verificationStatus VerificationStatus  @default(PENDING)
-  rating            Float                @default(0)
-  totalReviews      Int                  @default(0)
   completedOrders   Int                  @default(0)
   // CS2 stats (Steam profile info is on User model)
   cs2Rank           String?              // Rank atual no CS2 (ex: "Global Elite")
@@ -267,22 +240,6 @@ enum VerificationStatus {
   PENDING
   VERIFIED
   REJECTED
-}
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  orderId   Int      @unique
-  order     Order    @relation(fields: [orderId], references: [id])
-  authorId  Int
-  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  boosterId Int
-  booster   User     @relation("ReviewTarget", fields: [boosterId], references: [id], onDelete: Cascade)
-  rating    Int // 1-5
-  comment   String?
-  createdAt DateTime @default(now())
-
-  @@index([authorId])
-  @@index([boosterId])
 }
 
 model Notification {
@@ -308,44 +265,6 @@ enum NotificationType {
   CHAT
   BOOSTER_ASSIGNED
   COMMISSION
-}
-
-model Dispute {
-  id        Int              @id @default(autoincrement())
-  orderId   Int              @unique
-  order     Order            @relation(fields: [orderId], references: [id])
-  creatorId Int
-  creator   User             @relation("DisputeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  reason    String
-  status    DisputeStatus    @default(OPEN)
-  messages  DisputeMessage[]
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-
-  @@index([orderId])
-  @@index([creatorId])
-  @@index([status])
-}
-
-model DisputeMessage {
-  id        Int      @id @default(autoincrement())
-  disputeId Int
-  dispute   Dispute  @relation(fields: [disputeId], references: [id])
-  authorId  Int
-  author    User     @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  content   String
-  createdAt DateTime @default(now())
-
-  @@index([disputeId])
-  @@index([authorId])
-}
-
-enum DisputeStatus {
-  OPEN
-  RESOLVED_REFUND
-  RESOLVED_PAYOUT
-  RESOLVED_PARTIAL
-  CANCELLED
 }
 
 // Modelo para rastrear saques PIX de boosters e admins

@@ -75,13 +75,10 @@ export default function AdminUsersPage() {
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
   const [profitShareDialogOpen, setProfitShareDialogOpen] = useState(false)
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [commissionPercentage, setCommissionPercentage] = useState<string>('')
   const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
-  const [commissionHistory, setCommissionHistory] = useState<any[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(false)
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -379,24 +376,8 @@ export default function AdminUsersPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10 font-rajdhani"
+                              className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10 font-rajdhani hidden"
                               style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                              onClick={async () => {
-                                setSelectedUser(adminUser)
-                                setLoadingHistory(true)
-                                setHistoryDialogOpen(true)
-                                try {
-                                  const response = await fetch(`/api/admin/users/${adminUser.id}/commission-history`)
-                                  if (response.ok) {
-                                    const data = await response.json()
-                                    setCommissionHistory(data.history || [])
-                                  }
-                                } catch (error) {
-                                  console.error('Erro ao buscar histórico:', error)
-                                } finally {
-                                  setLoadingHistory(false)
-                                }
-                              }}
                             >
                               <History className="h-4 w-4 mr-2" />
                               Histórico
@@ -686,68 +667,6 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog para histórico de comissão */}
-      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="bg-brand-black border-brand-purple/50 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              Histórico de Comissão
-            </DialogTitle>
-            <DialogDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-              {selectedUser?.name || selectedUser?.email}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-96 overflow-y-auto">
-            {loadingHistory ? (
-              <div className="text-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-brand-purple mx-auto" />
-              </div>
-            ) : commissionHistory.length === 0 ? (
-              <div className="text-center py-8 text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                Nenhuma mudança registrada
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {commissionHistory.map((item: any) => (
-                  <Card key={item.id} className="bg-black/30 border-brand-purple/50">
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              {item.previousPercentage !== null
-                                ? `${(item.previousPercentage * 100).toFixed(0)}%`
-                                : 'N/A'} → {(item.newPercentage * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                          {item.reason && (
-                            <p className="text-xs text-brand-gray-500 font-rajdhani mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                              {item.reason}
-                            </p>
-                          )}
-                          <p className="text-xs text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            Alterado por {item.changedByUser?.name || item.changedByUser?.email} em {formatDate(item.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setHistoryDialogOpen(false)}
-              className="border-brand-purple/50 text-brand-purple-light font-rajdhani"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

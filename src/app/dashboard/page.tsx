@@ -39,7 +39,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
-import { ReviewModal } from '@/components/reviews/review-modal'
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -421,24 +420,6 @@ export default function DashboardPage() {
                         </div>
                       )}
 
-                      {order.status === 'COMPLETED' && !order.review && (
-                        <ReviewModal
-                          orderId={order.id}
-                          onSuccess={() => fetchOrders(true)}
-                          trigger={
-                            <Button className="w-full md:w-auto bg-yellow-500 text-black font-bold border border-transparent hover:border-black/50">
-                              Avaliar Booster
-                            </Button>
-                          }
-                        />
-                      )}
-
-                      {order.status === 'COMPLETED' && order.review && (
-                        <div className="flex items-center text-yellow-400 bg-yellow-400/10 px-3 py-2 rounded-md border border-yellow-400/30">
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          <span className="text-sm font-bold">Avaliado ({order.review.rating}★)</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </DashboardCard>

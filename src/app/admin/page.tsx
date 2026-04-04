@@ -237,7 +237,7 @@ export default function AdminDashboardPage() {
           </Link>
 
           {/* Configurar Comissões */}
-          <Link href="/admin/commission-config" className="group">
+          <Link href="/admin/payments?tab=configuracoes" className="group">
             <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-amber-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1 card-interactive">
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               

@@ -44,16 +44,6 @@ interface WebhookEventResult {
   orderId?: number
 }
 
-// Webhook event types from AbacatePay
-// Used for documentation — actual webhook handling uses string comparison
-// type WebhookEventType =
-//   | 'billing.paid'
-//   | 'withdraw.done'
-//   | 'withdraw.failed'
-//   | 'payment.refunded'
-//   | 'payment.expired'
-//   | 'payment.cancelled'
-
 interface WebhookData {
   event?: string
   data?: {
@@ -299,22 +289,19 @@ export const PaymentService = {
         return failure(ErrorMessages.PAYMENT_NOT_FOUND, ErrorCodes.PAYMENT_NOT_FOUND)
       }
 
-      // Idempotency: check if already processed
-      if (payment.status === PaymentStatus.PAID) {
-        console.log(`Payment ${payment.id} already processed, skipping`)
-        return success({ processed: true, message: 'Já processado', paymentId: payment.id, orderId: payment.orderId })
-      }
-
-      // Update payment and order in transaction
+      // Atomically update payment status — only proceeds if still PENDING
+      // This prevents duplicate processing when AbacatePay retries the webhook
+      let alreadyProcessed = false
       await prisma.$transaction(async (tx: any) => {
-        // Update payment
-        await tx.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: PaymentStatus.PAID,
-            paidAt: new Date(),
-          },
+        const updated = await tx.payment.updateMany({
+          where: { id: payment.id, status: PaymentStatus.PENDING },
+          data: { status: PaymentStatus.PAID, paidAt: new Date() },
         })
+
+        if (updated.count === 0) {
+          alreadyProcessed = true
+          return
+        }
 
         // Update order to PAID if was PENDING
         if (payment.order.status === OrderStatus.PENDING) {
@@ -334,6 +321,11 @@ export const PaymentService = {
           })
         }
       })
+
+      if (alreadyProcessed) {
+        console.log(`Payment ${payment.id} already processed, skipping`)
+        return success({ processed: true, message: 'Já processado', paymentId: payment.id, orderId: payment.orderId })
+      }
 
       console.log(`Payment ${payment.id} confirmed, order ${payment.orderId} updated to PAID`)
 
