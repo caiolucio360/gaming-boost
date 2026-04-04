@@ -71,7 +71,7 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
   const roleLabel = role === 'ADMIN' ? 'ADMIN' : 'BOOSTER'
   const dashboardHref = role === 'ADMIN' ? '/admin' : '/booster'
 
-  function SidebarContent() {
+  function renderSidebar() {
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
@@ -94,9 +94,9 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
           )}
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto py-2">
-          <TooltipProvider delayDuration={0}>
+        <TooltipProvider delayDuration={0}>
+          {/* Nav items */}
+          <nav className="flex-1 overflow-y-auto py-2">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item)
@@ -132,12 +132,10 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
                 </div>
               )
             })}
-          </TooltipProvider>
-        </nav>
+          </nav>
 
-        {/* User footer */}
-        <div className="border-t border-white/10 p-3 flex-shrink-0">
-          <TooltipProvider delayDuration={0}>
+          {/* User footer */}
+          <div className="border-t border-white/10 p-3 flex-shrink-0">
             {!collapsed && (
               <div className="flex items-center gap-3 mb-2 px-1">
                 <div className="w-8 h-8 rounded-full bg-brand-purple/30 flex items-center justify-center flex-shrink-0">
@@ -175,8 +173,8 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
                 </TooltipContent>
               )}
             </Tooltip>
-          </TooltipProvider>
-        </div>
+          </div>
+        </TooltipProvider>
       </div>
     )
   }
@@ -190,14 +188,18 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
           collapsed ? 'w-16' : 'w-60'
         )}
       >
-        <SidebarContent />
+        {renderSidebar()}
       </aside>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          role="button"
+          tabIndex={0}
+          aria-label="Fechar menu"
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm cursor-default"
           onClick={() => setMobileOpen(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setMobileOpen(false) }}
         />
       )}
 
@@ -208,7 +210,7 @@ export function AppShell({ role, navItems, children }: AppShellProps) {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <SidebarContent />
+        {renderSidebar()}
       </aside>
 
       {/* Main content area */}
