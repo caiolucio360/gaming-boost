@@ -34,7 +34,7 @@ import {
   History,
 } from 'lucide-react'
 import Link from 'next/link'
-import { TableSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonTable } from '@/components/common/skeletons'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
@@ -284,7 +284,7 @@ export default function AdminUsersPage() {
 
         {/* Lista de Usuários */}
         {loading ? (
-          <TableSkeleton rows={8} cols={5} />
+          <SkeletonTable rows={8} columns={5} />
         ) : users.length === 0 ? (
           <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">

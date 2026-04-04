@@ -28,7 +28,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
-import { OrdersListSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { showSuccess, showError, handleApiError } from '@/lib/toast'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -320,7 +320,7 @@ export default function DashboardPage() {
         </Card>
 
         {loading ? (
-          <OrdersListSkeleton count={3} />
+          <SkeletonOrdersList count={3} />
         ) : orders.length === 0 ? (
           <EmptyState
             icon={Package}

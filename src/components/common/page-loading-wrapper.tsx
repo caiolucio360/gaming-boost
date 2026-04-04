@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react'
 import { LoadingSpinner } from './loading-spinner'
-import { PageSkeleton } from './loading-skeletons'
+import { SkeletonPage } from './skeletons'
 
 interface PageLoadingWrapperProps {
   loading: boolean
@@ -40,7 +40,7 @@ export function PageLoadingWrapper({
         case 'table':
           return <>{/* TableSkeleton será renderizado inline */}</>
         default:
-          return <PageSkeleton />
+          return <SkeletonPage />
       }
     }
     return <LoadingSpinner />

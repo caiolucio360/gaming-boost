@@ -26,7 +26,7 @@ import { StatCard } from '@/components/common/stat-card'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { OrdersListSkeleton, StatsGridSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { showSuccess, showError } from '@/lib/toast'
@@ -251,7 +251,7 @@ export default function BoosterPaymentsPage() {
           {/* ── Tab: Comissões ────────────────────────────────────────────── */}
           <TabsContent value="comissoes">
             {commissionsLoading && !stats ? (
-              <StatsGridSkeleton count={5} />
+              <SkeletonStatsGrid count={5} />
             ) : stats ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-green-300" />
@@ -271,7 +271,7 @@ export default function BoosterPaymentsPage() {
               </TabsList>
               <TabsContent value={commissionFilter} className="mt-6">
                 {commissionsLoading ? (
-                  <OrdersListSkeleton count={3} />
+                  <SkeletonOrdersList count={3} />
                 ) : commissions.length === 0 ? (
                   <EmptyState
                     title="Nenhuma comissão encontrada"

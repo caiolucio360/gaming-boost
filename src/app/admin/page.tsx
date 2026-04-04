@@ -23,7 +23,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/common/empty-state'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { StatsGridSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonStatsGrid } from '@/components/common/skeletons'
 import { formatPrice, formatDate } from '@/lib/utils'
 
 interface Stats {
@@ -132,7 +132,7 @@ export default function AdminDashboardPage() {
 
         {/* Cards de Estatísticas */}
         {loading && !stats ? (
-          <StatsGridSkeleton count={4} />
+          <SkeletonStatsGrid count={4} />
         ) : stats ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">

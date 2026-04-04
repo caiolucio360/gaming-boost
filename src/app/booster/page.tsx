@@ -24,7 +24,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
 import Link from 'next/link'
-import { OrdersListSkeleton, StatsGridSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
 import { RefreshingBanner } from '@/components/common/refreshing-banner'
@@ -374,7 +374,7 @@ export default function BoosterDashboardPage() {
 
         {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
-          <StatsGridSkeleton count={5} />
+          <SkeletonStatsGrid count={5} />
         ) : stats ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Card de Navegação - Disponíveis */}
@@ -481,7 +481,7 @@ export default function BoosterDashboardPage() {
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
-              <OrdersListSkeleton count={3} />
+              <SkeletonOrdersList count={3} />
             ) : orders.length === 0 ? (
               <EmptyState
                 icon={Package}
@@ -562,7 +562,7 @@ export default function BoosterDashboardPage() {
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
-              <OrdersListSkeleton count={3} />
+              <SkeletonOrdersList count={3} />
             ) : orders.length === 0 ? (
               <EmptyState
                 icon={Loader2}
@@ -718,7 +718,7 @@ export default function BoosterDashboardPage() {
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
             {loading && !refreshing ? (
-              <OrdersListSkeleton count={3} />
+              <SkeletonOrdersList count={3} />
             ) : orders.length === 0 ? (
               <EmptyState
                 icon={CheckCircle2}

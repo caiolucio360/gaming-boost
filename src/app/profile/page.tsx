@@ -26,7 +26,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { getAuthToken } from '@/lib/api-client'
-import { ProfileSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonProfileCard } from '@/components/common/skeletons'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -274,7 +274,7 @@ export default function ProfilePage() {
         />
 
         {loading ? (
-          <ProfileSkeleton />
+          <SkeletonProfileCard />
         ) : !profile ? (
           <div className="text-center py-12">
             <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>

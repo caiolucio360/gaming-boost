@@ -23,7 +23,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { EmptyState } from '@/components/common/empty-state'
-import { OrdersListSkeleton } from '@/components/common/loading-skeletons'
+import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 
@@ -173,7 +173,7 @@ export default function AdminOrdersPage() {
 
         {/* Lista de Pedidos */}
         {loading ? (
-          <OrdersListSkeleton count={5} />
+          <SkeletonOrdersList count={5} />
         ) : orders.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}
