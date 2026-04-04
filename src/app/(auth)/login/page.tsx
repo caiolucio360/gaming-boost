@@ -52,9 +52,9 @@ function LoginContent() {
 
     try {
       await login(data.email, data.password)
+      // Keep loading active — redirect will unmount this component
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
-    } finally {
       setIsLoading(false)
     }
   }
