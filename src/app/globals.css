@@ -26,41 +26,6 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 262 83% 58%;
     --radius: 0.5rem;
-
-    /* =============================================
-       DESIGN SYSTEM SEMANTIC TOKENS (Light Mode)
-       Docs: docs/design_system.md
-       ============================================= */
-
-    /* Surface tokens (backgrounds) */
-    --surface-page: #FFFFFF;
-    --surface-section: #F9FAFB;
-    --surface-card: #FFFFFF;
-    --surface-subtle: #F3F4F6;
-    --surface-elevated: #FFFFFF;
-
-    /* Action tokens (buttons, interactive) */
-    --action-primary: #7C3AED;
-    --action-primary-hover: #A855F7;
-    --action-secondary: transparent;
-    --action-strong: #4C1D95;
-    --action-danger: #DC2626;
-
-    /* Text tokens */
-    --text-primary: #111827;
-    --text-secondary: #4B5563;
-    --text-muted: #9CA3AF;
-    --text-on-brand: #FFFFFF;
-    --text-brand: #7C3AED;
-
-    /* Status tokens */
-    --status-success: #10B981;
-    --status-warning: #F59E0B;
-    --status-error: #DC2626;
-
-    /* Border tokens */
-    --border-default: #E5E7EB;
-    --border-brand: #7C3AED;
   }
 
   .dark {
@@ -86,41 +51,6 @@
     --border: 0 0% 10%;
     --input: 0 0% 10%;
     --ring: 262 83% 58%;
-
-    /* =============================================
-       DESIGN SYSTEM SEMANTIC TOKENS (Dark Mode)
-       Docs: docs/design_system.md
-       ============================================= */
-
-    /* Surface tokens (backgrounds) */
-    --surface-page: #0A0A0A;
-    --surface-section: #0A0A0A;
-    --surface-card: #1A1A1A;
-    --surface-subtle: #27272a;
-    --surface-elevated: #1A1A1A;
-
-    /* Action tokens (buttons, interactive) */
-    --action-primary: #7C3AED;
-    --action-primary-hover: #A855F7;
-    --action-secondary: transparent;
-    --action-strong: #4C1D95;
-    --action-danger: #DC2626;
-
-    /* Text tokens */
-    --text-primary: #FFFFFF;
-    --text-secondary: #D1D5DB;
-    --text-muted: #6B7280;
-    --text-on-brand: #FFFFFF;
-    --text-brand: #7C3AED;
-
-    /* Status tokens */
-    --status-success: #10B981;
-    --status-warning: #F59E0B;
-    --status-error: #DC2626;
-
-    /* Border tokens */
-    --border-default: #27272a;
-    --border-brand: #7C3AED;
   }
 }
 
@@ -607,7 +537,7 @@
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid var(--action-primary);
+  outline: 2px solid #7C3AED;
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
 }
