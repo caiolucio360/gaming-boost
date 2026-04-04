@@ -7,7 +7,7 @@ function Skeleton({
   return (
     <div
       className={cn(
-        "rounded-md bg-gradient-to-r from-brand-purple/10 via-brand-purple/20 to-brand-purple/10 bg-[length:200%_100%] animate-shimmer",
+        "rounded-lg bg-gradient-to-r from-white/5 via-brand-purple/15 to-white/5 bg-[length:200%_100%] animate-shimmer",
         className
       )}
       {...props}
@@ -74,7 +74,7 @@ function SkeletonButton({
 
   return (
     <Skeleton
-      className={cn("rounded-md", sizeClasses[size], className)}
+      className={cn("rounded-lg", sizeClasses[size], className)}
       {...props}
     />
   )
