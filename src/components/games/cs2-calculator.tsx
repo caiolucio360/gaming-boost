@@ -355,7 +355,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                     onClick={() => handleServiceTypeChange(type)}
                     className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 font-rajdhani font-bold text-sm
                       ${isSelected
-                        ? 'bg-brand-purple text-white shadow-glow'
+                        ? 'bg-brand-purple border border-transparent text-white shadow-glow'
                         : 'bg-brand-black-light border border-white/10 text-brand-gray-400 hover:border-brand-purple/50 hover:text-white'
                       }`}
                   >
