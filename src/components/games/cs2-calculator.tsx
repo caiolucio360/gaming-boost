@@ -10,7 +10,7 @@ import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, GameMode, ServiceType } from '@/lib/games-config'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Calculator, Zap } from 'lucide-react'
+import { AlertCircle, Calculator, Check, Sword, Users, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -25,7 +25,7 @@ interface ActiveOrder {
 }
 
 export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType>('RANK_BOOST')
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null)
   const [selectedMode, setSelectedMode] = useState<GameMode>('PREMIER')
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
@@ -41,10 +41,12 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
   const gameConfig = getGameConfig(gameId)
   const modeConfig = gameConfig?.modes?.[selectedMode]
-  const serviceTypeInfo = gameConfig?.serviceTypeInfo?.[selectedServiceType]
+  const serviceTypeInfo = selectedServiceType ? gameConfig?.serviceTypeInfo?.[selectedServiceType] : undefined
 
   // Fetch dynamic rating points from API
   useEffect(() => {
+    if (!selectedServiceType) return
+
     const fetchRanges = async () => {
       setIsLoadingRanges(true)
       try {
@@ -115,7 +117,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const hasActiveOrderInMode = activeOrders.length > 0
 
   const handleHire = async () => {
-    if (!selectedCurrent || !selectedTarget || price <= 0 || !gameConfig || !modeConfig) return
+    if (!selectedCurrent || !selectedTarget || price <= 0 || !gameConfig || !modeConfig || !selectedServiceType) return
 
     setIsLoading(true)
     const currentValue = selectedMode === 'PREMIER' ? parseInt(selectedCurrent) * 1000 : parseInt(selectedCurrent)
@@ -222,7 +224,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   const targetRatingPoints = getRatingPoints(true)
 
   const calculatePrice = async () => {
-    if (!selectedCurrent || !selectedTarget || !modeConfig) {
+    if (!selectedCurrent || !selectedTarget || !modeConfig || !selectedServiceType) {
       setPrice(0)
       return
     }
@@ -306,32 +308,67 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Service Type Selector */}
-          {gameConfig.supportedServiceTypes && gameConfig.supportedServiceTypes.length > 1 && (
-            <div className="mb-4">
-              <Tabs value={selectedServiceType} onValueChange={(value) => handleServiceTypeChange(value as ServiceType)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
-                  <TabsTrigger
-                    value="RANK_BOOST"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
-                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
-                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+          {/* Service Type Selection — Phase A (full cards) or Phase B (compact bar) */}
+          {selectedServiceType === null ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {([
+                {
+                  type: 'RANK_BOOST' as ServiceType,
+                  Icon: Sword,
+                  title: 'Rank Boost',
+                  description: 'Nosso booster joga por você e sobe seu rank profissionalmente.',
+                },
+                {
+                  type: 'DUO_BOOST' as ServiceType,
+                  Icon: Users,
+                  title: 'Duo Boost',
+                  description: 'Você joga ao lado de um booster profissional para subir juntos.',
+                },
+              ] as const).map(({ type, Icon, title, description }) => (
+                <button
+                  key={type}
+                  onClick={() => handleServiceTypeChange(type)}
+                  className="bg-brand-black-light border border-brand-purple/30 rounded-xl p-6 cursor-pointer
+                    hover:border-brand-purple hover:shadow-glow transition-all duration-300
+                    flex flex-col items-center text-center"
+                >
+                  <Icon className="h-10 w-10 text-brand-purple-light mb-3" />
+                  <h3 className="text-lg font-bold text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    {title}
+                  </h3>
+                  <p className="text-sm text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    {description}
+                  </p>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(gameConfig.supportedServiceTypes as ServiceType[]).map((type) => {
+                const info = gameConfig.serviceTypeInfo?.[type]
+                const isSelected = selectedServiceType === type
+                const Icon = type === 'RANK_BOOST' ? Sword : Users
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleServiceTypeChange(type)}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 font-rajdhani font-bold text-sm
+                      ${isSelected
+                        ? 'bg-brand-purple text-white shadow-glow'
+                        : 'bg-brand-black-light border border-white/10 text-brand-gray-400 hover:border-brand-purple/50 hover:text-white'
+                      }`}
                   >
-                    Rank Boost
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="DUO_BOOST"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
-                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
-                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
-                  >
-                    Duo Boost
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                    <Icon className="h-4 w-4" />
+                    {info?.displayName || type}
+                    {isSelected && <Check className="h-4 w-4" />}
+                  </button>
+                )
+              })}
             </div>
           )}
 
+          {selectedServiceType !== null && (
+            <div key={selectedServiceType} className="animate-fadeInUp">
           {/* Service Type Description */}
           {serviceTypeInfo && (
             <p className="text-xs text-brand-gray-400 text-center mb-3 font-rajdhani">
@@ -581,6 +618,8 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
               </div>
             </div>
           </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
