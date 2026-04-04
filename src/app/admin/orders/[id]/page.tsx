@@ -193,8 +193,7 @@ export default function AdminOrderDetailPage() {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
           <Alert variant="destructive">
             <AlertTitle>Erro</AlertTitle>
             <AlertDescription>Pedido não encontrado</AlertDescription>
@@ -203,14 +202,12 @@ export default function AdminOrderDetailPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para Pedidos
           </Link>
-        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -482,7 +479,6 @@ export default function AdminOrderDetailPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   )
 }

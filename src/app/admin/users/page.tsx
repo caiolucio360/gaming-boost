@@ -207,8 +207,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {refreshing && (
           <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
             <p className="text-sm text-brand-purple-light font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
@@ -449,7 +448,6 @@ export default function AdminUsersPage() {
             Total: {users.length} usuário{users.length !== 1 ? 's' : ''}
           </p>
         </div>
-      </div>
 
       {/* Dialog para configurar comissão */}
       <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>

@@ -115,8 +115,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Removido banner de refreshing para evitar piscar - atualizações são silenciosas */}
         {error && (
           <Alert variant="destructive" className="mb-6">
@@ -379,7 +378,6 @@ export default function AdminDashboardPage() {
         </Card>
           </>
         ) : null}
-      </div>
     </div>
   )
 }

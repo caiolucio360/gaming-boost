@@ -167,8 +167,7 @@ export default function AdminBoostersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
                 {/* Back link */}
                 <Link 
                     href="/admin" 
@@ -336,7 +335,6 @@ export default function AdminBoostersPage() {
                         )}
                     </CardContent>
                 </Card>
-            </div>
 
             {/* Confirmation Dialog */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
