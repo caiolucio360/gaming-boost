@@ -5,9 +5,12 @@ import { Skeleton, SkeletonText, SkeletonAvatar, SkeletonButton } from '@/compon
 import { cn } from '@/lib/utils'
 
 // Stats card skeleton (for dashboard stats)
-export function SkeletonStatsCard({ className }: { className?: string }) {
+export function SkeletonStatsCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card
+      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4 rounded" />
@@ -21,9 +24,12 @@ export function SkeletonStatsCard({ className }: { className?: string }) {
 }
 
 // Order card skeleton (for order lists)
-export function SkeletonOrderCard({ className }: { className?: string }) {
+export function SkeletonOrderCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card
+      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -281,6 +287,44 @@ export function SkeletonList({
           <Skeleton className="h-8 w-20 rounded-md" />
         </div>
       ))}
+    </div>
+  )
+}
+
+// Grid of stats cards with stagger
+export function SkeletonStatsGrid({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonStatsCard key={i} index={i} />
+      ))}
+    </div>
+  )
+}
+
+// List of order cards with stagger
+export function SkeletonOrdersList({ count = 3 }: { count?: number }) {
+  return (
+    <div className="grid gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonOrderCard key={i} index={i} />
+      ))}
+    </div>
+  )
+}
+
+// Full page skeleton (stats grid + orders list)
+export function SkeletonPage() {
+  return (
+    <div className="min-h-screen bg-brand-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <SkeletonStatsGrid count={4} />
+        <SkeletonOrdersList count={3} />
+      </div>
     </div>
   )
 }
