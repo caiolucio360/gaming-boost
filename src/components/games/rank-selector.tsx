@@ -125,7 +125,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                     className="object-contain drop-shadow-lg"
                   />
                 </div>
-                <h3 className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-brand-purple-light font-bold' : 'text-white group-hover:text-brand-purple-lighter'}`}>
+                <h3 className={`font-bold text-sm transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-white group-hover:text-brand-purple-lighter'}`}>
                   {rank.name}
                 </h3>
                 {rank.tier && (
