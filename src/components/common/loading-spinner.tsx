@@ -10,6 +10,28 @@ interface LoadingSpinnerProps {
   text?: string
 }
 
+const spinnerSizes = {
+  xs: 'h-3 w-3',
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+  lg: 'h-6 w-6',
+}
+
+export function Spinner({
+  size = 'sm',
+  className,
+}: {
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  className?: string
+}) {
+  return (
+    <Loader2
+      className={cn('animate-spin text-brand-purple', spinnerSizes[size], className)}
+      aria-hidden="true"
+    />
+  )
+}
+
 const sizeClasses = {
   sm: 'h-4 w-4',
   md: 'h-8 w-8',
