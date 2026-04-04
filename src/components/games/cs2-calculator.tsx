@@ -469,7 +469,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                           onClick={() => handleCurrentSelect(point.value)}
                           className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
                             ${isSelected
-                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
                               : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
                             }`}
                         >
@@ -496,7 +496,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                           onClick={() => handleTargetSelect(point.value)}
                           className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
                             ${isSelected
-                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow scale-105'
+                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
                               : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
                             }`}
                         >

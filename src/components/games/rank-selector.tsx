@@ -100,7 +100,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               aria-pressed={isSelected}
               className={`group relative cursor-pointer transition-all duration-300 overflow-hidden ${
                 isSelected
-                  ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/50 scale-105' 
+                  ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/50'
                   : 'hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 hover:border-brand-purple-light/50'
               } bg-gradient-to-br from-gray-900/50 via-gray-800/50 to-gray-900/50 border-brand-purple/30`}
               onClick={() => handleRankSelect(rank)}
@@ -117,7 +117,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               )}
               
               <CardContent className="p-4 text-center relative z-10">
-                <div className={`w-16 h-16 mx-auto mb-2 relative transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}>
+                <div className={`w-16 h-16 mx-auto mb-2 relative transition-transform duration-300 ${isSelected ? '' : 'group-hover:scale-110'}`}>
                   <Image
                     src={rank.image}
                     alt={rank.name}
