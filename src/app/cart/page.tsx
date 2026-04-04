@@ -34,7 +34,7 @@ export default function CartPage() {
   const handleFinalizePurchase = async () => {
     if (!user) {
       showWarning('Login necessário', 'Faça login para finalizar sua compra')
-      router.push('/login')
+      router.replace('/login')
       return
     }
 

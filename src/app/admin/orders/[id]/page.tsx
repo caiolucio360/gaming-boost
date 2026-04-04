@@ -93,7 +93,7 @@ export default function AdminOrderDetailPage() {
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace('/')
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
     } else if (user && user.role === 'ADMIN' && orderId) {
       fetchOrder()
     }

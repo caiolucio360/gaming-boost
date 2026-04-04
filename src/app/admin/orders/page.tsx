@@ -65,8 +65,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      // Usar replace para redirecionamento de autenticação
-      router.replace('/')
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
     } else if (user && user.role === 'ADMIN') {
       fetchOrders()
     }

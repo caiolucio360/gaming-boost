@@ -102,10 +102,7 @@ npm run test:coverage    # Generate coverage report
   - Linked to User
 
 - `BoosterProfile` - Extended booster information (bio, CS2 stats, verification status)
-- `Review` - Order reviews (1-5 rating + comment)
 - `Notification` - User notifications (types: ORDER_UPDATE, PAYMENT, SYSTEM, CHAT, BOOSTER_ASSIGNED, COMMISSION)
-- `Dispute` - Order disputes with message thread
-- `BoosterCommissionHistory` - Tracks commission percentage changes over time
 
 - `Service` - Available boost services (e.g., "CS2 Premier Rank Boost")
   - Links to Game and ServiceType
@@ -223,7 +220,7 @@ if (!validation.success) {
 **Client-Initiated Cancellation & Refund:**
 - Clients can cancel orders via `/api/orders/[id]/cancel` (POST)
 - Only PENDING and PAID orders can be cancelled
-- IN_PROGRESS and COMPLETED orders cannot be cancelled (must use dispute system)
+- IN_PROGRESS and COMPLETED orders cannot be cancelled (contact support)
 - PAID orders automatically trigger refund processing
 - Refund processed synchronously - if it fails, cancellation is blocked
 - Order ownership verified before allowing cancellation
@@ -325,7 +322,6 @@ NEXT_PUBLIC_APP_URL       # App URL for email templates (default: localhost:3000
 **Custom Commission Rates:**
 - Global defaults in `CommissionConfig` table
 - Per-booster override via `User.boosterCommissionPercentage`
-- Historical tracking in `BoosterCommissionHistory`
 
 ### Email System
 
@@ -377,14 +373,11 @@ src/
 │   │   ├── payment/         # Payment endpoints (pix, pix/simulate, pix/status)
 │   │   ├── pricing/         # Pricing calculation (calculate)
 │   │   ├── webhooks/        # External webhooks (abacatepay, abacatepay/debug)
-│   │   ├── admin/           # Admin-only (orders, orders/[id], payments, payments/confirm, users, users/[id], users/[id]/commission-history, boosters, boosters/[id], stats, pricing, pricing/[id], commission-config, withdraw)
+│   │   ├── admin/           # Admin-only (orders, orders/[id], payments, payments/confirm, users, users/[id], boosters, boosters/[id], stats, pricing, pricing/[id], commission-config, withdraw)
 │   │   ├── booster/         # Booster-only (orders, orders/[id], payments, apply, profile, withdraw)
 │   │   ├── user/            # User endpoints (profile, bank-account, delete)
-│   │   ├── disputes/        # Dispute system ([id], [id]/messages)
-│   │   ├── contact/         # Contact form
 │   │   ├── realtime/        # Real-time polling endpoint
 │   │   ├── notifications/   # Notification management
-│   │   ├── reviews/         # Review system
 │   │   └── cron/            # Scheduled tasks (auto-refund)
 │   └── ...                  # Public pages
 ├── components/
@@ -465,25 +458,26 @@ prisma/
 **Standard Response Pattern:**
 ```typescript
 return Response.json({ data: ... }, { status: 200 })
-return Response.json({ error: 'message' }, { status: 400 })
+return Response.json({ message: 'error description' }, { status: 400 })  // always "message", never "error"
 ```
 
 **Authentication in API Routes:**
 ```typescript
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
+import { verifyAuth, verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 
-const session = await getServerSession(authOptions)
-if (!session) {
-  return Response.json({ error: 'Unauthorized' }, { status: 401 })
-}
+// For user-facing routes:
+const authResult = await verifyAuth(request)
+if (!authResult.authenticated) return createAuthErrorResponseFromResult(authResult)
+
+// For admin-only routes:
+const authResult = await verifyAdmin(request)
+if (!authResult.authenticated) return createAuthErrorResponseFromResult(authResult)
 ```
 
 **Role-Based Authorization:**
 ```typescript
-if (session.user.role !== 'ADMIN') {
-  return Response.json({ error: 'Forbidden' }, { status: 403 })
-}
+// Use verifyAdmin() directly — it handles the role check internally
+// Only call verifyAuth() + manual role check when you need the user object for further logic
 ```
 
 **Error Handling (IMPORTANT):**
@@ -597,20 +591,64 @@ npm run test:coverage     # Generate coverage report
 - Use AbacatePay dev mode
 - Use `simulatePixPayment()` via `/api/payment/pix/simulate`
 
+## Frontend Page Patterns
+
+### Auth Guard (all protected pages)
+```typescript
+useEffect(() => {
+  if (!authLoading && !user) {
+    router.replace('/login')
+  } else if (user && user.role !== 'ADMIN') {
+    router.replace(user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+  }
+}, [user, authLoading, router])
+```
+- Always use `router.replace()` for auth redirects (not `push`) — prevents going back to the protected page
+- Admin pages redirect to `/login` when unauthenticated, to `/booster` or `/dashboard` when wrong role
+- Booster pages redirect to `/dashboard` for CLIENT, `/admin` for ADMIN
+
+### Loading State
+- **Always use `useLoading` hook** from `@/hooks/use-loading` — never manual `useState(true/false)` for page-level loading
+- `useLoading({ initialLoading: true })` → returns `{ loading, refreshing, withLoading }`
+- `withLoading(async () => { ... })` wraps fetch calls automatically
+
+### API Error Key
+- Frontend always reads `data.message` from API responses — **never `data.error`**
+- API routes always return `{ message: '...' }` for errors — **never `{ error: '...' }`**
+
+### Admin Pages (current structure)
+- `/admin` — Dashboard overview
+- `/admin/orders` + `/admin/orders/[id]` — Order management
+- `/admin/users` — User management (roles, custom commissions)
+- `/admin/boosters` — Booster application approval
+- `/admin/pricing` — Dynamic pricing configuration
+- `/admin/payments` — Tabbed: Receitas | Saques | Configurações (commission config merged here)
+
+### Booster Pages (current structure)
+- `/booster` — Dashboard
+- `/booster/payments` — Tabbed: Comissões | Saques (withdraw merged here)
+- `/booster/apply` — Application form
+
 ## Notes for AI Assistants
 
 - Prisma Client is imported from `@/lib/db`, not `@/generated/prisma`
 - All monetary amounts in AbacatePay are in **centavos** (multiply reais by 100)
 - Steam credentials must be encrypted before storing in database
-- Order duplication is prevented by `[userId, gameMode, status]` index - don't allow multiple PENDING/PAID/IN_PROGRESS orders in same game mode
+- Order duplication is prevented by `[userId, gameMode, status]` index — don't allow multiple PENDING/PAID/IN_PROGRESS orders in same game mode
 - Commission percentages are stored as decimals (0.70 = 70%, not 70)
 - NextAuth session user object is extended with `id` and `role` fields via callbacks
-- Middleware protects routes - check `src/middleware.ts` config before adding new protected routes
-- **Pricing System:** All pricing is database-driven via `PricingConfig` model. NEVER add calculation functions to `games-config.ts`. Use `/api/pricing/calculate` endpoint for price calculations. Config only contains display metadata (pricingInfo.unit and pricingInfo.description)
+- Middleware protects routes — check `src/middleware.ts` config before adding new protected routes
+- **Pricing System:** All pricing is database-driven via `PricingConfig` model. NEVER add calculation functions to `games-config.ts`. Use `/api/pricing/calculate` endpoint for price calculations.
 - **Service Layer:** Business logic belongs in `src/services/`, API routes should be thin controllers
 - **Validation:** Use centralized Zod schemas from `src/schemas/` with `validateBody` from `@/lib/validate`
 - **Dev-Admin:** The `isDevAdmin` flag on User designates a dev-admin who gets a cut before the regular admin split
 - **User Activation:** New users are `active: false` until they verify their email via 6-digit code
+- **Removed features (MVP scope cut):** Dispute system, review system, booster public profiles (`/booster/[id]`), commission history audit trail, and contact form were removed. Do not re-add these.
+- **Webhook security:** `ABACATEPAY_WEBHOOK_SECRET` is mandatory — missing it returns 500, not 200
+- **Cron security:** `CRON_SECRET` is enforced in all environments (not just production)
+- **Payment simulate:** `/api/payment/pix/simulate` returns 403 in production (`NODE_ENV === 'production'`)
+- **Withdrawal race condition:** Both withdraw routes use provisional-record pattern (DB record created before AbacatePay call) to prevent TOCTOU overdraft
+- **Webhook idempotency:** `confirmPayment` uses atomic `updateMany` with `status=PENDING` guard — duplicate webhooks are safely no-ops
 
 ## Key Dependencies
 

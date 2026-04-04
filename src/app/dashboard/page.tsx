@@ -32,7 +32,6 @@ import { OrdersListSkeleton } from '@/components/common/loading-skeletons'
 import { showSuccess, showError, handleApiError } from '@/lib/toast'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
-import { RefreshingBanner } from '@/components/common/refreshing-banner'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -181,7 +180,7 @@ export default function DashboardPage() {
         // Recarregar pedidos sem mostrar loading completo
         fetchOrders(true)
       } else {
-        showError('Erro ao cancelar pedido', data.error || 'Não foi possível cancelar o pedido')
+        showError('Erro ao cancelar pedido', data.message || 'Não foi possível cancelar o pedido')
       }
     } catch (error) {
       console.error('Erro ao cancelar pedido:', error)

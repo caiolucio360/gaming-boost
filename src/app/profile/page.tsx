@@ -242,7 +242,7 @@ export default function ProfilePage() {
 
       // Logout and redirect
       logout()
-      router.push('/login?deleted=true')
+      router.replace('/login?deleted=true')
 
     } catch (error: any) {
       console.error('Erro ao excluir conta:', error)

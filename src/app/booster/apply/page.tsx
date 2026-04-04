@@ -2,7 +2,7 @@ import { ApplyForm } from '@/components/booster/apply-form'
 
 export default function ApplyPage() {
   return (
-    <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-brand-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
           <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">Junte-se</span>

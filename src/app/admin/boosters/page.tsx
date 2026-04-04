@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -56,7 +57,7 @@ export default function AdminBoostersPage() {
     const router = useRouter()
     const [applications, setApplications] = useState<BoosterApplication[]>([])
     const [counts, setCounts] = useState<StatusCounts>({ PENDING: 0, VERIFIED: 0, REJECTED: 0 })
-    const [loading, setLoading] = useState(true)
+    const { loading, withLoading } = useLoading({ initialLoading: true })
     const [filter, setFilter] = useState<string>('PENDING')
     const [selectedApp, setSelectedApp] = useState<BoosterApplication | null>(null)
     const [rejectReason, setRejectReason] = useState('')
@@ -75,18 +76,17 @@ export default function AdminBoostersPage() {
     }, [user, authLoading, router, filter])
 
     const fetchApplications = async () => {
-        try {
-            setLoading(true)
-            const response = await fetch(`/api/admin/boosters?status=${filter}`)
-            if (!response.ok) throw new Error('Erro ao carregar')
-            const data = await response.json()
-            setApplications(data.applications)
-            setCounts(data.counts)
-        } catch (error) {
-            showError('Erro', 'Não foi possível carregar as aplicações')
-        } finally {
-            setLoading(false)
-        }
+        await withLoading(async () => {
+            try {
+                const response = await fetch(`/api/admin/boosters?status=${filter}`)
+                if (!response.ok) throw new Error('Erro ao carregar')
+                const data = await response.json()
+                setApplications(data.applications)
+                setCounts(data.counts)
+            } catch (error) {
+                showError('Erro', 'Não foi possível carregar as aplicações')
+            }
+        })
     }
 
     const handleAction = async () => {
