@@ -5,6 +5,7 @@ export interface User {
   email: string;
   name?: string;
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN';
+  isDevAdmin?: boolean;
 }
 
 export interface GameRank {
