@@ -57,7 +57,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { rangeStart, rangeEnd, price, unit, enabled } = body
+    const { rangeStart, rangeEnd, price, enabled, gameMode } = body
 
     // Validações
     if (rangeStart !== undefined && rangeEnd !== undefined && rangeStart >= rangeEnd) {
@@ -106,7 +106,10 @@ export async function PUT(
     if (rangeStart !== undefined) updateData.rangeStart = parseInt(rangeStart)
     if (rangeEnd !== undefined) updateData.rangeEnd = parseInt(rangeEnd)
     if (price !== undefined) updateData.price = parseFloat(price)
-    if (unit !== undefined) updateData.unit = unit
+    if (gameMode !== undefined) {
+      updateData.gameMode = gameMode
+      updateData.unit = gameMode === 'PREMIER' ? '1000 pontos' : '1 nível'
+    }
     if (enabled !== undefined) updateData.enabled = enabled
 
     const pricingConfig = await db.pricingConfig.update({

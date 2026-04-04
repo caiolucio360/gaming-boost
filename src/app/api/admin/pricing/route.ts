@@ -88,11 +88,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { game, gameMode, serviceType: bodyServiceType, rangeStart, rangeEnd, price, unit, enabled } = body
+    const { game, gameMode, serviceType: bodyServiceType, rangeStart, rangeEnd, price, enabled } = body
     const svcType: ServiceType = bodyServiceType === 'DUO_BOOST' ? 'DUO_BOOST' : 'RANK_BOOST'
 
     // Validações
-    if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price || !unit) {
+    if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -115,6 +115,8 @@ export async function POST(request: NextRequest) {
         error: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`
       }, { status: 409 })
     }
+
+    const unit = gameMode === 'PREMIER' ? '1000 pontos' : '1 nível'
 
     const pricingConfig = await db.pricingConfig.create({
       data: {
