@@ -2,6 +2,8 @@
  * Security controls tests
  * Verify critical security checks work correctly.
  * These test the guards that happen before any DB/external calls.
+ *
+ * @jest-environment node
  */
 import { NextRequest } from 'next/server'
 

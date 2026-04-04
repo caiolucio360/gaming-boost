@@ -12,7 +12,8 @@ describe('GAMES_CONFIG', () => {
       expect(config).toHaveProperty('href')
       expect(config).toHaveProperty('enabled')
       expect(config).toHaveProperty('modes')
-      expect(Array.isArray(config.modes)).toBe(true)
+      // modes is a Record<GameMode, GameModeConfig>, not an array
+      expect(typeof config.modes).toBe('object')
     })
   })
 
