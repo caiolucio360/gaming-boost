@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: session.user.email,
         name: session.user.name || undefined,
         role: session.user.role,
+        isDevAdmin: session.user.isDevAdmin,
       }
     : null
 

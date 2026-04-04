@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { createApiErrorResponse } from '@/lib/api-errors'
 
-// GET - Obter configuração de comissão ativa
+// GET - Fetch active commission config
 export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAdmin(request)
@@ -10,34 +11,30 @@ export async function GET(request: NextRequest) {
       return createAuthErrorResponseFromResult(authResult)
     }
 
-    // Buscar configuração ativa
-    let config = await prisma.commissionConfig.findFirst({
+    const config = await prisma.commissionConfig.findFirst({
       where: { enabled: true },
     })
 
-    // Se não houver configuração, criar uma padrão
     if (!config) {
-      config = await prisma.commissionConfig.create({
-        data: {
-          boosterPercentage: 0.70,
-          adminPercentage: 0.30,
-          withdrawalWaitingDays: 7,
-          enabled: true,
-        },
-      })
+      return NextResponse.json(
+        { message: 'Configuração de comissão não encontrada. Execute o seed.' },
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json({ config }, { status: 200 })
+    // Always derive adminPercentage — never trust the stored value
+    const enriched = {
+      ...config,
+      adminPercentage: 1 - config.boosterPercentage,
+    }
+
+    return NextResponse.json({ config: enriched }, { status: 200 })
   } catch (error) {
-    console.error('Erro ao buscar configuração de comissão:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar configuração de comissão' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, 'Erro ao buscar configuração de comissão', 'GET /api/admin/commission-config')
   }
 }
 
-// PUT - Atualizar configuração de comissão
+// PUT - Update commission config
 export async function PUT(request: NextRequest) {
   try {
     const authResult = await verifyAdmin(request)
@@ -46,72 +43,65 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { boosterPercentage, adminPercentage, withdrawalWaitingDays } = body
+    const { boosterPercentage, devAdminPercentage, withdrawalWaitingDays } = body
 
-    // Validar porcentagens
-    if (
-      boosterPercentage === undefined ||
-      adminPercentage === undefined ||
-      boosterPercentage < 0 ||
-      boosterPercentage > 1 ||
-      adminPercentage < 0 ||
-      adminPercentage > 1
-    ) {
+    if (boosterPercentage === undefined || devAdminPercentage === undefined) {
       return NextResponse.json(
-        { message: 'Porcentagens devem estar entre 0 e 1 (0% e 100%)' },
+        { message: 'boosterPercentage e devAdminPercentage são obrigatórios' },
         { status: 400 }
       )
     }
 
-    // Validar que a soma seja 1 (100%)
-    const sum = boosterPercentage + adminPercentage
-    if (Math.abs(sum - 1.0) > 0.01) {
+    if (boosterPercentage < 0 || boosterPercentage > 1) {
       return NextResponse.json(
-        { message: 'A soma das porcentagens deve ser 100%' },
+        { message: 'boosterPercentage deve estar entre 0 e 1' },
         { status: 400 }
       )
     }
 
-    // Validar período de espera
+    if (devAdminPercentage < 0 || devAdminPercentage > 1) {
+      return NextResponse.json(
+        { message: 'devAdminPercentage deve estar entre 0 e 1' },
+        { status: 400 }
+      )
+    }
+
     if (withdrawalWaitingDays !== undefined &&
         (!Number.isInteger(withdrawalWaitingDays) || withdrawalWaitingDays < 0)) {
       return NextResponse.json(
-        { message: 'Período de espera deve ser um inteiro não negativo (0 = imediato)' },
+        { message: 'withdrawalWaitingDays deve ser um inteiro não negativo' },
         { status: 400 }
       )
     }
 
-    // Desabilitar configurações antigas e criar nova
-    // Using any due to Prisma custom output path type resolution issues
+    // adminPercentage stored as 1 - boosterPercentage for DB compatibility
+    const adminPercentage = 1 - boosterPercentage
+
     const config = await prisma.$transaction(async (tx: any) => {
-      // Desabilitar todas as configurações existentes
       await tx.commissionConfig.updateMany({
         where: { enabled: true },
         data: { enabled: false },
       })
 
-      // Criar nova configuração ativa
-      const newConfig = await tx.commissionConfig.create({
+      return tx.commissionConfig.create({
         data: {
           boosterPercentage,
           adminPercentage,
+          devAdminPercentage,
           ...(withdrawalWaitingDays !== undefined && { withdrawalWaitingDays }),
           enabled: true,
         },
       })
-
-      return newConfig
     })
 
     return NextResponse.json(
-      { message: 'Configuração de comissão atualizada com sucesso', config },
+      {
+        message: 'Configuração atualizada com sucesso',
+        config: { ...config, adminPercentage: 1 - config.boosterPercentage },
+      },
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao atualizar configuração de comissão:', error)
-    return NextResponse.json(
-      { message: 'Erro ao atualizar configuração de comissão' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, 'Erro ao atualizar configuração de comissão', 'PUT /api/admin/commission-config')
   }
 }

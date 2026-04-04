@@ -8,6 +8,7 @@ declare module 'next-auth' {
       email: string
       name?: string | null
       role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
+      isDevAdmin?: boolean
     }
   }
 
@@ -16,6 +17,7 @@ declare module 'next-auth' {
     email: string
     name?: string | null
     role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
+    isDevAdmin?: boolean
   }
 }
 

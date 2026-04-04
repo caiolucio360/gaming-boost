@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Settings as SettingsIcon
+  Percent,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StatCard } from '@/components/common/stat-card'
@@ -236,26 +236,20 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
-          {/* Configurar Comissões */}
-          <Link href="/admin/payments?tab=configuracoes" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-amber-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1 card-interactive">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/25 group-hover:scale-110 group-hover:shadow-amber-500/40 transition-all duration-300">
-                  <SettingsIcon className="h-7 w-7 text-white" />
+          {/* Gerenciar Comissões */}
+          <Link href="/admin/commissions">
+            <Card className="bg-brand-black-light border-brand-purple/20 hover:border-brand-purple transition-colors cursor-pointer group">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-brand-purple/10 group-hover:bg-brand-purple/20 transition-colors">
+                  <Percent className="h-6 w-6 text-brand-purple" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-amber-200 transition-colors">
-                  Comissões
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Configurar porcentagens de comissão
-                </p>
-                <div className="flex items-center mt-4 text-amber-400 text-sm font-medium group-hover:text-amber-300 transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <div>
+                  <h3 className="text-white font-rajdhani font-semibold">Comissões</h3>
+                  <p className="text-brand-gray-500 text-sm font-rajdhani">Gerenciar porcentagens</p>
                 </div>
-              </div>
-            </div>
+                <ArrowRight className="h-4 w-4 text-brand-gray-500 ml-auto group-hover:text-brand-purple transition-colors" />
+              </CardContent>
+            </Card>
           </Link>
 
           {/* Aplicações de Booster */}

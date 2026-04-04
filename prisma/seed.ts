@@ -56,7 +56,6 @@ async function main() {
             password: await bcrypt.hash('booster123', 10),
             role: 'BOOSTER',
             pixKey: '11988888888',
-            boosterCommissionPercentage: 0.70,
         },
     })
     console.log('  ✓ Booster:', booster.email)
@@ -93,24 +92,23 @@ async function main() {
     if (!existingConfig) {
         await prisma.commissionConfig.create({
             data: {
-                boosterPercentage: 0.60,
-                adminPercentage: 0.30,
-                devAdminPercentage: 0.10, // 10% para Dev
+                boosterPercentage: 0.25,
+                adminPercentage: 0.75, // stored for DB compat, always derived in code as 1 - boosterPercentage
+                devAdminPercentage: 0.10,
                 enabled: true
             },
         })
-        console.log('  ✓ Commission: 60% booster / 30% admin / 10% dev')
+        console.log('  ✓ Commission: 25% booster / 75% admin / 10% dev-admin (off-the-top)')
     } else {
-        // Update existing to include dev percentage if missing
-        if (existingConfig.devAdminPercentage === null || existingConfig.devAdminPercentage === undefined) {
-            await prisma.commissionConfig.update({
-                where: { id: existingConfig.id },
-                data: { devAdminPercentage: 0.10, boosterPercentage: 0.60 } // Ajustando para ter espaço pro dev
-            })
-            console.log('  ✓ Updated Commission with Dev %')
-        } else {
-            console.log('  ✓ Commission config exists')
-        }
+        await prisma.commissionConfig.update({
+            where: { id: existingConfig.id },
+            data: {
+                boosterPercentage: 0.25,
+                adminPercentage: 0.75,
+                devAdminPercentage: 0.10,
+            }
+        })
+        console.log('  ✓ Commission config updated to: 25% booster / 75% admin / 10% dev-admin')
     }
 
     // 4. PRICING CONFIG (CS2)

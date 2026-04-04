@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -21,15 +21,12 @@ import {
   Wallet,
   RefreshCw,
   Settings,
-  Save,
-  AlertCircle,
-  Percent,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { OrdersListSkeleton, StatsGridSkeleton, ProfileSkeleton } from '@/components/common/loading-skeletons'
+import { OrdersListSkeleton, StatsGridSkeleton } from '@/components/common/loading-skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { showSuccess, showError } from '@/lib/toast'
@@ -73,14 +70,6 @@ interface Withdrawal {
   receiptUrl: string | null
 }
 
-interface CommissionConfig {
-  id: number
-  boosterPercentage: number
-  adminPercentage: number
-  withdrawalWaitingDays: number
-  enabled: boolean
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminPaymentsPage() {
@@ -102,17 +91,6 @@ export default function AdminPaymentsPage() {
   const [pixKeyType, setPixKeyType] = useState<string>('')
   const [pixKey, setPixKey] = useState('')
 
-  // ── Commission config ──
-  const { loading: configLoading, withLoading: withConfigLoading } = useLoading({ initialLoading: true })
-  const [config, setConfig] = useState<CommissionConfig | null>(null)
-  const [boosterPercentage, setBoosterPercentage] = useState('70')
-  const [adminPercentage, setAdminPercentage] = useState('30')
-  const [withdrawalWaitingDays, setWithdrawalWaitingDays] = useState('7')
-  const [saving, setSaving] = useState(false)
-  const [configAlert, setConfigAlert] = useState<{
-    title: string; description: string; variant: 'default' | 'destructive'
-  } | null>(null)
-
   // ── Auth guard ──
   useEffect(() => {
     if (!authLoading && !user) {
@@ -127,7 +105,6 @@ export default function AdminPaymentsPage() {
     if (user?.role === 'ADMIN') {
       fetchRevenues()
       fetchWithdrawals()
-      fetchCommissionConfig()
     }
   }, [user?.id])
 
@@ -173,23 +150,6 @@ export default function AdminPaymentsPage() {
     }
   }
 
-  const fetchCommissionConfig = async () => {
-    await withConfigLoading(async () => {
-      try {
-        const response = await fetch('/api/admin/commission-config')
-        if (response.ok) {
-          const data = await response.json()
-          setConfig(data.config)
-          setBoosterPercentage((data.config.boosterPercentage * 100).toFixed(0))
-          setAdminPercentage((data.config.adminPercentage * 100).toFixed(0))
-          setWithdrawalWaitingDays(String(data.config.withdrawalWaitingDays ?? 7))
-        }
-      } catch (error) {
-        console.error('Erro ao buscar configuração:', error)
-      }
-    })
-  }
-
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
   const handleWithdrawSubmit = async (e: React.FormEvent) => {
@@ -222,50 +182,6 @@ export default function AdminPaymentsPage() {
     }
   }
 
-  const handleSaveConfig = async () => {
-    setSaving(true)
-    setConfigAlert(null)
-    const booster = parseFloat(boosterPercentage)
-    const admin = parseFloat(adminPercentage)
-    const waitingDays = parseInt(withdrawalWaitingDays, 10)
-
-    if (isNaN(booster) || isNaN(admin)) {
-      setConfigAlert({ title: 'Erro', description: 'Porcentagens devem ser números válidos', variant: 'destructive' })
-      setSaving(false); return
-    }
-    if (booster < 0 || booster > 100 || admin < 0 || admin > 100) {
-      setConfigAlert({ title: 'Erro', description: 'Porcentagens devem estar entre 0 e 100', variant: 'destructive' })
-      setSaving(false); return
-    }
-    if (Math.abs(booster + admin - 100) > 0.01) {
-      setConfigAlert({ title: 'Erro', description: 'A soma das porcentagens deve ser 100%', variant: 'destructive' })
-      setSaving(false); return
-    }
-    if (isNaN(waitingDays) || waitingDays < 0) {
-      setConfigAlert({ title: 'Erro', description: 'Período de espera deve ser um número inteiro não negativo', variant: 'destructive' })
-      setSaving(false); return
-    }
-
-    try {
-      const response = await fetch('/api/admin/commission-config', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ boosterPercentage: booster / 100, adminPercentage: admin / 100, withdrawalWaitingDays: waitingDays }),
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setConfig(data.config)
-        showSuccess('Configuração atualizada com sucesso!')
-      } else {
-        showError(data.message || 'Erro ao atualizar configuração')
-      }
-    } catch {
-      showError('Erro ao salvar configuração')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   const getRevenueStatusBadge = (status: string) => {
@@ -287,7 +203,6 @@ export default function AdminPaymentsPage() {
   }
 
   const hasPendingWithdrawal = withdrawals.some(w => w.status === 'PENDING' || w.status === 'PROCESSING')
-  const percentSum = parseFloat(boosterPercentage) + parseFloat(adminPercentage)
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -500,122 +415,18 @@ export default function AdminPaymentsPage() {
 
           {/* ── Tab: Configurações ────────────────────────────────────────── */}
           <TabsContent value="configuracoes">
-            <div className="max-w-4xl">
-              {configAlert && (
-                <Alert variant={configAlert.variant} className="mb-6">
-                  {configAlert.variant === 'default' ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                  <AlertTitle>{configAlert.title}</AlertTitle>
-                  <AlertDescription>{configAlert.description}</AlertDescription>
-                </Alert>
-              )}
-
-              {configLoading ? (
-                <ProfileSkeleton />
-              ) : (
-                <Card className="bg-brand-black/30 border-brand-purple/50">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-brand-purple-light" />
-                      Porcentagens de Comissão
-                    </CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Configure como o valor dos pedidos será distribuído entre boosters e administradores
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="boosterPercentage" className="text-gray-400 flex items-center gap-2">
-                          <Percent className="h-4 w-4" />Porcentagem do Booster (%)
-                        </Label>
-                        <Input
-                          id="boosterPercentage"
-                          type="number" min="0" max="100" step="0.1" placeholder="70"
-                          value={boosterPercentage}
-                          onChange={(e) => {
-                            setBoosterPercentage(e.target.value)
-                            const b = parseFloat(e.target.value)
-                            if (!isNaN(b) && b >= 0 && b <= 100) setAdminPercentage((100 - b).toFixed(1))
-                          }}
-                          className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold"
-                        />
-                        <p className="text-xs text-gray-500">Valor que o booster receberá por cada pedido concluído</p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="adminPercentage" className="text-gray-400 flex items-center gap-2">
-                          <Percent className="h-4 w-4" />Porcentagem do Admin (%)
-                        </Label>
-                        <Input
-                          id="adminPercentage"
-                          type="number" min="0" max="100" step="0.1" placeholder="30"
-                          value={adminPercentage}
-                          onChange={(e) => {
-                            setAdminPercentage(e.target.value)
-                            const a = parseFloat(e.target.value)
-                            if (!isNaN(a) && a >= 0 && a <= 100) setBoosterPercentage((100 - a).toFixed(1))
-                          }}
-                          className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold"
-                        />
-                        <p className="text-xs text-gray-500">Valor que o administrador receberá por cada pedido concluído</p>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">Soma das porcentagens:</span>
-                        <span className={`text-lg font-bold ${Math.abs(percentSum - 100) < 0.01 ? 'text-green-300' : 'text-red-300'}`}>
-                          {percentSum.toFixed(1)}%
-                        </span>
-                      </div>
-                      {Math.abs(percentSum - 100) >= 0.01 && (
-                        <p className="text-xs text-red-400 mt-2">A soma deve ser exatamente 100%</p>
-                      )}
-                    </div>
-
-                    {config && (
-                      <div className="p-4 bg-brand-black/50 border border-brand-purple/30 rounded-lg">
-                        <p className="text-sm text-gray-400 mb-2">Exemplo de cálculo (pedido de R$ 100,00):</p>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-gray-500">Booster receberá:</p>
-                            <p className="text-green-300 font-bold">R$ {(100 * parseFloat(boosterPercentage) / 100).toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500">Admin receberá:</p>
-                            <p className="text-brand-purple-light font-bold">R$ {(100 * parseFloat(adminPercentage) / 100).toFixed(2)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="pt-4 border-t border-brand-purple/30 space-y-2">
-                      <Label htmlFor="withdrawalWaitingDays" className="text-gray-400 flex items-center gap-2">
-                        <Clock className="h-4 w-4" />Período de Espera para Saque (dias)
-                      </Label>
-                      <Input
-                        id="withdrawalWaitingDays"
-                        type="number" min="0" step="1" placeholder="7"
-                        value={withdrawalWaitingDays}
-                        onChange={(e) => setWithdrawalWaitingDays(e.target.value)}
-                        className="bg-brand-black/50 border-brand-purple/50 text-white text-lg font-bold max-w-xs"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Quantos dias após a conclusão de um pedido o booster deve aguardar para sacar a comissão.
-                        Use <span className="text-brand-purple-light font-medium">0</span> para liberação imediata.
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={handleSaveConfig}
-                      disabled={saving || Math.abs(percentSum - 100) >= 0.01}
-                      className="w-full bg-brand-purple text-white border border-transparent hover:border-white/50"
-                    >
-                      {saving ? <><span className="animate-spin mr-2">⏳</span>Salvando...</> : <><Save className="h-4 w-4 mr-2" />Salvar Configuração</>}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            <Card className="bg-brand-black-light border-brand-purple/20">
+              <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
+                <p className="text-brand-gray-300 font-rajdhani text-center max-w-sm">
+                  As configurações de comissão foram movidas para uma página dedicada.
+                </p>
+                <Link href="/admin/commissions">
+                  <Button className="bg-brand-purple hover:bg-brand-purple-light text-white">
+                    Ir para Gerenciar Comissões
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
