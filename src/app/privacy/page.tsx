@@ -1,6 +1,5 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Card, CardContent} from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
@@ -37,7 +36,7 @@ export default function PrivacyPage() {
           }),
         }}
       />
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
@@ -199,8 +198,7 @@ export default function PrivacyPage() {
                   <li><strong className="text-white">Informação:</strong> Sobre entidades públicas e privadas com as quais compartilhamos dados</li>
                 </ul>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Para exercer seus direitos, entre em contato através do nosso{' '}
-                  <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">formulário de contato</Link>.
+                  Para exercer seus direitos, entre em contato com nossa equipe via WhatsApp.
                   Responderemos sua solicitação em até 15 dias.
                 </p>
               </section>
@@ -294,10 +292,8 @@ export default function PrivacyPage() {
                     entre em contato com nosso Encarregado de Proteção de Dados:
                   </p>
                   <p>
-                    <strong className="text-white">Formulário de Contato:</strong>{' '}
-                    <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">
-                      Clique aqui
-                    </Link>
+                    <strong className="text-white">Suporte:</strong>{' '}
+                    Entre em contato com nossa equipe via WhatsApp
                   </p>
                   <p className="text-sm">
                     Prazo de resposta: até 15 dias conforme estabelecido pela LGPD
@@ -307,7 +303,7 @@ export default function PrivacyPage() {
 
               <div className="border-t border-brand-purple/30 pt-8 mt-8">
                 <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Última atualização: Janeiro de 2026
+                  Última atualização: Abril de 2026
                 </p>
                 <p className="text-xs text-gray-500 font-rajdhani text-center mt-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Esta Política de Privacidade está em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)

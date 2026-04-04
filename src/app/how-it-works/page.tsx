@@ -58,14 +58,14 @@ const features = [
 
 export default function ComoFuncionaPage() {
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="min-h-screen bg-brand-black">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-5xl font-bold text-white font-orbitron mb-4">
+        <div className="text-center mb-16">
+          <h1 className="text-3xl md:text-5xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             <span className="text-brand-purple-light">COMO</span> FUNCIONA
           </h1>
-          <p className="text-lg text-gray-300 font-rajdhani max-w-2xl mx-auto">
+          <p className="text-lg text-brand-gray-300 font-rajdhani max-w-2xl mx-auto" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Processo simples e seguro em 4 passos
           </p>
         </div>
@@ -75,27 +75,27 @@ export default function ComoFuncionaPage() {
           {steps.map((step, index) => (
             <Card
               key={step.number}
-              className="relative bg-brand-black-light border-brand-purple/30 hover:border-brand-purple/60 transition-all duration-300 overflow-hidden group"
+              className="relative bg-brand-black-light border-brand-purple/30 hover:border-brand-purple/60 hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300 overflow-hidden group"
             >
               <CardContent className="p-6">
                 {/* Step Number */}
-                <div className="text-5xl font-black text-brand-purple/20 font-orbitron absolute top-2 right-4">
+                <div className="text-5xl font-black text-brand-purple/20 font-orbitron absolute top-2 right-4" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                   {step.number}
                 </div>
-                
+
                 {/* Icon */}
                 <div className="w-12 h-12 rounded-lg bg-brand-purple/20 flex items-center justify-center mb-4 group-hover:bg-brand-purple/30 transition-colors">
                   <step.icon className="h-6 w-6 text-brand-purple-light" />
                 </div>
-                
+
                 {/* Content */}
-                <h3 className="text-lg font-bold text-white font-orbitron mb-2">
+                <h3 className="text-lg font-bold text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                   {step.title}
                 </h3>
-                <p className="text-sm text-gray-400 font-rajdhani">
+                <p className="text-sm text-brand-gray-400 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   {step.description}
                 </p>
-                
+
                 {/* Connector line (except last) */}
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-brand-purple/30" />
@@ -106,18 +106,18 @@ export default function ComoFuncionaPage() {
         </div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex items-start gap-4 p-4 rounded-lg bg-brand-purple/5 border border-brand-purple/20"
+              className="flex items-start gap-4 p-5 rounded-lg bg-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 hover:bg-brand-purple/10 transition-all duration-300"
             >
               <div className="w-10 h-10 rounded-lg bg-brand-purple/20 flex items-center justify-center flex-shrink-0">
                 <feature.icon className="h-5 w-5 text-brand-purple-light" />
               </div>
               <div>
-                <h4 className="font-bold text-white font-rajdhani">{feature.title}</h4>
-                <p className="text-sm text-gray-400 font-rajdhani">{feature.description}</p>
+                <h4 className="font-bold text-white font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.title}</h4>
+                <p className="text-sm text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.description}</p>
               </div>
             </div>
           ))}
@@ -128,6 +128,7 @@ export default function ComoFuncionaPage() {
           <Link
             href="/games/cs2"
             className="inline-flex items-center gap-2 bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-glow hover:shadow-glow-hover font-rajdhani text-lg"
+            style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             <Zap className="h-5 w-5" />
             Começar Agora
