@@ -63,7 +63,7 @@ interface PricingConfig {
   rangeStart: number
   rangeEnd: number
   price: number
-  unit: string
+  unit?: string
   enabled: boolean
   createdAt: string
   updatedAt: string
@@ -213,7 +213,6 @@ export default function PricingConfigPage() {
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
   const [price, setPrice] = useState('')
-  const [unit, setUnit] = useState('')
 
   // Calculator preview
   const [calcCurrent, setCalcCurrent] = useState('')
@@ -241,14 +240,6 @@ export default function PricingConfigPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, selectedGame, selectedMode, selectedServiceType])
-
-  // Auto-fill unit when mode changes (only if not editing)
-  useEffect(() => {
-    if (!isEditing && !unit) {
-      setUnit(getDefaultUnit())
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMode])
 
   // Gap Analysis
   const gaps = useMemo((): Gap[] => {
@@ -307,7 +298,7 @@ export default function PricingConfigPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!rangeStart || !rangeEnd || !price || !unit) {
+    if (!rangeStart || !rangeEnd || !price) {
       showError('Erro', 'Preencha todos os campos')
       return
     }
@@ -322,7 +313,6 @@ export default function PricingConfigPage() {
         rangeStart: parseInt(rangeStart),
         rangeEnd: parseInt(rangeEnd),
         price: parseFloat(price),
-        unit,
         enabled: true,
       }
 
@@ -382,7 +372,6 @@ export default function PricingConfigPage() {
     setRangeStart(config.rangeStart.toString())
     setRangeEnd(config.rangeEnd.toString())
     setPrice(config.price.toString())
-    setUnit(config.unit)
 
     // Scroll to form smoothly
     setTimeout(() => {
@@ -505,11 +494,6 @@ export default function PricingConfigPage() {
     setRangeStart('')
     setRangeEnd('')
     setPrice('')
-    setUnit('')
-  }
-
-  const getDefaultUnit = () => {
-    return selectedMode === 'PREMIER' ? '1000 pontos' : '1 nível'
   }
 
   const formatRangeDisplay = (config: PricingConfig) => {
@@ -706,8 +690,8 @@ export default function PricingConfigPage() {
                     </div>
                   </div>
 
-                  {/* Price and Unit inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Price input */}
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="price" className="text-brand-gray-300">
                         Preço (R$)
@@ -727,19 +711,6 @@ export default function PricingConfigPage() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="unit" className="text-brand-gray-300">Unidade</Label>
-                      <Input
-                        id="unit"
-                        type="text"
-                        value={unit}
-                        onChange={(e) => setUnit(e.target.value)}
-                        placeholder={getDefaultUnit()}
-                        required
-                        disabled={isSaving}
-                        className="bg-brand-black border-white/10 focus:border-brand-purple transition-all"
-                      />
-                    </div>
                   </div>
 
                   {/* Preview */}
@@ -755,7 +726,7 @@ export default function PricingConfigPage() {
                           R$ {parseFloat(price || '0').toFixed(2)}
                         </span>
                         <span className="text-brand-gray-500 text-xs ml-1">
-                          / {unit || getDefaultUnit()}
+                          / {selectedMode === 'PREMIER' ? '1000 pontos' : '1 nível'}
                         </span>
                       </p>
                     </div>
@@ -833,7 +804,6 @@ export default function PricingConfigPage() {
                         <TableRow className="border-white/10 hover:bg-transparent">
                           <TableHead className="text-brand-gray-300">Faixa</TableHead>
                           <TableHead className="text-brand-gray-300">Preço</TableHead>
-                          <TableHead className="text-brand-gray-300 hidden sm:table-cell">Unidade</TableHead>
                           <TableHead className="text-brand-gray-300 text-center">Ativo</TableHead>
                           <TableHead className="text-brand-gray-300 text-right">Ações</TableHead>
                         </TableRow>
@@ -863,9 +833,6 @@ export default function PricingConfigPage() {
                                 <span className="text-brand-purple-light font-semibold">
                                   R$ {config.price.toFixed(2)}
                                 </span>
-                              </TableCell>
-                              <TableCell className="text-brand-gray-400 hidden sm:table-cell">
-                                {config.unit}
                               </TableCell>
                               <TableCell className="text-center">
                                 <Switch
