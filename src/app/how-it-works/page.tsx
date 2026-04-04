@@ -1,8 +1,20 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, Shield, Zap, Clock, MessageCircle, CreditCard } from 'lucide-react'
+import {
+  CheckCircle,
+  Shield,
+  Zap,
+  MessageCircle,
+  CreditCard,
+  Lock,
+  Bell,
+  Camera,
+  RefreshCw,
+} from 'lucide-react'
 import Link from 'next/link'
+
+const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Como Funciona - GameBoost',
@@ -27,13 +39,13 @@ const steps = [
   {
     number: '03',
     title: 'Booster Designado',
-    description: 'Um booster profissional verificado aceita seu pedido e inicia o trabalho.',
+    description: 'Um booster profissional verificado aceita seu pedido. Você envia suas credenciais Steam pelo chat criptografado.',
     icon: Shield,
   },
   {
     number: '04',
     title: 'Acompanhe e Receba',
-    description: 'Acompanhe o progresso em tempo real. Receba sua conta no rank desejado!',
+    description: 'Acompanhe o progresso pelo chat em tempo real. O booster envia prova de conclusão antes de finalizar.',
     icon: CheckCircle,
   },
 ]
@@ -42,17 +54,32 @@ const features = [
   {
     icon: Shield,
     title: 'Boosters Verificados',
-    description: 'Todos os boosters passam por verificação rigorosa.',
+    description: 'Todos os boosters passam por verificação rigorosa antes de serem aprovados na plataforma.',
+  },
+  {
+    icon: Lock,
+    title: 'Credenciais Criptografadas',
+    description: 'Suas credenciais Steam são enviadas pelo chat com criptografia AES-256 e apagadas automaticamente ao final do serviço.',
+  },
+  {
+    icon: Camera,
+    title: 'Prova de Conclusão',
+    description: 'O booster deve enviar um print comprovando que atingiu o rank desejado antes de marcar o pedido como concluído.',
   },
   {
     icon: MessageCircle,
-    title: 'Suporte 24/7',
-    description: 'Atendimento via WhatsApp a qualquer momento.',
+    title: 'Chat em Tempo Real',
+    description: 'Comunique-se diretamente com seu booster pelo chat da plataforma durante todo o serviço.',
   },
   {
-    icon: CheckCircle,
-    title: 'Garantia de Reembolso',
-    description: 'Não ficou satisfeito? Devolvemos seu dinheiro.',
+    icon: Bell,
+    title: 'Notificações em Tempo Real',
+    description: 'Receba notificações a cada atualização do seu pedido: booster designado, progresso e conclusão.',
+  },
+  {
+    icon: RefreshCw,
+    title: 'Reembolso Automático',
+    description: 'Se nenhum booster aceitar seu pedido em até 24h, o valor é reembolsado automaticamente via PIX.',
   },
 ]
 
@@ -71,7 +98,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         {/* Steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
           {steps.map((step, index) => (
             <Card
               key={step.number}
@@ -106,25 +133,30 @@ export default function ComoFuncionaPage() {
         </div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="flex items-start gap-4 p-5 rounded-lg bg-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 hover:bg-brand-purple/10 transition-all duration-300"
-            >
-              <div className="w-10 h-10 rounded-lg bg-brand-purple/20 flex items-center justify-center flex-shrink-0">
-                <feature.icon className="h-5 w-5 text-brand-purple-light" />
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-white font-orbitron text-center mb-10" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            POR QUE <span className="text-brand-purple-light">ESCOLHER</span> A GAMEBOOST
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="flex items-start gap-4 p-5 rounded-lg bg-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 hover:bg-brand-purple/10 transition-all duration-300"
+              >
+                <div className="w-10 h-10 rounded-lg bg-brand-purple/20 flex items-center justify-center flex-shrink-0">
+                  <feature.icon className="h-5 w-5 text-brand-purple-light" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.title}</h4>
+                  <p className="text-sm text-brand-gray-400 font-rajdhani leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.description}</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-white font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.title}</h4>
-                <p className="text-sm text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{feature.description}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <Link
             href="/games/cs2"
             className="inline-flex items-center gap-2 bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-glow hover:shadow-glow-hover font-rajdhani text-lg"
@@ -133,6 +165,12 @@ export default function ComoFuncionaPage() {
             <Zap className="h-5 w-5" />
             Começar Agora
           </Link>
+          <p className="text-sm text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            Dúvidas?{' '}
+            <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors">
+              Fale conosco no Discord
+            </Link>
+          </p>
         </div>
       </div>
     </div>
