@@ -36,53 +36,7 @@ module.exports = {
       },
       colors: {
         // =============================================
-        // DESIGN SYSTEM SEMANTIC TOKENS
-        // Use these instead of raw hex values
-        // =============================================
-
-        // Surface tokens (backgrounds)
-        surface: {
-          page: 'var(--surface-page)',
-          section: 'var(--surface-section)',
-          card: 'var(--surface-card)',
-          subtle: 'var(--surface-subtle)',
-          elevated: 'var(--surface-elevated)',
-        },
-
-        // Action tokens (buttons, interactive elements)
-        action: {
-          primary: 'var(--action-primary)',
-          'primary-hover': 'var(--action-primary-hover)',
-          secondary: 'var(--action-secondary)',
-          strong: 'var(--action-strong)',
-          danger: 'var(--action-danger)',
-        },
-
-        // Text tokens
-        text: {
-          primary: 'var(--text-primary)',
-          secondary: 'var(--text-secondary)',
-          muted: 'var(--text-muted)',
-          'on-brand': 'var(--text-on-brand)',
-          brand: 'var(--text-brand)',
-        },
-
-        // Status tokens
-        status: {
-          success: 'var(--status-success)',
-          warning: 'var(--status-warning)',
-          error: 'var(--status-error)',
-        },
-
-        // Border tokens
-        'border-ds': {
-          default: 'var(--border-default)',
-          brand: 'var(--border-brand)',
-        },
-
-        // =============================================
-        // BRAND PALETTE (Reference values)
-        // Prefer semantic tokens above
+        // BRAND PALETTE
         // =============================================
         brand: {
           black: '#0A0A0A',

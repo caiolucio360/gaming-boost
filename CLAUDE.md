@@ -687,9 +687,9 @@ useEffect(() => {
 
 The `@config` directive is mandatory in Tailwind v4 to load the configuration file.
 
-### Brand Palette (RECOMMENDED)
+### Brand Palette (THE ONLY SYSTEM)
 
-Use these brand palette classes throughout the codebase. They work reliably with Tailwind v4.
+This is the only color system. CSS variable tokens (`bg-surface-*`, `bg-action-*`, etc.) are removed. Always use brand palette classes — they work reliably with Tailwind v4.
 
 **Background Colors:**
 ```
@@ -735,38 +735,23 @@ When refactoring from hardcoded colors to brand palette:
 | `gray-400` / `gray-500` | `brand-gray-500` |
 | `gray-300` | `brand-gray-300` |
 
-### CSS Variable Semantic Tokens (CAUTION)
+### Quick Reference — What to Use
 
-The design system includes semantic tokens defined in `globals.css`:
+**Backgrounds:** `bg-brand-black` (page), `bg-brand-black-light` (cards/modals)
 
-```css
-/* Surface tokens */
---surface-page: #0A0A0A;
---surface-card: #1A1A1A;
+**Purple:** `bg-brand-purple` (buttons), `hover:bg-brand-purple-light` (hover), `bg-brand-purple-dark` (strong CTAs), `border-brand-purple` (focus/active)
 
-/* Action tokens */
---action-primary: #7C3AED;
---action-primary-hover: #A855F7;
+**Text:** `text-white` (primary), `text-brand-gray-300` (secondary), `text-brand-gray-500` (muted), `text-brand-purple` (accent/links)
 
-/* Text tokens */
---text-primary: #FFFFFF;
---text-muted: #6B7280;
+**Borders:** `border-white/10` (default), `border-brand-purple` (focus/active), `border-brand-purple/50` (hover)
 
-/* Status tokens */
---status-success: #10B981;
---status-warning: #F59E0B;
---status-error: #DC2626;
-```
+**Status:** `bg-green-500/20 text-green-300` (success), `bg-yellow-500/20 text-yellow-300` (warning), `bg-red-500/20 text-red-300` (error)
 
-**IMPORTANT:** While these tokens exist in `tailwind.config.js`, using them with Tailwind v4's arbitrary value syntax (e.g., `bg-[var(--surface-page)]`) has compatibility issues. **Prefer brand palette classes instead:**
+**Effects:** `shadow-glow` / `shadow-glow-lg`, `.hover-glow`, `.animate-glow`, `.bg-gradient-brand`
 
-```tsx
-// ❌ AVOID - CSS variable syntax has issues in Tailwind v4
-<div className="bg-[var(--surface-page)] text-[var(--text-muted)]">
+**Fonts:** `font-orbitron` + `style={{ fontFamily: 'Orbitron, sans-serif' }}` (titles), `font-rajdhani` (labels/UI)
 
-// ✅ USE - Brand palette classes work reliably
-<div className="bg-brand-black text-brand-gray-500">
-```
+Full reference: `docs/design_system.md`
 
 ### Typography
 

@@ -1,119 +1,226 @@
-# Design System & UI Documentation
+# Design System — GameBoost
 
-## Visão Geral
-Este Design System une a identidade visual do Gaming Boost (baseada em Roxo Neon e Dark Mode) com uma estrutura de tokens semânticos para garantir consistência.
+**Single source of truth for all styling decisions.**
 
-> **Regra de Ouro**: NUNCA use valores hexadecimais ou arbitrários (ex: `#7C3AED`, `px-4`) diretamente no código. Use sempre os **Tokens** descritos abaixo.
-
-## CORES & TOKENS
-
-Os valores abaixo foram extraídos da configuração atual (`tailwind.config.js` e `globals.css`).
-
-### Paleta Base (Referência)
-* **Brand Purple**: `#7C3AED` (DEFAULT), `#4C1D95` (Dark), `#A855F7` (Light)
-* **Brand Black**: `#0A0A0A` (Background), `#1A1A1A` (Surface)
-* **Brand Red**: `#DC2626` (Error)
-
-### Mapeamento de Tokens
-
-#### Texto (`text-*`)
-| Token | Valor (Dark) | Aplicação |
-| :--- | :--- | :--- |
-| **text-primary** | `#FFFFFF` | Títulos, texto principal |
-| **text-secondary** | `#D1D5DB` (gray-300) | Legendas, descrições |
-| **text-muted** | `#6B7280` (gray-500) | Placeholders, textos desabilitados |
-| **text-on-brand** | `#FFFFFF` | Texto sobre botões roxos/vermelhos |
-| **text-brand** | `#7C3AED` | Texto com a cor da marca (links, destaques) |
-
-#### Superfícies / Fundos (`bg-*` ou custom)
-| Token | Valor (Dark) | Aplicação |
-| :--- | :--- | :--- |
-| **surface-page** | `#0A0A0A` | Fundo principal da página (Body) |
-| **surface-section** | `#0A0A0A` | Seções principais |
-| **surface-card** | `#1A1A1A` | Cards, Sidebar, Elementos flutuantes |
-| **surface-subtle** | `#27272a` | Hover states em listas |
-| **surface-elevated** | `#1A1A1A` | Modais, Popovers (com shadow) |
-
-#### Ações / Botões (`bg-*` + Hover)
-| Token | Valor (Dark) | Aplicação |
-| :--- | :--- | :--- |
-| **action-primary** | `#7C3AED` (Purple) | Botão Principal |
-| **action-primary-hover** | `#A855F7` (Light Purple) | Hover do Botão Principal |
-| **action-secondary** | `transparent` (Border) | Botão Secundário (Outline) |
-| **action-strong** | `#4C1D95` (Dark Purple) | CTAs de alta conversão / fundos de destaque |
-| **action-danger** | `#DC2626` (Red) | Botões de perigo/erro |
-
-#### Status
-| Token | Valor | Aplicação |
-| :--- | :--- | :--- |
-| **status-success** | `#10B981` | Sucesso, Confirmação |
-| **status-warning** | `#F59E0B` | Alertas |
-| **status-error** | `#DC2626` | Erros, Falhas |
-
-#### Bordas
-| Token | Valor (Dark) | Aplicação |
-| :--- | :--- | :--- |
-| **border-default** | `#27272a` | Divisórias de cards, inputs |
-| **border-brand** | `#7C3AED` | Borda ativa / foco |
+> **Golden Rule:** NEVER use hexadecimal values (`#7C3AED`), CSS token classes (`bg-surface-card`, `text-primary`, `bg-action-primary`), or arbitrary Tailwind values. ALWAYS use brand palette classes.
 
 ---
 
-## ESPAÇAMENTO & GRID
+## Colors
 
-Utilize a escala padrão do TailwindCSS.
+### Backgrounds
 
-* **Layout Container**: `container mx-auto px-4` (MaxWidth: 1280px)
-* **Section Spacing**: `py-12` ou `py-20` (Grandes seções)
-* **Card Padding**: `p-6` (padrão)
-* **Gap**: `gap-4`, `gap-8`
+| Class | Hex | Use |
+|-------|-----|-----|
+| `bg-brand-black` | `#0A0A0A` | Page backgrounds, body |
+| `bg-brand-black-light` | `#1A1A1A` | Cards, sidebars, elevated surfaces, modals |
+| `bg-brand-black/50` | `#0A0A0A` 50% | Subtle overlay backgrounds |
+
+### Purple (Brand)
+
+| Class | Hex | Use |
+|-------|-----|-----|
+| `bg-brand-purple` / `text-brand-purple` | `#7C3AED` | Primary buttons, key accents |
+| `bg-brand-purple-light` / `text-brand-purple-light` | `#A855F7` | Hover states, secondary accents |
+| `bg-brand-purple-dark` / `text-brand-purple-dark` | `#4C1D95` | Strong CTAs, deep backgrounds |
+| `text-brand-purple-lighter` | `#C084FC` | Subtle purple text |
+| `border-brand-purple` | `#7C3AED` | Focus borders, active borders |
+
+### Text
+
+| Class | Hex | Use |
+|-------|-----|-----|
+| `text-white` | `#FFFFFF` | Primary text, headings |
+| `text-brand-gray-300` | `#D1D5DB` | Secondary text, descriptions |
+| `text-brand-gray-400` | `#9CA3AF` | Muted text |
+| `text-brand-gray-500` | `#6B7280` | Placeholders, disabled text |
+
+### Status (use standard Tailwind)
+
+| Use | Background | Text | Border |
+|-----|-----------|------|--------|
+| Success | `bg-green-500/20` | `text-green-300` | `border-green-500/50` |
+| Warning | `bg-yellow-500/20` | `text-yellow-300` | `border-yellow-500/50` |
+| Error | `bg-red-500/20` | `text-red-300` | `border-red-500/50` |
+| Info | `bg-brand-purple/20` | `text-brand-purple-light` | `border-brand-purple/50` |
+
+### Red (brand red — use for destructive actions)
+
+| Class | Hex | Use |
+|-------|-----|-----|
+| `bg-brand-red` / `text-brand-red` | `#DC2626` | Danger buttons, error text |
 
 ---
 
-## TIPOGRAFIA
+## Borders
 
-**Fontes**:
-* `font-orbitron`: Títulos, Headlines (Identidade visual)
-* `font-rajdhani`: Subtítulos, UI Elements técnicos
-* `font-sans` (Inter/System): Corpo de texto, leitura longa
-
-**Pesos**:
-* `font-normal` (400)
-* `font-medium` (500)
-* `font-bold` (700)
+| Class | Use |
+|-------|-----|
+| `border-white/10` | Default card/input border |
+| `border-white/5` | Very subtle separator |
+| `border-brand-purple` | Focus state, active state |
+| `border-brand-purple/50` | Hover state on cards |
+| `border-brand-purple/20` | Subtle purple border |
 
 ---
 
-## COMPONENTES OBRIGATÓRIOS
+## Typography
 
-### 1. Botões
-#### Primary Button
+| Font | Class | `style` fallback | Use |
+|------|-------|-----------------|-----|
+| Orbitron | `font-orbitron` | `style={{ fontFamily: 'Orbitron, sans-serif' }}` | Page titles, headings |
+| Rajdhani | `font-rajdhani` | `style={{ fontFamily: 'Rajdhani, sans-serif' }}` | Labels, UI elements, descriptions |
+| System | `font-sans` | — | Body text, long-form content |
+
+**Important:** Always add the inline `style` attribute alongside `font-orbitron` and `font-rajdhani` to ensure correct rendering if the CSS variable hasn't loaded.
+
+Font weights: `font-normal` (400), `font-medium` (500), `font-semibold` (600), `font-bold` (700).
+
+---
+
+## Component Patterns
+
+### Card
+
 ```tsx
-<button className="bg-[#7C3AED] hover:bg-[#A855F7] text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)]">
-  Texto do Botão
-</button>
-```
-*Tokenizado*: `bg-action-primary hover:bg-action-primary-hover text-on-brand ...`
-
-### 2. Cards
-```tsx
-<div className="bg-[#1A1A1A] border border-white/5 rounded-xl p-6 hover:border-[#7C3AED]/50 transition-colors">
-  Conteúdo
+<div className="bg-brand-black-light border border-white/10 rounded-xl p-6 hover:border-brand-purple/50 transition-colors">
+  Content
 </div>
 ```
-*Tokenizado*: `bg-surface-card border-border-default hover:border-border-brand ...`
 
-### 3. Inputs
+**Glassmorphism variant:**
 ```tsx
-<input className="bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-3 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-all" />
+<div className="bg-brand-black/30 backdrop-blur-md border border-brand-purple/50 rounded-xl p-6">
+  Content
+</div>
 ```
-*Tokenizado*: `bg-surface-card border-border-default focus:border-border-brand ...`
+
+### Primary Button
+
+```tsx
+<button className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-6 rounded-lg transition-all shadow-glow hover:shadow-glow-lg">
+  Button Label
+</button>
+```
+
+### Danger Button
+
+```tsx
+<button className="bg-brand-red hover:bg-brand-red-light text-white font-bold py-3 px-6 rounded-lg transition-all">
+  Delete
+</button>
+```
+
+### Input
+
+```tsx
+<input className="bg-brand-black-light border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-brand-gray-500 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition-all" />
+```
+
+### Status Badge
+
+```tsx
+{/* Success */}
+<span className="bg-green-500/20 text-green-300 border border-green-500/50 px-2 py-1 rounded text-xs font-medium">
+  Active
+</span>
+
+{/* Warning */}
+<span className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 px-2 py-1 rounded text-xs font-medium">
+  Pending
+</span>
+
+{/* Error */}
+<span className="bg-red-500/20 text-red-300 border border-red-500/50 px-2 py-1 rounded text-xs font-medium">
+  Failed
+</span>
+
+{/* Info / Brand */}
+<span className="bg-brand-purple/20 text-brand-purple-light border border-brand-purple/50 px-2 py-1 rounded text-xs font-medium">
+  In Progress
+</span>
+```
 
 ---
 
-## EFEITOS ESPECIAIS (Glow & Neon)
+## Spacing & Layout
 
-Utilize as classes utilitárias globais para efeitos de marca:
+| Pattern | Class | Use |
+|---------|-------|-----|
+| Page container | `container mx-auto px-4` | Top-level page wrapper |
+| Card padding | `p-6` | Standard card interior |
+| Section gap | `gap-4`, `gap-8` | Between cards/sections |
+| Large section | `py-12`, `py-20` | Hero/section vertical spacing |
 
-* `.animate-glow`: Pulsação suave do glow roxo.
-* `.hover-glow`: Aplica glow roxo apenas no hover.
-* `.bg-gradient-brand`: Gradiente fundo padrão (`#0A0A0A` -> `#1A1A1A` -> `#4C1D95`).
+---
+
+## Effects
+
+### Glow Shadows
+
+| Class | Use |
+|-------|-----|
+| `shadow-glow-sm` | Subtle glow (10px, 0.3 opacity) |
+| `shadow-glow` | Standard glow (20px, 0.5 opacity) |
+| `shadow-glow-lg` | Large glow (30px, 0.7 opacity) |
+
+### CSS Utility Classes (defined in globals.css)
+
+| Class | Effect |
+|-------|--------|
+| `.hover-glow` | Purple glow on hover |
+| `.hover-lift` | Card floats up on hover |
+| `.animate-glow` | Pulsing purple glow animation |
+| `.bg-gradient-brand` | `#0A0A0A → #1A1A1A → #4C1D95` diagonal gradient |
+| `.bg-gradient-red` | Red gradient (danger zones) |
+| `.card-interactive` | Combines hover-lift + hover-glow |
+| `.focus-ring` | Accessible focus ring (purple) |
+| `.shimmer` | Loading shimmer animation |
+
+---
+
+## Touch Targets (Mobile)
+
+| Class | Size | Use |
+|-------|------|-----|
+| `min-h-touch` | 44px | iOS recommended touch target |
+| `min-h-touch-lg` | 48px | Android recommended touch target |
+
+---
+
+## Responsive Breakpoints
+
+| Name | Size | Use |
+|------|------|-----|
+| `sm` | 640px | Small tablets |
+| `md` | 768px | Tablets |
+| `lg` / `notebook` | 1024px | Laptops |
+| `xl` | 1280px | Desktops |
+| `desktop` | 1366px | Standard desktops |
+| `wide` | 1920px | Large displays |
+
+---
+
+## What NOT To Use
+
+These patterns are removed and must never be reintroduced:
+
+| ❌ Don't use | ✅ Use instead |
+|-------------|---------------|
+| `bg-surface-page` | `bg-brand-black` |
+| `bg-surface-card` | `bg-brand-black-light` |
+| `bg-surface-elevated` | `bg-brand-black-light` |
+| `bg-surface-subtle` | `bg-brand-black/50` |
+| `text-primary` | `text-white` |
+| `text-secondary` | `text-brand-gray-300` |
+| `text-muted` | `text-brand-gray-500` |
+| `text-brand` | `text-brand-purple` |
+| `text-on-brand` | `text-white` |
+| `bg-action-primary` | `bg-brand-purple` |
+| `hover:bg-action-primary-hover` | `hover:bg-brand-purple-light` |
+| `bg-action-danger` | `bg-brand-red` or `bg-red-600` |
+| `bg-action-strong` | `bg-brand-purple-dark` |
+| `border-border-default` | `border-white/10` |
+| `border-border-brand` | `border-brand-purple` |
+| `#7C3AED` (hardcoded hex) | `brand-purple` |
+| `bg-[var(--surface-card)]` | `bg-brand-black-light` |
