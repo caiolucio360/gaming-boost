@@ -221,8 +221,7 @@ export default function BoosterPaymentsPage() {
   if (!user || user.role !== 'BOOSTER') return null
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="mb-6">
           <Link href="/booster">
             <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
@@ -480,7 +479,6 @@ export default function BoosterPaymentsPage() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   )
 }

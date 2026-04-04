@@ -17,13 +17,12 @@ import {
   ImageIcon,
   X,
 } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatCard } from '@/components/common/stat-card'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { DashboardCard } from '@/components/common/dashboard-card'
-import Link from 'next/link'
 import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -348,8 +347,7 @@ export default function BoosterDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -362,30 +360,13 @@ export default function BoosterDashboardPage() {
           description={`Olá, ${user.name || user.email}! Gerencie seus pedidos e ganhos.`}
         />
 
-        {/* Link para Pagamentos */}
-        <div className="mb-6">
-          <Link href="/booster/payments">
-            <Button className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-200">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Ver Meus Pagamentos
-            </Button>
-          </Link>
-        </div>
-
         {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
           <SkeletonStatsGrid count={5} />
         ) : stats ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
-            {/* Card de Navegação - Disponíveis */}
-            <Card
-              onClick={() => setActiveTab('available')}
-              className={`cursor-pointer transition-all duration-200 ${
-                activeTab === 'available'
-                  ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/70 shadow-lg shadow-yellow-500/20'
-                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-yellow-500/50 hover:bg-yellow-500/5'
-              }`}
-            >
+            {/* Card - Disponíveis */}
+            <Card className="bg-brand-black/30 border-yellow-500/30">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -399,20 +380,13 @@ export default function BoosterDashboardPage() {
                       Pedidos pendentes
                     </p>
                   </div>
-                  <Package className={`h-8 w-8 ${activeTab === 'available' ? 'text-yellow-500' : 'text-yellow-500/50'}`} />
+                  <Package className="h-8 w-8 text-yellow-500/60" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card de Navegação - Em Andamento */}
-            <Card
-              onClick={() => setActiveTab('assigned')}
-              className={`cursor-pointer transition-all duration-200 ${
-                activeTab === 'assigned'
-                  ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/70 shadow-lg shadow-blue-500/20'
-                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-blue-500/50 hover:bg-blue-500/5'
-              }`}
-            >
+            {/* Card - Em Andamento */}
+            <Card className="bg-brand-black/30 border-blue-500/30">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -426,20 +400,13 @@ export default function BoosterDashboardPage() {
                       Pedidos ativos
                     </p>
                   </div>
-                  <Loader2 className={`h-8 w-8 ${activeTab === 'assigned' ? 'text-blue-500' : 'text-blue-500/50'}`} />
+                  <Loader2 className="h-8 w-8 text-blue-500/60" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card de Navegação - Concluídos */}
-            <Card
-              onClick={() => setActiveTab('completed')}
-              className={`cursor-pointer transition-all duration-200 ${
-                activeTab === 'completed'
-                  ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border-green-500/70 shadow-lg shadow-green-500/20'
-                  : 'bg-brand-black/30 border-brand-purple/50 hover:border-green-500/50 hover:bg-green-500/5'
-              }`}
-            >
+            {/* Card - Concluídos */}
+            <Card className="bg-brand-black/30 border-green-500/30">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -453,7 +420,7 @@ export default function BoosterDashboardPage() {
                       Pedidos finalizados
                     </p>
                   </div>
-                  <CheckCircle2 className={`h-8 w-8 ${activeTab === 'completed' ? 'text-green-500' : 'text-green-500/50'}`} />
+                  <CheckCircle2 className="h-8 w-8 text-green-500/60" />
                 </div>
               </CardContent>
             </Card>
@@ -475,6 +442,41 @@ export default function BoosterDashboardPage() {
             />
           </div>
         ) : null}
+
+        {/* Tabs de navegação */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
+            <TabsTrigger
+              value="available"
+              className="font-rajdhani font-bold transition-all duration-200 rounded-md py-2 px-4
+                data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+            >
+              Disponíveis
+              {stats && stats.available > 0 && (
+                <span className="ml-2 bg-yellow-500/20 text-yellow-300 text-xs px-1.5 py-0.5 rounded font-bold">
+                  {stats.available}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="assigned"
+              className="font-rajdhani font-bold transition-all duration-200 rounded-md py-2 px-4
+                data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+            >
+              Em Andamento
+            </TabsTrigger>
+            <TabsTrigger
+              value="completed"
+              className="font-rajdhani font-bold transition-all duration-200 rounded-md py-2 px-4
+                data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
+                data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
+            >
+              Concluídos
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {/* Pedidos Disponíveis */}
         {activeTab === 'available' && (
@@ -771,7 +773,6 @@ export default function BoosterDashboardPage() {
             )}
           </div>
         )}
-      </div>
     </div>
   )
 }

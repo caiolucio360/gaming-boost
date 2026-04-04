@@ -9,12 +9,10 @@ import {
   Users,
   ShoppingCart,
   DollarSign,
-  ArrowRight,
   Clock,
   CheckCircle2,
   XCircle,
   Loader2,
-  Percent,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StatCard } from '@/components/common/stat-card'
@@ -115,8 +113,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Removido banner de refreshing para evitar piscar - atualizações são silenciosas */}
         {error && (
           <Alert variant="destructive" className="mb-6">
@@ -166,137 +163,20 @@ export default function AdminDashboardPage() {
           )}
         </div>
 
-        {/* Cards de Ações Rápidas - Modern Design */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 mb-8 lg:mb-10">
-          
-          {/* Gerenciar Usuários */}
-          <Link href="/admin/users" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-brand-purple/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-brand-purple/10 hover:-translate-y-1 card-interactive">
-              {/* Glow effect */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-purple/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-brand-purple/25 group-hover:scale-110 group-hover:shadow-brand-purple/40 transition-all duration-300">
-                  <Users className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-brand-purple-light transition-colors">
-                  Usuários
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Gerenciar todos os usuários da plataforma
-                </p>
-                <div className="flex items-center mt-4 text-brand-purple-light text-sm font-medium group-hover:text-brand-purple-light transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Gerenciar Pedidos */}
-          <Link href="/admin/orders" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-brand-purple/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-brand-purple/10 hover:-translate-y-1 card-interactive">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-purple/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-brand-purple/25 group-hover:scale-110 group-hover:shadow-brand-purple/40 transition-all duration-300">
-                  <ShoppingCart className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-brand-purple-light transition-colors">
-                  Pedidos
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Visualizar e gerenciar status dos pedidos
-                </p>
-                <div className="flex items-center mt-4 text-brand-purple-light text-sm font-medium group-hover:text-brand-purple-light transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Receitas */}
-          <Link href="/admin/payments" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-green-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-green-500/10 hover:-translate-y-1 card-interactive">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg shadow-green-500/25 group-hover:scale-110 group-hover:shadow-green-500/40 transition-all duration-300">
-                  <DollarSign className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-emerald-200 transition-colors">
-                  Receitas
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Acompanhar pagamentos e receitas
-                </p>
-                <div className="flex items-center mt-4 text-green-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Gerenciar Comissões */}
-          <Link href="/admin/commissions">
-            <Card className="bg-brand-black-light border-brand-purple/20 hover:border-brand-purple transition-colors cursor-pointer group">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-brand-purple/10 group-hover:bg-brand-purple/20 transition-colors">
-                  <Percent className="h-6 w-6 text-brand-purple" />
-                </div>
-                <div>
-                  <h3 className="text-white font-rajdhani font-semibold">Comissões</h3>
-                  <p className="text-brand-gray-500 text-sm font-rajdhani">Gerenciar porcentagens</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-brand-gray-500 ml-auto group-hover:text-brand-purple transition-colors" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Aplicações de Booster */}
-          <Link href="/admin/boosters" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-brand-purple/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-brand-purple/10 hover:-translate-y-1 card-interactive">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-purple/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-purple flex items-center justify-center mb-4 shadow-lg shadow-brand-purple/25 group-hover:scale-110 group-hover:shadow-brand-purple/40 transition-all duration-300">
-                  <Users className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-brand-purple-light transition-colors">
-                  Boosters
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Aprovar ou rejeitar candidatos
-                </p>
-                <div className="flex items-center mt-4 text-brand-purple-light text-sm font-medium group-hover:text-brand-purple-light transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Configuração de Preços */}
-          <Link href="/admin/pricing" className="group">
-            <div className="relative h-full p-6 rounded-2xl bg-brand-black-light backdrop-blur-xl border border-white/10 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-1 card-interactive">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25 group-hover:scale-110 group-hover:shadow-cyan-500/40 transition-all duration-300">
-                  <DollarSign className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 font-orbitron group-hover:text-cyan-200 transition-colors">
-                  Preços
-                </h3>
-                <p className="text-brand-gray-500 text-sm font-rajdhani group-hover:text-brand-gray-300 transition-colors">
-                  Configurar preços do calculador de boost
-                </p>
-                <div className="flex items-center mt-4 text-cyan-400 text-sm font-medium group-hover:text-cyan-300 transition-colors">
-                  Acessar <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-        </div>
+        {/* Alert: pedidos pagos aguardando booster */}
+        {stats.orders.pending > 0 && (
+          <Alert className="mb-6 bg-amber-500/10 border-amber-500/50">
+            <AlertTitle className="text-amber-400 font-orbitron text-sm">
+              {stats.orders.pending} pedido{stats.orders.pending > 1 ? 's' : ''} aguardando booster
+            </AlertTitle>
+            <AlertDescription className="text-brand-gray-300 font-rajdhani text-sm">
+              Há pedidos pagos sem booster atribuído.{' '}
+              <Link href="/admin/orders" className="text-amber-400 hover:text-amber-300 underline underline-offset-2">
+                Ver pedidos →
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Pedidos Recentes */}
         <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
@@ -379,7 +259,6 @@ export default function AdminDashboardPage() {
         </Card>
           </>
         ) : null}
-      </div>
     </div>
   )
 }

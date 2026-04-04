@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card, CardContent} from '@/components/ui/card'
 
+const DISCORD_URL = 'https://discord.gg/gameboost'
+
 export const metadata: Metadata = generateMetadata({
   title: 'Política de Privacidade - GameBoost',
   description: 'Política de privacidade da GameBoost. Saiba como protegemos e utilizamos suas informações pessoais. Conformidade com LGPD e proteção de dados.',
@@ -37,7 +39,7 @@ export default function PrivacyPage() {
           }),
         }}
       />
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
@@ -96,10 +98,11 @@ export default function PrivacyPage() {
                   <div className="ml-4">
                     <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>2.3 Dados de Serviço:</h3>
                     <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                      <li>Credenciais de jogos (criptografadas com AES-256-GCM)</li>
+                      <li>Credenciais Steam enviadas via chat (criptografadas com AES-256-GCM; apagadas automaticamente ao concluir ou cancelar o pedido)</li>
+                      <li>Mensagens do chat entre cliente e booster (armazenadas enquanto o pedido estiver ativo)</li>
+                      <li>Screenshots de prova de conclusão enviadas pelo booster (armazenadas em serviço de blob seguro)</li>
                       <li>Perfil Steam (URL pública e Steam ID)</li>
                       <li>Histórico de pedidos e serviços</li>
-                      <li>Comunicações e mensagens na plataforma</li>
                     </ul>
                   </div>
                   <div className="ml-4">
@@ -199,8 +202,8 @@ export default function PrivacyPage() {
                   <li><strong className="text-white">Informação:</strong> Sobre entidades públicas e privadas com as quais compartilhamos dados</li>
                 </ul>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Para exercer seus direitos, entre em contato através do nosso{' '}
-                  <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">formulário de contato</Link>.
+                  Para exercer seus direitos, entre em contato com nossa equipe pelo{' '}
+                  <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">servidor no Discord</Link>.
                   Responderemos sua solicitação em até 15 dias.
                 </p>
               </section>
@@ -215,7 +218,9 @@ export default function PrivacyPage() {
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li><strong className="text-white">Dados de Conta:</strong> Enquanto sua conta estiver ativa ou conforme necessário para fornecer serviços</li>
                   <li><strong className="text-white">Dados Financeiros:</strong> 5 anos conforme legislação fiscal brasileira</li>
-                  <li><strong className="text-white">Credenciais de Jogo:</strong> Excluídas imediatamente após conclusão do serviço</li>
+                  <li><strong className="text-white">Credenciais Steam:</strong> Apagadas automaticamente ao concluir ou cancelar o pedido (substituídas por placeholder no chat)</li>
+                  <li><strong className="text-white">Screenshots de Prova:</strong> Retidas por até 30 dias após conclusão do pedido, depois excluídas</li>
+                  <li><strong className="text-white">Mensagens de Chat:</strong> Retidas enquanto o pedido estiver ativo; após encerramento, armazenadas por até 90 dias para fins de suporte</li>
                   <li><strong className="text-white">Logs de Segurança:</strong> Até 6 meses para fins de auditoria e segurança</li>
                 </ul>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
@@ -294,9 +299,9 @@ export default function PrivacyPage() {
                     entre em contato com nosso Encarregado de Proteção de Dados:
                   </p>
                   <p>
-                    <strong className="text-white">Formulário de Contato:</strong>{' '}
-                    <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">
-                      Clique aqui
+                    <strong className="text-white">Suporte:</strong>{' '}
+                    <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">
+                      Servidor no Discord
                     </Link>
                   </p>
                   <p className="text-sm">
@@ -307,7 +312,7 @@ export default function PrivacyPage() {
 
               <div className="border-t border-brand-purple/30 pt-8 mt-8">
                 <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Última atualização: Janeiro de 2026
+                  Última atualização: Abril de 2026
                 </p>
                 <p className="text-xs text-gray-500 font-rajdhani text-center mt-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   Esta Política de Privacidade está em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)

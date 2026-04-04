@@ -133,8 +133,7 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -278,7 +277,6 @@ export default function AdminOrdersPage() {
             Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         </div>
-      </div>
     </div>
   )
 }

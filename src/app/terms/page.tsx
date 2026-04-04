@@ -3,6 +3,8 @@ import type { Metadata} from 'next'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 
+const DISCORD_URL = 'https://discord.gg/gameboost'
+
 export const metadata: Metadata = generateMetadata({
   title: 'Termos de Uso - GameBoost',
   description: 'Termos e condições de uso da GameBoost. Conheça nossas políticas de uso, responsabilidades e condições para utilização dos serviços de boost.',
@@ -36,7 +38,7 @@ export default function TermsPage() {
           }),
         }}
       />
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
@@ -85,10 +87,13 @@ export default function TermsPage() {
                 </p>
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li>Boost de rank em Counter-Strike 2 (Premier e Gamers Club)</li>
-                  <li>Sistema de pagamento via PIX</li>
-                  <li>Suporte ao cliente</li>
-                  <li>Sistema de disputa e mediação</li>
-                  <li>Garantia de segurança da conta (criptografia AES-256)</li>
+                  <li>Sistema de pagamento via PIX (AbacatePay)</li>
+                  <li>Chat criptografado entre cliente e booster durante o serviço</li>
+                  <li>Envio seguro de credenciais Steam via chat (criptografia AES-256-GCM, apagadas ao final)</li>
+                  <li>Prova de conclusão obrigatória (screenshot enviado pelo booster)</li>
+                  <li>Notificações em tempo real sobre o status do pedido</li>
+                  <li>Reembolso automático em até 24h caso nenhum booster aceite o pedido</li>
+                  <li>Suporte via servidor no Discord</li>
                 </ul>
               </section>
 
@@ -128,11 +133,12 @@ export default function TermsPage() {
                   O cliente é responsável por:
                 </p>
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  <li>Fornecer credenciais de jogo corretas e funcionais</li>
+                  <li>Fornecer credenciais Steam corretas e funcionais através do chat criptografado da plataforma</li>
                   <li>Não acessar a conta durante o serviço de boost</li>
                   <li>Não alterar a senha ou configurações de segurança durante o serviço</li>
                   <li>Manter comunicação respeitosa com boosters e administração</li>
                   <li>Não solicitar serviços que violem os termos dos jogos</li>
+                  <li>Verificar a prova de conclusão (screenshot) antes de confirmar o recebimento</li>
                 </ul>
               </section>
 
@@ -145,9 +151,10 @@ export default function TermsPage() {
                 </p>
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li>Executar o serviço conforme acordado</li>
-                  <li>Manter confidencialidade das credenciais do cliente</li>
+                  <li>Manter total confidencialidade das credenciais Steam do cliente (nunca compartilhar com terceiros)</li>
                   <li>Não utilizar cheats, hacks ou qualquer software proibido</li>
-                  <li>Comunicar progresso e eventuais problemas</li>
+                  <li>Comunicar progresso e eventuais problemas pelo chat da plataforma</li>
+                  <li>Enviar screenshot (prova de conclusão) antes de marcar o pedido como concluído</li>
                   <li>Receber comissões apenas após conclusão aprovada do serviço</li>
                 </ul>
               </section>
@@ -169,12 +176,12 @@ export default function TermsPage() {
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
                 <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Disputas e Mediação
+                  <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Resolução de Conflitos
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Em caso de conflitos entre cliente e booster, a plataforma oferece um sistema de disputa onde a administração
-                  atua como mediadora. As decisões administrativas são finais e vinculantes. Ambas as partes comprometem-se a
-                  fornecer evidências e cooperar durante o processo de mediação.
+                  Em caso de conflitos entre cliente e booster, entre em contato com nossa equipe de suporte via WhatsApp.
+                  A administração atua como mediadora e suas decisões são finais e vinculantes. Ambas as partes comprometem-se
+                  a cooperar durante o processo de mediação.
                 </p>
               </section>
 
@@ -263,14 +270,14 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">16.</span> Contato
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco através do{' '}
-                  <Link href="/contact" className="text-brand-purple-light hover:text-brand-purple-light transition-colors font-semibold">formulário de contato</Link>.
+                  Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco pelo nosso{' '}
+                  <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">servidor no Discord</Link>.
                 </p>
               </section>
 
               <div className="border-t border-brand-purple/30 pt-8 mt-8">
                 <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Última atualização: Janeiro de 2026
+                  Última atualização: Abril de 2026
                 </p>
               </div>
 

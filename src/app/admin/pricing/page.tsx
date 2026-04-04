@@ -79,8 +79,7 @@ interface Gap {
  */
 function PricingPageSkeleton() {
   return (
-    <div className="min-h-screen bg-brand-black">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header skeleton */}
         <div className="mb-6">
           <Skeleton className="h-10 w-64 mb-2 bg-brand-black-light" />
@@ -189,7 +188,6 @@ function PricingPageSkeleton() {
             </Card>
           </div>
         </div>
-      </div>
     </div>
   )
 }
@@ -512,8 +510,7 @@ export default function PricingConfigPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <PageHeader
           highlight="GERENCIAR"
           title="PREÇOS"
@@ -980,7 +977,6 @@ export default function PricingConfigPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
     </div>
   )
 }
