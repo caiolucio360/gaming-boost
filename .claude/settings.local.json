@@ -25,7 +25,14 @@
       "Bash(rm -f \"src/app/booster/[id]/page.tsx\")",
       "Bash(rm -f \"src/app/api/admin/users/[id]/commission-history/route.ts\")",
       "Bash(rm -f src/app/contact/page.tsx)",
-      "Bash(xargs rm:*)"
+      "Bash(xargs rm:*)",
+      "Bash(npm install:*)",
+      "Bash(cp ../../.env .env)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr create --title 'feat: centralized commissions management page' --body ':*)",
+      "Bash(where gh:*)",
+      "Bash(winget list:*)"
     ]
   }
 }

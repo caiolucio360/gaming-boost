@@ -133,6 +133,20 @@ No new API endpoints required — all existing endpoints can be reused.
 
 ---
 
+## UI / Design System
+
+All components in `/admin/commissions` must follow the project design system (`docs/design_system.md`). No hardcoded hex values or arbitrary Tailwind values.
+
+- Backgrounds: `bg-surface-card`, `bg-surface-page`
+- Text: `text-primary`, `text-secondary`, `text-muted`, `text-brand`
+- Buttons: `bg-action-primary hover:bg-action-primary-hover text-on-brand`
+- Inputs: `bg-surface-card border-border-default focus:border-border-brand`
+- Borders: `border-border-default`, `border-border-brand`
+- Status colors: `status-success`, `status-warning`, `status-error`
+- Fonts: `font-orbitron` for values/numbers, `font-rajdhani` for labels
+
+---
+
 ## Out of Scope (MVP)
 
 - Per-booster live preview card
