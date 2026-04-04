@@ -4,7 +4,23 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Menu, LogOut } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  LogOut,
+  LayoutDashboard,
+  ShoppingCart,
+  Users,
+  Shield,
+  SlidersHorizontal,
+  CreditCard,
+  Percent,
+  ExternalLink,
+  Briefcase,
+  DollarSign,
+  User,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { NotificationBell } from '@/components/common/notification-bell'
@@ -25,15 +41,38 @@ export interface NavItem {
   separator?: boolean
 }
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { label: 'Dashboard',    href: '/admin',             icon: LayoutDashboard, exact: true },
+  { label: 'Pedidos',      href: '/admin/orders',      icon: ShoppingCart },
+  { label: 'Usuários',     href: '/admin/users',       icon: Users },
+  { label: 'Boosters',     href: '/admin/boosters',    icon: Shield },
+  { label: 'Precificação', href: '/admin/pricing',     icon: SlidersHorizontal },
+  { label: 'Pagamentos',   href: '/admin/payments',    icon: CreditCard },
+  { label: 'Comissões',    href: '/admin/commissions', icon: Percent },
+  {
+    separator: true,
+    label: 'Preview do Site',
+    href: '/games/cs2',
+    icon: ExternalLink,
+    external: true,
+  },
+]
+
+const BOOSTER_NAV_ITEMS: NavItem[] = [
+  { label: 'Meus Trabalhos', href: '/booster',          icon: Briefcase, exact: true },
+  { label: 'Pagamentos',     href: '/booster/payments', icon: DollarSign },
+  { label: 'Meu Perfil',     href: '/profile',          icon: User },
+]
+
 interface AppShellProps {
   role: 'ADMIN' | 'BOOSTER'
-  navItems: NavItem[]
   children: React.ReactNode
 }
 
 const STORAGE_KEY = 'app-shell-collapsed'
 
-export function AppShell({ role, navItems, children }: AppShellProps) {
+export function AppShell({ role, children }: AppShellProps) {
+  const navItems = role === 'ADMIN' ? ADMIN_NAV_ITEMS : BOOSTER_NAV_ITEMS
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
