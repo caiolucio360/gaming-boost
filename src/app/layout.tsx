@@ -73,7 +73,7 @@ export default function RootLayout({
               <ToastProvider />
               <SkipLink />
               <LiveRegion message="" id="live-region" />
-              <div className="min-h-screen flex flex-col overflow-x-hidden">
+              <div className="h-screen flex flex-col overflow-hidden">
                 <ConditionalShell>
                   {children}
                 </ConditionalShell>

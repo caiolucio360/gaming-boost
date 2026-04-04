@@ -22,7 +22,7 @@ export function ConditionalShell({ children }: { children: React.ReactNode }) {
       {!appRoute && <ElojobHeader />}
       <main
         id="main-content"
-        className={appRoute ? 'flex-1' : 'flex-1 pt-16 pb-24 lg:pb-0'}
+        className={appRoute ? 'flex-1 flex flex-col overflow-hidden' : 'flex-1 pt-16 pb-24 lg:pb-0'}
         aria-label="Conteúdo principal"
       >
         {children}

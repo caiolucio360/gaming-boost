@@ -1,8 +1,8 @@
 // src/components/layout/app-shell.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { useState, useEffect, Fragment } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ChevronLeft,
@@ -26,11 +26,13 @@ import { useAuth } from '@/contexts/auth-context'
 import { NotificationBell } from '@/components/common/notification-bell'
 import { cn } from '@/lib/utils'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export interface NavItem {
   label: string
@@ -71,20 +73,50 @@ interface AppShellProps {
 
 const STORAGE_KEY = 'app-shell-collapsed'
 
+const SEGMENT_LABELS: Record<string, string> = {
+  admin:       'Dashboard',
+  booster:     'Meus Trabalhos',
+  orders:      'Pedidos',
+  users:       'Usuários',
+  boosters:    'Boosters',
+  pricing:     'Precificação',
+  payments:    'Pagamentos',
+  commissions: 'Comissões',
+  profile:     'Meu Perfil',
+}
+
+interface Crumb { label: string; href: string }
+
+function buildBreadcrumbs(pathname: string): Crumb[] {
+  const segments = pathname.split('/').filter(Boolean)
+  const crumbs: Crumb[] = []
+  let accumulated = ''
+
+  for (const seg of segments) {
+    accumulated += `/${seg}`
+    const isId = /^\d+$/.test(seg)
+    const label = isId
+      ? `#${seg}`
+      : (SEGMENT_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1))
+    crumbs.push({ label, href: accumulated })
+  }
+
+  return crumbs
+}
+
 export function AppShell({ role, children }: AppShellProps) {
   const navItems = role === 'ADMIN' ? ADMIN_NAV_ITEMS : BOOSTER_NAV_ITEMS
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const { user, logout } = useAuth()
 
-  // Restore collapse state from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === 'true') setCollapsed(true)
   }, [])
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileOpen(false)
   }, [pathname])
@@ -108,34 +140,51 @@ export function AppShell({ role, children }: AppShellProps) {
       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
 
   const roleLabel = role === 'ADMIN' ? 'ADMIN' : 'BOOSTER'
+  const roleShort = role === 'ADMIN' ? 'ADM' : 'BST'
   const dashboardHref = role === 'ADMIN' ? '/admin' : '/booster'
 
   function renderSidebar() {
     return (
       <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className={cn('p-4 border-b border-white/10 flex-shrink-0', collapsed && 'lg:px-3 lg:py-4')}>
-          <Link href={dashboardHref} className="block">
-            <h1 className={cn('text-lg font-black font-orbitron leading-none', collapsed && 'lg:hidden')} style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              <span className="text-brand-purple-light">GAME</span>
-              <span className="text-white">BOOST</span>
-            </h1>
-            {collapsed && (
-              <span className="hidden lg:block text-lg font-black font-orbitron text-brand-purple-light leading-none" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                G
-              </span>
+        {/* Header — same h-14 as top bar so logo aligns with bell */}
+        <div className={cn(
+          'h-14 border-b border-white/10 flex items-center flex-shrink-0',
+          collapsed ? 'justify-center relative' : 'px-3'
+        )}>
+          {/* Logo + badge */}
+          <div className={cn('flex items-center gap-2 min-w-0', !collapsed && 'flex-1')}>
+            <Link href={dashboardHref} className="flex items-center min-w-0">
+              <h1
+                className="text-lg font-black font-orbitron leading-none"
+                style={{ fontFamily: 'Orbitron, sans-serif' }}
+              >
+                {collapsed ? (
+                  <span className="text-brand-purple-light">G</span>
+                ) : (
+                  <>
+                    <span className="text-brand-purple-light">GAME</span>
+                    <span className="text-white">BOOST</span>
+                  </>
+                )}
+              </h1>
+            </Link>
+          </div>
+
+          {/* Collapse toggle */}
+          <button
+            onClick={toggleCollapse}
+            className={cn(
+              'hidden lg:flex w-7 h-7 items-center justify-center text-brand-gray-500 hover:text-brand-purple-light transition-colors flex-shrink-0',
+              collapsed && 'absolute right-1.5 top-1/2 -translate-y-1/2'
             )}
-          </Link>
-          {!collapsed && (
-            <span className={cn('inline-block mt-2 text-xs font-bold px-2 py-0.5 rounded font-rajdhani', roleBadgeClass)}>
-              {roleLabel}
-            </span>
-          )}
+            aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
         </div>
 
-        <TooltipProvider delayDuration={0}>
           {/* Nav items */}
-          <nav className="flex-1 overflow-y-auto py-2">
+          <nav className="scrollbar-none flex-1 overflow-y-auto overflow-x-hidden py-2">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item)
@@ -144,30 +193,26 @@ export function AppShell({ role, children }: AppShellProps) {
                   {item.separator && (
                     <div className="my-2 mx-3 border-t border-white/10" />
                   )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={item.href}
-                        target={item.external ? '_blank' : undefined}
-                        rel={item.external ? 'noopener noreferrer' : undefined}
-                        className={cn(
-                          'flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm font-medium font-rajdhani border-l-2',
-                          active
-                            ? 'bg-brand-purple/20 text-brand-purple-light border-brand-purple'
-                            : 'text-brand-gray-400 hover:text-white hover:bg-white/5 border-transparent',
-                          collapsed && 'lg:justify-center lg:px-2'
-                        )}
-                      >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <span className={cn(collapsed && 'lg:hidden')}>{item.label}</span>
-                      </Link>
-                    </TooltipTrigger>
-                    {collapsed && (
-                      <TooltipContent side="right" className="bg-brand-black-light border-brand-purple/50 text-white lg:block hidden">
-                        {item.label}
-                      </TooltipContent>
+                  <Link
+                    href={item.href}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noopener noreferrer' : undefined}
+                    className={cn(
+                      'group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm font-medium font-rajdhani border-l-2',
+                      active
+                        ? 'bg-brand-purple/20 text-brand-purple-light border-brand-purple'
+                        : 'text-brand-gray-400 hover:text-brand-purple-light hover:bg-brand-purple/10 border-transparent',
+                      collapsed && 'justify-center px-2'
                     )}
-                  </Tooltip>
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    {!collapsed && <span>{item.label}</span>}
+                    {collapsed && (
+                      <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-brand-black-light border border-brand-purple/50 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
+                        {item.label}
+                      </span>
+                    )}
+                  </Link>
                 </div>
               )
             })}
@@ -181,50 +226,50 @@ export function AppShell({ role, children }: AppShellProps) {
                   <span className="text-sm font-bold text-brand-purple-light">{userInitial}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white font-medium truncate">{user?.name || 'Usuário'}</p>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <p className="text-sm text-white font-medium truncate">{user?.name || 'Usuário'}</p>
+                    <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded font-rajdhani flex-shrink-0', roleBadgeClass)}>
+                      {roleLabel}
+                    </span>
+                  </div>
                   <p className="text-xs text-brand-gray-500 truncate">{user?.email}</p>
                 </div>
               </div>
             )}
             {collapsed && (
-              <div className="hidden lg:flex justify-center mb-2">
+              <div className="flex justify-center mb-2">
                 <div className="w-8 h-8 rounded-full bg-brand-purple/30 flex items-center justify-center">
                   <span className="text-sm font-bold text-brand-purple-light">{userInitial}</span>
                 </div>
               </div>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={logout}
-                  className={cn(
-                    'flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm text-brand-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors font-rajdhani',
-                    collapsed && 'lg:justify-center'
-                  )}
-                >
-                  <LogOut className="h-4 w-4 flex-shrink-0" />
-                  <span className={cn(collapsed && 'lg:hidden')}>Sair</span>
-                </button>
-              </TooltipTrigger>
-              {collapsed && (
-                <TooltipContent side="right" className="bg-brand-black-light border-brand-purple/50 text-white lg:block hidden">
-                  Sair
-                </TooltipContent>
+            <button
+              onClick={logout}
+              className={cn(
+                'group relative flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm text-brand-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors font-rajdhani',
+                collapsed && 'justify-center'
               )}
-            </Tooltip>
+            >
+              <LogOut className="h-4 w-4 flex-shrink-0" />
+              {!collapsed && <span>Sair</span>}
+              {collapsed && (
+                <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-brand-black-light border border-brand-purple/50 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
+                  Sair
+                </span>
+              )}
+            </button>
           </div>
-        </TooltipProvider>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-brand-black">
+    <div className="flex h-full bg-brand-black">
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col flex-shrink-0 bg-brand-black-light border-r border-white/10 transition-all duration-300',
-          collapsed ? 'w-16' : 'w-60'
+          'hidden lg:flex flex-col flex-shrink-0 bg-brand-black-light border-r border-white/10 transition-all duration-300 overflow-hidden',
+          collapsed ? 'w-20' : 'w-60'
         )}
       >
         {renderSidebar()}
@@ -254,37 +299,76 @@ export function AppShell({ role, children }: AppShellProps) {
 
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Top bar */}
+        {/* Top bar — h-14 matches sidebar header for visual alignment */}
         <header className="h-14 bg-brand-black-light border-b border-white/10 flex items-center gap-3 px-4 flex-shrink-0">
           {/* Mobile hamburger */}
           <button
-            className="lg:hidden text-brand-gray-400 hover:text-white transition-colors"
+            className="lg:hidden text-brand-gray-400 hover:text-brand-purple-light transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Abrir menu"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Desktop collapse toggle */}
-          <button
-            className="hidden lg:flex text-brand-gray-400 hover:text-white transition-colors"
-            onClick={toggleCollapse}
-            aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
-          >
-            {collapsed ? (
-              <ChevronRight className="h-5 w-5" />
-            ) : (
-              <ChevronLeft className="h-5 w-5" />
-            )}
-          </button>
+          {/* Breadcrumb */}
+          <nav aria-label="Navegação" className="hidden lg:flex items-center gap-1 text-sm ml-1">
+            {buildBreadcrumbs(pathname).map((crumb, i, arr) => (
+              <Fragment key={crumb.href}>
+                {i > 0 && (
+                  <ChevronRight className="h-3.5 w-3.5 text-brand-gray-500 flex-shrink-0" />
+                )}
+                {i < arr.length - 1 ? (
+                  <Link
+                    href={crumb.href}
+                    className="text-brand-gray-400 hover:text-brand-purple-light transition-colors"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="text-white font-medium">{crumb.label}</span>
+                )}
+              </Fragment>
+            ))}
+          </nav>
 
           <div className="flex-1" />
 
-          {/* Right side: notifications + avatar */}
+          {/* Notification bell */}
           <NotificationBell />
-          <div className="w-8 h-8 rounded-full bg-brand-purple/30 flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-bold text-brand-purple-light">{userInitial}</span>
-          </div>
+
+          {/* Avatar dropdown — perfil + sair */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="w-8 h-8 rounded-full bg-brand-purple/30 flex items-center justify-center flex-shrink-0 hover:bg-brand-purple/50 transition-colors"
+                aria-label="Menu do usuário"
+              >
+                <span className="text-sm font-bold text-brand-purple-light">{userInitial}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52 bg-brand-black-light border-white/10">
+              <DropdownMenuLabel className="pb-1">
+                <p className="text-sm text-white font-medium truncate">{user?.name || 'Usuário'}</p>
+                <p className="text-xs text-brand-gray-500 font-normal truncate">{user?.email}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem
+                onClick={() => router.push('/profile')}
+                className="cursor-pointer text-brand-gray-300 hover:text-white focus:text-white"
+              >
+                <User className="mr-2 h-4 w-4" />
+                Meu Perfil
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem
+                onClick={logout}
+                className="cursor-pointer text-red-400 hover:text-red-300 focus:text-red-300"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {/* Page content */}

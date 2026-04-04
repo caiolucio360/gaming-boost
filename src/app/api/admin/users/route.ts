@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
-    const where: any = {}
+    const where: any = { isDevAdmin: false }
 
     if (role && (role === 'CLIENT' || role === 'BOOSTER' || role === 'ADMIN')) {
       where.role = role

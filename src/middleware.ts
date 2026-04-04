@@ -1,10 +1,21 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 
+const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify']
+
 export default withAuth(
     function middleware(req) {
         const { pathname } = req.nextUrl
         const token = req.nextauth.token
+
+        // Usuário autenticado tentando acessar página de auth → redireciona para seu dashboard
+        if (AUTH_PAGES.some((p) => pathname.startsWith(p))) {
+            if (token) {
+                const dest = token.role === 'ADMIN' ? '/admin' : token.role === 'BOOSTER' ? '/booster' : '/dashboard'
+                return NextResponse.redirect(new URL(dest, req.url))
+            }
+            return NextResponse.next()
+        }
 
         // Rotas de admin - apenas ADMIN
         if (pathname.startsWith('/admin')) {
@@ -15,7 +26,6 @@ export default withAuth(
 
         // Rotas de booster - apenas BOOSTER (exceto /booster/apply que CLIENTs podem acessar)
         if (pathname.startsWith('/booster')) {
-            // Allow CLIENT users to access the apply page
             if (pathname === '/booster/apply') {
                 if (token?.role !== 'CLIENT' && token?.role !== 'BOOSTER' && token?.role !== 'ADMIN') {
                     return NextResponse.redirect(new URL('/dashboard', req.url))
@@ -29,15 +39,26 @@ export default withAuth(
     },
     {
         callbacks: {
-            // Retorna true se o usuário está autenticado
-            authorized: ({ token }) => !!token,
+            authorized: ({ token, req }) => {
+                const { pathname } = req.nextUrl
+                // Páginas de auth são sempre acessíveis (token não obrigatório)
+                if (AUTH_PAGES.some((p) => pathname.startsWith(p))) return true
+                // Demais rotas no matcher exigem token
+                return !!token
+            },
         },
     }
 )
 
-// Definir quais rotas o middleware deve proteger
 export const config = {
     matcher: [
+        // Auth pages — para bloquear acesso de usuários já autenticados
+        '/login/:path*',
+        '/register/:path*',
+        '/forgot-password/:path*',
+        '/reset-password/:path*',
+        '/verify/:path*',
+
         // Dashboard e perfil do cliente
         '/dashboard/:path*',
         '/profile/:path*',
@@ -54,8 +75,5 @@ export const config = {
 
         // Área do admin
         '/admin/:path*',
-
-        // Disputas
-        '/disputes/:path*',
     ],
 }

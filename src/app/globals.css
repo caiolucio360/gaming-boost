@@ -63,6 +63,13 @@
     scrollbar-gutter: stable;
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
