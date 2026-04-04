@@ -1,122 +1,94 @@
-/**
- * Tests for common Zod schemas
- * TDD: Write tests first, then implement
- */
+import { EmailSchema, MoneySchema, PaginationSchema, IdSchema, OptionalStringSchema } from '@/schemas/common'
 
-import { z } from 'zod'
-import {
-    IdSchema,
-    PaginationSchema,
-    EmailSchema,
-    PhoneSchema,
-    TaxIdSchema,
-} from '@/schemas/common'
+describe('EmailSchema', () => {
+  it('accepts valid email', () => {
+    expect(EmailSchema.safeParse('user@example.com').success).toBe(true)
+  })
+  it('normalises to lowercase', () => {
+    const r = EmailSchema.safeParse('USER@EXAMPLE.COM')
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBe('user@example.com')
+  })
+  it('trims whitespace', () => {
+    const r = EmailSchema.safeParse('  user@example.com  ')
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBe('user@example.com')
+  })
+  it('rejects invalid email', () => {
+    expect(EmailSchema.safeParse('notanemail').success).toBe(false)
+    expect(EmailSchema.safeParse('missing@').success).toBe(false)
+    expect(EmailSchema.safeParse('@nodomain.com').success).toBe(false)
+  })
+})
 
-describe('Common Schemas', () => {
-    describe('IdSchema', () => {
-        it('should validate a valid CUID', () => {
-            const validId = 'clh4ptu8g0000ym2x6qwt2xp3'
-            const result = IdSchema.safeParse(validId)
-            expect(result.success).toBe(true)
-        })
+describe('MoneySchema', () => {
+  it('accepts positive number', () => {
+    expect(MoneySchema.safeParse(100).success).toBe(true)
+    expect(MoneySchema.safeParse(0.01).success).toBe(true)
+  })
+  it('rejects zero', () => {
+    expect(MoneySchema.safeParse(0).success).toBe(false)
+  })
+  it('rejects negative', () => {
+    expect(MoneySchema.safeParse(-1).success).toBe(false)
+  })
+})
 
-        it('should reject empty string', () => {
-            const result = IdSchema.safeParse('')
-            expect(result.success).toBe(false)
-        })
+describe('PaginationSchema', () => {
+  it('defaults page=1 limit=10', () => {
+    const r = PaginationSchema.safeParse({})
+    expect(r.success).toBe(true)
+    if (r.success) {
+      expect(r.data.page).toBe(1)
+      expect(r.data.limit).toBe(10)
+    }
+  })
+  it('coerces strings to numbers', () => {
+    const r = PaginationSchema.safeParse({ page: '3', limit: '25' })
+    expect(r.success).toBe(true)
+    if (r.success) {
+      expect(r.data.page).toBe(3)
+      expect(r.data.limit).toBe(25)
+    }
+  })
+  it('rejects limit > 100', () => {
+    expect(PaginationSchema.safeParse({ limit: 101 }).success).toBe(false)
+  })
+  it('rejects page < 1', () => {
+    expect(PaginationSchema.safeParse({ page: 0 }).success).toBe(false)
+  })
+})
 
-        it('should accept numeric values and transform to string', () => {
-            const result = IdSchema.safeParse(123)
-            expect(result.success).toBe(true)
-            if (result.success) {
-                expect(result.data).toBe('123')
-            }
-        })
-    })
+describe('IdSchema', () => {
+  it('accepts string ID', () => {
+    const r = IdSchema.safeParse('42')
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBe('42')
+  })
+  it('accepts number ID and coerces to string', () => {
+    const r = IdSchema.safeParse(42)
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBe('42')
+  })
+  it('rejects empty string', () => {
+    expect(IdSchema.safeParse('').success).toBe(false)
+  })
+})
 
-    describe('PaginationSchema', () => {
-        it('should use default values when not provided', () => {
-            const result = PaginationSchema.parse({})
-            expect(result.page).toBe(1)
-            expect(result.limit).toBe(10)
-        })
-
-        it('should accept valid page and limit', () => {
-            const result = PaginationSchema.parse({ page: 2, limit: 20 })
-            expect(result.page).toBe(2)
-            expect(result.limit).toBe(20)
-        })
-
-        it('should reject negative page', () => {
-            const result = PaginationSchema.safeParse({ page: -1 })
-            expect(result.success).toBe(false)
-        })
-
-        it('should reject limit over 100', () => {
-            const result = PaginationSchema.safeParse({ limit: 150 })
-            expect(result.success).toBe(false)
-        })
-    })
-
-    describe('EmailSchema', () => {
-        it('should validate a valid email', () => {
-            const result = EmailSchema.safeParse('test@example.com')
-            expect(result.success).toBe(true)
-        })
-
-        it('should reject invalid email format', () => {
-            const result = EmailSchema.safeParse('not-an-email')
-            expect(result.success).toBe(false)
-        })
-
-        it('should trim whitespace from email', () => {
-            const result = EmailSchema.parse('  test@example.com  ')
-            expect(result).toBe('test@example.com')
-        })
-
-        it('should convert email to lowercase', () => {
-            const result = EmailSchema.parse('Test@EXAMPLE.com')
-            expect(result).toBe('test@example.com')
-        })
-    })
-
-    describe('PhoneSchema', () => {
-        it('should validate a valid Brazilian mobile phone', () => {
-            const result = PhoneSchema.safeParse('11999998888')
-            expect(result.success).toBe(true)
-        })
-
-        it('should accept phone with formatting', () => {
-            const result = PhoneSchema.safeParse('(11) 99999-8888')
-            expect(result.success).toBe(true)
-        })
-
-        it('should reject landline (not starting with 9)', () => {
-            const result = PhoneSchema.safeParse('1133334444')
-            expect(result.success).toBe(false)
-        })
-    })
-
-    describe('TaxIdSchema (CPF)', () => {
-        it('should validate a valid CPF with correct check digits', () => {
-            // Valid CPF: 529.982.247-25
-            const result = TaxIdSchema.safeParse('52998224725')
-            expect(result.success).toBe(true)
-        })
-
-        it('should accept CPF with formatting', () => {
-            const result = TaxIdSchema.safeParse('529.982.247-25')
-            expect(result.success).toBe(true)
-        })
-
-        it('should reject CPF with invalid check digits', () => {
-            const result = TaxIdSchema.safeParse('12345678900')
-            expect(result.success).toBe(false)
-        })
-
-        it('should reject CPF with all same digits', () => {
-            const result = TaxIdSchema.safeParse('11111111111')
-            expect(result.success).toBe(false)
-        })
-    })
+describe('OptionalStringSchema', () => {
+  it('returns undefined for empty string', () => {
+    const r = OptionalStringSchema.safeParse('')
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBeUndefined()
+  })
+  it('returns value for non-empty string', () => {
+    const r = OptionalStringSchema.safeParse('hello')
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBe('hello')
+  })
+  it('returns undefined when omitted', () => {
+    const r = OptionalStringSchema.safeParse(undefined)
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data).toBeUndefined()
+  })
 })

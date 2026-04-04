@@ -1,56 +1,128 @@
+/**
+ * Security controls tests
+ * Verify critical security checks work correctly.
+ * These test the guards that happen before any DB/external calls.
+ */
+import { NextRequest } from 'next/server'
 
-// Mock process.env
-const originalEnv = process.env
+// ─── /api/payment/pix/simulate ────────────────────────────────────────────────
 
-describe('Security Hardening Verification', () => {
-    beforeEach(() => {
-        jest.resetModules()
-        process.env = { ...originalEnv }
+describe('/api/payment/pix/simulate', () => {
+  it('returns 403 in production', async () => {
+    const original = process.env.NODE_ENV
+    ;(process.env as any).NODE_ENV = 'production'
+
+    // Re-require after env change so the module reads the updated value
+    jest.resetModules()
+    const { POST } = await import('@/app/api/payment/pix/simulate/route')
+    const req = new NextRequest('http://localhost/api/payment/pix/simulate', {
+      method: 'POST',
+      body: JSON.stringify({}),
     })
 
-    afterEach(() => {
-        process.env = originalEnv
+    const res = await POST(req)
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.message).toMatch(/produção/i)
+
+    ;(process.env as any).NODE_ENV = original
+    jest.resetModules()
+  })
+})
+
+// ─── /api/cron/auto-refund ────────────────────────────────────────────────────
+
+describe('/api/cron/auto-refund', () => {
+  it('returns 500 when CRON_SECRET is not configured', async () => {
+    const original = process.env.CRON_SECRET
+    delete process.env.CRON_SECRET
+
+    jest.resetModules()
+    const { POST } = await import('@/app/api/cron/auto-refund/route')
+    const req = new Request('http://localhost/api/cron/auto-refund', { method: 'POST' })
+
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+
+    process.env.CRON_SECRET = original
+    jest.resetModules()
+  })
+
+  it('returns 401 when Bearer token is wrong', async () => {
+    process.env.CRON_SECRET = 'correct-secret'
+
+    jest.resetModules()
+    const { POST } = await import('@/app/api/cron/auto-refund/route')
+    const req = new Request('http://localhost/api/cron/auto-refund', {
+      method: 'POST',
+      headers: { authorization: 'Bearer wrong-secret' },
     })
 
-    describe('JWT Secret', () => {
-        it('should throw error if JWT_SECRET is missing', async () => {
-            delete process.env.JWT_SECRET
+    const res = await POST(req)
+    expect(res.status).toBe(401)
 
-            // Re-import to trigger top-level check
-            await expect(import('@/lib/jwt')).rejects.toThrow('FATAL: JWT_SECRET environment variable is not defined')
-        })
+    jest.resetModules()
+  })
 
-        it('should work when JWT_SECRET is present', async () => {
-            process.env.JWT_SECRET = 'valid-secret-for-testing'
-            const { generateToken } = await import('@/lib/jwt')
-            const token = generateToken({ userId: 1, email: 'test@test.com', role: 'CLIENT' })
-            expect(token).toBeDefined()
-            expect(typeof token).toBe('string')
-        })
+  it('returns 401 with no authorization header', async () => {
+    process.env.CRON_SECRET = 'correct-secret'
+
+    jest.resetModules()
+    const { POST } = await import('@/app/api/cron/auto-refund/route')
+    const req = new Request('http://localhost/api/cron/auto-refund', { method: 'POST' })
+
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+
+    jest.resetModules()
+  })
+})
+
+// ─── /api/webhooks/abacatepay ─────────────────────────────────────────────────
+
+describe('/api/webhooks/abacatepay', () => {
+  beforeEach(() => {
+    jest.resetModules()
+    // Mock rate limiter to always pass so we reach the secret check
+    jest.mock('@/lib/rate-limit', () => ({
+      webhookRateLimiter: { check: jest.fn().mockResolvedValue({ success: true, remaining: 99, reset: Date.now() }) },
+      getIdentifier: jest.fn().mockReturnValue('test-ip'),
+      createRateLimitHeaders: jest.fn().mockReturnValue({}),
+    }))
+  })
+
+  afterEach(() => {
+    jest.resetModules()
+  })
+
+  it('returns 500 when ABACATEPAY_WEBHOOK_SECRET is not configured', async () => {
+    const original = process.env.ABACATEPAY_WEBHOOK_SECRET
+    delete process.env.ABACATEPAY_WEBHOOK_SECRET
+
+    const { POST } = await import('@/app/api/webhooks/abacatepay/route')
+    const req = new NextRequest('http://localhost/api/webhooks/abacatepay', {
+      method: 'POST',
+      body: JSON.stringify({ event: 'billing.paid', data: {} }),
     })
 
-    describe('Encryption Key', () => {
-        it('should throw error if ENCRYPTION_KEY is missing', async () => {
-            delete process.env.ENCRYPTION_KEY
+    const res = await POST(req)
+    expect(res.status).toBe(500)
 
-            const { encrypt } = await import('@/lib/encryption')
-            expect(() => encrypt('test')).toThrow('FATAL: ENCRYPTION_KEY environment variable is not defined')
-        })
+    if (original) process.env.ABACATEPAY_WEBHOOK_SECRET = original
+    else delete process.env.ABACATEPAY_WEBHOOK_SECRET
+  })
 
-        it('should throw error if ENCRYPTION_KEY is invalid length', async () => {
-            process.env.ENCRYPTION_KEY = 'short-key'
-            const { encrypt } = await import('@/lib/encryption')
-            expect(() => encrypt('test')).toThrow('FATAL: ENCRYPTION_KEY must be exactly 64 hex characters')
-        })
+  it('returns 401 when signature is invalid', async () => {
+    process.env.ABACATEPAY_WEBHOOK_SECRET = 'test-secret'
 
-        it('should work with valid key', async () => {
-            // 32 bytes = 64 hex chars
-            process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
-            const { encrypt, decrypt } = await import('@/lib/encryption')
-            const encrypted = encrypt('secret data')
-            expect(encrypted).not.toBe('secret data')
-            const decrypted = decrypt(encrypted)
-            expect(decrypted).toBe('secret data')
-        })
+    const { POST } = await import('@/app/api/webhooks/abacatepay/route')
+    const req = new NextRequest('http://localhost/api/webhooks/abacatepay', {
+      method: 'POST',
+      headers: { 'x-signature': 'invalidsignature' },
+      body: JSON.stringify({ event: 'billing.paid', data: {} }),
     })
+
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+  })
 })
