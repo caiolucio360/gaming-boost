@@ -10,7 +10,7 @@ import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, GameMode, ServiceType } from '@/lib/games-config'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Calculator, Check, Sword, Users, Zap } from 'lucide-react'
+import { AlertCircle, Calculator, Sword, Users, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
@@ -361,7 +361,6 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   >
                     <Icon className="h-4 w-4" />
                     {info?.displayName || type}
-                    {isSelected && <Check className="h-4 w-4" />}
                   </button>
                 )
               })}
