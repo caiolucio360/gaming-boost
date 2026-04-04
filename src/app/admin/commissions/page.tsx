@@ -415,7 +415,7 @@ export default function AdminCommissionsPage() {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => startEdit(booster)}
-                                    className="text-brand-gray-500 hover:text-brand-purpleh-8 w-8 p-0"
+                                    className="text-brand-gray-500 hover:text-white h-8 w-8 p-0"
                                   >
                                     <Pencil className="h-3 w-3" />
                                   </Button>
