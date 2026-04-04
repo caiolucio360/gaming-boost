@@ -234,11 +234,11 @@ export default function DashboardPage() {
           <CardContent className="pt-4 pb-4 relative z-10">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Filtros de Status - Badges Compactos */}
-              <div className="flex flex-wrap items-center gap-2">
-                <Filter className="h-4 w-4 text-brand-purple-light mr-1" />
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-nowrap">
+                <Filter className="h-4 w-4 text-brand-purple-light mr-1 flex-shrink-0" />
                 <button
                   onClick={() => setFilterStatus('')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     !filterStatus
                       ? 'bg-gradient-to-r from-brand-purple/20 to-brand-purple-dark/20 border border-brand-purple-light text-brand-purple-light shadow-lg shadow-brand-purple/20'
                       : 'bg-brand-black/50 border border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10'
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('PENDING')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'PENDING'
                       ? 'bg-yellow-500/20 border border-yellow-400 text-yellow-300'
                       : 'bg-brand-black/50 border border-yellow-500/30 text-brand-gray-500 hover:border-yellow-500/50 hover:text-yellow-300'
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('PAID')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'PAID'
                       ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300'
                       : 'bg-brand-black/50 border border-cyan-500/30 text-brand-gray-500 hover:border-cyan-500/50 hover:text-cyan-300'
@@ -271,7 +271,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('IN_PROGRESS')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'IN_PROGRESS'
                       ? 'bg-blue-500/20 border border-blue-400 text-blue-300'
                       : 'bg-brand-black/50 border border-blue-500/30 text-brand-gray-500 hover:border-blue-500/50 hover:text-blue-300'
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('COMPLETED')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'COMPLETED'
                       ? 'bg-green-500/20 border border-green-400 text-green-300'
                       : 'bg-brand-black/50 border border-green-500/30 text-brand-gray-500 hover:border-green-500/50 hover:text-green-300'
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setFilterStatus('CANCELLED')}
-                  className={`px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
                     filterStatus === 'CANCELLED'
                       ? 'bg-red-500/20 border border-red-400 text-red-300'
                       : 'bg-brand-black/50 border border-red-500/30 text-brand-gray-500 hover:border-red-500/50 hover:text-red-300'
