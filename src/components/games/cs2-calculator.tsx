@@ -26,7 +26,7 @@ interface ActiveOrder {
 }
 
 export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null)
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>('RANK_BOOST')
   const [selectedMode, setSelectedMode] = useState<GameMode>('PREMIER')
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
