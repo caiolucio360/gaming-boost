@@ -230,22 +230,24 @@ export default function AdminCommissionsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-brand-gray-300 font-rajdhani">% Dev-Admin (off-the-top)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={devAdminInput}
-                        onChange={e => setDevAdminInput(e.target.value)}
-                        disabled={!canEdit}
-                        className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
-                      />
-                      <Percent className="h-4 w-4 text-brand-gray-500 flex-shrink-0" />
+                <div className={`grid grid-cols-1 gap-4 ${isDevAdmin ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+                  {isDevAdmin && (
+                    <div className="space-y-2">
+                      <Label className="text-brand-gray-300 font-rajdhani">% Dev-Admin (off-the-top)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={devAdminInput}
+                          onChange={e => setDevAdminInput(e.target.value)}
+                          disabled={!canEdit}
+                          className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
+                        />
+                        <Percent className="h-4 w-4 text-brand-gray-500 flex-shrink-0" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label className="text-brand-gray-300 font-rajdhani">% Booster padrão</Label>
@@ -283,13 +285,15 @@ export default function AdminCommissionsPage() {
                   <p className="text-brand-gray-300 font-rajdhani text-sm mb-3">
                     Simulação em {formatPrice(PREVIEW_AMOUNT)}:
                   </p>
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div>
-                      <p className="text-xs text-brand-gray-500 font-rajdhani">Dev-Admin</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                        {formatPrice(previewDev)}
-                      </p>
-                    </div>
+                  <div className={`grid gap-3 text-center ${isDevAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                    {isDevAdmin && (
+                      <div>
+                        <p className="text-xs text-brand-gray-500 font-rajdhani">Dev-Admin</p>
+                        <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                          {formatPrice(previewDev)}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <p className="text-xs text-brand-gray-500 font-rajdhani">Booster</p>
                       <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>

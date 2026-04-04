@@ -46,6 +46,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name || undefined,
           role: user.role,
+          isDevAdmin: user.isDevAdmin,
         }
       },
     }),
@@ -56,6 +57,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.role = (user as { role: 'CLIENT' | 'BOOSTER' | 'ADMIN' }).role
+        token.isDevAdmin = (user as { isDevAdmin?: boolean }).isDevAdmin ?? false
       }
       return token
     },
@@ -64,6 +66,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = parseInt(token.id as string)
         session.user.role = token.role as 'CLIENT' | 'BOOSTER' | 'ADMIN'
+        session.user.isDevAdmin = token.isDevAdmin as boolean
       }
       return session
     },

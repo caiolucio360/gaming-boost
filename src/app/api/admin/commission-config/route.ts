@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Always derive adminPercentage — never trust the stored value
+    // devAdminPercentage is only visible to dev-admins
+    const isDevAdmin = authResult.user.isDevAdmin ?? false
     const enriched = {
       ...config,
       adminPercentage: 1 - config.boosterPercentage,
+      ...(isDevAdmin ? {} : { devAdminPercentage: undefined }),
     }
 
     return NextResponse.json({ config: enriched }, { status: 200 })

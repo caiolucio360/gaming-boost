@@ -14,6 +14,7 @@ export interface AuthResult {
     id: number
     email: string
     role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
+    isDevAdmin: boolean
   }
   error?: string
   code?: AuthErrorCode
@@ -41,6 +42,7 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
         id: session.user.id,
         email: session.user.email,
         role: session.user.role,
+        isDevAdmin: session.user.isDevAdmin ?? false,
       },
     }
   } catch (error) {
