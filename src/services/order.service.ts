@@ -272,18 +272,16 @@ export const OrderService = {
         where: { enabled: true },
       })
 
-      // Default values
-      let boosterPercentage = 0.70
-      let adminPercentage = 0.30
-      let devAdminPercentage = 0
-
-      if (config) {
-        boosterPercentage = config.boosterPercentage
-        adminPercentage = config.adminPercentage
-        devAdminPercentage = config.devAdminPercentage || 0
+      if (!config) {
+        return failure('Configuração de comissão não encontrada. Execute o seed do banco de dados.', ErrorCodes.DATABASE_ERROR)
       }
 
-      // Check for custom booster commission (overrides global booster %)
+      let boosterPercentage = config.boosterPercentage
+      const devAdminPercentage = config.devAdminPercentage || 0
+      // adminPercentage is always derived — never read from DB
+      let adminPercentage = 1 - boosterPercentage
+
+      // Per-booster override: if set, use it; admin gets the remainder
       if (boosterId) {
         const booster = await prisma.user.findUnique({
           where: { id: boosterId },
@@ -292,10 +290,6 @@ export const OrderService = {
 
         if (booster?.boosterCommissionPercentage !== null && booster?.boosterCommissionPercentage !== undefined) {
           boosterPercentage = booster.boosterCommissionPercentage
-          // Recalculate admin percentage based on remaining AFTER dev admin cut
-          // Note context: adminPercentage used to be 1 - booster. Now it depends on the base.
-          // But wait, the split logic is: Total -> Dev -> Remaining -> Booster/Admin
-          // So Booster % applies to Remaining.
           adminPercentage = 1 - boosterPercentage
         }
       }
