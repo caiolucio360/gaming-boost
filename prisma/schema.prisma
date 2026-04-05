@@ -54,6 +54,8 @@ model User {
   emailMarketing                Boolean   @default(true)
   reactivationDiscountPct       Float     @default(0)
   reactivationDiscountExpiresAt DateTime?
+
+  @@index([role, emailMarketing, streakLastOrderAt])
 }
 
 
