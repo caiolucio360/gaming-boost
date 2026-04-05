@@ -12,6 +12,7 @@ import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
 import { ChatService } from './chat.service'
 import { bestAvailableDiscount, updateUserStreak } from '@/lib/retention'
+import { getNextMilestone, calculateProgressPct } from '@/lib/retention-utils'
 
 /**
  * Erro de serviço tipado com código estruturado.
@@ -671,22 +672,40 @@ export const OrderService = {
         console.error('Failed to wipe Steam credentials:', error)
       })
 
+      // Update streak (needed before email so we can pass discount data)
+      let streakResult = { newStreak: 0, leveledUp: false, newDiscountPct: 0 }
+      if (updatedOrder.user?.id) {
+        streakResult = await updateUserStreak(updatedOrder.user.id)
+      }
+
       // Send email notification (async, non-blocking)
       if (updatedOrder.user?.email) {
         const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
+        const currentRating = updatedOrder.targetRating ?? 0
+        const rawGameMode = updatedOrder.gameMode ?? ''
+        const emailGameMode: 'PREMIER' | 'GC' = rawGameMode.toUpperCase().includes('GC') ? 'GC' : 'PREMIER'
+        const nextMilestone = getNextMilestone(currentRating, emailGameMode)
+        const progressPct = nextMilestone
+          ? calculateProgressPct(currentRating, 0, nextMilestone)
+          : 100
         sendOrderCompletedEmail(
           updatedOrder.user.email,
           updatedOrder.id,
-          serviceName
+          serviceName,
+          {
+            currentRating,
+            nextMilestone,
+            progressPct,
+            discountPct: streakResult.newDiscountPct,
+            gameMode: emailGameMode,
+          }
         ).catch((error) => {
-          console.error('Failed to send order completed email:', error)
+          console.error('[completeOrder] Retention email error:', error)
         })
       }
 
-      // Update streak and create retention-aware notifications
+      // Create retention-aware notifications
       if (updatedOrder.user?.id) {
-        const streakResult = await updateUserStreak(updatedOrder.user.id)
-
         prisma.notification.create({
           data: {
             userId: updatedOrder.user.id,
