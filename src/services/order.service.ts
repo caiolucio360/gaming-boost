@@ -11,7 +11,7 @@ import { Result, Failure, success, failure, ErrorCode, PaginatedResult, paginate
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
 import { ChatService } from './chat.service'
-import { bestAvailableDiscount } from '@/lib/retention'
+import { bestAvailableDiscount, updateUserStreak } from '@/lib/retention'
 
 /**
  * Erro de serviço tipado com código estruturado.
@@ -683,20 +683,37 @@ export const OrderService = {
         })
       }
 
-      // Create notification for client that order is complete
+      // Update streak and create retention-aware notifications
       if (updatedOrder.user?.id) {
-        const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
+        const streakResult = await updateUserStreak(updatedOrder.user.id)
+
         prisma.notification.create({
           data: {
             userId: updatedOrder.user.id,
             type: 'ORDER_UPDATE',
-            title: 'Pedido Concluído!',
-            message: `Seu pedido #${orderId} de ${serviceName} foi concluído com sucesso! Avalie sua experiência.`,
-            metadata: JSON.stringify({ orderId }),
+            title: `Boost concluído! Você chegou a ${updatedOrder.targetRating ?? updatedOrder.targetRank} pts`,
+            message: streakResult.newDiscountPct > 0
+              ? `Seus rivais não param. Garanta ${Math.round(streakResult.newDiscountPct * 100)}% off no próximo boost — oferta válida por 48h.`
+              : `Continue subindo — contrate o próximo boost e ganhe 5% de desconto.`,
+            read: false,
           },
         }).catch((error) => {
           console.error('Failed to create notification for order completed:', error)
         })
+
+        if (streakResult.leveledUp) {
+          prisma.notification.create({
+            data: {
+              userId: updatedOrder.user.id,
+              type: 'SYSTEM',
+              title: `Fidelidade desbloqueada! ${Math.round(streakResult.newDiscountPct * 100)}% de desconto`,
+              message: `Você completou ${streakResult.newStreak} pedidos consecutivos. Seu desconto subiu para ${Math.round(streakResult.newDiscountPct * 100)}%!`,
+              read: false,
+            },
+          }).catch((error) => {
+            console.error('Failed to create streak unlock notification:', error)
+          })
+        }
       }
 
       return success(updatedOrder as OrderWithRelations)
