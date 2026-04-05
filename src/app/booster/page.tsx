@@ -364,7 +364,7 @@ export default function BoosterDashboardPage() {
         {loading && !stats ? (
           <SkeletonStatsGrid count={5} />
         ) : stats ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Card - Disponíveis */}
             <Card className="bg-brand-black/30 border-yellow-500/30">
               <CardContent className="p-6">
@@ -484,7 +484,7 @@ export default function BoosterDashboardPage() {
               />
             ) : (
               <div className="grid gap-6">
-                {orders.map((order, index) => {
+                {orders.map((order) => {
                   return (
                     <Card
                       key={order.id}
@@ -565,7 +565,7 @@ export default function BoosterDashboardPage() {
               />
             ) : (
               <div className="grid gap-6">
-                {orders.map((order, index) => {
+                {orders.map((order) => {
                   return (
                     <Card
                       key={order.id}
