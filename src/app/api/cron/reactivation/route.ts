@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
   if (!cronSecret) {
     console.error('[CRON:REACTIVATION] CRON_SECRET not configured')
-    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
+    return NextResponse.json({ message: 'Cron secret not configured' }, { status: 500 })
   }
 
   const authHeader = request.headers.get('authorization')
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for'),
       timestamp: new Date().toISOString(),
     })
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
   }
 
   const now = new Date()
@@ -67,6 +67,22 @@ export async function POST(request: NextRequest) {
     },
   })
 
+  // Bulk-fetch last completed order for all candidates (eliminates N+1)
+  const candidateIds = candidates.map((u: typeof candidates[0]) => u.id)
+  const lastCompletedOrders = await db.order.findMany({
+    where: {
+      userId: { in: candidateIds },
+      status: 'COMPLETED',
+      targetRating: { not: null },
+    },
+    orderBy: { updatedAt: 'desc' },
+    select: { userId: true, targetRating: true, gameMode: true },
+    distinct: ['userId'],
+  })
+  const lastOrderByUser = new Map<string, { userId: string; targetRating: number | null; gameMode: string | null }>(
+    lastCompletedOrders.map((o: typeof lastCompletedOrders[0]) => [o.userId, o])
+  )
+
   let sent = 0
   let skipped = 0
 
@@ -87,11 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get their most recent completed order for rating context
-    const lastOrder = await db.order.findFirst({
-      where: { userId: user.id, status: 'COMPLETED' },
-      orderBy: { updatedAt: 'desc' },
-      select: { targetRating: true, gameMode: true },
-    })
+    const lastOrder = lastOrderByUser.get(user.id)
 
     if (!lastOrder || lastOrder.targetRating == null) {
       skipped++
