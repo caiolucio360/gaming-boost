@@ -11,6 +11,7 @@ import { Result, Failure, success, failure, ErrorCode, PaginatedResult, paginate
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
 import { ChatService } from './chat.service'
+import { bestAvailableDiscount } from '@/lib/retention'
 
 /**
  * Erro de serviço tipado com código estruturado.
@@ -353,18 +354,53 @@ export const OrderService = {
         }
       }
 
+      // Fetch user discount fields
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          currentDiscountPct: true,
+          reactivationDiscountPct: true,
+          reactivationDiscountExpiresAt: true,
+        },
+      })
+
+      // Compute best available discount
+      const discountPct = user
+        ? bestAvailableDiscount(
+            user.currentDiscountPct ?? 0,
+            user.reactivationDiscountPct ?? 0,
+            user.reactivationDiscountExpiresAt ?? null
+          )
+        : 0
+      const discountedTotal = discountPct > 0
+        ? Math.round(total * (1 - discountPct))
+        : total
+
       // Create order
       const order = await prisma.order.create({
         data: {
           userId,
           game,
           serviceType,
-          total,
+          total: discountedTotal,
+          discountApplied: discountPct > 0,
+          discountPct: discountPct,
           status: OrderStatus.PENDING,
           gameMode,
           ...rest,
         },
       })
+
+      // Clear reactivation discount if it was used
+      if (discountPct > 0 && (user?.reactivationDiscountPct ?? 0) > 0) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            reactivationDiscountPct: 0,
+            reactivationDiscountExpiresAt: null,
+          },
+        })
+      }
 
       return success(order as OrderWithRelations)
     } catch (error) {
