@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
+    instrumentationHook: true,
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-dialog',
