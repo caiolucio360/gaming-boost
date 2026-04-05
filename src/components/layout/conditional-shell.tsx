@@ -17,18 +17,34 @@ export function ConditionalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const appRoute = isAppRoute(pathname)
 
+  if (appRoute) {
+    // App shell (admin/booster): fixed height, no browser scroll
+    return (
+      <div className="h-screen flex flex-col overflow-hidden">
+        <main
+          id="main-content"
+          className="flex-1 flex flex-col overflow-hidden"
+          aria-label="Conteúdo principal"
+        >
+          {children}
+        </main>
+      </div>
+    )
+  }
+
+  // Public pages: natural document flow, browser scroll
   return (
-    <>
-      {!appRoute && <ElojobHeader />}
+    <div className="min-h-screen flex flex-col">
+      <ElojobHeader />
       <main
         id="main-content"
-        className={appRoute ? 'flex-1 flex flex-col overflow-hidden' : 'flex-1 pt-16 pb-24 lg:pb-0'}
+        className="flex-1 pt-16 pb-24 lg:pb-0"
         aria-label="Conteúdo principal"
       >
         {children}
       </main>
-      {!appRoute && <Footer />}
-      {!appRoute && <MobileBottomNav />}
-    </>
+      <Footer />
+      <MobileBottomNav />
+    </div>
   )
 }
