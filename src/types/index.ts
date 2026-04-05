@@ -6,6 +6,7 @@ export interface User {
   name?: string;
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN';
   isDevAdmin?: boolean;
+  currentDiscountPct?: number;
 }
 
 export interface GameRank {

@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         phone: true,
         active: true,
         createdAt: true,
+        currentDiscountPct: true,
       },
     })
 

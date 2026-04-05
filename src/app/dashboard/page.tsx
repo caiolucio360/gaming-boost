@@ -38,6 +38,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
+import { RetentionProgress } from '@/components/common/retention-progress'
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -54,6 +55,7 @@ export default function DashboardPage() {
   } | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
+  const [currentDiscountPct, setCurrentDiscountPct] = useState<number>(0)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -73,6 +75,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user && user.role === 'CLIENT') {
       fetchOrders()
+      apiGet<{ user: { currentDiscountPct?: number | null } }>('/api/auth/me')
+        .then((data) => setCurrentDiscountPct(data.user?.currentDiscountPct ?? 0))
+        .catch(() => {})
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
 
@@ -192,6 +197,16 @@ export default function DashboardPage() {
     }
   }
 
+
+  const completedOrders = (orders ?? [])
+    .filter((o) => o.status === 'COMPLETED' && o.targetRating != null)
+    .map((o) => ({
+      id: o.id,
+      targetRating: o.targetRating as number,
+      targetRank: o.targetRank ?? null,
+      gameMode: o.gameMode ?? '',
+      completedAt: o.updatedAt ?? o.createdAt,
+    }))
 
   // Loading de tela inteira apenas para autenticação
   if (authLoading) {
@@ -318,6 +333,16 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        {completedOrders.length > 0 && (
+          <div className="mb-6">
+            <RetentionProgress
+              completedOrders={completedOrders}
+              currentDiscountPct={currentDiscountPct}
+              gameMode="PREMIER"
+            />
+          </div>
+        )}
 
         {loading ? (
           <SkeletonOrdersList count={3} />

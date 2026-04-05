@@ -1,6 +1,6 @@
 'use client'
 
-import { getNextMilestone, calculateProgressPct, isAtMax } from '@/lib/retention'
+import { getNextMilestone, calculateProgressPct, isAtMax } from '@/lib/retention-utils'
 
 interface CompletedOrderEntry {
   id: number
