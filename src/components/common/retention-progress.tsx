@@ -39,9 +39,8 @@ export function RetentionProgress({
   const latest = orders[orders.length - 1]
   const currentRating = latest.targetRating ?? 0
   const nextMilestone = getNextMilestone(currentRating, gameMode)
-  const firstRating = orders[0].targetRating ?? 0
   const progressPct = nextMilestone
-    ? calculateProgressPct(currentRating, firstRating, nextMilestone)
+    ? calculateProgressPct(currentRating, 0, nextMilestone)
     : 100
   const atMax = isAtMax(currentRating, gameMode)
   const discountLabel = currentDiscountPct > 0
