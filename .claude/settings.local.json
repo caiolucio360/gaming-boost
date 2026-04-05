@@ -45,7 +45,10 @@
       "Bash(start chrome:*)",
       "Bash(npx tsc:*)",
       "Bash(bash /tmp/verify_task7.sh)",
-      "Bash(gh pr create --title 'feat: client retention system \\(streak discounts + progress bar + reactivation\\)' --body ':*)"
+      "Bash(gh pr create --title 'feat: client retention system \\(streak discounts + progress bar + reactivation\\)' --body ':*)",
+      "Read(//tmp/**)",
+      "Bash(gh pr create --title 'fix: address code review findings in retention system' --body ':*)",
+      "Bash(npm show:*)"
     ]
   }
 }
