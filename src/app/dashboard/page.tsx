@@ -334,6 +334,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Currently only PREMIER mode is shown. GC support can be added by rendering a second widget with gameMode="GC" */}
         {completedOrders.length > 0 && (
           <div className="mb-6">
             <RetentionProgress

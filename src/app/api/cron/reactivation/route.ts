@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         lte: fourteenDaysAgo,
       },
     },
+    take: 100,
     select: {
       id: true,
       email: true,

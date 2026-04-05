@@ -374,7 +374,7 @@ export const OrderService = {
           )
         : 0
       const discountedTotal = discountPct > 0
-        ? Math.round(total * (1 - discountPct))
+        ? Math.round(total * (1 - discountPct) * 100) / 100
         : total
 
       // Create order

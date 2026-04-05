@@ -32,6 +32,8 @@ export interface Order {
   targetRating?: number | null;
   gameMode?: string | null;
   completionProofUrl?: string | null;
+  discountApplied?: boolean;
+  discountPct?: number;
   createdAt: Date;
   updatedAt?: Date;
 }
