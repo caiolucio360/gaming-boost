@@ -9,6 +9,8 @@ const requiredEnvVars = [
     'NEXT_PUBLIC_API_URL',
     'JWT_SECRET',
     'ENCRYPTION_KEY',
+    'ABACATEPAY_WEBHOOK_SECRET',
+    'CRON_SECRET',
     // 'ABACATEPAY_API_KEY', // Optional in dev, required in prod
     // 'RESEND_API_KEY', // Optional in dev, required in prod
 ]
