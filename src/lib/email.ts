@@ -296,7 +296,7 @@ export async function sendOrderCompletedEmail(
       }
     </div>
     <div style="text-align:center;margin:20px 0">
-      <a href="${appUrl}/dashboard"
+      <a href="${appUrl}/games/cs2"
          style="background:#7C3AED;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700">
         ${retention.discountPct > 0 ? 'Garantir meu desconto agora' : 'Continuar subindo'}
       </a>
@@ -484,7 +484,7 @@ export async function sendReactivationEmail(
     <p style="color:#9CA3AF;font-size:13px;margin:0">Válido até ${expiresFormatted}</p>
   </div>
   <div style="text-align:center;margin:20px 0">
-    <a href="${appUrl}/dashboard"
+    <a href="${appUrl}/games/cs2"
        style="background:#7C3AED;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
       Garantir meu desconto agora
     </a>
@@ -492,7 +492,7 @@ export async function sendReactivationEmail(
 </body>
 </html>`
 
-  const text = `Você parou em ${data.currentRatingLabel} há 14 dias. Faltam só ${gap} para ${data.nextMilestoneLabel}. Garanta ${discountLabel}% de desconto em: ${appUrl}/dashboard`
+  const text = `Você parou em ${data.currentRatingLabel} há 14 dias. Faltam só ${gap} para ${data.nextMilestoneLabel}. Garanta ${discountLabel}% de desconto em: ${appUrl}/games/cs2`
 
   return sendEmail({
     to,
