@@ -26,6 +26,7 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/.next/',
+    '/.worktrees/',
     '/src/__tests__/utils/',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
