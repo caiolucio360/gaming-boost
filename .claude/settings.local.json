@@ -48,7 +48,8 @@
       "Bash(gh pr create --title 'feat: client retention system \\(streak discounts + progress bar + reactivation\\)' --body ':*)",
       "Read(//tmp/**)",
       "Bash(gh pr create --title 'fix: address code review findings in retention system' --body ':*)",
-      "Bash(npm show:*)"
+      "Bash(npm show:*)",
+      "Bash(gh pr create --title 'fix: test suite and public page layout bugs' --body ':*)"
     ]
   }
 }
