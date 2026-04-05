@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { z } from 'zod'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 const updateProfileSchema = z.object({
     bio: z.string().min(10).optional(),
@@ -40,11 +41,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ profile }, { status: 200 })
     } catch (error) {
-        console.error('Erro ao buscar perfil:', error)
-        return NextResponse.json(
-            { message: 'Erro interno ao buscar perfil' },
-            { status: 500 }
-        )
+        return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/booster/profile')
     }
 }
 
@@ -82,10 +79,6 @@ export async function PATCH(request: NextRequest) {
             { status: 200 }
         )
     } catch (error) {
-        console.error('Erro ao atualizar perfil:', error)
-        return NextResponse.json(
-            { message: 'Erro interno ao atualizar perfil' },
-            { status: 500 }
-        )
+        return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'PATCH /api/booster/profile')
     }
 }

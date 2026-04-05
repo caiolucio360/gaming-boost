@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import bcrypt from 'bcryptjs'
 
 // GET - Buscar perfil do usuário autenticado
@@ -47,11 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ user }, { status: 200 })
   } catch (error) {
-    console.error('Erro ao buscar perfil:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar perfil' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/user/profile')
   }
 }
 
@@ -157,11 +154,7 @@ export async function PUT(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao atualizar perfil:', error)
-    return NextResponse.json(
-      { message: 'Erro ao atualizar perfil' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'PUT /api/user/profile')
   }
 }
 

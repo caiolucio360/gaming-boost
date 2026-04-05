@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { db } from '@/lib/db'
 import { Game, ServiceType } from '@/generated/prisma/client'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 /**
  * Helper to check if a new range overlaps with existing ranges
@@ -70,8 +71,7 @@ export async function GET(request: NextRequest) {
 
     return Response.json({ data: pricingConfigs }, { status: 200 })
   } catch (error) {
-    console.error('Error fetching pricing configs:', error)
-    return Response.json({ error: 'Internal server error' }, { status: 500 })
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/admin/pricing')
   }
 }
 
@@ -133,7 +133,6 @@ export async function POST(request: NextRequest) {
 
     return Response.json({ data: pricingConfig }, { status: 201 })
   } catch (error) {
-    console.error('Error creating pricing config:', error)
-    return Response.json({ error: 'Internal server error' }, { status: 500 })
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'POST /api/admin/pricing')
   }
 }
