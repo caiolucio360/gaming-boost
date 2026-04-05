@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>GameBoost — Retenção de Clientes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0A; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 32px; }
+  h1 { font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: #6B7280; margin-bottom: 32px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+  .card { background: #1A1A1A; border-radius: 12px; padding: 24px; border: 1px solid rgba(124,58,237,0.2); position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .card.simple::before { background: #10B981; }
+  .card.medium::before { background: #7C3AED; }
+  .card.full::before { background: #F59E0B; }
+  .card-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; font-weight: 700; }
+  .card.simple .card-tag { color: #10B981; }
+  .card.medium .card-tag { color: #A855F7; }
+  .card.full .card-tag { color: #F59E0B; }
+  .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: #9CA3AF; line-height: 1.6; margin-bottom: 16px; }
+  .mechanics { list-style: none; }
+  .mechanics li { font-size: 13px; color: #D1D5DB; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; gap: 8px; }
+  .mechanics li:last-child { border-bottom: none; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .simple .dot { background: #10B981; }
+  .medium .dot { background: #A855F7; }
+  .full .dot { background: #F59E0B; }
+  .impact { margin-top: 16px; padding: 10px 12px; border-radius: 8px; font-size: 12px; display: flex; justify-content: space-between; }
+  .simple .impact { background: rgba(16,185,129,0.1); color: #10B981; }
+  .medium .impact { background: rgba(168,85,247,0.1); color: #A855F7; }
+  .full .impact { background: rgba(245,158,11,0.1); color: #F59E0B; }
+  .impact span { font-weight: 700; }
+
+  /* Journey */
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #6B7280; margin-bottom: 16px; }
+  .journey { display: flex; align-items: stretch; gap: 0; margin-bottom: 40px; }
+  .step { flex: 1; background: #1A1A1A; padding: 18px; border: 1px solid rgba(255,255,255,0.06); position: relative; }
+  .step:first-child { border-radius: 10px 0 0 10px; }
+  .step:last-child { border-radius: 0 10px 10px 0; }
+  .step-num { font-size: 10px; color: #6B7280; margin-bottom: 4px; letter-spacing: 1px; }
+  .step-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .step-sub { font-size: 11px; color: #9CA3AF; line-height: 1.5; }
+  .step-now { border-bottom: 2px solid #EF4444; }
+  .step-now .step-title { color: #FCA5A5; }
+  .step-opp { border-bottom: 2px solid #7C3AED; }
+  .step-opp .step-title { color: #A855F7; }
+  .arrow { display: flex; align-items: center; color: #374151; font-size: 18px; padding: 0 2px; flex-shrink: 0; }
+  .label-now { font-size: 10px; color: #EF4444; font-weight: 700; }
+  .label-opp { font-size: 10px; color: #7C3AED; font-weight: 700; }
+  .legend { display: flex; gap: 20px; margin-bottom: 24px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9CA3AF; }
+  .legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>GameBoost · Estratégia de Retenção de Clientes</h1>
+
+<!-- Journey -->
+<p class="section-title">Jornada atual vs oportunidades</p>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div> Momento desperdiçado hoje</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7C3AED"></div> Oportunidade de retenção</div>
+</div>
+<div class="journey">
+  <div class="step step-now">
+    <div class="step-num">01</div>
+    <div class="step-title">Compra</div>
+    <div class="step-sub">Cliente paga PIX, pedido criado</div>
+  </div>
+  <div class="arrow">›</div>
+  <div class="step">
+    <div class="step-num">02</div>
+    <div class="step-title">Em progresso</div>
+    <div class="step-sub">Booster trabalhando</div>
+  </div>
+  <div class="arrow">›</div>
+  <div class="step step-opp">
+    <div class="step-num">03 ★</div>
+    <div class="step-title">Conclusão</div>
+    <div class="step-sub">Pico de satisfação — hoje: silêncio total</div>
+  </div>
+  <div class="arrow">›</div>
+  <div class="step step-opp">
+    <div class="step-num">04 ★</div>
+    <div class="step-title">Pós-conclusão</div>
+    <div class="step-sub">Quer continuar subindo — hoje: some da plataforma</div>
+  </div>
+  <div class="arrow">›</div>
+  <div class="step step-now">
+    <div class="step-num">05</div>
+    <div class="step-title">Churn</div>
+    <div class="step-sub">Volta só quando lembra que existe</div>
+  </div>
+</div>
+
+<!-- Approaches -->
+<p class="section-title">3 abordagens — escolha o nível de investimento</p>
+<div class="grid">
+
+  <div class="card simple">
+    <div class="card-tag">Opção A · Simples</div>
+    <h2>Captura do Momento</h2>
+    <p>Agir exatamente quando o cliente está mais satisfeito — na conclusão do pedido.</p>
+    <ul class="mechanics">
+      <li><span class="dot"></span>Email de conclusão com CTA "Continuar subindo" + próximo range pré-calculado</li>
+      <li><span class="dot"></span>Notificação in-app com oferta do próximo boost</li>
+      <li><span class="dot"></span>Desconto de 10% válido por 48h para o próximo pedido</li>
+    </ul>
+    <div class="impact">
+      <span>Impacto estimado</span>
+      <span>↑ 20–30% recompra</span>
+    </div>
+  </div>
+
+  <div class="card medium">
+    <div class="card-tag">Opção B · Médio · Recomendado</div>
+    <h2>Progressão + Urgência</h2>
+    <p>Criar senso de jornada contínua e urgência para não "perder o momento".</p>
+    <ul class="mechanics">
+      <li><span class="dot"></span>Tudo da Opção A</li>
+      <li><span class="dot"></span>Barra de progresso visual no dashboard ("Você está em 12k — próximo marco: 15k")</li>
+      <li><span class="dot"></span>Streak de fidelidade — desconto cresce a cada pedido consecutivo (5%, 10%, 15%)</li>
+      <li><span class="dot"></span>Email de reativação após 14 dias sem atividade</li>
+      <li><span class="dot"></span>Badge de cliente recorrente visível no perfil</li>
+    </ul>
+    <div class="impact">
+      <span>Impacto estimado</span>
+      <span>↑ 40–60% recompra</span>
+    </div>
+  </div>
+
+  <div class="card full">
+    <div class="card-tag">Opção C · Completo</div>
+    <h2>Sistema de Fidelidade</h2>
+    <p>Transformar o cliente em "colecionador" — ele quer acumular, subir de tier e ter status.</p>
+    <ul class="mechanics">
+      <li><span class="dot"></span>Tudo das Opções A e B</li>
+      <li><span class="dot"></span>Pontos por pedido (XP) — resgatáveis em desconto</li>
+      <li><span class="dot"></span>Tiers de cliente: Bronze → Prata → Ouro → Diamante</li>
+      <li><span class="dot"></span>Benefícios por tier: prioridade na fila, desconto fixo, booster dedicado</li>
+      <li><span class="dot"></span>Ranking público de clientes mais ativos</li>
+      <li><span class="dot"></span>Missões semanais ("Complete 2 boosts esse mês")</li>
+    </ul>
+    <div class="impact">
+      <span>Impacto estimado</span>
+      <span>↑ 80–120% LTV</span>
+    </div>
+  </div>
+
+</div>
+
+<p style="font-size:12px;color:#4B5563;text-align:center">★ Os momentos 03 e 04 são onde mora o dinheiro — qualquer opção captura eles</p>
+
+</body>
+</html>
