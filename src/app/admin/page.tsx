@@ -182,7 +182,7 @@ export default function AdminDashboardPage() {
                       <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} tickLine={false} axisLine={false}
                         tickFormatter={(v) => `R$${v}`} />
                       <Tooltip contentStyle={TOOLTIP_STYLE}
-                        formatter={(v: number) => [`R$ ${v.toFixed(2)}`, 'Receita']} />
+                        formatter={(v) => [`R$ ${Number(v).toFixed(2)}`, 'Receita']} />
                       <Area type="monotone" dataKey="receita" stroke="#7C3AED" strokeWidth={2}
                         fill="url(#gradReceita)" dot={false} activeDot={{ r: 4, fill: '#A855F7' }} />
                     </AreaChart>
@@ -208,7 +208,7 @@ export default function AdminDashboardPage() {
                         <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} tickLine={false} axisLine={false}
                           allowDecimals={false} />
                         <Tooltip contentStyle={TOOLTIP_STYLE}
-                          formatter={(v: number) => [v, 'Pedidos']} />
+                          formatter={(v) => [v, 'Pedidos']} />
                         <Bar dataKey="pedidos" fill="#7C3AED" radius={[3, 3, 0, 0]}
                           activeBar={{ fill: '#A855F7' }} />
                       </BarChart>
@@ -238,7 +238,7 @@ export default function AdminDashboardPage() {
                               ))}
                             </Pie>
                             <Tooltip contentStyle={TOOLTIP_STYLE}
-                              formatter={(v: number, _: string, props: { payload?: { name: string } }) => [v, props.payload?.name ?? '']} />
+                              formatter={(v, _name, props) => [v, (props as { payload?: { name: string } }).payload?.name ?? '']} />
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="flex-1 space-y-2">
@@ -273,7 +273,7 @@ export default function AdminDashboardPage() {
                       <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} tickLine={false} axisLine={false}
                         allowDecimals={false} />
                       <Tooltip contentStyle={TOOLTIP_STYLE}
-                        formatter={(v: number) => [v, 'Novos usuários']} />
+                        formatter={(v) => [v, 'Novos usuários']} />
                       <Bar dataKey="usuarios" fill="#10B981" radius={[3, 3, 0, 0]}
                         activeBar={{ fill: '#34D399' }} />
                     </BarChart>
