@@ -266,9 +266,43 @@ export async function sendOrderAcceptedEmail(
 export async function sendOrderCompletedEmail(
   to: string,
   orderId: number,
-  serviceName: string
+  serviceName: string,
+  retention?: {
+    currentRating: number
+    nextMilestone: number | null
+    progressPct: number
+    discountPct: number
+    gameMode: 'PREMIER' | 'GC'
+  }
 ): Promise<boolean> {
   const orderUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+  const retentionBlock = retention
+    ? `
+    <div style="margin:24px 0;padding:16px;background:#1A1A1A;border-radius:8px;border:1px solid rgba(124,58,237,0.3)">
+      <p style="color:#A855F7;font-size:13px;font-weight:700;margin:0 0 8px">PRÓXIMO MARCO</p>
+      ${retention.nextMilestone
+        ? `<p style="color:#fff;font-size:14px;margin:0 0 6px">Você está em <strong>${retention.currentRating}</strong> — faltam <strong>${retention.nextMilestone - retention.currentRating}</strong> pts para o próximo marco.</p>
+           <div style="background:#374151;border-radius:4px;height:6px;overflow:hidden">
+             <div style="background:#7C3AED;height:100%;width:${retention.progressPct}%"></div>
+           </div>`
+        : `<p style="color:#10B981;font-size:14px;margin:0">🏆 Você chegou ao rating máximo!</p>`
+      }
+      ${retention.discountPct > 0
+        ? `<p style="color:#D1D5DB;font-size:13px;margin:12px 0 0">Você tem <strong style="color:#A855F7">${Math.round(retention.discountPct * 100)}% de desconto</strong> disponível por 48h para o próximo pedido.</p>`
+        : `<p style="color:#D1D5DB;font-size:13px;margin:12px 0 0">Complete o próximo boost e ganhe 5% de desconto de fidelidade.</p>`
+      }
+    </div>
+    <div style="text-align:center;margin:20px 0">
+      <a href="${appUrl}/dashboard"
+         style="background:#7C3AED;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700">
+        ${retention.discountPct > 0 ? 'Garantir meu desconto agora' : 'Continuar subindo'}
+      </a>
+    </div>
+  `
+    : ''
 
   const html = getEmailTemplate(`
     <h2>🎉 Seu Boost Foi Concluído!</h2>
@@ -287,6 +321,7 @@ export async function sendOrderCompletedEmail(
     <p style="color: #666; font-size: 14px; margin-top: 30px;">
       Obrigado por escolher a GameBoost! 🚀
     </p>
+    ${retentionBlock}
   `)
 
   return sendEmail({
@@ -409,5 +444,60 @@ export async function sendOrderCancelledEmail(
     to,
     subject: `Pedido Cancelado - #${orderId}`,
     html,
+  })
+}
+
+// ============================================================================
+// TEMPLATE: Reactivation (retention campaign)
+// ============================================================================
+
+export async function sendReactivationEmail(
+  to: string,
+  data: {
+    currentRating: number
+    currentRatingLabel: string
+    nextMilestone: number
+    nextMilestoneLabel: string
+    discountPct: number
+    discountExpiresAt: Date
+  }
+): Promise<boolean> {
+  const discountLabel = Math.round(data.discountPct * 100)
+  const expiresFormatted = data.discountExpiresAt.toLocaleDateString('pt-BR')
+  const gap = data.nextMilestone - data.currentRating
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+  const subject = `Seus rivais estão subindo. Você parou em ${data.currentRatingLabel}.`
+
+  const html = `<!DOCTYPE html>
+<html>
+<body style="background:#0A0A0A;color:#fff;font-family:sans-serif;padding:32px;max-width:600px;margin:0 auto">
+  <h1 style="font-size:20px;font-weight:700;margin-bottom:16px">
+    Seus rivais estão subindo. Você parou em ${data.currentRatingLabel}.
+  </h1>
+  <p style="color:#9CA3AF;font-size:14px;line-height:1.6">
+    Você parou em ${data.currentRatingLabel} há 14 dias. Faltam só <strong style="color:#fff">${gap}</strong> para ${data.nextMilestoneLabel}.
+  </p>
+  <div style="margin:24px 0;padding:16px;background:#1A1A1A;border-radius:8px;border:1px solid rgba(124,58,237,0.3)">
+    <p style="color:#A855F7;font-weight:700;margin:0 0 8px;font-size:13px">OFERTA ESPECIAL</p>
+    <p style="color:#fff;font-size:16px;font-weight:700;margin:0 0 4px">${discountLabel}% de desconto</p>
+    <p style="color:#9CA3AF;font-size:13px;margin:0">Válido até ${expiresFormatted}</p>
+  </div>
+  <div style="text-align:center;margin:20px 0">
+    <a href="${appUrl}/dashboard"
+       style="background:#7C3AED;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
+      Garantir meu desconto agora
+    </a>
+  </div>
+</body>
+</html>`
+
+  const text = `Você parou em ${data.currentRatingLabel} há 14 dias. Faltam só ${gap} para ${data.nextMilestoneLabel}. Garanta ${discountLabel}% de desconto em: ${appUrl}/dashboard`
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+    text,
   })
 }

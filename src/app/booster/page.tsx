@@ -425,14 +425,6 @@ export default function BoosterDashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Cards de Estatísticas - Ganhos */}
-            <StatCard
-              title="Ganhos Totais"
-              value={formatPrice(stats.totalEarnings)}
-              description="Total recebido"
-              icon={DollarSign}
-              valueColor="text-brand-purple-light"
-            />
             <StatCard
               title="Ganhos Pendentes"
               value={formatPrice(stats.pendingEarnings)}

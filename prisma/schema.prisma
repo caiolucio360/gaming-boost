@@ -47,6 +47,13 @@ model User {
   steamProfileUrl    String?              // URL do perfil Steam
   steamId            String?              // Steam64 ID
   verificationCodes  VerificationCode[]   // Códigos de verificação
+  // Retention system fields
+  completedOrdersStreak         Int       @default(0)
+  streakLastOrderAt             DateTime?
+  currentDiscountPct            Float     @default(0)
+  emailMarketing                Boolean   @default(true)
+  reactivationDiscountPct       Float     @default(0)
+  reactivationDiscountExpiresAt DateTime?
 }
 
 
@@ -58,6 +65,8 @@ model Order {
   serviceType       ServiceType        @default(RANK_BOOST) // Tipo de serviço (Rank Boost ou Duo Boost)
   status            OrderStatus        @default(PENDING)
   total             Float
+  discountApplied   Boolean @default(false)
+  discountPct       Float   @default(0)
 
   // Metadados do pedido
   currentRank       String? // Rank/pontuação atual (ex: "10K", "Nível 5")

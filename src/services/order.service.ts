@@ -11,6 +11,8 @@ import { Result, Failure, success, failure, ErrorCode, PaginatedResult, paginate
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
 import { ChatService } from './chat.service'
+import { bestAvailableDiscount, updateUserStreak } from '@/lib/retention'
+import { getNextMilestone, calculateProgressPct } from '@/lib/retention-utils'
 
 /**
  * Erro de serviço tipado com código estruturado.
@@ -353,18 +355,53 @@ export const OrderService = {
         }
       }
 
+      // Fetch user discount fields
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          currentDiscountPct: true,
+          reactivationDiscountPct: true,
+          reactivationDiscountExpiresAt: true,
+        },
+      })
+
+      // Compute best available discount
+      const discountPct = user
+        ? bestAvailableDiscount(
+            user.currentDiscountPct ?? 0,
+            user.reactivationDiscountPct ?? 0,
+            user.reactivationDiscountExpiresAt ?? null
+          )
+        : 0
+      const discountedTotal = discountPct > 0
+        ? Math.round(total * (1 - discountPct) * 100) / 100
+        : total
+
       // Create order
       const order = await prisma.order.create({
         data: {
           userId,
           game,
           serviceType,
-          total,
+          total: discountedTotal,
+          discountApplied: discountPct > 0,
+          discountPct: discountPct,
           status: OrderStatus.PENDING,
           gameMode,
           ...rest,
         },
       })
+
+      // Clear reactivation discount if it was used
+      if (discountPct > 0 && (user?.reactivationDiscountPct ?? 0) > 0) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            reactivationDiscountPct: 0,
+            reactivationDiscountExpiresAt: null,
+          },
+        })
+      }
 
       return success(order as OrderWithRelations)
     } catch (error) {
@@ -635,32 +672,67 @@ export const OrderService = {
         console.error('Failed to wipe Steam credentials:', error)
       })
 
+      // Update streak (needed before email so we can pass discount data)
+      let streakResult = { newStreak: 0, leveledUp: false, newDiscountPct: 0 }
+      if (updatedOrder.user?.id) {
+        streakResult = await updateUserStreak(updatedOrder.user.id)
+      }
+
       // Send email notification (async, non-blocking)
       if (updatedOrder.user?.email) {
         const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
+        const currentRating = updatedOrder.targetRating ?? 0
+        const rawGameMode = updatedOrder.gameMode ?? ''
+        const emailGameMode: 'PREMIER' | 'GC' = rawGameMode.toUpperCase().includes('GC') ? 'GC' : 'PREMIER'
+        const nextMilestone = getNextMilestone(currentRating, emailGameMode)
+        const progressPct = nextMilestone
+          ? calculateProgressPct(currentRating, 0, nextMilestone)
+          : 100
         sendOrderCompletedEmail(
           updatedOrder.user.email,
           updatedOrder.id,
-          serviceName
+          serviceName,
+          {
+            currentRating,
+            nextMilestone,
+            progressPct,
+            discountPct: streakResult.newDiscountPct,
+            gameMode: emailGameMode,
+          }
         ).catch((error) => {
-          console.error('Failed to send order completed email:', error)
+          console.error('[completeOrder] Retention email error:', error)
         })
       }
 
-      // Create notification for client that order is complete
+      // Create retention-aware notifications
       if (updatedOrder.user?.id) {
-        const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
         prisma.notification.create({
           data: {
             userId: updatedOrder.user.id,
             type: 'ORDER_UPDATE',
-            title: 'Pedido Concluído!',
-            message: `Seu pedido #${orderId} de ${serviceName} foi concluído com sucesso! Avalie sua experiência.`,
-            metadata: JSON.stringify({ orderId }),
+            title: `Boost concluído! Você chegou a ${updatedOrder.targetRating ?? updatedOrder.targetRank} pts`,
+            message: streakResult.newDiscountPct > 0
+              ? `Seus rivais não param. Garanta ${Math.round(streakResult.newDiscountPct * 100)}% off no próximo boost — oferta válida por 48h.`
+              : `Continue subindo — contrate o próximo boost e ganhe 5% de desconto.`,
+            read: false,
           },
         }).catch((error) => {
           console.error('Failed to create notification for order completed:', error)
         })
+
+        if (streakResult.leveledUp) {
+          prisma.notification.create({
+            data: {
+              userId: updatedOrder.user.id,
+              type: 'SYSTEM',
+              title: `Fidelidade desbloqueada! ${Math.round(streakResult.newDiscountPct * 100)}% de desconto`,
+              message: `Você completou ${streakResult.newStreak} pedidos consecutivos. Seu desconto subiu para ${Math.round(streakResult.newDiscountPct * 100)}%!`,
+              read: false,
+            },
+          }).catch((error) => {
+            console.error('Failed to create streak unlock notification:', error)
+          })
+        }
       }
 
       return success(updatedOrder as OrderWithRelations)

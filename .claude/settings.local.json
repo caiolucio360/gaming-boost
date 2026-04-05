@@ -38,7 +38,14 @@
       "Bash(cmd /c \"gh --version\")",
       "Bash(cmd /c \"where gh\")",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" --version)",
-      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)"
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(reg query:*)",
+      "Bash(start \"C:\\\\Users\\\\caiol\\\\source\\\\repos\\\\boosT\\\\gaming-boost\\\\docs\\\\brainstorm-retention.html\")",
+      "Bash(start \"C:\\\\Users\\\\caiol\\\\source\\\\repos\\\\boosT\\\\gaming-boost\\\\docs\\\\brainstorm-retention-design.html\")",
+      "Bash(start chrome:*)",
+      "Bash(npx tsc:*)",
+      "Bash(bash /tmp/verify_task7.sh)",
+      "Bash(gh pr create --title 'feat: client retention system \\(streak discounts + progress bar + reactivation\\)' --body ':*)"
     ]
   }
 }
