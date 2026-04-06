@@ -86,6 +86,7 @@ export default function BoosterDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [activeTab, setActiveTab] = useState('available')
+  const initialTabSet = useRef(false)
   const [orderToAction, setOrderToAction] = useState<number | null>(null)
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false)
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false)
@@ -120,6 +121,16 @@ export default function BoosterDashboardPage() {
       fetchOrders(false)
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
+
+  // On first stats load, default to 'assigned' tab if booster has in-progress orders
+  useEffect(() => {
+    if (stats && !initialTabSet.current) {
+      initialTabSet.current = true
+      if (stats.assigned > 0) {
+        setActiveTab('assigned')
+      }
+    }
+  }, [stats])
 
   // Recarregar quando tab muda, mas sem mostrar loading completo
   useEffect(() => {

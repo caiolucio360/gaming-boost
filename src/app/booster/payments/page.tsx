@@ -45,8 +45,11 @@ interface Commission {
   order: {
     id: number
     status: string
+    serviceType: string
+    gameMode: string | null
+    currentRating: number | null
+    targetRating: number | null
     user: { id: number; email: string; name: string | null }
-    service: { id: number; name: string; game: string }
   }
 }
 
@@ -285,7 +288,7 @@ export default function BoosterPaymentsPage() {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                {commission.order.service.name}
+                                {commission.order.gameMode || commission.order.serviceType}
                               </CardTitle>
                               <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                 Pedido #{commission.order.id}

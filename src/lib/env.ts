@@ -20,6 +20,7 @@ const optionalButRecommended = [
     'RESEND_API_KEY',
     'EMAIL_FROM',
     'ORDER_TIMEOUT_HOURS',
+    'BLOB_READ_WRITE_TOKEN',
 ]
 
 export function validateEnv() {

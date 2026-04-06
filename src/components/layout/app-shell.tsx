@@ -63,7 +63,6 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
 const BOOSTER_NAV_ITEMS: NavItem[] = [
   { label: 'Meus Trabalhos', href: '/booster',          icon: Briefcase, exact: true },
   { label: 'Pagamentos',     href: '/booster/payments', icon: DollarSign },
-  { label: 'Meu Perfil',     href: '/profile',          icon: User },
 ]
 
 interface AppShellProps {
@@ -243,21 +242,6 @@ export function AppShell({ role, children }: AppShellProps) {
                 </div>
               </div>
             )}
-            <button
-              onClick={logout}
-              className={cn(
-                'group relative flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm text-brand-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors font-rajdhani',
-                collapsed && 'justify-center'
-              )}
-            >
-              <LogOut className="h-4 w-4 flex-shrink-0" />
-              {!collapsed && <span>Sair</span>}
-              {collapsed && (
-                <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-brand-black-light border border-brand-purple/50 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
-                  Sair
-                </span>
-              )}
-            </button>
           </div>
       </div>
     )
