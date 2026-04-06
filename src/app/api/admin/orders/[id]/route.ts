@@ -3,6 +3,10 @@ import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { ChatService } from '@/services'
+import { rateLimit, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+
+// Admin order mutations: isolated window, 20 req/min per IP
+const adminOrderMutationLimiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 })
 
 // GET - Buscar pedido específico
 export async function GET(
@@ -120,6 +124,14 @@ export async function PUT(
     const authResult = await verifyAdmin(request)
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponseFromResult(authResult)
+    }
+
+    const rateLimitResult = await adminOrderMutationLimiter.check(getIdentifier(request), 20)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { message: 'Muitas tentativas. Aguarde um momento.' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      )
     }
 
     const { id } = await params

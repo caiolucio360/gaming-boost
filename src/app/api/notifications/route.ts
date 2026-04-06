@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth } from '@/lib/auth-middleware'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,8 +47,7 @@ export async function GET(request: NextRequest) {
       unreadCount,
     })
   } catch (error) {
-    console.error('Error fetching notifications:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/notifications')
   }
 }
 
@@ -83,7 +83,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error updating notifications:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'PATCH /api/notifications')
   }
 }
