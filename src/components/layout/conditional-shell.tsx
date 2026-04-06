@@ -1,21 +1,30 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
 import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 
-// Only admin and booster routes get the app shell.
-// Client routes (/dashboard, /cart, /payment) intentionally keep the public header.
+// Admin and booster-scoped routes always get the app shell.
 const APP_ROUTES = ['/admin', '/booster']
 
-function isAppRoute(pathname: string) {
-  return APP_ROUTES.some((route) => pathname.startsWith(route))
+// Shared routes that also get the app shell for admin/booster users.
+const SHARED_ROUTES = ['/notifications', '/profile']
+
+function isAppRoute(pathname: string, role?: string) {
+  if (APP_ROUTES.some((route) => pathname.startsWith(route))) return true
+  if (SHARED_ROUTES.some((route) => pathname.startsWith(route))) {
+    return role === 'ADMIN' || role === 'BOOSTER'
+  }
+  return false
 }
 
 export function ConditionalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const appRoute = isAppRoute(pathname)
+  const { data: session } = useSession()
+  const role = session?.user?.role as string | undefined
+  const appRoute = isAppRoute(pathname, role)
 
   if (appRoute) {
     // App shell (admin/booster): fixed height, no browser scroll

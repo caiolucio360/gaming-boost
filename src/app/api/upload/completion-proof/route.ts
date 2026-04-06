@@ -34,6 +34,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('[UPLOAD] BLOB_READ_WRITE_TOKEN not configured')
+      return NextResponse.json(
+        { message: 'Serviço de upload não configurado. Contate o suporte.' },
+        { status: 503 }
+      )
+    }
+
     const filename = `completion-proofs/${authResult.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
 
     const blob = await put(filename, file, {

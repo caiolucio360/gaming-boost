@@ -35,7 +35,13 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           order: {
-            include: {
+            select: {
+              id: true,
+              status: true,
+              serviceType: true,
+              gameMode: true,
+              currentRating: true,
+              targetRating: true,
               user: {
                 select: {
                   id: true,
