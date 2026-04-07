@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
 import { apiGet } from '@/lib/api-client'
@@ -342,6 +343,13 @@ export default function DashboardPage() {
               currentDiscountPct={currentDiscountPct}
               gameMode="PREMIER"
             />
+            <div className="mt-3 flex justify-end">
+              <Link href="/dashboard/retencao">
+                <Button variant="ghost" size="sm" className="text-brand-purple-light hover:text-brand-purple-light text-sm">
+                  Ver programa de fidelidade →
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
 
