@@ -10,6 +10,7 @@ import { OrderStatus } from '@/generated/prisma/client'
 import { Result, Failure, success, failure, ErrorCode, PaginatedResult, paginatedSuccess } from './types'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { sendOrderAcceptedEmail, sendOrderCompletedEmail } from '@/lib/email'
+import { encrypt } from '@/lib/encryption'
 import { ChatService } from './chat.service'
 import { bestAvailableDiscount, updateUserStreak } from '@/lib/retention'
 import { getNextMilestone, calculateProgressPct } from '@/lib/retention-utils'
@@ -61,6 +62,11 @@ interface CompleteOrderInput {
   orderId: number
   boosterId: number
   completionProofUrl: string
+}
+
+interface StartOrderInput {
+  orderId: number
+  boosterId: number
 }
 
 interface OrderWithRelations {
@@ -475,13 +481,37 @@ export const OrderService = {
           },
           data: {
             boosterId,
-            status: OrderStatus.IN_PROGRESS,
+            // Status stays PAID — booster must start separately after client shares credentials
           },
         })
 
         if (updateResult.count === 0) {
           throw new ServiceError(ErrorMessages.ORDER_ALREADY_ACCEPTED, ErrorCodes.ORDER_ALREADY_ACCEPTED)
         }
+
+        // Auto-create chat and post system message asking for credentials
+        const existingChat = await tx.orderChat.findUnique({ where: { orderId }, select: { id: true } })
+        let chatId: number
+        if (existingChat) {
+          chatId = existingChat.id
+        } else {
+          const newChat = await tx.orderChat.create({
+            data: { orderId, isActive: true },
+            select: { id: true },
+          })
+          chatId = newChat.id
+        }
+        await tx.orderMessage.create({
+          data: {
+            chatId,
+            authorId: boosterId,
+            content: encrypt(
+              'Olá! Sou seu booster. Por favor, envie suas credenciais Steam (usuário e senha) pelo botão abaixo para que eu possa iniciar o boost.'
+            ),
+            isEncrypted: true,
+            messageType: 'TEXT',
+          },
+        })
 
         // Create booster commission
         await tx.boosterCommission.create({
@@ -561,19 +591,6 @@ export const OrderService = {
         return failure('Erro ao buscar pedido atualizado', ErrorCodes.DATABASE_ERROR)
       }
 
-      // Send email notification (async, non-blocking)
-      if (updatedOrder.user?.email && updatedOrder.booster?.name) {
-        const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
-        sendOrderAcceptedEmail(
-          updatedOrder.user.email,
-          updatedOrder.id,
-          serviceName,
-          updatedOrder.booster.name
-        ).catch((error) => {
-          console.error('Failed to send order accepted email:', error)
-        })
-      }
-
       // Create notification for client that booster accepted order
       if (updatedOrder.user?.id && updatedOrder.booster?.name) {
         prisma.notification.create({
@@ -581,7 +598,7 @@ export const OrderService = {
             userId: updatedOrder.user.id,
             type: 'BOOSTER_ASSIGNED',
             title: 'Booster Atribuído!',
-            message: `${updatedOrder.booster.name} aceitou seu pedido #${orderId} e começará o boost em breve.`,
+            message: `${updatedOrder.booster.name} aceitou seu pedido #${orderId}. Envie suas credenciais Steam pelo chat para iniciar o boost.`,
             metadata: JSON.stringify({ orderId, boosterId }),
           },
         }).catch((error) => {
@@ -596,6 +613,101 @@ export const OrderService = {
       }
       console.error('Error accepting order:', error)
       return failure('Erro ao aceitar pedido', ErrorCodes.DATABASE_ERROR)
+    }
+  },
+
+  /**
+   * Booster starts an order - transitions PAID → IN_PROGRESS after credentials are shared
+   */
+  async startOrder(input: StartOrderInput): Promise<Result<OrderWithRelations>> {
+    const { orderId, boosterId } = input
+
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: { id: true, status: true, boosterId: true, userId: true, gameMode: true },
+      })
+
+      if (!order) {
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
+      }
+
+      if (order.boosterId !== boosterId) {
+        return failure(ErrorMessages.ORDER_ACCESS_DENIED, ErrorCodes.FORBIDDEN)
+      }
+
+      if (order.status !== OrderStatus.PAID) {
+        return failure(ErrorMessages.ORDER_NOT_PAID, ErrorCodes.INVALID_STATUS_TRANSITION)
+      }
+
+      // Validate that credentials have been shared in chat
+      const credResult = await ChatService.hasCredentials(orderId)
+      if (!credResult.success) {
+        return credResult as Failure
+      }
+      if (!credResult.data.hasCredentials) {
+        return failure(ErrorMessages.ORDER_CREDENTIALS_REQUIRED, ErrorCodes.CREDENTIALS_REQUIRED)
+      }
+
+      // Transition to IN_PROGRESS
+      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+        const updateResult = await tx.order.updateMany({
+          where: { id: orderId, status: OrderStatus.PAID, boosterId },
+          data: { status: OrderStatus.IN_PROGRESS },
+        })
+
+        if (updateResult.count === 0) {
+          throw new ServiceError('Pedido não pôde ser iniciado', ErrorCodes.INVALID_STATUS_TRANSITION)
+        }
+
+        return tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+            booster: { select: { id: true, name: true, email: true } },
+          },
+        })
+      })
+
+      if (!updatedOrder) {
+        return failure('Erro ao buscar pedido atualizado', ErrorCodes.DATABASE_ERROR)
+      }
+
+      // Send email to client that boost has started
+      if (updatedOrder.user?.email && updatedOrder.booster?.name) {
+        const serviceName = updatedOrder.gameMode ? `CS2 ${updatedOrder.gameMode}` : 'Boost CS2'
+        sendOrderAcceptedEmail(
+          updatedOrder.user.email,
+          updatedOrder.id,
+          serviceName,
+          updatedOrder.booster.name
+        ).catch((error) => {
+          console.error('Failed to send order started email:', error)
+        })
+      }
+
+      // Notify client
+      if (updatedOrder.user?.id) {
+        prisma.notification.create({
+          data: {
+            userId: updatedOrder.user.id,
+            type: 'ORDER_UPDATE',
+            title: 'Boost Iniciado!',
+            message: `Seu pedido #${orderId} foi iniciado. Acompanhe o progresso pelo chat.`,
+            metadata: JSON.stringify({ orderId }),
+          },
+        }).catch((error) => {
+          console.error('Failed to create start notification:', error)
+        })
+      }
+
+      return success(updatedOrder as OrderWithRelations)
+    } catch (error: unknown) {
+      if (error instanceof ServiceError) {
+        return failure(error.message, error.code)
+      }
+      console.error('Error starting order:', error)
+      return failure('Erro ao iniciar pedido', ErrorCodes.DATABASE_ERROR)
     }
   },
 
