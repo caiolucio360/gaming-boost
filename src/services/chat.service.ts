@@ -118,7 +118,8 @@ export const ChatService = {
   },
 
   /**
-   * Check if chat is active for the order (only IN_PROGRESS orders can chat)
+   * Check if chat is active for the order
+   * Enabled for IN_PROGRESS orders and PAID orders with an assigned booster (credentials exchange phase)
    */
   async isChatEnabled(orderId: number): Promise<Result<{ enabled: boolean; reason?: string }>> {
     try {
@@ -131,20 +132,24 @@ export const ChatService = {
         return failure('Pedido não encontrado', 'ORDER_NOT_FOUND')
       }
 
-      // Chat is only enabled for IN_PROGRESS orders
+      // Chat enabled for IN_PROGRESS orders
       if (order.status === OrderStatus.IN_PROGRESS) {
         return success({ enabled: true })
       }
 
-      // Chat can be read but not written for COMPLETED orders
+      // Chat enabled for PAID orders when a booster has been assigned (credentials exchange phase)
+      if (order.status === OrderStatus.PAID && order.boosterId !== null) {
+        return success({ enabled: true })
+      }
+
+      // Chat readable but not writable for COMPLETED orders
       if (order.status === OrderStatus.COMPLETED) {
         return success({ enabled: false, reason: 'Pedido concluído. O chat está desabilitado.' })
       }
 
-      // Not available for other statuses
       return success({
         enabled: false,
-        reason: 'Chat disponível apenas para pedidos em andamento.'
+        reason: 'Chat disponível apenas para pedidos em andamento.',
       })
     } catch (error) {
       console.error('Error checking chat status:', error)
@@ -495,6 +500,37 @@ export const ChatService = {
     } catch (error) {
       console.error('Error wiping Steam credentials:', error)
       return failure('Erro ao remover credenciais', 'DATABASE_ERROR')
+    }
+  },
+
+  /**
+   * Check if the client has shared Steam credentials in the order's chat
+   * Used by startOrder to ensure credentials are available before transitioning to IN_PROGRESS
+   */
+  async hasCredentials(orderId: number): Promise<Result<{ hasCredentials: boolean }>> {
+    try {
+      const chat = await prisma.orderChat.findUnique({
+        where: { orderId },
+        select: { id: true },
+      })
+
+      if (!chat) {
+        return success({ hasCredentials: false })
+      }
+
+      const credMessage = await prisma.orderMessage.findFirst({
+        where: {
+          chatId: chat.id,
+          messageType: 'STEAM_CREDENTIALS',
+          isExpired: false,
+        },
+        select: { id: true },
+      })
+
+      return success({ hasCredentials: !!credMessage })
+    } catch (error) {
+      console.error('Error checking credentials:', error)
+      return failure('Erro ao verificar credenciais', 'DATABASE_ERROR')
     }
   },
 }
