@@ -405,27 +405,35 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
       {/* Message Input */}
       <div className="p-4 border-t border-brand-purple/20 flex-shrink-0">
         {chatEnabled ? (
-          <div className="space-y-2">
-            {/* Credential form toggle for CLIENT */}
-            {user?.role === 'CLIENT' && (
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setCredentialMode((v) => !v)}
-                  className="flex items-center gap-1.5 text-xs text-brand-purple-light hover:text-brand-purple transition-colors"
-                >
-                  <KeyRound className="h-3.5 w-3.5" />
-                  {credentialMode ? 'Cancelar credenciais' : 'Enviar credenciais Steam'}
-                </button>
-              </div>
+          <div className="space-y-3">
+            {/* Credential CTA for CLIENT — prominent, full-width */}
+            {user?.role === 'CLIENT' && !credentialMode && (
+              <button
+                type="button"
+                onClick={() => setCredentialMode(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/10 border border-yellow-500/50 hover:border-yellow-400/80 hover:from-yellow-500/30 hover:to-amber-500/20 transition-all group"
+              >
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center group-hover:bg-yellow-500/30 transition-colors">
+                  <KeyRound className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-bold text-yellow-300 font-orbitron leading-tight" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    Enviar Credenciais Steam
+                  </p>
+                  <p className="text-xs text-yellow-500/80 mt-0.5">
+                    Necessário para o booster iniciar o boost
+                  </p>
+                </div>
+                <Send className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+              </button>
             )}
 
             {credentialMode && user?.role === 'CLIENT' ? (
               <form onSubmit={handleSendCredentials} className="space-y-2">
-                <div className="p-3 bg-brand-purple/5 border border-brand-purple/30 rounded-lg space-y-2">
-                  <p className="text-xs text-brand-purple-light flex items-center gap-1.5">
+                <div className="p-3 bg-yellow-500/5 border border-yellow-500/30 rounded-lg space-y-2">
+                  <p className="text-xs text-yellow-400 flex items-center gap-1.5 font-semibold">
                     <Shield className="h-3.5 w-3.5" />
-                    Credenciais criptografadas — apenas o booster designado poderá ver
+                    Criptografado — só o booster designado poderá ver
                   </p>
                   <Input
                     value={credUsername}
@@ -445,20 +453,31 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     autoComplete="new-password"
                   />
                 </div>
-                <Button
-                  type="submit"
-                  disabled={sending || !credUsername.trim() || !credPassword.trim()}
-                  className="w-full bg-gradient-to-r from-brand-purple-dark to-brand-purple-dark hover:from-brand-purple hover:to-brand-purple-dark text-white"
-                >
-                  {sending ? (
-                    <LoadingSpinner size="sm" />
-                  ) : (
-                    <>
-                      <Shield className="h-4 w-4 mr-2" />
-                      Enviar credenciais com segurança
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { setCredentialMode(false); setCredUsername(''); setCredPassword('') }}
+                    className="text-gray-400 hover:text-white"
+                    disabled={sending}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={sending || !credUsername.trim() || !credPassword.trim()}
+                    className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+                  >
+                    {sending ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      <>
+                        <Shield className="h-4 w-4 mr-2" />
+                        Enviar com segurança
+                      </>
+                    )}
+                  </Button>
+                </div>
               </form>
             ) : (
               <form onSubmit={handleSendMessage} className="flex gap-3">
