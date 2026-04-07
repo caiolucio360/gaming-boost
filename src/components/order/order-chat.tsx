@@ -155,9 +155,11 @@ interface OrderChatData {
 interface OrderChatProps {
   orderId: number
   className?: string
+  /** Called whenever messages are fetched. Receives the latest messages array. */
+  onMessagesUpdate?: (messages: ChatMessage[]) => void
 }
 
-export function OrderChat({ orderId, className }: OrderChatProps) {
+export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatProps) {
   const { user } = useAuth()
   const [chat, setChat] = useState<OrderChatData | null>(null)
   const [chatEnabled, setChatEnabled] = useState(false)
@@ -180,6 +182,9 @@ export function OrderChat({ orderId, className }: OrderChatProps) {
         setChatEnabled(data.chatEnabled)
         setDisabledReason(data.disabledReason)
         setLastUpdate(new Date())
+        if (data.chat?.messages && onMessagesUpdate) {
+          onMessagesUpdate(data.chat.messages)
+        }
       }
     } catch (error) {
       console.error('Erro ao buscar chat:', error)

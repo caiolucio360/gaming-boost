@@ -29,6 +29,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
+import { OrderChat } from '@/components/order/order-chat'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { showSuccess, showError, handleApiError } from '@/lib/toast'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
@@ -454,6 +455,22 @@ export default function DashboardPage() {
                       )}
 
                     </div>
+
+                    {(order.status === 'PAID' && order.boosterId) && (
+                      <div className="mt-4 border-t border-white/10 pt-4">
+                        <div className="mb-3 p-3 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
+                          <p className="text-brand-purple-light text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            Seu booster está pronto! Envie suas credenciais Steam pelo chat para iniciar o boost.
+                          </p>
+                        </div>
+                        <OrderChat orderId={order.id} />
+                      </div>
+                    )}
+                    {order.status === 'IN_PROGRESS' && (
+                      <div className="mt-4 border-t border-white/10 pt-4">
+                        <OrderChat orderId={order.id} />
+                      </div>
+                    )}
                   </div>
                 </DashboardCard>
               )
