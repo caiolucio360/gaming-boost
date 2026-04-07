@@ -40,6 +40,8 @@ export const ErrorCodes = {
   INSUFFICIENT_BALANCE: 'INSUFFICIENT_BALANCE',
   CHAT_ACCESS_DENIED: 'CHAT_ACCESS_DENIED',
   CHAT_DISABLED: 'CHAT_DISABLED',
+  PIX_KEY_REQUIRED: 'PIX_KEY_REQUIRED',
+  CREDENTIALS_REQUIRED: 'CREDENTIALS_REQUIRED',
 
   // External Services
   PAYMENT_PROVIDER_ERROR: 'PAYMENT_PROVIDER_ERROR',
@@ -95,6 +97,8 @@ export const ErrorStatusMap: Record<string, number> = {
   [ErrorCodes.INSUFFICIENT_BALANCE]: 400,
   [ErrorCodes.CHAT_ACCESS_DENIED]: 403,
   [ErrorCodes.CHAT_DISABLED]: 400,
+  [ErrorCodes.PIX_KEY_REQUIRED]: 400,
+  [ErrorCodes.CREDENTIALS_REQUIRED]: 400,
 
   // External
   [ErrorCodes.PAYMENT_PROVIDER_ERROR]: 502,
@@ -156,6 +160,9 @@ export const ErrorMessages = {
   ORDER_NOT_BELONGS_TO_USER: 'Pedido não pertence ao usuário',
   ORDER_NOT_CANCELLABLE: 'Este pedido não pode ser cancelado',
   ORDER_ACCESS_DENIED: 'Acesso negado. Este pedido não foi atribuído a você.',
+  ORDER_PIX_KEY_REQUIRED: 'Cadastre sua chave PIX antes de aceitar pedidos.',
+  ORDER_CREDENTIALS_REQUIRED: 'Aguardando credenciais Steam do cliente para iniciar o boost.',
+  BOOSTER_START_ORDER_FAILED: 'Não foi possível iniciar o pedido. Por favor, tente novamente.',
 
   // ---- Payments ----
   PAYMENT_NOT_FOUND: 'Pagamento não encontrado',

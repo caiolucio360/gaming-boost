@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +17,7 @@ import {
   Upload,
   ImageIcon,
   X,
+  RefreshCw,
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatCard } from '@/components/common/stat-card'
@@ -29,6 +31,8 @@ import { ActionButton } from '@/components/common/action-button'
 import { RefreshingBanner } from '@/components/common/refreshing-banner'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
+import { showSuccess, showError } from '@/lib/toast'
+import { OrderChat } from '@/components/order/order-chat'
 import {
   Alert,
   AlertDescription,
@@ -98,6 +102,9 @@ export default function BoosterDashboardPage() {
   const [proofPreview, setProofPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [hasPixKey, setHasPixKey] = useState<boolean | null>(null)
+  const [hasCredentialsMap, setHasCredentialsMap] = useState<Record<number, boolean>>({})
+  const [startingOrderId, setStartingOrderId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -119,6 +126,10 @@ export default function BoosterDashboardPage() {
   useEffect(() => {
     if (user && user.role === 'BOOSTER') {
       fetchOrders(false)
+      fetch('/api/user/bank-account')
+        .then((r) => r.json())
+        .then((data) => setHasPixKey(!!data.pixKey))
+        .catch(() => setHasPixKey(true)) // fail open — server will enforce
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
 
@@ -207,6 +218,24 @@ export default function BoosterDashboardPage() {
         setStats(data.stats || null)
       }
     }, isRefresh)
+  }
+
+  const handleStartOrder = async (orderId: number) => {
+    setStartingOrderId(orderId)
+    try {
+      const res = await fetch(`/api/booster/orders/${orderId}/start`, { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        showSuccess('Boost iniciado com sucesso!')
+        fetchOrders(true)
+      } else {
+        showError(data.message || 'Erro ao iniciar pedido')
+      }
+    } catch {
+      showError('Erro ao iniciar pedido')
+    } finally {
+      setStartingOrderId(null)
+    }
   }
 
   const handleAcceptOrderClick = (orderId: number) => {
@@ -370,6 +399,24 @@ export default function BoosterDashboardPage() {
           title="TRABALHOS"
           description={`Olá, ${user.name || user.email}! Gerencie seus pedidos e ganhos.`}
         />
+
+        {hasPixKey === false && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/40 rounded-xl flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-yellow-300 font-semibold font-orbitron text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                CHAVE PIX NÃO CADASTRADA
+              </p>
+              <p className="text-yellow-400/80 text-sm font-rajdhani mt-0.5" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Você precisa cadastrar sua chave PIX para aceitar pedidos e receber pagamentos.
+              </p>
+            </div>
+            <Link href="/profile">
+              <Button size="sm" className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold flex-shrink-0">
+                Cadastrar PIX
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
@@ -539,6 +586,8 @@ export default function BoosterDashboardPage() {
                             onClick={() => handleAcceptOrderClick(order.id)}
                             icon={Check}
                             className="w-full"
+                            disabled={!hasPixKey}
+                            title={!hasPixKey ? 'Cadastre sua chave PIX no perfil para aceitar pedidos' : undefined}
                           >
                             Aceitar Pedido
                           </ActionButton>
@@ -616,14 +665,56 @@ export default function BoosterDashboardPage() {
                             <OrderInfoItem label="Data do Pedido" value={formatDate(order.createdAt)} />
                           </div>
 
-                          <ActionButton
-                            onClick={() => handleCompleteOrderClick(order.id)}
-                            variant="success"
-                            icon={CheckCircle2}
-                            className="w-full"
-                          >
-                            Marcar como Concluído
-                          </ActionButton>
+                          {/* Chat for PAID orders awaiting credentials */}
+                          {order.status === 'PAID' && (
+                            <div className="border-t border-white/10 pt-4">
+                              <div className="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                <p className="text-yellow-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                  Aguardando credenciais Steam do cliente. Peça ao cliente para enviar pelo chat abaixo.
+                                </p>
+                              </div>
+                              <OrderChat
+                                orderId={order.id}
+                                onMessagesUpdate={(messages) => {
+                                  const hasCreds = messages.some(
+                                    (m) => m.messageType === 'STEAM_CREDENTIALS' && !m.isExpired
+                                  )
+                                  setHasCredentialsMap((prev) => ({ ...prev, [order.id]: hasCreds }))
+                                }}
+                              />
+                              <div className="mt-3 flex justify-end">
+                                <Button
+                                  onClick={() => handleStartOrder(order.id)}
+                                  disabled={!hasCredentialsMap[order.id] || startingOrderId === order.id}
+                                  className="bg-green-600 hover:bg-green-500 text-white font-bold disabled:opacity-40"
+                                  title={!hasCredentialsMap[order.id] ? 'Aguardando credenciais Steam do cliente' : undefined}
+                                >
+                                  {startingOrderId === order.id ? (
+                                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Iniciando...</>
+                                  ) : (
+                                    'Iniciar Boost'
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Chat + complete button for IN_PROGRESS orders */}
+                          {order.status === 'IN_PROGRESS' && (
+                            <>
+                              <div className="border-t border-white/10 pt-4">
+                                <OrderChat orderId={order.id} />
+                              </div>
+                              <ActionButton
+                                onClick={() => handleCompleteOrderClick(order.id)}
+                                variant="success"
+                                icon={CheckCircle2}
+                                className="w-full"
+                              >
+                                Marcar como Concluído
+                              </ActionButton>
+                            </>
+                          )}
 
                           {/* Completion proof dialog */}
                           <Dialog
