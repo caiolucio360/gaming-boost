@@ -20,6 +20,7 @@ import {
   Briefcase,
   DollarSign,
   User,
+  Wallet,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
@@ -50,6 +51,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: 'Boosters',     href: '/admin/boosters',    icon: Shield },
   { label: 'Precificação', href: '/admin/pricing',     icon: SlidersHorizontal },
   { label: 'Pagamentos',   href: '/admin/payments',    icon: CreditCard },
+  { label: 'Saques',       href: '/admin/withdraw',    icon: Wallet },
   { label: 'Comissões',    href: '/admin/commissions', icon: Percent },
   {
     separator: true,
@@ -63,6 +65,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
 const BOOSTER_NAV_ITEMS: NavItem[] = [
   { label: 'Meus Trabalhos', href: '/booster',          icon: Briefcase, exact: true },
   { label: 'Pagamentos',     href: '/booster/payments', icon: DollarSign },
+  { label: 'Saques',         href: '/booster/withdraw', icon: Wallet },
 ]
 
 interface AppShellProps {
