@@ -435,6 +435,15 @@ export const OrderService = {
         return failure(ErrorMessages.ORDER_ALREADY_ACCEPTED, ErrorCodes.ORDER_ALREADY_ACCEPTED)
       }
 
+      // Check if booster has a PIX key registered
+      const boosterUser = await prisma.user.findUnique({
+        where: { id: boosterId },
+        select: { pixKey: true },
+      })
+      if (!boosterUser?.pixKey) {
+        return failure(ErrorMessages.ORDER_PIX_KEY_REQUIRED, ErrorCodes.PIX_KEY_REQUIRED)
+      }
+
       // Check if booster already has an active order
       const activeCheck = await this.boosterHasActiveOrder(boosterId)
       if (!activeCheck.success) {
