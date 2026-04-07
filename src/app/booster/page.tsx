@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -98,6 +99,7 @@ export default function BoosterDashboardPage() {
   const [proofPreview, setProofPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [hasPixKey, setHasPixKey] = useState<boolean | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -119,6 +121,10 @@ export default function BoosterDashboardPage() {
   useEffect(() => {
     if (user && user.role === 'BOOSTER') {
       fetchOrders(false)
+      fetch('/api/user/bank-account')
+        .then((r) => r.json())
+        .then((data) => setHasPixKey(!!data.pixKey))
+        .catch(() => setHasPixKey(true)) // fail open — server will enforce
     }
   }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
 
@@ -371,6 +377,24 @@ export default function BoosterDashboardPage() {
           description={`Olá, ${user.name || user.email}! Gerencie seus pedidos e ganhos.`}
         />
 
+        {hasPixKey === false && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/40 rounded-xl flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-yellow-300 font-semibold font-orbitron text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                CHAVE PIX NÃO CADASTRADA
+              </p>
+              <p className="text-yellow-400/80 text-sm font-rajdhani mt-0.5" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Você precisa cadastrar sua chave PIX para aceitar pedidos e receber pagamentos.
+              </p>
+            </div>
+            <Link href="/profile">
+              <Button size="sm" className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold flex-shrink-0">
+                Cadastrar PIX
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
           <SkeletonStatsGrid count={5} />
@@ -539,6 +563,8 @@ export default function BoosterDashboardPage() {
                             onClick={() => handleAcceptOrderClick(order.id)}
                             icon={Check}
                             className="w-full"
+                            disabled={!hasPixKey}
+                            title={!hasPixKey ? 'Cadastre sua chave PIX no perfil para aceitar pedidos' : undefined}
                           >
                             Aceitar Pedido
                           </ActionButton>
