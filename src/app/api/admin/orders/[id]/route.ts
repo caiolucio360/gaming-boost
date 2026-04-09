@@ -4,6 +4,13 @@ import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middl
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { ChatService } from '@/services'
 import { rateLimit, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { createApiErrorResponse } from '@/lib/api-errors'
+
+const UpdateOrderSchema = z.object({
+  status: z.enum(['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  boosterId: z.union([z.number().int().positive(), z.null()]).optional(),
+})
 
 // Admin order mutations: isolated window, 20 req/min per IP
 const adminOrderMutationLimiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 })
@@ -107,11 +114,7 @@ export async function GET(
 
     return NextResponse.json({ order }, { status: 200 })
   } catch (error) {
-    console.error('Erro ao buscar pedido:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pedido' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/admin/orders/[id]')
   }
 }
 
@@ -136,7 +139,12 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { status, boosterId } = body
+
+    const validation = UpdateOrderSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json({ message: 'Dados inválidos' }, { status: 400 })
+    }
+    const { status, boosterId } = validation.data
 
     // Converter id para número
     const orderIdNum = parseInt(id, 10)
@@ -225,21 +233,12 @@ export async function PUT(
     }
 
     if (boosterId !== undefined) {
-      if (boosterId === null || boosterId === '') {
+      if (boosterId === null) {
         updateData.boosterId = null
       } else {
-        // Converter boosterId para número
-        const boosterIdNum = typeof boosterId === 'string' ? parseInt(boosterId, 10) : boosterId
-        if (isNaN(boosterIdNum)) {
-          return NextResponse.json(
-            { message: 'ID do booster inválido' },
-            { status: 400 }
-          )
-        }
-
         // Verificar se o booster existe e tem role BOOSTER
         const booster = await prisma.user.findUnique({
-          where: { id: boosterIdNum },
+          where: { id: boosterId },
           select: { role: true },
         })
 
@@ -257,7 +256,7 @@ export async function PUT(
           )
         }
 
-        updateData.boosterId = boosterIdNum
+        updateData.boosterId = boosterId
       }
     }
 
@@ -301,11 +300,7 @@ export async function PUT(
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao atualizar pedido:', error)
-    return NextResponse.json(
-      { message: 'Erro ao atualizar pedido' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_UPDATE_FAILED, 'PUT /api/admin/orders/[id]')
   }
 }
 

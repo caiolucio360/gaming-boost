@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,11 +72,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao buscar pedidos:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pedidos' },
-      { status: 500 }
-    )
+    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/admin/orders')
   }
 }
 

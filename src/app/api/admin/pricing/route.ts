@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || session.user.role !== 'ADMIN') {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      return Response.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || session.user.role !== 'ADMIN') {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      return Response.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -93,15 +93,15 @@ export async function POST(request: NextRequest) {
 
     // Validações
     if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price) {
-      return Response.json({ error: 'Missing required fields' }, { status: 400 })
+      return Response.json({ message: 'Missing required fields' }, { status: 400 })
     }
 
     if (rangeStart >= rangeEnd) {
-      return Response.json({ error: 'rangeStart must be less than rangeEnd' }, { status: 400 })
+      return Response.json({ message: 'rangeStart must be less than rangeEnd' }, { status: 400 })
     }
 
     if (price <= 0) {
-      return Response.json({ error: 'price must be greater than 0' }, { status: 400 })
+      return Response.json({ message: 'price must be greater than 0' }, { status: 400 })
     }
 
     // Check for overlapping ranges
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     if (overlapCheck.overlaps) {
       const existing = overlapCheck.overlappingRange!
       return Response.json({
-        error: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`
+        message: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`
       }, { status: 409 })
     }
 

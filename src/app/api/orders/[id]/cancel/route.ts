@@ -162,13 +162,21 @@ export async function POST(
     }
 
     // Update order and payment status atomically in a transaction
+    let metadata: Record<string, unknown> = {}
+    try {
+      if (order.metadata) {
+        metadata = JSON.parse(order.metadata as string)
+      }
+    } catch {
+      metadata = {}
+    }
     const { updatedOrder } = await db.$transaction(async (tx: any) => {
       const updated = await tx.order.update({
         where: { id: orderId },
         data: {
           status: 'CANCELLED',
           metadata: JSON.stringify({
-            ...(order.metadata ? JSON.parse(order.metadata as string) : {}),
+            ...metadata,
             cancelledAt: new Date().toISOString(),
             cancelledBy: 'CLIENT',
             cancellationReason,

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return Response.json(
         {
-          error: 'Muitas tentativas de recuperação de senha. Tente novamente mais tarde.'
+          message: 'Muitas tentativas de recuperação de senha. Tente novamente mais tarde.'
         },
         {
           status: 429,
@@ -64,7 +64,14 @@ export async function POST(request: NextRequest) {
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
 
     // Update user with reset token (store in metadata as JSON)
-    const metadata = user.metadata ? JSON.parse(user.metadata) : {}
+    let metadata: Record<string, unknown> = {}
+    try {
+      if (user.metadata) {
+        metadata = JSON.parse(user.metadata as string)
+      }
+    } catch {
+      metadata = {}
+    }
     metadata.resetToken = hashedToken
     metadata.resetTokenExpiry = resetTokenExpiry.toISOString()
 
@@ -97,7 +104,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in forgot-password:', error)
     return Response.json({
-      error: 'Erro ao processar solicitação. Tente novamente.'
+      message: 'Erro ao processar solicitação. Tente novamente.'
     }, { status: 500 })
   }
 }
