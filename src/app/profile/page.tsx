@@ -8,15 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
-import { 
+import { showSuccess, showError } from '@/lib/toast'
+import {
   User as UserIcon,
   Mail,
   Phone,
   Save,
-  AlertCircle,
-  CheckCircle2,
   Lock,
   CreditCard,
   Trash2,
@@ -60,11 +58,6 @@ export default function ProfilePage() {
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [alert, setAlert] = useState<{ 
-    title: string
-    description: string
-    variant: 'default' | 'destructive'
-  } | null>(null)
 
   // Form fields
   const [name, setName] = useState('')
@@ -92,11 +85,7 @@ export default function ProfilePage() {
         setName(data.user.name || '')
         setPhone(data.user.phone || '')
       } else {
-        setAlert({
-          title: 'Erro',
-          description: 'Não foi possível carregar o perfil',
-          variant: 'destructive',
-        })
+        showError('Erro', 'Não foi possível carregar o perfil')
       }
       
       // Buscar chave PIX se for booster ou admin
@@ -117,24 +106,15 @@ export default function ProfilePage() {
   const handleSave = async () => {
     try {
       setSaving(true)
-      setAlert(null)
 
       // Validações
       if (newPassword && newPassword !== confirmPassword) {
-        setAlert({
-          title: 'Erro',
-          description: 'As senhas não coincidem',
-          variant: 'destructive',
-        })
+        showError('Erro', 'As senhas não coincidem')
         return
       }
 
       if (newPassword && newPassword.length < 6) {
-        setAlert({
-          title: 'Erro',
-          description: 'A nova senha deve ter no mínimo 6 caracteres',
-          variant: 'destructive',
-        })
+        showError('Erro', 'A nova senha deve ter no mínimo 6 caracteres')
         return
       }
 
@@ -144,11 +124,7 @@ export default function ProfilePage() {
 
       if (newPassword) {
         if (!currentPassword) {
-          setAlert({
-            title: 'Erro',
-            description: 'Informe sua senha atual para alterar a senha',
-            variant: 'destructive',
-          })
+          showError('Erro', 'Informe sua senha atual para alterar a senha')
           return
         }
         body.currentPassword = currentPassword
@@ -188,11 +164,7 @@ export default function ProfilePage() {
         }
       }
 
-      setAlert({
-        title: 'Sucesso',
-        description: 'Perfil atualizado com sucesso!',
-        variant: 'default',
-      })
+      showSuccess('Perfil atualizado com sucesso!')
       
       // Limpar campos de senha
       setCurrentPassword('')
@@ -206,11 +178,7 @@ export default function ProfilePage() {
       await refreshUser()
     } catch (error: any) {
       console.error('Erro ao salvar perfil:', error)
-      setAlert({
-        title: 'Erro',
-        description: error.message || 'Erro ao salvar perfil',
-        variant: 'destructive',
-      })
+      showError('Erro', error.message || 'Erro ao salvar perfil')
     } finally {
       setSaving(false)
     }
@@ -220,7 +188,6 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     try {
       setSaving(true)
-      setAlert(null)
 
       const token = getAuthToken()
       if (!token) {
@@ -246,11 +213,7 @@ export default function ProfilePage() {
 
     } catch (error: any) {
       console.error('Erro ao excluir conta:', error)
-      setAlert({
-        title: 'Erro ao excluir conta',
-        description: error.message || 'Não foi possível excluir sua conta. Verifique se não há pedidos em andamento.',
-        variant: 'destructive',
-      })
+      showError('Erro ao excluir conta', error.message || 'Não foi possível excluir sua conta. Verifique se não há pedidos em andamento.')
     } finally {
       setSaving(false)
     }
@@ -283,21 +246,6 @@ export default function ProfilePage() {
           </div>
         ) : (
           <>
-
-        {alert && (
-          <Alert 
-            variant={alert.variant} 
-            className="mb-6"
-          >
-            {alert.variant === 'destructive' ? (
-              <AlertCircle className="h-4 w-4" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4" />
-            )}
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        )}
 
         <div className="grid gap-6">
           {/* Informações da Conta */}
