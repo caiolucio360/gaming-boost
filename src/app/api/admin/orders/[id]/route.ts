@@ -5,7 +5,6 @@ import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 import { ChatService } from '@/services'
 import { rateLimit, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { z } from 'zod'
-import { createApiErrorResponse } from '@/lib/api-errors'
 
 const UpdateOrderSchema = z.object({
   status: z.enum(['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
@@ -114,7 +113,8 @@ export async function GET(
 
     return NextResponse.json({ order }, { status: 200 })
   } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/admin/orders/[id]')
+    console.error('Error in GET /api/admin/orders/[id]:', error)
+    return NextResponse.json({ message: 'Erro ao buscar pedido' }, { status: 500 })
   }
 }
 
@@ -300,7 +300,8 @@ export async function PUT(
       { status: 200 }
     )
   } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_UPDATE_FAILED, 'PUT /api/admin/orders/[id]')
+    console.error('Error in PUT /api/admin/orders/[id]:', error)
+    return NextResponse.json({ message: 'Erro ao atualizar pedido' }, { status: 500 })
   }
 }
 
