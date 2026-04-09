@@ -33,11 +33,6 @@ import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { showSuccess, showError } from '@/lib/toast'
 import { OrderChat } from '@/components/order/order-chat'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert'
 import { useRealtime } from '@/hooks/use-realtime'
 
 interface Order {
@@ -96,7 +91,6 @@ export default function BoosterDashboardPage() {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false)
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
-  const [alert, setAlert] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null)
   // Proof upload state
   const [proofFile, setProofFile] = useState<File | null>(null)
   const [proofPreview, setProofPreview] = useState<string | null>(null)
@@ -255,30 +249,15 @@ export default function BoosterDashboardPage() {
       if (response.ok) {
         setAcceptDialogOpen(false)
         setOrderToAction(null)
-        setAlert({
-          title: 'Sucesso',
-          description: 'Pedido aceito com sucesso!',
-          variant: 'default',
-        })
-        fetchOrders(true) // Refresh sem loading completo
-        setTimeout(() => setAlert(null), 5000)
+        showSuccess('Pedido aceito com sucesso!')
+        fetchOrders(true)
       } else {
         const data = await response.json()
-        setAlert({
-          title: 'Erro',
-          description: data.message || 'Erro ao aceitar pedido',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 5000)
+        showError('Erro ao aceitar pedido', data.message || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao aceitar pedido:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao aceitar pedido',
-        variant: 'destructive',
-      })
-      setTimeout(() => setAlert(null), 5000)
+      showError('Erro ao aceitar pedido')
     } finally {
       setIsAccepting(false)
     }
@@ -321,12 +300,7 @@ export default function BoosterDashboardPage() {
 
       if (!uploadResponse.ok) {
         const uploadData = await uploadResponse.json()
-        setAlert({
-          title: 'Erro no upload',
-          description: uploadData.message || 'Erro ao enviar o print. Tente novamente.',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 6000)
+        showError('Erro no upload', uploadData.message || 'Erro ao enviar o print. Tente novamente.')
         return
       }
 
@@ -346,30 +320,15 @@ export default function BoosterDashboardPage() {
         setOrderToAction(null)
         setProofFile(null)
         setProofPreview(null)
-        setAlert({
-          title: 'Sucesso',
-          description: 'Pedido marcado como concluído!',
-          variant: 'default',
-        })
+        showSuccess('Pedido marcado como concluído!')
         fetchOrders(true)
-        setTimeout(() => setAlert(null), 5000)
       } else {
         const data = await response.json()
-        setAlert({
-          title: 'Erro',
-          description: data.message || 'Erro ao atualizar pedido',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 5000)
+        showError('Erro ao concluir pedido', data.message || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao concluir pedido:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao concluir pedido',
-        variant: 'destructive',
-      })
-      setTimeout(() => setAlert(null), 5000)
+      showError('Erro ao concluir pedido')
     } finally {
       setIsUploading(false)
       setIsCompleting(false)
@@ -388,12 +347,6 @@ export default function BoosterDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        {alert && (
-          <Alert variant={alert.variant} className="mb-4">
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        )}
         <PageHeader
           highlight="MEUS"
           title="TRABALHOS"

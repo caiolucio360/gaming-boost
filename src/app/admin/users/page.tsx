@@ -15,11 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert'
+import { showSuccess, showError } from '@/lib/toast'
 import {
   Users,
   Search,
@@ -72,7 +68,6 @@ export default function AdminUsersPage() {
   const [filterRole, setFilterRole] = useState<string>('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null)
-  const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
   const [profitShareDialogOpen, setProfitShareDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
@@ -109,22 +104,12 @@ export default function AdminUsersPage() {
           setUsers(data.users || [])
         } else {
           const errorData = await response.json().catch(() => ({ message: 'Erro ao buscar usuários' }))
-          setAlert({
-            title: 'Erro',
-            description: errorData.message || 'Erro ao buscar usuários',
-            variant: 'destructive',
-          })
-          setTimeout(() => setAlert(null), 5000)
+          showError('Erro ao buscar usuários', errorData.message || 'Tente novamente.')
         }
       }, isRefresh)
     } catch (error) {
       console.error('Erro ao buscar usuários:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao buscar usuários. Tente novamente.',
-        variant: 'destructive',
-      })
-      setTimeout(() => setAlert(null), 5000)
+      showError('Erro ao buscar usuários', 'Tente novamente.')
     }
   }
 
@@ -149,30 +134,15 @@ export default function AdminUsersPage() {
       if (response.ok) {
         setDeleteDialogOpen(false)
         setUserToDelete(null)
-        setAlert({
-          title: 'Sucesso',
-          description: 'Usuário deletado com sucesso!',
-          variant: 'default',
-        })
+        showSuccess('Usuário deletado com sucesso!')
         fetchUsers(true)
-        setTimeout(() => setAlert(null), 5000)
       } else {
         const data = await response.json()
-        setAlert({
-          title: 'Erro',
-          description: data.message || 'Erro ao deletar usuário',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 5000)
+        showError('Erro ao deletar usuário', data.message || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao deletar usuário:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao deletar usuário',
-        variant: 'destructive',
-      })
-      setTimeout(() => setAlert(null), 5000)
+      showError('Erro ao deletar usuário')
     }
   }
 
@@ -215,12 +185,6 @@ export default function AdminUsersPage() {
               Atualizando...
             </p>
           </div>
-        )}
-        {alert && (
-          <Alert variant={alert.variant} className="mb-4">
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
         )}
         {/* Header */}
         <div className="mb-8">
@@ -508,12 +472,7 @@ export default function AdminUsersPage() {
                 try {
                   const percentage = parseFloat(commissionPercentage) / 100
                   if (isNaN(percentage) || percentage < 0 || percentage > 1) {
-                    setAlert({
-                      title: 'Erro',
-                      description: 'Porcentagem deve ser um número entre 0 e 100',
-                      variant: 'destructive',
-                    })
-                    setTimeout(() => setAlert(null), 5000)
+                    showError('Erro de validação', 'Porcentagem deve ser um número entre 0 e 100')
                     return
                   }
 
@@ -527,31 +486,16 @@ export default function AdminUsersPage() {
                   })
 
                   if (response.ok) {
-                    setAlert({
-                      title: 'Sucesso',
-                      description: 'Comissão atualizada com sucesso!',
-                      variant: 'default',
-                    })
+                    showSuccess('Comissão atualizada com sucesso!')
                     setCommissionDialogOpen(false)
                     fetchUsers(false)
-                    setTimeout(() => setAlert(null), 5000)
                   } else {
                     const data = await response.json()
-                    setAlert({
-                      title: 'Erro',
-                      description: data.message || 'Erro ao atualizar comissão',
-                      variant: 'destructive',
-                    })
-                    setTimeout(() => setAlert(null), 5000)
+                    showError('Erro ao atualizar comissão', data.message || 'Tente novamente.')
                   }
                 } catch (error) {
                   console.error('Erro ao atualizar comissão:', error)
-                  setAlert({
-                    title: 'Erro',
-                    description: 'Erro ao atualizar comissão',
-                    variant: 'destructive',
-                  })
-                  setTimeout(() => setAlert(null), 5000)
+                  showError('Erro ao atualizar comissão')
                 }
               }}
               className="bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50"
@@ -610,12 +554,7 @@ export default function AdminUsersPage() {
                 try {
                   const share = parseFloat(profitShareValue)
                   if (isNaN(share) || share < 0) {
-                    setAlert({
-                      title: 'Erro',
-                      description: 'O valor deve ser um número positivo',
-                      variant: 'destructive',
-                    })
-                    setTimeout(() => setAlert(null), 5000)
+                    showError('Erro de validação', 'O valor deve ser um número positivo')
                     return
                   }
 
@@ -628,31 +567,16 @@ export default function AdminUsersPage() {
                   })
 
                   if (response.ok) {
-                    setAlert({
-                      title: 'Sucesso',
-                      description: 'Profit Share atualizado com sucesso!',
-                      variant: 'default',
-                    })
+                    showSuccess('Profit Share atualizado com sucesso!')
                     setProfitShareDialogOpen(false)
                     fetchUsers(false)
-                    setTimeout(() => setAlert(null), 5000)
                   } else {
                     const data = await response.json()
-                    setAlert({
-                      title: 'Erro',
-                      description: data.message || 'Erro ao atualizar Profit Share',
-                      variant: 'destructive',
-                    })
-                    setTimeout(() => setAlert(null), 5000)
+                    showError('Erro ao atualizar Profit Share', data.message || 'Tente novamente.')
                   }
                 } catch (error) {
                   console.error('Erro ao atualizar Profit Share:', error)
-                  setAlert({
-                    title: 'Erro',
-                    description: 'Erro ao atualizar Profit Share',
-                    variant: 'destructive',
-                  })
-                  setTimeout(() => setAlert(null), 5000)
+                  showError('Erro ao atualizar Profit Share')
                 }
               }}
               className="bg-brand-purple text-white font-rajdhani border border-transparent hover:border-white/50"
