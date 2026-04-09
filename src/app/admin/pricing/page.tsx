@@ -588,10 +588,10 @@ export default function PricingConfigPage() {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle className="font-orbitron">Atenção: Faixas de preço com lacunas</AlertTitle>
             <AlertDescription>
-              <p className="mb-2 text-red-200">
+              <p className="mb-2">
                 As seguintes faixas não possuem preço configurado e causarão erro no cálculo:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-red-300">
+              <ul className="list-disc list-inside space-y-1">
                 {gaps.map((gap, i) => (
                   <li key={i}>
                     {selectedMode === 'PREMIER'

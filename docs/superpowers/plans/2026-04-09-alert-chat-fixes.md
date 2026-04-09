@@ -1,302 +1,200 @@
-'use client'
+# Alert Standardization + Chat Fixes — Implementation Plan
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  Send,
-  MessageCircle,
-  Lock,
-  AlertCircle,
-  RefreshCw,
-  Shield,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Maximize2,
-  Minimize2,
-} from 'lucide-react'
-import { showError } from '@/lib/toast'
-import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { formatMessageTime } from '@/lib/utils'
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-interface ChatMessage {
-  id: number
-  content: string
-  messageType?: 'TEXT' | 'STEAM_CREDENTIALS'
-  isExpired?: boolean
-  authorId: number
-  author: {
-    id: number
-    name: string | null
-    image: string | null
-    role: string
-  }
-  createdAt: string
-}
+**Goal:** Padronizar cores internas do Alert em `/admin/pricing`, corrigir o bug de scroll da página no chat e adicionar botão de expandir o chat via Dialog.
 
-function SteamCredentialsCard({
-  content,
-  isExpired,
-  isOwnMessage,
-}: {
-  content: string
-  isExpired?: boolean
-  isOwnMessage: boolean
-}) {
-  const [revealed, setRevealed] = useState(false)
-  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+**Architecture:** Duas mudanças independentes. Task 1 é uma edição cirúrgica de classes CSS. Task 2 refatora `OrderChat` para (a) usar `ref` direto num `div` com `overflow-y-auto` no lugar de `ScrollArea` — eliminando o `scrollIntoView` que causava scroll da página — e (b) extrair o conteúdo do chat em componente interno `ChatContent` para ser reutilizado no Dialog sem duplicar estado ou polling.
 
-  useEffect(() => {
-    if (!revealed) return
-    setTimeLeft(30)
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(timer)
-          setRevealed(false)
-          return null
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [revealed])
+**Tech Stack:** Next.js 15, React, shadcn/ui (`Alert`, `Dialog`), Lucide React, Tailwind CSS v4.
 
-  if (isExpired) {
-    return (
-      <div className="rounded-2xl px-4 py-3 bg-gray-800/50 border border-gray-700/50">
-        <p className="text-sm text-gray-500 italic">[Credenciais removidas após conclusão do pedido]</p>
-      </div>
-    )
-  }
+---
 
-  let username = ''
-  let password = ''
-  try {
-    const parsed = JSON.parse(content)
-    username = parsed.username
-    password = parsed.password
-  } catch {
-    return (
-      <div className="rounded-2xl px-4 py-3 bg-gray-800/50 border border-gray-700/50">
-        <div className="flex items-center gap-2 mb-1">
-          <Shield className="h-4 w-4 text-brand-purple-light" />
-          <span className="text-xs font-semibold text-brand-purple-light">Credenciais Steam</span>
-        </div>
-        <p className="text-sm text-gray-500">{content}</p>
-      </div>
-    )
-  }
+## Mapa de arquivos
 
-  return (
-    <div
-      className={`rounded-2xl px-4 py-3 border ${
-        isOwnMessage
-          ? 'bg-brand-purple-dark/30 border-brand-purple/50'
-          : 'bg-gray-800/80 border-gray-700/50'
-      }`}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <Shield className="h-4 w-4 text-brand-purple-light" />
-        <span className="text-xs font-semibold text-brand-purple-light">Credenciais Steam</span>
-      </div>
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs text-gray-500 mb-0.5">Usuário</p>
-          <p className="text-sm text-white font-mono">{username}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-0.5">Senha</p>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-white font-mono">
-              {revealed ? password : '••••••••'}
-            </p>
-            <button
-              onClick={() => setRevealed((r) => !r)}
-              className="text-xs text-brand-purple-light hover:text-brand-purple underline flex items-center gap-1"
-            >
-              {revealed ? (
-                <>
-                  <EyeOff className="h-3 w-3" />
-                  {timeLeft !== null ? `Ocultar (${timeLeft}s)` : 'Ocultar'}
-                </>
-              ) : (
-                <>
-                  <Eye className="h-3 w-3" />
-                  Revelar
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+| Arquivo | Ação |
+|---|---|
+| `src/app/admin/pricing/page.tsx` | Modificar: ajustar classes de texto dentro do `AlertDescription` |
+| `src/components/order/order-chat.tsx` | Modificar: substituir `ScrollArea` por `div` com ref, remover `scrollIntoView`, extrair `ChatContent`, adicionar Dialog de expansão |
 
-interface OrderChatData {
-  id: number
-  orderId: number
-  isActive: boolean
-  messages: ChatMessage[]
-  order: {
-    id: number
-    status: string
-    userId: number
-    boosterId: number | null
-  }
-}
+---
 
-interface OrderChatProps {
-  orderId: number
-  className?: string
-  /** Called whenever messages are fetched. Receives the latest messages array. */
-  onMessagesUpdate?: (messages: ChatMessage[]) => void
-}
+## Task 1: Corrigir cores do Alert em `/admin/pricing`
 
-export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatProps) {
-  const { user } = useAuth()
-  const [chat, setChat] = useState<OrderChatData | null>(null)
-  const [chatEnabled, setChatEnabled] = useState(false)
-  const [disabledReason, setDisabledReason] = useState<string | null>(null)
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
-  const [credentialMode, setCredentialMode] = useState(false)
-  const [credUsername, setCredUsername] = useState('')
-  const [credPassword, setCredPassword] = useState('')
-  const [isExpanded, setIsExpanded] = useState(false)
+**Arquivo:** `src/app/admin/pricing/page.tsx` — linhas 590–602
+
+- [ ] **Passo 1: Abrir o arquivo e localizar o trecho**
+
+  No arquivo `src/app/admin/pricing/page.tsx`, localizar o bloco (aproximadamente linha 585):
+
+  ```tsx
+  {gaps.length > 0 && (
+    <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/50">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle className="font-orbitron">Atenção: Faixas de preço com lacunas</AlertTitle>
+      <AlertDescription>
+        <p className="mb-2 text-red-200">
+          As seguintes faixas não possuem preço configurado e causarão erro no cálculo:
+        </p>
+        <ul className="list-disc list-inside space-y-1 text-red-300">
+          {gaps.map((gap, i) => (
+            <li key={i}>
+              {selectedMode === 'PREMIER'
+                ? `${(gap.start / 1000).toFixed(0)}K - ${(gap.end / 1000).toFixed(0)}K`
+                : `Níveis ${gap.start} - ${gap.end}`}
+            </li>
+          ))}
+        </ul>
+      </AlertDescription>
+    </Alert>
+  )}
+  ```
+
+- [ ] **Passo 2: Substituir as classes de texto inconsistentes**
+
+  Substituir o trecho acima por:
+
+  ```tsx
+  {gaps.length > 0 && (
+    <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/50">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle className="font-orbitron">Atenção: Faixas de preço com lacunas</AlertTitle>
+      <AlertDescription>
+        <p className="mb-2">
+          As seguintes faixas não possuem preço configurado e causarão erro no cálculo:
+        </p>
+        <ul className="list-disc list-inside space-y-1">
+          {gaps.map((gap, i) => (
+            <li key={i}>
+              {selectedMode === 'PREMIER'
+                ? `${(gap.start / 1000).toFixed(0)}K - ${(gap.end / 1000).toFixed(0)}K`
+                : `Níveis ${gap.start} - ${gap.end}`}
+            </li>
+          ))}
+        </ul>
+      </AlertDescription>
+    </Alert>
+  )}
+  ```
+
+  **Racional:** O `Alert variant="destructive"` já aplica a cor vermelha correta via CSS variables do shadcn/ui. As classes `text-red-200` e `text-red-300` sobrescreviam a cor errada. Removendo-as, o Alert usa sua cor padrão consistente.
+
+- [ ] **Passo 3: Verificar visualmente no navegador**
+
+  Navegar para `/admin/pricing`, criar ou ter uma configuração com lacuna de faixas para acionar o alerta. Verificar que o texto dentro do Alert tem cor vermelha uniforme (não mais duas tonalidades diferentes).
+
+- [ ] **Passo 4: Commit**
+
+  ```bash
+  git add src/app/admin/pricing/page.tsx
+  git commit -m "fix: padronizar cores de texto dentro do Alert de lacunas de preço"
+  ```
+
+---
+
+## Task 2: Corrigir scroll e adicionar expansão no `OrderChat`
+
+**Arquivo:** `src/components/order/order-chat.tsx`
+
+### Contexto do problema
+
+1. **Bug de scroll:** A linha `messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })` escala pelo DOM até o primeiro ancestral scrollável — que pode ser a `window`. Isso puxa a página inteira para baixo a cada mensagem nova. A correção é usar um `ref` direto num `div` com `overflow-y-auto` e chamar `scrollTop = scrollHeight`.
+
+2. **ScrollArea:** O componente `ScrollArea` do Radix UI usa `overflow-hidden` no Root e um Viewport interno para scroll. Isso torna o scroll programático inconveniente. Substituímos por um `div` simples com `overflow-y-auto` — mesma UX, controle total.
+
+3. **Expansão via Dialog:** Extraímos o conteúdo (mensagens + input) para um componente interno `ChatContent`. O `OrderChat` gerencia todo o estado (mensagens, polling, envio) e renderiza `ChatContent` tanto no Card inline quanto dentro de um `Dialog` — sem duplicar estado ou fazer dois fetches simultâneos.
+
+### Passo a passo
+
+- [ ] **Passo 1: Atualizar imports**
+
+  No topo de `src/components/order/order-chat.tsx`, substituir o bloco de imports por:
+
+  ```tsx
+  'use client'
+
+  import { useState, useEffect, useRef, useCallback } from 'react'
+  import { useAuth } from '@/contexts/auth-context'
+  import { Button } from '@/components/ui/button'
+  import { Input } from '@/components/ui/input'
+  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+  import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+  import { Badge } from '@/components/ui/badge'
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+  } from '@/components/ui/dialog'
+  import {
+    Send,
+    MessageCircle,
+    Lock,
+    AlertCircle,
+    RefreshCw,
+    Shield,
+    Eye,
+    EyeOff,
+    KeyRound,
+    Maximize2,
+    Minimize2,
+  } from 'lucide-react'
+  import { showError } from '@/lib/toast'
+  import { LoadingSpinner } from '@/components/common/loading-spinner'
+  import { formatMessageTime } from '@/lib/utils'
+  ```
+
+  **O que mudou:** removido `ScrollArea` (não será mais usado), adicionados `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `Maximize2`, `Minimize2`.
+
+- [ ] **Passo 2: Substituir `messagesEndRef` por `scrollAreaRef`**
+
+  Localizar dentro da função `OrderChat` (logo abaixo das declarações de estado, linha ~174):
+
+  ```tsx
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  ```
+
+  Substituir por:
+
+  ```tsx
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [isExpanded, setIsExpanded] = useState(false)
+  ```
 
-  const fetchChat = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/orders/${orderId}/chat`)
-      if (response.ok) {
-        const data = await response.json()
-        setChat(data.chat)
-        setChatEnabled(data.chatEnabled)
-        setDisabledReason(data.disabledReason)
-        setLastUpdate(new Date())
-        if (data.chat?.messages && onMessagesUpdate) {
-          onMessagesUpdate(data.chat.messages)
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao buscar chat:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [orderId, onMessagesUpdate])
+- [ ] **Passo 3: Corrigir o efeito de scroll**
 
+  Localizar o `useEffect` que causava o bug (logo após o efeito do polling, linha ~203):
+
+  ```tsx
   useEffect(() => {
-    fetchChat()
-    const interval = setInterval(fetchChat, 3000)
-    return () => clearInterval(interval)
-  }, [fetchChat])
+    // Smooth scroll to bottom when messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chat?.messages])
+  ```
 
+  Substituir por:
+
+  ```tsx
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [chat?.messages])
+  ```
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!message.trim() || sending) return
+  **Racional:** `scrollTop = scrollHeight` opera apenas no elemento referenciado, sem escalar pelo DOM. O scroll fica contido dentro do chat.
 
-    setSending(true)
-    try {
-      const response = await fetch(`/api/orders/${orderId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: message }),
-      })
+- [ ] **Passo 4: Extrair `ChatContent` como componente interno**
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erro ao enviar mensagem')
-      }
+  Antes do `return` da função `OrderChat` (logo antes da linha com `if (loading) {`), adicionar o componente interno que renderiza mensagens + input. Esse componente recebe como props todos os dados e handlers já existentes no `OrderChat`:
 
-      setMessage('')
-      await fetchChat()
-    } catch (error) {
-      showError('Erro', error instanceof Error ? error.message : 'Erro ao enviar mensagem')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const handleSendCredentials = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!credUsername.trim() || !credPassword.trim() || sending) return
-
-    setSending(true)
-    try {
-      const response = await fetch(`/api/orders/${orderId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageType: 'STEAM_CREDENTIALS',
-          credentials: { username: credUsername, password: credPassword },
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erro ao enviar credenciais')
-      }
-
-      setCredUsername('')
-      setCredPassword('')
-      setCredentialMode(false)
-      await fetchChat()
-    } catch (error) {
-      showError('Erro', error instanceof Error ? error.message : 'Erro ao enviar credenciais')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return <Badge className="bg-red-500/20 text-red-300 border-red-500/50 text-xs ml-2">Admin</Badge>
-      case 'BOOSTER':
-        return <Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50 text-xs ml-2">Booster</Badge>
-      default:
-        return null
-    }
-  }
-
-  if (loading) {
-    return (
-      <Card className={`bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30 ${className || ''}`}>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center py-12">
-            <LoadingSpinner />
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
+  ```tsx
   const messages = chat?.messages || []
   const hasMessages = messages.length > 0
 
-  const chatContent = (
+  const ChatContent = () => (
     <>
+      {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
         <div
           ref={scrollAreaRef}
@@ -380,6 +278,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
         </div>
       </div>
 
+      {/* Message Input */}
       <div className="p-4 border-t border-brand-purple/20 flex-shrink-0">
         {chatEnabled ? (
           <div className="space-y-3">
@@ -498,6 +397,43 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
       </div>
     </>
   )
+  ```
+
+  **Nota:** `ChatContent` é definido dentro do corpo da função `OrderChat` para ter acesso ao closure (estado, handlers, refs, user). Ele não recebe props — lê diretamente do escopo pai.
+
+- [ ] **Passo 5: Substituir o `return` do `OrderChat`**
+
+  Localizar o bloco `return` atual do `OrderChat` (começa na linha ~291) e substituir **completamente** por:
+
+  ```tsx
+  const chatHeader = (
+    <CardHeader className="border-b border-brand-purple/20 pb-4 flex-shrink-0">
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <MessageCircle className="h-5 w-5 text-brand-purple-light" />
+          Chat do Pedido
+        </CardTitle>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-xs text-green-400">
+            <Lock className="h-3 w-3" />
+            <span>Criptografado</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <RefreshCw className="h-3 w-3" />
+            <span>{formatMessageTime(lastUpdate.toISOString())}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(true)}
+            className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            title="Expandir chat"
+          >
+            <Maximize2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </CardHeader>
+  )
 
   const securityNotice = (
     <div className="px-4 py-2 bg-brand-purple/5 border-b border-brand-purple/20 flex-shrink-0">
@@ -513,35 +449,10 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
   return (
     <>
       <Card className={`bg-gradient-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl border border-brand-purple/30 h-[500px] flex flex-col ${className || ''}`}>
-        <CardHeader className="border-b border-brand-purple/20 pb-4 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              <MessageCircle className="h-5 w-5 text-brand-purple-light" />
-              Chat do Pedido
-            </CardTitle>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-xs text-green-400">
-                <Lock className="h-3 w-3" />
-                <span>Criptografado</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <RefreshCw className="h-3 w-3" />
-                <span>{formatMessageTime(lastUpdate.toISOString())}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsExpanded(true)}
-                className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                title="Expandir chat"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </CardHeader>
+        {chatHeader}
         {securityNotice}
         <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
-          {chatContent}
+          <ChatContent />
         </CardContent>
       </Card>
 
@@ -571,10 +482,49 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
           </DialogHeader>
           {securityNotice}
           <div className="flex-1 overflow-hidden flex flex-col">
-            {chatContent}
+            <ChatContent />
           </div>
         </DialogContent>
       </Dialog>
     </>
   )
-}
+  ```
+
+  **Nota:** O `Dialog` reutiliza o mesmo `ChatContent` (mesmo escopo, mesmo estado, sem segundo polling).
+
+- [ ] **Passo 6: Remover o `CardContent` antigo e as linhas mortas**
+
+  Após as substituições dos passos anteriores, verificar que não restam referências a:
+  - `messagesEndRef` — remover qualquer ocorrência remanescente
+  - `<ScrollArea` — remover qualquer ocorrência remanescente
+  - O bloco original `const messages = ...` e `const hasMessages = ...` que estava logo antes do `return` — esses devem estar agora antes da definição de `ChatContent`
+
+- [ ] **Passo 7: Verificar no navegador**
+
+  1. Abrir `/dashboard` com um pedido `IN_PROGRESS`
+  2. Tentar scrollar as mensagens do chat — a página **não deve** se mover
+  3. Clicar no ícone `Maximize2` no header do chat — o Dialog deve abrir
+  4. Verificar que as mensagens aparecem no Dialog
+  5. Scrollar dentro do Dialog — a página **não deve** se mover
+  6. Clicar `Minimize2` ou clicar fora do Dialog para fechar
+  7. Repetir em `/booster` com um pedido aceito
+
+- [ ] **Passo 8: Commit**
+
+  ```bash
+  git add src/components/order/order-chat.tsx
+  git commit -m "fix: corrigir scroll da página no chat e adicionar modal de expansão"
+  ```
+
+---
+
+## Checklist de conclusão
+
+- [ ] `/admin/pricing`: cores internas do Alert padronizadas (sem `text-red-200`/`text-red-300` avulsos)
+- [ ] Chat: scrollar mensagens não move a página
+- [ ] Chat: botão `Maximize2` visível no header do card
+- [ ] Dialog abre ao clicar em `Maximize2`
+- [ ] Chat dentro do Dialog preenche `h-[85vh]` sem overflow externo
+- [ ] Botão `Minimize2` e clique fora fecham o Dialog
+- [ ] Nenhum toast substituído por Alert
+- [ ] Nenhum segundo polling criado (estado compartilhado via closure)
