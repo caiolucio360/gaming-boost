@@ -73,53 +73,35 @@ export async function GET(request: NextRequest) {
     }))
 
     // Calcular estatísticas
-    const stats = {
-      totalRevenue: await prisma.adminRevenue.aggregate({
-        where: {
-          adminId,
-          status: 'PAID',
-        },
-        _sum: {
-          amount: true,
-        },
+    const [
+      totalRevenueAgg,
+      pendingRevenueAgg,
+      totalRevenues,
+      paidRevenues,
+      pendingRevenues,
+    ] = await Promise.all([
+      prisma.adminRevenue.aggregate({
+        where: { adminId, status: 'PAID' },
+        _sum: { amount: true },
       }),
-      pendingRevenue: await prisma.adminRevenue.aggregate({
-        where: {
-          adminId,
-          status: 'PENDING',
-        },
-        _sum: {
-          amount: true,
-        },
+      prisma.adminRevenue.aggregate({
+        where: { adminId, status: 'PENDING' },
+        _sum: { amount: true },
       }),
-      totalRevenues: await prisma.adminRevenue.count({
-        where: {
-          adminId,
-        },
-      }),
-      paidRevenues: await prisma.adminRevenue.count({
-        where: {
-          adminId,
-          status: 'PAID',
-        },
-      }),
-      pendingRevenues: await prisma.adminRevenue.count({
-        where: {
-          adminId,
-          status: 'PENDING',
-        },
-      }),
-    }
+      prisma.adminRevenue.count({ where: { adminId } }),
+      prisma.adminRevenue.count({ where: { adminId, status: 'PAID' } }),
+      prisma.adminRevenue.count({ where: { adminId, status: 'PENDING' } }),
+    ])
 
     return NextResponse.json(
       {
         revenues,
         stats: {
-          totalRevenue: stats.totalRevenue._sum.amount || 0,
-          pendingRevenue: stats.pendingRevenue._sum.amount || 0,
-          totalRevenues: stats.totalRevenues,
-          paidRevenues: stats.paidRevenues,
-          pendingRevenues: stats.pendingRevenues,
+          totalRevenue: totalRevenueAgg._sum.amount || 0,
+          pendingRevenue: pendingRevenueAgg._sum.amount || 0,
+          totalRevenues,
+          paidRevenues,
+          pendingRevenues,
         },
         pagination: { total, limit, offset },
       },

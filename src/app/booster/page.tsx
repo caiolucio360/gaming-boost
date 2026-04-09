@@ -31,6 +31,7 @@ import { ActionButton } from '@/components/common/action-button'
 import { RefreshingBanner } from '@/components/common/refreshing-banner'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
+import { apiGet } from '@/lib/api-client'
 import { showSuccess, showError } from '@/lib/toast'
 import { OrderChat } from '@/components/order/order-chat'
 import {
@@ -126,8 +127,7 @@ export default function BoosterDashboardPage() {
   useEffect(() => {
     if (user && user.role === 'BOOSTER') {
       fetchOrders(false)
-      fetch('/api/user/bank-account')
-        .then((r) => r.json())
+      apiGet<{ pixKey?: string }>('/api/user/bank-account')
         .then((data) => setHasPixKey(!!data.pixKey))
         .catch(() => setHasPixKey(true)) // fail open — server will enforce
     }
