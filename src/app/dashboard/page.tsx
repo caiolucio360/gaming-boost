@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Package,
   X,
-  AlertCircle,
   Filter,
   Clock,
   CheckCircle2,
@@ -36,7 +35,6 @@ import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
@@ -50,11 +48,6 @@ export default function DashboardPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState<number | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
-  const [alert, setAlert] = useState<{ 
-    title: string
-    description: string
-    variant: 'default' | 'destructive'
-  } | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [currentDiscountPct, setCurrentDiscountPct] = useState<number>(0)
@@ -227,22 +220,6 @@ export default function DashboardPage() {
           title="DASHBOARD"
           description={`Olá, ${user.name || user.email}! Aqui estão suas solicitações de boost.`}
         />
-
-        {/* Removido RefreshingBanner para evitar piscar - atualizações são silenciosas */}
-        {alert && (
-          <Alert 
-            variant={alert.variant} 
-            className="mb-6"
-          >
-            {alert.variant === 'destructive' ? (
-              <AlertCircle className="h-4 w-4" />
-            ) : (
-              <Package className="h-4 w-4" />
-            )}
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        )}
 
         {/* Filtros */}
         <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 mb-6 overflow-hidden">
