@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { showSuccess, showError } from '@/lib/toast'
 import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
@@ -61,7 +61,6 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterStatus, setFilterStatus] = useState<string>('')
-  const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -95,30 +94,15 @@ export default function AdminOrdersPage() {
       })
 
       if (response.ok) {
-        setAlert({
-          title: 'Sucesso',
-          description: 'Status atualizado com sucesso!',
-          variant: 'default',
-        })
+        showSuccess('Status atualizado com sucesso!')
         fetchOrders()
-        setTimeout(() => setAlert(null), 5000)
       } else {
         const data = await response.json()
-        setAlert({
-          title: 'Erro',
-          description: data.message || 'Erro ao atualizar status',
-          variant: 'destructive',
-        })
-        setTimeout(() => setAlert(null), 5000)
+        showError('Erro ao atualizar status', data.message || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error)
-      setAlert({
-        title: 'Erro',
-        description: 'Erro ao atualizar status',
-        variant: 'destructive',
-      })
-      setTimeout(() => setAlert(null), 5000)
+      showError('Erro ao atualizar status')
     }
   }
 
@@ -134,12 +118,6 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        {alert && (
-          <Alert variant={alert.variant} className="mb-4">
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        )}
         <div className="mb-8">
           <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             <ArrowLeft className="mr-2 h-4 w-4" />
