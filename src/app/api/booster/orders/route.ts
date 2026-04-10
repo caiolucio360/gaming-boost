@@ -95,47 +95,25 @@ export async function GET(request: NextRequest) {
     ])
 
     // Calcular estatísticas
-    const stats = {
-      available: await prisma.order.count({
-        where: {
-          status: 'PAID',
-          boosterId: null,
-          game: 'CS2',
-        },
+    const [
+      available,
+      assigned,
+      completed,
+      totalEarningsAgg,
+      pendingEarningsAgg,
+    ] = await Promise.all([
+      prisma.order.count({ where: { status: 'PAID', boosterId: null, game: 'CS2' } }),
+      prisma.order.count({ where: { boosterId: userId, status: 'IN_PROGRESS', game: 'CS2' } }),
+      prisma.order.count({ where: { boosterId: userId, status: 'COMPLETED', game: 'CS2' } }),
+      prisma.boosterCommission.aggregate({
+        where: { boosterId: userId, status: 'PAID' },
+        _sum: { amount: true },
       }),
-      assigned: await prisma.order.count({
-        where: {
-          boosterId: userId,
-          status: 'IN_PROGRESS',
-          game: 'CS2',
-        },
+      prisma.boosterCommission.aggregate({
+        where: { boosterId: userId, status: 'PENDING' },
+        _sum: { amount: true },
       }),
-      completed: await prisma.order.count({
-        where: {
-          boosterId: userId,
-          status: 'COMPLETED',
-          game: 'CS2',
-        },
-      }),
-      totalEarnings: await prisma.boosterCommission.aggregate({
-        where: {
-          boosterId: userId,
-          status: 'PAID',
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-      pendingEarnings: await prisma.boosterCommission.aggregate({
-        where: {
-          boosterId: userId,
-          status: 'PENDING',
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-    }
+    ])
 
     // Map orders to include constructed service object
     const mappedOrders = orders.map((order: any) => {
@@ -162,11 +140,11 @@ export async function GET(request: NextRequest) {
       {
         orders: mappedOrders,
         stats: {
-          available: stats.available,
-          assigned: stats.assigned,
-          completed: stats.completed,
-          totalEarnings: stats.totalEarnings._sum.amount || 0,
-          pendingEarnings: stats.pendingEarnings._sum.amount || 0,
+          available,
+          assigned,
+          completed,
+          totalEarnings: totalEarningsAgg._sum.amount || 0,
+          pendingEarnings: pendingEarningsAgg._sum.amount || 0,
         },
         pagination: { total, limit, offset },
       },

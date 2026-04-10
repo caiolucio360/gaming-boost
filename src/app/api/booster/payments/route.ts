@@ -60,53 +60,35 @@ export async function GET(request: NextRequest) {
     ])
 
     // Calcular estatísticas
-    const stats = {
-      totalEarnings: await prisma.boosterCommission.aggregate({
-        where: {
-          boosterId,
-          status: 'PAID',
-        },
-        _sum: {
-          amount: true,
-        },
+    const [
+      totalEarningsAgg,
+      pendingEarningsAgg,
+      totalCommissions,
+      paidCommissions,
+      pendingCommissions,
+    ] = await Promise.all([
+      prisma.boosterCommission.aggregate({
+        where: { boosterId, status: 'PAID' },
+        _sum: { amount: true },
       }),
-      pendingEarnings: await prisma.boosterCommission.aggregate({
-        where: {
-          boosterId,
-          status: 'PENDING',
-        },
-        _sum: {
-          amount: true,
-        },
+      prisma.boosterCommission.aggregate({
+        where: { boosterId, status: 'PENDING' },
+        _sum: { amount: true },
       }),
-      totalCommissions: await prisma.boosterCommission.count({
-        where: {
-          boosterId,
-        },
-      }),
-      paidCommissions: await prisma.boosterCommission.count({
-        where: {
-          boosterId,
-          status: 'PAID',
-        },
-      }),
-      pendingCommissions: await prisma.boosterCommission.count({
-        where: {
-          boosterId,
-          status: 'PENDING',
-        },
-      }),
-    }
+      prisma.boosterCommission.count({ where: { boosterId } }),
+      prisma.boosterCommission.count({ where: { boosterId, status: 'PAID' } }),
+      prisma.boosterCommission.count({ where: { boosterId, status: 'PENDING' } }),
+    ])
 
     return NextResponse.json(
       {
         commissions,
         stats: {
-          totalEarnings: stats.totalEarnings._sum.amount || 0,
-          pendingEarnings: stats.pendingEarnings._sum.amount || 0,
-          totalCommissions: stats.totalCommissions,
-          paidCommissions: stats.paidCommissions,
-          pendingCommissions: stats.pendingCommissions,
+          totalEarnings: totalEarningsAgg._sum.amount || 0,
+          pendingEarnings: pendingEarningsAgg._sum.amount || 0,
+          totalCommissions,
+          paidCommissions,
+          pendingCommissions,
         },
         pagination: { total, limit, offset },
       },

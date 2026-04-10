@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     if (!cronSecret) {
       console.error('[CRON] CRON_SECRET not configured')
       return NextResponse.json(
-        { error: 'Cron secret not configured' },
+        { message: 'Cron secret not configured' },
         { status: 500 }
       )
     }
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString(),
       })
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
@@ -125,12 +125,20 @@ export async function POST(request: Request) {
         await refundPixPayment(payment.providerId)
 
         // Update order status to CANCELLED
+        let metadata: Record<string, unknown> = {}
+        try {
+          if (order.metadata) {
+            metadata = JSON.parse(order.metadata as string)
+          }
+        } catch {
+          metadata = {}
+        }
         await db.order.update({
           where: { id: order.id },
           data: {
             status: 'CANCELLED',
             metadata: JSON.stringify({
-              ...(order.metadata ? JSON.parse(order.metadata as string) : {}),
+              ...metadata,
               cancelledReason: 'AUTO_TIMEOUT',
               cancelledAt: new Date().toISOString(),
               timeoutHours,

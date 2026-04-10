@@ -71,11 +71,8 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Erro ao buscar pedidos:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pedidos' },
-      { status: 500 }
-    )
+    console.error('Error in GET /api/admin/orders:', error)
+    return NextResponse.json({ message: 'Erro ao buscar pedidos' }, { status: 500 })
   }
 }
 

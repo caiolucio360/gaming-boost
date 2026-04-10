@@ -649,6 +649,12 @@ useEffect(() => {
 - **Payment simulate:** `/api/payment/pix/simulate` returns 403 in production (`NODE_ENV === 'production'`)
 - **Withdrawal race condition:** Both withdraw routes use provisional-record pattern (DB record created before AbacatePay call) to prevent TOCTOU overdraft
 - **Webhook idempotency:** `confirmPayment` uses atomic `updateMany` with `status=PENDING` guard — duplicate webhooks are safely no-ops
+- **Padrão de feedback:** Toasts (`showSuccess`/`showError` de `@/lib/toast`) para feedback de ações (submit, delete, update); `<Alert>` inline apenas para erros de fetch na montagem da página e validação de formulário. O padrão `alert state + setAlert + setTimeout` está **removido** das páginas principais — pendente apenas em `admin/orders/[id]/page.tsx` e `admin/users/[id]/page.tsx`.
+- **React remounting gotcha:** Nunca defina sub-componentes como `const Foo = () => (...)` dentro do corpo de outro componente — causa remount a cada render (quebra focus, timers). Use variável JSX: `const foo = (...)` com `{foo}` no JSX.
+- **`api-errors.ts` importa Prisma diretamente** (`import { Prisma } from '@/generated/prisma/client'`). Evite adicionar `import { createApiErrorResponse } from '@/lib/api-errors'` em rotas cujos testes já passam — isso introduce dependência transitiva de Prisma não resolvida pelo Jest. Use handlers inline `{ message: '...' }` nessas rotas.
+- **Admin orders/[id]/route.ts:** O PUT usa Zod schema `UpdateOrderSchema` para validar body. Booster re-aprovação rejeitada com 409 se `verificationStatus === 'VERIFIED'`.
+- **JSON.parse(*.metadata):** Sempre envolver em try-catch retornando `{}` no catch — o campo é JSON livre e pode conter dados corrompidos.
+- **Stats queries paralelas:** Rotas de dashboard (booster/payments, admin/payments, booster/orders) usam `Promise.all` para as 5 queries de aggregate/count de stats.
 
 ## Key Dependencies
 

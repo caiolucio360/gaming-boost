@@ -63,6 +63,13 @@ export async function PATCH(
             )
         }
 
+        if (status === 'VERIFIED' && profile.verificationStatus === 'VERIFIED') {
+            return NextResponse.json(
+                { message: 'Este booster já está verificado' },
+                { status: 409 }
+            )
+        }
+
         // Update the profile status
         const updatedProfile = await prisma.boosterProfile.update({
             where: { id: profileId },
