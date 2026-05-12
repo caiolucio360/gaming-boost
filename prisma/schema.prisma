@@ -109,6 +109,7 @@ enum Game {
 enum ServiceType {
   RANK_BOOST
   DUO_BOOST
+  COACHING
 }
 
 model Payment {

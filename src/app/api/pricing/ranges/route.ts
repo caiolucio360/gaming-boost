@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
     const game = (searchParams.get('game') || 'CS2') as Game
     const gameMode = searchParams.get('gameMode') || 'PREMIER'
     const rawServiceType = searchParams.get('serviceType')
-    const serviceType: ServiceType = rawServiceType === 'DUO_BOOST' ? 'DUO_BOOST' : 'RANK_BOOST'
+    let serviceType: ServiceType
+    if (rawServiceType === 'DUO_BOOST') serviceType = 'DUO_BOOST'
+    else if (rawServiceType === 'COACHING') serviceType = 'COACHING'
+    else serviceType = 'RANK_BOOST'
 
     const configs = await db.pricingConfig.findMany({
       where: { game, gameMode, serviceType, enabled: true },
@@ -30,7 +33,16 @@ export async function GET(request: NextRequest) {
 
     let points: number[]
 
-    if (gameMode === 'PREMIER') {
+    if (serviceType === 'COACHING') {
+      // Generate hour increments from rangeStart to rangeEnd
+      const hours: number[] = []
+      for (let h = min; h <= max; h++) {
+        hours.push(h)
+      }
+      return Response.json({
+        data: { hours, min, max }
+      }, { status: 200 })
+    } else if (gameMode === 'PREMIER') {
       // Generate 1K increments from first available 1K boundary to max (rounded up to nearest 1K)
       const maxRounded = Math.ceil((max + 1) / 1000) * 1000
       const startPoint = Math.max(1000, Math.ceil(min / 1000) * 1000)
@@ -38,10 +50,6 @@ export async function GET(request: NextRequest) {
       for (let p = startPoint; p <= maxRounded; p += 1000) {
         points.push(p)
       }
-    } else if (gameMode === 'GAMERS_CLUB') {
-      // Generate level increments from min to max
-      const startLevel = Math.max(1, min)
-      points = Array.from({ length: max - startLevel + 1 }, (_, i) => startLevel + i)
     } else {
       points = []
     }

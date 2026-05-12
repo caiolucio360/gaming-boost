@@ -245,8 +245,8 @@ export default function PricingConfigPage() {
     if (enabledConfigs.length === 0) return []
 
     const detectedGaps: Gap[] = []
-    const minExpected = selectedMode === 'PREMIER' ? 0 : 1
-    const maxExpected = selectedMode === 'PREMIER' ? 26000 : 20
+    const minExpected = selectedServiceType === 'COACHING' ? 1 : selectedMode === 'PREMIER' ? 0 : 1
+    const maxExpected = selectedServiceType === 'COACHING' ? 10 : 26000
 
     // Check if first range starts at expected minimum
     if (enabledConfigs[0].rangeStart > minExpected) {
@@ -269,7 +269,7 @@ export default function PricingConfigPage() {
     }
 
     return detectedGaps
-  }, [configs, selectedMode])
+  }, [configs, selectedMode, selectedServiceType])
 
   const fetchConfigs = async () => {
     await withLoading(async () => {
@@ -439,34 +439,49 @@ export default function PricingConfigPage() {
   }
 
   const handleCalculatePreview = async () => {
-    if (!calcCurrent || !calcTarget) {
-      showError('Erro', 'Preencha os valores atual e desejado')
+    const isCoaching = selectedServiceType === 'COACHING'
+
+    if (!calcCurrent || (!isCoaching && !calcTarget)) {
+      showError('Erro', isCoaching ? 'Preencha o número de horas' : 'Preencha os valores atual e desejado')
       return
     }
 
-    const current = parseInt(calcCurrent)
-    const target = parseInt(calcTarget)
-
-    if (current >= target) {
-      showError('Erro', 'O valor atual deve ser menor que o desejado')
-      return
+    if (!isCoaching) {
+      const current = parseInt(calcCurrent)
+      const target = parseInt(calcTarget)
+      if (current >= target) {
+        showError('Erro', 'O valor atual deve ser menor que o desejado')
+        return
+      }
     }
 
     setIsCalculating(true)
     try {
-      const currentValue = selectedMode === 'PREMIER' ? current * 1000 : current
-      const targetValue = selectedMode === 'PREMIER' ? target * 1000 : target
+      let body: Record<string, unknown>
 
-      const response = await fetch('/api/pricing/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      if (isCoaching) {
+        body = {
+          game: selectedGame,
+          gameMode: selectedMode,
+          serviceType: selectedServiceType,
+          hours: parseInt(calcCurrent),
+        }
+      } else {
+        const currentValue = selectedMode === 'PREMIER' ? parseInt(calcCurrent) * 1000 : parseInt(calcCurrent)
+        const targetValue = selectedMode === 'PREMIER' ? parseInt(calcTarget) * 1000 : parseInt(calcTarget)
+        body = {
           game: selectedGame,
           gameMode: selectedMode,
           serviceType: selectedServiceType,
           current: currentValue,
           target: targetValue,
-        }),
+        }
+      }
+
+      const response = await fetch('/api/pricing/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
 
       if (response.ok) {
@@ -495,6 +510,9 @@ export default function PricingConfigPage() {
   }
 
   const formatRangeDisplay = (config: PricingConfig) => {
+    if (selectedServiceType === 'COACHING') {
+      return `${config.rangeStart}h - ${config.rangeEnd}h`
+    }
     if (selectedMode === 'PREMIER') {
       return `${(config.rangeStart / 1000).toFixed(0)}K - ${(config.rangeEnd / 1000).toFixed(0)}K`
     }
@@ -557,7 +575,6 @@ export default function PricingConfigPage() {
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
                     <SelectItem value="PREMIER">Premier</SelectItem>
-                    <SelectItem value="GAMERS_CLUB">Gamers Club</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -575,6 +592,7 @@ export default function PricingConfigPage() {
                   <SelectContent position="popper" sideOffset={4}>
                     <SelectItem value="RANK_BOOST">Rank Boost</SelectItem>
                     <SelectItem value="DUO_BOOST">Duo Boost</SelectItem>
+                    <SelectItem value="COACHING">Coaching</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -594,9 +612,11 @@ export default function PricingConfigPage() {
               <ul className="list-disc list-inside space-y-1">
                 {gaps.map((gap, i) => (
                   <li key={i}>
-                    {selectedMode === 'PREMIER'
-                      ? `${(gap.start / 1000).toFixed(0)}K - ${(gap.end / 1000).toFixed(0)}K`
-                      : `Níveis ${gap.start} - ${gap.end}`}
+                    {selectedServiceType === 'COACHING'
+                      ? `${gap.start}h - ${gap.end}h`
+                      : selectedMode === 'PREMIER'
+                        ? `${(gap.start / 1000).toFixed(0)}K - ${(gap.end / 1000).toFixed(0)}K`
+                        : `Níveis ${gap.start} - ${gap.end}`}
                   </li>
                 ))}
               </ul>
@@ -634,9 +654,11 @@ export default function PricingConfigPage() {
                       {isEditing ? 'Editar' : 'Nova'} Configuração de Preço
                     </CardTitle>
                     <CardDescription className="text-brand-gray-400">
-                      {selectedMode === 'PREMIER'
-                        ? 'Configure o preço por 1000 pontos para diferentes faixas de rating'
-                        : 'Configure o preço por nível para diferentes faixas'}
+                      {selectedServiceType === 'COACHING'
+                        ? 'Configure o preço por hora para diferentes faixas de horas'
+                        : selectedMode === 'PREMIER'
+                          ? 'Configure o preço por 1000 pontos para diferentes faixas de rating'
+                          : 'Configure o preço por nível para diferentes faixas'}
                     </CardDescription>
                   </div>
                 </div>
@@ -647,8 +669,8 @@ export default function PricingConfigPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="rangeStart" className="text-brand-gray-300 flex items-center gap-2">
-                        {selectedMode === 'PREMIER' ? 'Rating Inicial' : 'Nível Inicial'}
-                        {rangeStart && (
+                        {selectedServiceType === 'COACHING' ? 'Horas mínimas' : selectedMode === 'PREMIER' ? 'Rating Inicial' : 'Nível Inicial'}
+                        {rangeStart && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
                             {selectedMode === 'PREMIER' ? `${(parseInt(rangeStart) / 1000).toFixed(0)}K` : `Nível ${rangeStart}`}
                           </span>
@@ -659,7 +681,7 @@ export default function PricingConfigPage() {
                         type="number"
                         value={rangeStart}
                         onChange={(e) => setRangeStart(e.target.value)}
-                        placeholder={selectedMode === 'PREMIER' ? '0' : '1'}
+                        placeholder={selectedServiceType === 'COACHING' ? '1' : selectedMode === 'PREMIER' ? '0' : '1'}
                         required
                         disabled={isSaving}
                         className="bg-brand-black border-white/10 focus:border-brand-purple transition-all"
@@ -667,8 +689,8 @@ export default function PricingConfigPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="rangeEnd" className="text-brand-gray-300 flex items-center gap-2">
-                        {selectedMode === 'PREMIER' ? 'Rating Final' : 'Nível Final'}
-                        {rangeEnd && (
+                        {selectedServiceType === 'COACHING' ? 'Horas máximas' : selectedMode === 'PREMIER' ? 'Rating Final' : 'Nível Final'}
+                        {rangeEnd && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
                             {selectedMode === 'PREMIER' ? `${(parseInt(rangeEnd) / 1000).toFixed(0)}K` : `Nível ${rangeEnd}`}
                           </span>
@@ -679,7 +701,7 @@ export default function PricingConfigPage() {
                         type="number"
                         value={rangeEnd}
                         onChange={(e) => setRangeEnd(e.target.value)}
-                        placeholder={selectedMode === 'PREMIER' ? '4999' : '10'}
+                        placeholder={selectedServiceType === 'COACHING' ? '10' : selectedMode === 'PREMIER' ? '4999' : '10'}
                         required
                         disabled={isSaving}
                         className="bg-brand-black border-white/10 focus:border-brand-purple transition-all"
@@ -691,7 +713,7 @@ export default function PricingConfigPage() {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="price" className="text-brand-gray-300">
-                        Preço (R$)
+                        {selectedServiceType === 'COACHING' ? 'Preço por hora (R$)' : 'Preço (R$)'}
                       </Label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gray-500 text-sm">R$</span>
@@ -715,15 +737,17 @@ export default function PricingConfigPage() {
                     <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                       <p className="text-xs text-brand-gray-400 mb-1">Preview</p>
                       <p className="text-sm text-white">
-                        {selectedMode === 'PREMIER'
-                          ? `${(parseInt(rangeStart) / 1000).toFixed(0)}K - ${(parseInt(rangeEnd) / 1000).toFixed(0)}K`
-                          : `Nível ${rangeStart} - ${rangeEnd}`}
+                        {selectedServiceType === 'COACHING'
+                          ? `${rangeStart}h - ${rangeEnd}h`
+                          : selectedMode === 'PREMIER'
+                            ? `${(parseInt(rangeStart) / 1000).toFixed(0)}K - ${(parseInt(rangeEnd) / 1000).toFixed(0)}K`
+                            : `Nível ${rangeStart} - ${rangeEnd}`}
                         {' → '}
                         <span className="text-brand-purple-light font-semibold">
                           R$ {parseFloat(price || '0').toFixed(2)}
                         </span>
                         <span className="text-brand-gray-500 text-xs ml-1">
-                          / {selectedMode === 'PREMIER' ? '1000 pontos' : '1 nível'}
+                          / {selectedServiceType === 'COACHING' ? '1 hora' : selectedMode === 'PREMIER' ? '1000 pontos' : '1 nível'}
                         </span>
                       </p>
                     </div>
@@ -780,9 +804,11 @@ export default function PricingConfigPage() {
                 <div>
                   <CardTitle className="text-white font-orbitron text-lg">Configurações Cadastradas</CardTitle>
                   <CardDescription className="text-brand-gray-400">
-                    {selectedMode === 'PREMIER'
-                      ? 'Faixas de rating e preços configurados'
-                      : 'Faixas de níveis e preços configurados'}
+                    {selectedServiceType === 'COACHING'
+                      ? 'Faixas de horas e preços configurados'
+                      : selectedMode === 'PREMIER'
+                        ? 'Faixas de rating e preços configurados'
+                        : 'Faixas de níveis e preços configurados'}
                   </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={fetchConfigs} className="border-white/10 hover:border-brand-purple/50">
@@ -884,34 +910,36 @@ export default function PricingConfigPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="calcCurrent" className="text-brand-gray-300">
-                    {selectedMode === 'PREMIER' ? 'Rating Atual (K)' : 'Nível Atual'}
+                    {selectedServiceType === 'COACHING' ? 'Número de horas' : selectedMode === 'PREMIER' ? 'Rating Atual (K)' : 'Nível Atual'}
                   </Label>
                   <Input
                     id="calcCurrent"
                     type="number"
                     value={calcCurrent}
                     onChange={(e) => setCalcCurrent(e.target.value)}
-                    placeholder={selectedMode === 'PREMIER' ? '10' : '5'}
+                    placeholder={selectedServiceType === 'COACHING' ? '3' : selectedMode === 'PREMIER' ? '10' : '5'}
                     className="bg-brand-black border-white/10 focus:border-brand-purple"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="calcTarget" className="text-brand-gray-300">
-                    {selectedMode === 'PREMIER' ? 'Rating Desejado (K)' : 'Nível Desejado'}
-                  </Label>
-                  <Input
-                    id="calcTarget"
-                    type="number"
-                    value={calcTarget}
-                    onChange={(e) => setCalcTarget(e.target.value)}
-                    placeholder={selectedMode === 'PREMIER' ? '15' : '10'}
-                    className="bg-brand-black border-white/10 focus:border-brand-purple"
-                  />
-                </div>
+                {selectedServiceType !== 'COACHING' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="calcTarget" className="text-brand-gray-300">
+                      {selectedMode === 'PREMIER' ? 'Rating Desejado (K)' : 'Nível Desejado'}
+                    </Label>
+                    <Input
+                      id="calcTarget"
+                      type="number"
+                      value={calcTarget}
+                      onChange={(e) => setCalcTarget(e.target.value)}
+                      placeholder={selectedMode === 'PREMIER' ? '15' : '10'}
+                      className="bg-brand-black border-white/10 focus:border-brand-purple"
+                    />
+                  </div>
+                )}
                 <Button
                   className="w-full bg-brand-purple hover:bg-brand-purple-light"
                   onClick={handleCalculatePreview}
-                  disabled={isCalculating || !calcCurrent || !calcTarget}
+                  disabled={isCalculating || !calcCurrent || (selectedServiceType !== 'COACHING' && !calcTarget)}
                 >
                   {isCalculating ? (
                     <>
@@ -933,9 +961,11 @@ export default function PricingConfigPage() {
                       R$ {calcResult.toFixed(2)}
                     </p>
                     <p className="text-xs text-brand-gray-400 mt-2">
-                      {selectedMode === 'PREMIER'
-                        ? `${calcCurrent}K → ${calcTarget}K`
-                        : `Nível ${calcCurrent} → ${calcTarget}`}
+                      {selectedServiceType === 'COACHING'
+                        ? `${calcCurrent}h de coaching`
+                        : selectedMode === 'PREMIER'
+                          ? `${calcCurrent}K → ${calcTarget}K`
+                          : `Nível ${calcCurrent} → ${calcTarget}`}
                     </p>
                   </div>
                 )}

@@ -6,7 +6,7 @@
 import { db } from '@/lib/db'
 import { Game, PricingConfig, ServiceType } from '@/generated/prisma/client'
 
-export type GameMode = 'PREMIER' | 'GAMERS_CLUB'
+export type GameMode = 'PREMIER'
 
 interface PricingRange {
   id: number
@@ -150,42 +150,18 @@ export async function calculatePremierPrice(
   return total
 }
 
+
 /**
- * Calcula o preço total para Gamers Club (baseado em níveis)
- * Exemplo: Do nível 5 para o nível 10
+ * Calcula o preço total para Coaching (baseado em horas)
+ * target = número de horas
  */
-export async function calculateGamersClubPrice(
-  current: number,
-  target: number,
-  serviceType: ServiceType = 'RANK_BOOST'
-): Promise<number> {
-  if (current >= target) {
-    return 0
+async function calculateCoachingPrice(hours: number, ranges: PricingRange[]): Promise<number> {
+  if (ranges.length === 0) throw new Error('Nenhuma configuração de coaching encontrada')
+  const range = ranges[0]
+  if (hours < range.rangeStart || hours > range.rangeEnd) {
+    throw new Error(`Número de horas inválido. Mínimo: ${range.rangeStart}, Máximo: ${range.rangeEnd}`)
   }
-
-  const ranges = await getPricingRanges('CS2', 'GAMERS_CLUB', serviceType)
-
-  if (ranges.length === 0) {
-    throw new Error('No pricing configuration found for CS2 Gamers Club')
-  }
-
-  let total = 0
-
-  // Calcular preço por nível
-  for (let level = current + 1; level <= target; level++) {
-    // Encontrar a faixa que contém este nível
-    const range = ranges.find(
-      r => level >= r.rangeStart && level <= r.rangeEnd
-    )
-
-    if (!range) {
-      throw new Error(`No pricing range found for level ${level}`)
-    }
-
-    total += range.price
-  }
-
-  return total
+  return hours * range.price
 }
 
 /**
@@ -198,11 +174,14 @@ export async function calculatePrice(
   target: number,
   serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<number> {
+  if (serviceType === 'COACHING') {
+    const ranges = await getPricingRanges(game, gameMode, serviceType)
+    return calculateCoachingPrice(target, ranges) // target = hours
+  }
+
   switch (gameMode) {
     case 'PREMIER':
       return calculatePremierPrice(current, target, serviceType)
-    case 'GAMERS_CLUB':
-      return calculateGamersClubPrice(current, target, serviceType)
     default:
       throw new Error(`Unsupported game mode: ${gameMode}`)
   }
@@ -228,6 +207,19 @@ export async function validatePricingRange(
       }
     }
 
+    // Para COACHING, verificar apenas se a quantidade de horas (current) está dentro do range
+    if (serviceType === 'COACHING') {
+      const range = ranges[0]
+      const hours = current // current é reutilizado como horas no contexto de coaching
+      if (hours < range.rangeStart || hours > range.rangeEnd) {
+        return {
+          valid: false,
+          error: `Número de horas inválido. Mínimo: ${range.rangeStart}, Máximo: ${range.rangeEnd}`
+        }
+      }
+      return { valid: true }
+    }
+
     // Verificar se todos os valores entre current e target têm configuração
     if (gameMode === 'PREMIER') {
       // Para Premier, verificar se há cobertura completa do range
@@ -239,19 +231,6 @@ export async function validatePricingRange(
           return {
             valid: false,
             error: `No pricing configured for rating ${rating}`
-          }
-        }
-      }
-    } else if (gameMode === 'GAMERS_CLUB') {
-      // Para GC, verificar se há preço para cada nível
-      for (let level = current + 1; level <= target; level++) {
-        const hasRange = ranges.some(
-          r => level >= r.rangeStart && level <= r.rangeEnd
-        )
-        if (!hasRange) {
-          return {
-            valid: false,
-            error: `No pricing configured for level ${level}`
           }
         }
       }
