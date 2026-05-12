@@ -669,89 +669,6 @@ export default function BoosterDashboardPage() {
                             </>
                           )}
 
-                          {/* Completion proof dialog */}
-                          <Dialog
-                            open={completeDialogOpen && orderToAction === order.id}
-                            onOpenChange={(open) => {
-                              if (!open) { setProofFile(null); setProofPreview(null) }
-                              setCompleteDialogOpen(open)
-                            }}
-                          >
-                            <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
-                              <DialogHeader>
-                                <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                  Comprovante de Conclusão
-                                </DialogTitle>
-                                <DialogDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                  Anexe um print da tela mostrando que o cliente atingiu o rank/rating contratado. Isso é obrigatório para concluir o pedido.
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              <div className="space-y-4 py-2">
-                                {proofPreview ? (
-                                  <div className="relative">
-                                    <img
-                                      src={proofPreview}
-                                      alt="Preview do comprovante"
-                                      className="w-full rounded-lg border border-brand-purple/30 object-cover max-h-56"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={handleRemoveProof}
-                                      className="absolute top-2 right-2 bg-black/70 rounded-full p-1 hover:bg-red-600/80 transition-colors"
-                                    >
-                                      <X className="h-4 w-4 text-white" />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="w-full border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 flex flex-col items-center gap-3 transition-colors cursor-pointer bg-brand-purple/5 hover:bg-brand-purple/10"
-                                  >
-                                    <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
-                                    <span className="text-brand-gray-400 font-rajdhani text-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                      Clique para selecionar o print
-                                    </span>
-                                    <span className="text-brand-gray-500 font-rajdhani text-xs" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                      JPG, PNG ou WebP — máx. 5 MB
-                                    </span>
-                                  </button>
-                                )}
-                                <input
-                                  ref={fileInputRef}
-                                  type="file"
-                                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                                  className="hidden"
-                                  onChange={handleProofFileChange}
-                                />
-                              </div>
-
-                              <DialogFooter className="gap-2">
-                                <Button
-                                  variant="outline"
-                                  onClick={() => { setCompleteDialogOpen(false); setProofFile(null); setProofPreview(null) }}
-                                  className="border-brand-purple/40 text-brand-gray-300 hover:bg-brand-purple/10"
-                                  disabled={isUploading || isCompleting}
-                                >
-                                  Cancelar
-                                </Button>
-                                <Button
-                                  onClick={handleCompleteOrder}
-                                  disabled={!proofFile || isUploading || isCompleting}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                  {isUploading ? (
-                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando print...</>
-                                  ) : isCompleting ? (
-                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Concluindo...</>
-                                  ) : (
-                                    <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluir Pedido</>
-                                  )}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
                         </div>
                       </CardContent>
                     </Card>
@@ -759,6 +676,90 @@ export default function BoosterDashboardPage() {
                 })}
               </div>
             )}
+
+            {/* Single completion proof dialog — outside the map to avoid shared state issues */}
+            <Dialog
+              open={completeDialogOpen}
+              onOpenChange={(open) => {
+                if (!open) { setProofFile(null); setProofPreview(null) }
+                setCompleteDialogOpen(open)
+              }}
+            >
+              <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    Comprovante de Conclusão
+                  </DialogTitle>
+                  <DialogDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    Anexe um print da tela mostrando que o cliente atingiu o rank/rating contratado. Isso é obrigatório para concluir o pedido.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-2">
+                  {proofPreview ? (
+                    <div className="relative">
+                      <img
+                        src={proofPreview}
+                        alt="Preview do comprovante"
+                        className="w-full rounded-lg border border-brand-purple/30 object-cover max-h-56"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveProof}
+                        className="absolute top-2 right-2 bg-black/70 rounded-full p-1 hover:bg-red-600/80 transition-colors"
+                      >
+                        <X className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 flex flex-col items-center gap-3 transition-colors cursor-pointer bg-brand-purple/5 hover:bg-brand-purple/10"
+                    >
+                      <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
+                      <span className="text-brand-gray-400 font-rajdhani text-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        Clique para selecionar o print
+                      </span>
+                      <span className="text-brand-gray-500 font-rajdhani text-xs" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        JPG, PNG ou WebP — máx. 5 MB
+                      </span>
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleProofFileChange}
+                  />
+                </div>
+
+                <DialogFooter className="gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setCompleteDialogOpen(false); setProofFile(null); setProofPreview(null) }}
+                    className="border-brand-purple/40 text-brand-gray-300 hover:bg-brand-purple/10"
+                    disabled={isUploading || isCompleting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCompleteOrder}
+                    disabled={!proofFile || isUploading || isCompleting}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {isUploading ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando print...</>
+                    ) : isCompleting ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Concluindo...</>
+                    ) : (
+                      <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluir Pedido</>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 

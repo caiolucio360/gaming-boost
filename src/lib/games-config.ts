@@ -64,7 +64,7 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
     supportedServiceTypes: ['RANK_BOOST', 'DUO_BOOST', 'COACHING'],
     serviceTypeInfo: {
       RANK_BOOST: {
-        displayName: 'Rank Boost',
+        displayName: 'Boost',
         description: 'Booster joga na sua conta para subir de rank',
         requiresSteamCredentials: true,
       },

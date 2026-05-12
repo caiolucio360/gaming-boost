@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 export default function CS2Page() {
   const services = [
     {
-      title: "BOOST DE RANK PREMIER",
+      title: "BOOST",
       description: "Subimos seu rank Premier do CS2 de forma segura e profissional",
       features: [
         "CS2 Premier Mode",
@@ -18,7 +18,21 @@ export default function CS2Page() {
         "Boosters verificados"
       ],
       icon: "⚡",
-      href: "/games/cs2/pricing",
+      href: "/games/cs2/pricing?service=RANK_BOOST",
+      available: true
+    },
+    {
+      title: "DUO BOOST",
+      description: "Jogue ao lado de um booster profissional e suba de rank juntos",
+      features: [
+        "CS2 Premier Mode",
+        "Você joga na sua conta",
+        "Booster profissional ao seu lado",
+        "Entrega rápida",
+        "Suporte 24/7"
+      ],
+      icon: "🤝",
+      href: "/games/cs2/pricing?service=DUO_BOOST",
       available: true
     },
     {
@@ -32,8 +46,8 @@ export default function CS2Page() {
         "Feedback em tempo real"
       ],
       icon: "🎖️",
-      href: "/games/cs2/pricing",
-      available: false
+      href: "/games/cs2/pricing?service=COACHING",
+      available: true
     }
   ]
 
@@ -69,8 +83,8 @@ export default function CS2Page() {
             </p>
           </div>
 
-          <div className="max-w-5xl xl:max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="max-w-6xl xl:max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {services.map((service, index) => (
                 <Card
                   key={index}

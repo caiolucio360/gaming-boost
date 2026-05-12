@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Total users filter: exclude dev-admin
-      const totalUsersWhere = { NOT: { isDevAdmin: true } }
+      const totalUsersWhere = { NOT: { isDevAdmin: true }, isTest: false }
 
       const [
         totalUsers,
@@ -54,21 +54,22 @@ export async function GET(request: NextRequest) {
         devAdminRevenueResult,
       ] = await Promise.all([
         prisma.user.count({ where: totalUsersWhere }).catch(() => 0),
-        prisma.user.count({ where: { role: 'CLIENT' } }).catch(() => 0),
-        prisma.user.count({ where: { role: 'BOOSTER' } }).catch(() => 0),
+        prisma.user.count({ where: { role: 'CLIENT', isTest: false } }).catch(() => 0),
+        prisma.user.count({ where: { role: 'BOOSTER', isTest: false } }).catch(() => 0),
         prisma.user.count({ where: adminCountWhere }).catch(() => 0),
-        prisma.order.count().catch(() => 0),
-        prisma.order.count({ where: { status: 'PENDING' } }).catch(() => 0),
-        prisma.order.count({ where: { status: 'IN_PROGRESS' } }).catch(() => 0),
-        prisma.order.count({ where: { status: 'COMPLETED' } }).catch(() => 0),
-        prisma.order.count({ where: { status: 'CANCELLED' } }).catch(() => 0),
+        prisma.order.count({ where: { isTest: false } }).catch(() => 0),
+        prisma.order.count({ where: { status: 'PENDING', isTest: false } }).catch(() => 0),
+        prisma.order.count({ where: { status: 'IN_PROGRESS', isTest: false } }).catch(() => 0),
+        prisma.order.count({ where: { status: 'COMPLETED', isTest: false } }).catch(() => 0),
+        prisma.order.count({ where: { status: 'CANCELLED', isTest: false } }).catch(() => 0),
         prisma.order.aggregate({
-          where: { status: 'COMPLETED' },
+          where: { status: 'COMPLETED', isTest: false },
           _sum: { total: true },
         }).catch(() => ({ _sum: { total: null } })),
         prisma.order.findMany({
           take: 5,
           orderBy: { createdAt: 'desc' },
+          where: { isTest: false },
           include: {
             user: { select: { email: true, name: true } },
           },

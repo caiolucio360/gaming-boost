@@ -16,6 +16,7 @@ import { Spinner } from '@/components/common/loading-spinner'
 
 interface GameCalculatorProps {
   gameId?: GameId
+  initialService?: ServiceType
 }
 
 interface ActiveOrder {
@@ -26,8 +27,8 @@ interface ActiveOrder {
 
 const gameMode = 'PREMIER'
 
-export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>('RANK_BOOST')
+export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
   const [selectedTarget, setSelectedTarget] = useState('')
@@ -387,7 +388,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                 {
                   type: 'RANK_BOOST' as ServiceType,
                   Icon: Sword,
-                  title: 'Rank Boost',
+                  title: 'Boost',
                   description: 'Nosso booster joga por você e sobe seu rank profissionalmente.',
                 },
                 {
@@ -421,7 +422,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
               ))}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4 justify-center">
               {(['RANK_BOOST', 'DUO_BOOST', 'COACHING'] as ServiceType[]).map((type) => {
                 const info = gameConfig.serviceTypeInfo?.[type]
                 const isSelected = selectedServiceType === type
@@ -461,12 +462,10 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                       <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-amber-500 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
-                          Você já possui um boost ativo nesta modalidade
+                          Você já possui um serviço ativo
                         </h3>
                         <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
-                          Você tem {activeOrders.length} pedido{activeOrders.length > 1 ? 's' : ''}{' '}
-                          {activeOrders[0].status === 'PENDING' ? 'pendente' : activeOrders[0].status === 'PAID' ? 'pago' : 'em andamento'} de boost Premier.
-                          Finalize ou cancele o pedido anterior antes de criar um novo.
+                          Finalize ou cancele o serviço atual antes de contratar um novo.
                         </p>
                         <Link
                           href="/dashboard"

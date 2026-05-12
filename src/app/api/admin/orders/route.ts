@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    const where: Record<string, unknown> = {}
+    const where: Record<string, unknown> = { isTest: false }
     if (status && ['PENDING', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(status)) {
       where.status = status
     }

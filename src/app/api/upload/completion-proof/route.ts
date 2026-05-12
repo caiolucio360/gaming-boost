@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
+import sharp from 'sharp'
 import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createApiErrorResponse } from '@/lib/api-errors'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+const MAX_WIDTH = 1920
+const WEBP_QUALITY = 80
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,18 +37,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('[UPLOAD] BLOB_READ_WRITE_TOKEN not configured')
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+    if (!blobToken || !blobToken.startsWith('vercel_blob_rw_')) {
+      console.error('[UPLOAD] BLOB_READ_WRITE_TOKEN not configured or invalid')
       return NextResponse.json(
         { message: 'Serviço de upload não configurado. Contate o suporte.' },
         { status: 503 }
       )
     }
 
-    const filename = `completion-proofs/${authResult.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+    // Compress and convert to WebP
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const compressed = await sharp(buffer)
+      .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer()
 
-    const blob = await put(filename, file, {
+    const filename = `completion-proofs/${authResult.user.id}/${Date.now()}.webp`
+
+    const blob = await put(filename, compressed, {
       access: 'public',
+      contentType: 'image/webp',
     })
 
     return NextResponse.json({ url: blob.url }, { status: 200 })

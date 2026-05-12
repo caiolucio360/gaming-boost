@@ -590,7 +590,7 @@ export default function PricingConfigPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
-                    <SelectItem value="RANK_BOOST">Rank Boost</SelectItem>
+                    <SelectItem value="RANK_BOOST">Boost</SelectItem>
                     <SelectItem value="DUO_BOOST">Duo Boost</SelectItem>
                     <SelectItem value="COACHING">Coaching</SelectItem>
                   </SelectContent>

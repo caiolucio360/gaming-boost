@@ -30,11 +30,11 @@ export async function GET(request: NextRequest) {
 
   const [orders, newUsers] = await Promise.all([
     prisma.order.findMany({
-      where: { createdAt: { gte: thirtyDaysAgo } },
+      where: { createdAt: { gte: thirtyDaysAgo }, isTest: false },
       select: { createdAt: true, total: true, status: true },
     }),
     prisma.user.findMany({
-      where: { createdAt: { gte: thirtyDaysAgo }, isDevAdmin: false },
+      where: { createdAt: { gte: thirtyDaysAgo }, isDevAdmin: false, isTest: false },
       select: { createdAt: true },
     }),
   ])
@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
   const statusCount = { PENDING: 0, PAID: 0, IN_PROGRESS: 0, COMPLETED: 0, CANCELLED: 0 }
   const allOrders = await prisma.order.groupBy({
     by: ['status'],
+    where: { isTest: false },
     _count: { status: true },
   })
   for (const row of allOrders) {
