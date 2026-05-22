@@ -155,11 +155,11 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
       cartItem = {
         game: gameId,
         serviceName: `${typeLabel} ${gameConfig.displayName} ${modeConfig.displayName}: ${selectedHours}h`,
-        description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} — ${selectedHours} hora${selectedHours > 1 ? 's' : ''}`,
+        description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} — ${selectedHours} hora${(selectedHours as number) > 1 ? 's' : ''}`,
         currentRank: `${selectedHours}h`,
         targetRank: `${selectedHours}h`,
         price,
-        duration: `${selectedHours} hora${selectedHours > 1 ? 's' : ''}`,
+        duration: `${selectedHours} hora${(selectedHours as number) > 1 ? 's' : ''}`,
         metadata: {
           hours: selectedHours,
           gameType: `${gameId}_${gameMode}`,
