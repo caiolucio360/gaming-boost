@@ -46,3 +46,6 @@ next-env.d.ts
 .worktrees/
 
 .superpowers/
+
+# Claude Code settings (may contain sensitive data)
+.claude/

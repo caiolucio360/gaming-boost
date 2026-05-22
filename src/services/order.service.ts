@@ -42,7 +42,7 @@ interface GetOrdersParams {
 interface CreateOrderInput {
   userId: number
   game?: 'CS2'
-  serviceType?: 'RANK_BOOST' | 'DUO_BOOST'
+  serviceType?: 'RANK_BOOST' | 'DUO_BOOST' | 'COACHING'
   total: number
   currentRank?: string
   targetRank?: string
