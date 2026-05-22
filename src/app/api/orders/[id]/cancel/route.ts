@@ -132,7 +132,7 @@ export async function POST(
     console.log(`   Reason: ${cancellationReason}`)
 
     let refundProcessed = false
-    let refundError: string | null = null
+    let refundNotFound = false
 
     // Get the first payment (orders typically have one payment)
     const payment = order.payments[0]
@@ -146,18 +146,23 @@ export async function POST(
         refundProcessed = true
         console.log(`✅ Refund processed successfully`)
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         console.error(`❌ Failed to process refund:`, error)
-        refundError = error instanceof Error ? error.message : 'Unknown error'
 
-        // If refund fails, we should not cancel the order
-        // Let admin handle it manually
-        return NextResponse.json(
-          {
-            message: 'Não foi possível processar o reembolso automaticamente. Entre em contato com o suporte.',
-            details: refundError,
-          },
-          { status: 500 }
-        )
+        // "Not found" means the payment doesn't exist in AbacatePay
+        // (e.g. simulated/dev payment or already expired). Allow cancellation.
+        if (errorMessage === 'Not found') {
+          refundNotFound = true
+          console.warn(`⚠️ Payment ${payment.providerId} not found in AbacatePay — cancelling order without refund`)
+        } else {
+          return NextResponse.json(
+            {
+              message: 'Não foi possível processar o reembolso automaticamente. Entre em contato com o suporte.',
+              details: errorMessage,
+            },
+            { status: 500 }
+          )
+        }
       }
     }
 
@@ -181,14 +186,15 @@ export async function POST(
             cancelledBy: 'CLIENT',
             cancellationReason,
             refundProcessed,
+            ...(refundNotFound && { refundNote: 'Payment not found in AbacatePay — no refund issued' }),
           }),
         },
       })
 
-      if (payment && refundProcessed) {
+      if (payment && (refundProcessed || refundNotFound)) {
         await tx.payment.update({
           where: { id: payment.id },
-          data: { status: 'REFUNDED' },
+          data: { status: refundProcessed ? 'REFUNDED' : 'CANCELLED' },
         })
       }
 
@@ -217,7 +223,9 @@ export async function POST(
       {
         message: refundProcessed
           ? 'Pedido cancelado e reembolso processado com sucesso. O valor será devolvido em até 5 dias úteis.'
-          : 'Pedido cancelado com sucesso.',
+          : refundNotFound
+            ? 'Pedido cancelado com sucesso.'
+            : 'Pedido cancelado com sucesso.',
         order: {
           id: updatedOrder.id,
           status: updatedOrder.status,

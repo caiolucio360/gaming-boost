@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Clock, CheckCircle2, XCircle, Loader2, LucideIcon, CreditCard } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, Loader2, LucideIcon, CreditCard, Hourglass } from 'lucide-react'
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
@@ -53,22 +53,34 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   const Icon = config.icon
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge
-            className={`${config.color} border font-rajdhani flex items-center gap-2 shadow-lg hover:scale-105 transition-transform duration-300 cursor-help ${className || ''}`}
-            style={{ fontFamily: 'Rajdhani, sans-serif' }}
-          >
-            <Icon className={`h-4 w-4 ${status === 'IN_PROGRESS' ? 'animate-spin' : ''}`} />
-            {config.label}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent className="bg-black/90 border-brand-purple/50 text-white">
-          <p>{config.tooltip}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className={`flex flex-wrap items-center gap-2 ${className || ''}`}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge
+              className={`${config.color} border font-rajdhani flex items-center gap-2 shadow-lg hover:scale-105 transition-transform duration-300 cursor-help`}
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              <Icon className={`h-4 w-4 ${status === 'IN_PROGRESS' ? 'animate-spin' : ''}`} />
+              {config.label}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent className="bg-black/90 border-brand-purple/50 text-white">
+            <p>{config.tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {status === 'PAID' && (
+        <Badge
+          className="bg-orange-500/20 text-orange-300 border border-orange-500/50 font-rajdhani flex items-center gap-2 animate-pulse"
+          style={{ fontFamily: 'Rajdhani, sans-serif' }}
+        >
+          <Hourglass className="h-3 w-3" />
+          Aguardando Booster
+        </Badge>
+      )}
+    </div>
   )
 }
 

@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { ArrowLeft, Save, Pencil, X, Check, Percent } from 'lucide-react'
+import { ArrowLeft, Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { showSuccess, showError } from '@/lib/toast'
 import { formatPrice } from '@/lib/utils'
@@ -45,6 +45,7 @@ export default function AdminCommissionsPage() {
   const [config, setConfig] = useState<CommissionConfig | null>(null)
   const [devAdminInput, setDevAdminInput] = useState('')
   const [boosterInput, setBoosterInput] = useState('')
+  const [waitingDaysInput, setWaitingDaysInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [configAlert, setConfigAlert] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null)
 
@@ -80,6 +81,7 @@ export default function AdminCommissionsPage() {
       setConfig(data.config)
       setDevAdminInput(String(Math.round(data.config.devAdminPercentage * 100)))
       setBoosterInput(String(Math.round(data.config.boosterPercentage * 100)))
+      setWaitingDaysInput(String(data.config.withdrawalWaitingDays ?? 7))
     }
   }
 
@@ -106,12 +108,17 @@ export default function AdminCommissionsPage() {
     const dev = parseFloat(devAdminInput)
     const booster = parseFloat(boosterInput)
 
+    const days = parseInt(waitingDaysInput)
     if (isNaN(dev) || isNaN(booster)) {
       setConfigAlert({ title: 'Erro', description: 'Porcentagens devem ser números válidos', variant: 'destructive' })
       return
     }
     if (dev < 0 || dev > 100 || booster < 0 || booster > 100) {
       setConfigAlert({ title: 'Erro', description: 'Porcentagens devem estar entre 0 e 100', variant: 'destructive' })
+      return
+    }
+    if (isNaN(days) || days < 0 || days > 365) {
+      setConfigAlert({ title: 'Erro', description: 'Dias de espera deve ser entre 0 e 365', variant: 'destructive' })
       return
     }
 
@@ -123,7 +130,7 @@ export default function AdminCommissionsPage() {
         body: JSON.stringify({
           boosterPercentage: booster / 100,
           devAdminPercentage: dev / 100,
-          withdrawalWaitingDays: config?.withdrawalWaitingDays ?? 7,
+          withdrawalWaitingDays: days,
         }),
       })
       const data = await response.json()
@@ -277,6 +284,26 @@ export default function AdminCommissionsPage() {
                     </div>
                     <p className="text-xs text-brand-gray-500">= 100% − % Booster</p>
                   </div>
+                </div>
+
+                <div className="space-y-2 max-w-xs">
+                  <Label className="text-brand-gray-300 font-rajdhani flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    Dias para saque do booster
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="365"
+                      value={waitingDaysInput}
+                      onChange={e => setWaitingDaysInput(e.target.value)}
+                      disabled={!canEdit}
+                      className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
+                    />
+                    <span className="text-brand-gray-500 text-sm font-rajdhani flex-shrink-0">dias</span>
+                  </div>
+                  <p className="text-xs text-brand-gray-500">Após conclusão do pedido. 0 = saque imediato.</p>
                 </div>
 
                 {/* Live preview */}

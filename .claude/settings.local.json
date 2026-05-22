@@ -51,7 +51,12 @@
       "Bash(npm show:*)",
       "Bash(gh pr create --title 'fix: test suite and public page layout bugs' --body ':*)",
       "Bash(head -40 src/app/api/admin/orders/[id]/route.ts)",
-      "Bash(head -5 src/app/api/admin/orders/[id]/route.ts)"
+      "Bash(head -5 src/app/api/admin/orders/[id]/route.ts)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(git -C c:/Projetos/gaming-boost checkout master)",
+      "Bash(git -C c:/Projetos/gaming-boost pull)",
+      "Bash(git -C c:/Projetos/gaming-boost log origin/master..HEAD --oneline)",
+      "Bash(git -C c:/Projetos/gaming-boost status --short)"
     ]
   }
 }

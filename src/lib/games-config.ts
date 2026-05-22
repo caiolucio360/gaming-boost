@@ -11,7 +11,7 @@ export type GameId = 'CS2' // Adicione novos jogos aqui conforme necessário
 
 export type ServiceType = 'RANK_BOOST' | 'DUO_BOOST' | 'PLACEMENT' | 'COACHING' | 'ACCOUNT_LEVELING'
 
-export type GameMode = 'PREMIER' | 'GAMERS_CLUB'
+export type GameMode = 'PREMIER'
 
 export interface GameModeConfig {
   id: GameMode
@@ -61,16 +61,21 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
     description: 'Boost de rank Premier do CS2',
     href: '/games/cs2',
     enabled: true,
-    supportedServiceTypes: ['RANK_BOOST', 'DUO_BOOST'],
+    supportedServiceTypes: ['RANK_BOOST', 'DUO_BOOST', 'COACHING'],
     serviceTypeInfo: {
       RANK_BOOST: {
-        displayName: 'Rank Boost',
+        displayName: 'Boost',
         description: 'Booster joga na sua conta para subir de rank',
         requiresSteamCredentials: true,
       },
       DUO_BOOST: {
         displayName: 'Duo Boost',
         description: 'Jogue junto com o booster na sua própria conta',
+        requiresSteamCredentials: false,
+      },
+      COACHING: {
+        displayName: 'Coaching',
+        description: 'Aulas com um jogador profissional (valor por hora)',
         requiresSteamCredentials: false,
       },
     },
@@ -89,25 +94,6 @@ export const GAMES_CONFIG: Partial<Record<GameId, GameConfig>> = {
           11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000,
           21000, 22000, 23000, 24000, 25000, 26000
         ],
-      },
-      GAMERS_CLUB: {
-        id: 'GAMERS_CLUB',
-        name: 'Gamers Club',
-        displayName: 'Gamers Club',
-        description: 'Sistema de ranqueamento do Gamers Club',
-        pricingInfo: {
-          unit: '1 nível',
-          description: 'Preços progressivos por faixa de nível',
-        },
-        ranks: [
-          { id: 'iniciante', name: 'Iniciante', minPoints: 1, maxPoints: 3 },
-          { id: 'amador', name: 'Amador', minPoints: 4, maxPoints: 7 },
-          { id: 'avançado', name: 'Avançado', minPoints: 8, maxPoints: 11 },
-          { id: 'expert', name: 'Expert', minPoints: 12, maxPoints: 15 },
-          { id: 'master', name: 'Master', minPoints: 16, maxPoints: 19 },
-          { id: 'supremo', name: 'Supremo', minPoints: 20, maxPoints: 20 },
-        ],
-        ratingPoints: Array.from({ length: 20 }, (_, i) => i + 1), // Níveis de 1 a 20
       },
     },
   },

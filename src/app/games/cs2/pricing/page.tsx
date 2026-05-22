@@ -1,6 +1,7 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { CS2Calculator } from '@/components/games/cs2-calculator'
+import type { ServiceType } from '@/lib/games-config'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Preços CS2 - Calculadora de Boost',
@@ -15,7 +16,18 @@ export const metadata: Metadata = generateMetadata({
   canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/games/cs2/pricing`,
 })
 
-export default function CS2PricingPage() {
+const VALID_SERVICES: ServiceType[] = ['RANK_BOOST', 'DUO_BOOST', 'COACHING']
+
+interface Props {
+  searchParams: Promise<{ service?: string }>
+}
+
+export default async function CS2PricingPage({ searchParams }: Props) {
+  const { service } = await searchParams
+  const initialService = VALID_SERVICES.includes(service as ServiceType)
+    ? (service as ServiceType)
+    : 'RANK_BOOST'
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
@@ -29,7 +41,7 @@ export default function CS2PricingPage() {
           </p>
         </div>
 
-        <CS2Calculator />
+        <CS2Calculator initialService={initialService} />
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ import { z } from 'zod'
 // Schema for order creation
 const CreateOrderSchema = z.object({
   game: z.enum(['CS2']).default('CS2'),
-  serviceType: z.enum(['RANK_BOOST', 'DUO_BOOST']).default('RANK_BOOST'),
+  serviceType: z.enum(['RANK_BOOST', 'DUO_BOOST', 'COACHING']).default('RANK_BOOST'),
   total: z.number().positive().or(z.string().transform(Number).pipe(z.number().positive())),
   currentRank: z.string().optional(),
   targetRank: z.string().optional(),

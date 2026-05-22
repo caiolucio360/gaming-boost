@@ -7,16 +7,16 @@ import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
-import { getGameConfig, GameId, GameMode, ServiceType } from '@/lib/games-config'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { getGameConfig, GameId, ServiceType } from '@/lib/games-config'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Calculator, Sword, Users, Zap } from 'lucide-react'
+import { AlertCircle, Calculator, Sword, Users, Zap, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
 
 interface GameCalculatorProps {
   gameId?: GameId
+  initialService?: ServiceType
 }
 
 interface ActiveOrder {
@@ -25,26 +25,29 @@ interface ActiveOrder {
   gameMode: string
 }
 
-export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>('RANK_BOOST')
-  const [selectedMode, setSelectedMode] = useState<GameMode>('PREMIER')
+const gameMode = 'PREMIER'
+
+export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
   const [selectedCurrent, setSelectedCurrent] = useState('')
   const [selectedTarget, setSelectedTarget] = useState('')
+  const [selectedHours, setSelectedHours] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
   const [dynamicPoints, setDynamicPoints] = useState<number[] | null>(null)
+  const [availableHours, setAvailableHours] = useState<number[]>([])
   const [isLoadingRanges, setIsLoadingRanges] = useState(false)
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
 
   const gameConfig = getGameConfig(gameId)
-  const modeConfig = gameConfig?.modes?.[selectedMode]
+  const modeConfig = gameConfig?.modes?.[gameMode]
   const serviceTypeInfo = selectedServiceType ? gameConfig?.serviceTypeInfo?.[selectedServiceType] : undefined
 
-  // Fetch dynamic rating points from API
+  // Fetch dynamic rating points or coaching hours from API
   useEffect(() => {
     if (!selectedServiceType) return
 
@@ -53,33 +56,51 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
       try {
         const params = new URLSearchParams({
           game: gameId,
-          gameMode: selectedMode,
+          gameMode,
           serviceType: selectedServiceType,
         })
         const response = await fetch(`/api/pricing/ranges?${params}`)
         if (response.ok) {
           const data = await response.json()
-          const points = data.data?.points
-          if (points && points.length > 0) {
-            setDynamicPoints(points)
-          } else {
-            // No configs for this combination — fall back to static
+
+          if (selectedServiceType === 'COACHING') {
+            const hours = data.data?.hours
+            if (hours && hours.length > 0) {
+              setAvailableHours(hours)
+            } else {
+              // Fallback: generate 1–10 hours
+              setAvailableHours(Array.from({ length: 10 }, (_, i) => i + 1))
+            }
             setDynamicPoints(null)
+          } else {
+            const points = data.data?.points
+            if (points && points.length > 0) {
+              setDynamicPoints(points)
+            } else {
+              setDynamicPoints(null)
+            }
+            setAvailableHours([])
           }
         } else {
           setDynamicPoints(null)
+          if (selectedServiceType === 'COACHING') {
+            setAvailableHours(Array.from({ length: 10 }, (_, i) => i + 1))
+          }
         }
       } catch {
         setDynamicPoints(null)
+        if (selectedServiceType === 'COACHING') {
+          setAvailableHours(Array.from({ length: 10 }, (_, i) => i + 1))
+        }
       } finally {
         setIsLoadingRanges(false)
       }
     }
 
     fetchRanges()
-  }, [gameId, selectedMode, selectedServiceType])
+  }, [gameId, selectedServiceType])
 
-  // Check for active orders when user is logged in or mode changes
+  // Check for active orders when user is logged in
   useEffect(() => {
     const checkActiveOrders = async () => {
       if (!user) {
@@ -99,10 +120,9 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
           const data = await response.json()
           const orders = data.orders || []
 
-          // Filter for active orders (PENDING, PAID, IN_PROGRESS) in current game mode
           const activeInMode = orders.filter((order: ActiveOrder) =>
             ['PENDING', 'PAID', 'IN_PROGRESS'].includes(order.status) &&
-            order.gameMode === selectedMode
+            order.gameMode === gameMode
           )
 
           setActiveOrders(activeInMode)
@@ -113,36 +133,62 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     }
 
     checkActiveOrders()
-  }, [user, selectedMode])
+  }, [user])
 
   const hasActiveOrderInMode = activeOrders.length > 0
 
   const handleHire = async () => {
-    if (!selectedCurrent || !selectedTarget || price <= 0 || !gameConfig || !modeConfig || !selectedServiceType) return
+    if (!gameConfig || !modeConfig || !selectedServiceType) return
+
+    if (selectedServiceType === 'COACHING') {
+      if (!selectedHours || price <= 0) return
+    } else {
+      if (!selectedCurrent || !selectedTarget || price <= 0) return
+    }
 
     setIsLoading(true)
-    const currentValue = selectedMode === 'PREMIER' ? parseInt(selectedCurrent) * 1000 : parseInt(selectedCurrent)
-    const targetValue = selectedMode === 'PREMIER' ? parseInt(selectedTarget) * 1000 : parseInt(selectedTarget)
-
-    const displayCurrent = selectedMode === 'PREMIER' ? `${selectedCurrent}K` : `Nível ${selectedCurrent}`
-    const displayTarget = selectedMode === 'PREMIER' ? `${selectedTarget}K` : `Nível ${selectedTarget}`
     const typeLabel = serviceTypeInfo?.displayName || 'Boost'
 
-    const cartItem: CartItem = {
-      game: gameId,
-      serviceName: `${typeLabel} ${gameConfig.displayName} ${modeConfig.displayName}: ${displayCurrent} → ${displayTarget}`,
-      description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} de ${displayCurrent} para ${displayTarget}`,
-      currentRank: displayCurrent,
-      targetRank: displayTarget,
-      price,
-      duration: '2-5 dias',
-      metadata: {
-        currentRating: currentValue,
-        targetRating: targetValue,
-        gameType: `${gameId}_${selectedMode}`,
-        mode: selectedMode,
-        serviceType: selectedServiceType,
-      },
+    let cartItem: CartItem
+
+    if (selectedServiceType === 'COACHING') {
+      cartItem = {
+        game: gameId,
+        serviceName: `${typeLabel} ${gameConfig.displayName} ${modeConfig.displayName}: ${selectedHours}h`,
+        description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} — ${selectedHours} hora${selectedHours > 1 ? 's' : ''}`,
+        currentRank: `${selectedHours}h`,
+        targetRank: `${selectedHours}h`,
+        price,
+        duration: `${selectedHours} hora${selectedHours > 1 ? 's' : ''}`,
+        metadata: {
+          hours: selectedHours,
+          gameType: `${gameId}_${gameMode}`,
+          mode: gameMode,
+          serviceType: selectedServiceType,
+        },
+      }
+    } else {
+      const currentValue = parseInt(selectedCurrent) * 1000
+      const targetValue = parseInt(selectedTarget) * 1000
+      const displayCurrent = `${selectedCurrent}K`
+      const displayTarget = `${selectedTarget}K`
+
+      cartItem = {
+        game: gameId,
+        serviceName: `${typeLabel} ${gameConfig.displayName} ${modeConfig.displayName}: ${displayCurrent} → ${displayTarget}`,
+        description: `${typeLabel} profissional no ${gameConfig.name} ${modeConfig.name} de ${displayCurrent} para ${displayTarget}`,
+        currentRank: displayCurrent,
+        targetRank: displayTarget,
+        price,
+        duration: '2-5 dias',
+        metadata: {
+          currentRating: currentValue,
+          targetRating: targetValue,
+          gameType: `${gameId}_${gameMode}`,
+          mode: gameMode,
+          serviceType: selectedServiceType,
+        },
+      }
     }
 
     try {
@@ -155,11 +201,9 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         }
       )
 
-      // Se o pedido foi criado, redirecionar direto para pagamento
       if (result.orderCreated && result.orderId) {
         router.replace(`/payment?orderId=${result.orderId}&total=${result.price}`)
       }
-      // Se não foi criado (usuário não logado), o redirect já foi feito para /login
     } catch (error) {
       console.error('Erro ao contratar serviço:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro ao contratar serviço. Tente novamente.'
@@ -167,16 +211,6 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  // Reset seleções ao mudar de modo com transição
-  const handleModeChange = (mode: GameMode) => {
-    if (mode === selectedMode) return
-
-    setSelectedMode(mode)
-    setSelectedCurrent('')
-    setSelectedTarget('')
-    setPrice(0)
   }
 
   // Reset seleções ao mudar de tipo de serviço
@@ -187,45 +221,79 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
     setSelectedCurrent('')
     setSelectedTarget('')
     setPrice(0)
+
+    if (type === 'COACHING') {
+      setSelectedHours(null)
+    } else {
+      setSelectedHours(null)
+    }
   }
 
-  // Obter pontos de rating baseado no modo (dynamic from API or fallback to static)
+  // Obter pontos de rating (dynamic from API or fallback to static)
   const getRatingPoints = (isTarget: boolean = false) => {
     if (!modeConfig) return []
 
-    // Use dynamic points if available, otherwise fall back to static config
     const basePoints = dynamicPoints || modeConfig.ratingPoints
     if (!basePoints) return []
 
-    let filteredPoints = basePoints
+    const filteredPoints = isTarget
+      ? basePoints
+      : basePoints.filter(p => p < basePoints[basePoints.length - 1])
 
-    if (selectedMode === 'PREMIER') {
-      // Current: all except last, Target: all except first
-      filteredPoints = isTarget
-        ? basePoints
-        : basePoints.filter(p => p < basePoints[basePoints.length - 1])
-    } else if (selectedMode === 'GAMERS_CLUB') {
-      // Current: all except last, Target: all except first
-      filteredPoints = isTarget
-        ? basePoints
-        : basePoints.filter(p => p < basePoints[basePoints.length - 1])
-    }
-
-    return filteredPoints.map(value => {
-      // Display value based on mode
-      const display = selectedMode === 'PREMIER'
-        ? `${value / 1000}K`
-        : value.toString()
-
-      return { value, display }
-    })
+    return filteredPoints.map(value => ({
+      value,
+      display: `${value / 1000}K`,
+    }))
   }
 
   const currentRatingPoints = getRatingPoints(false)
   const targetRatingPoints = getRatingPoints(true)
 
   const calculatePrice = async () => {
-    if (!selectedCurrent || !selectedTarget || !modeConfig || !selectedServiceType) {
+    if (!modeConfig || !selectedServiceType) {
+      setPrice(0)
+      return
+    }
+
+    if (selectedServiceType === 'COACHING') {
+      if (!selectedHours) {
+        setPrice(0)
+        return
+      }
+
+      setIsCalculating(true)
+      try {
+        const response = await fetch('/api/pricing/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            game: gameId,
+            gameMode,
+            serviceType: selectedServiceType,
+            hours: selectedHours,
+          }),
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          showError('Erro ao calcular preço', error.message || 'Não foi possível calcular o preço')
+          setPrice(0)
+          return
+        }
+
+        const data = await response.json()
+        setPrice(data.data.price)
+      } catch (error) {
+        console.error('Error calculating price:', error)
+        showError('Erro', 'Não foi possível calcular o preço. Tente novamente.')
+        setPrice(0)
+      } finally {
+        setIsCalculating(false)
+      }
+      return
+    }
+
+    if (!selectedCurrent || !selectedTarget) {
       setPrice(0)
       return
     }
@@ -238,21 +306,17 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
       return
     }
 
-    // Converter para valores reais baseado no modo
-    const currentValue = selectedMode === 'PREMIER' ? current * 1000 : current
-    const targetValue = selectedMode === 'PREMIER' ? target * 1000 : target
+    const currentValue = current * 1000
+    const targetValue = target * 1000
 
     setIsCalculating(true)
     try {
-      // Chamar API para calcular preço dinamicamente
       const response = await fetch('/api/pricing/calculate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           game: gameId,
-          gameMode: selectedMode,
+          gameMode,
           serviceType: selectedServiceType,
           current: currentValue,
           target: targetValue,
@@ -261,7 +325,7 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        showError('Erro ao calcular preço', error.error || 'Não foi possível calcular o preço')
+        showError('Erro ao calcular preço', error.message || 'Não foi possível calcular o preço')
         setPrice(0)
         return
       }
@@ -278,13 +342,21 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
   }
 
   const handleCurrentSelect = (value: number) => {
-    const displayValue = selectedMode === 'PREMIER' ? (value / 1000).toString() : value.toString()
-    setSelectedCurrent(displayValue)
+    setSelectedCurrent((value / 1000).toString())
   }
 
   const handleTargetSelect = (value: number) => {
-    const displayValue = selectedMode === 'PREMIER' ? (value / 1000).toString() : value.toString()
-    setSelectedTarget(displayValue)
+    setSelectedTarget((value / 1000).toString())
+  }
+
+  const isCalculateDisabled = selectedServiceType === 'COACHING'
+    ? !selectedHours || isCalculating
+    : !selectedCurrent || !selectedTarget || isCalculating
+
+  const getServiceIcon = (type: ServiceType) => {
+    if (type === 'RANK_BOOST') return Sword
+    if (type === 'DUO_BOOST') return Users
+    return Clock
   }
 
   if (!gameConfig || !modeConfig) {
@@ -311,12 +383,12 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
         <CardContent>
           {/* Service Type Selection — Phase A (full cards) or Phase B (compact bar) */}
           {selectedServiceType === null ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               {([
                 {
                   type: 'RANK_BOOST' as ServiceType,
                   Icon: Sword,
-                  title: 'Rank Boost',
+                  title: 'Boost',
                   description: 'Nosso booster joga por você e sobe seu rank profissionalmente.',
                 },
                 {
@@ -324,6 +396,12 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
                   Icon: Users,
                   title: 'Duo Boost',
                   description: 'Você joga ao lado de um booster profissional para subir juntos.',
+                },
+                {
+                  type: 'COACHING' as ServiceType,
+                  Icon: Clock,
+                  title: 'Coaching',
+                  description: 'Aulas com um profissional para melhorar suas habilidades.',
                 },
               ] as const).map(({ type, Icon, title, description }) => (
                 <button
@@ -344,11 +422,11 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
               ))}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {(gameConfig.supportedServiceTypes as ServiceType[]).map((type) => {
+            <div className="flex flex-wrap gap-2 mb-4 justify-center">
+              {(['RANK_BOOST', 'DUO_BOOST', 'COACHING'] as ServiceType[]).map((type) => {
                 const info = gameConfig.serviceTypeInfo?.[type]
                 const isSelected = selectedServiceType === type
-                const Icon = type === 'RANK_BOOST' ? Sword : Users
+                const Icon = getServiceIcon(type)
                 return (
                   <button
                     key={type}
@@ -369,246 +447,255 @@ export function CS2Calculator({ gameId = 'CS2' }: GameCalculatorProps) {
 
           {selectedServiceType !== null && (
             <div key={selectedServiceType} className="animate-fadeInUp">
-          {/* Service Type Description */}
-          {serviceTypeInfo && (
-            <p className="text-xs text-brand-gray-400 text-center mb-3 font-rajdhani">
-              {serviceTypeInfo.description}
-            </p>
-          )}
+              {/* Service Type Description */}
+              {serviceTypeInfo && (
+                <p className="text-xs text-brand-gray-400 text-center mb-3 font-rajdhani">
+                  {serviceTypeInfo.description}
+                </p>
+              )}
 
-          {/* Mode Selector */}
-          {gameConfig.modes && Object.keys(gameConfig.modes).length > 1 && (
-            <div className="mb-4">
-              <Tabs value={selectedMode} onValueChange={(value) => handleModeChange(value as GameMode)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-brand-purple/30 rounded-lg p-1 gap-1 h-auto">
-                  <TabsTrigger
-                    value="PREMIER"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
-                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
-                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
-                  >
-                    Premier
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="GAMERS_CLUB"
-                    className="font-rajdhani font-bold transition-all duration-300 rounded-md py-2 px-3
-                      data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow
-                      data-[state=inactive]:text-brand-gray-500 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-brand-purple/20"
-                  >
-                    Gamers Club
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          )}
-
-
-
-          {/* Warning for Active Orders */}
-          {user && hasActiveOrderInMode && (
-            <Card className="bg-amber-500/20 border border-amber-500/70 mb-6 animate-pulse">
-              <CardContent className="p-4 md:p-5">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
-                      Você já possui um boost ativo nesta modalidade
-                    </h3>
-                    <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
-                      Você tem {activeOrders.length} pedido{activeOrders.length > 1 ? 's' : ''} {activeOrders[0].status === 'PENDING' ? 'pendente' : activeOrders[0].status === 'PAID' ? 'pago' : 'em andamento'} de boost {selectedMode === 'PREMIER' ? 'Premier' : 'Gamers Club'}.
-                      Finalize ou cancele o pedido anterior antes de criar um novo.
-                    </p>
-                    <Link
-                      href="/dashboard"
-                      className="inline-block bg-amber-500 hover:bg-amber-500/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
-                    >
-                      Ver Meus Pedidos
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="space-y-4">
-            {/* Rating Selection - Side by Side */}
-            {isLoadingRanges ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
-                  <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
-                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                    {Array.from({ length: selectedMode === 'PREMIER' ? 10 : 12 }).map((_, i) => (
-                      <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Skeleton className="h-6 w-44 mb-2 bg-white/5" />
-                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                    {Array.from({ length: selectedMode === 'PREMIER' ? 10 : 12 }).map((_, i) => (
-                      <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Current Rating */}
-                <div>
-                  <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                    {selectedMode === 'PREMIER' ? 'PONTUAÇÃO ATUAL:' : 'NÍVEL ATUAL:'}
-                  </h3>
-                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                    {currentRatingPoints.map((point) => {
-                      const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                      const isSelected = selectedCurrent === displayValue
-
-                      return (
-                        <button
-                          key={point.value}
-                          onClick={() => handleCurrentSelect(point.value)}
-                          className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                            ${isSelected
-                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
-                              : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                            }`}
-                        >
-                          {point.display}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Target Rating */}
-                <div>
-                  <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                    {selectedMode === 'PREMIER' ? 'PONTUAÇÃO DESEJADA:' : 'NÍVEL DESEJADO:'}
-                  </h3>
-                  <div className={`grid gap-1.5 ${selectedMode === 'PREMIER' ? 'grid-cols-5' : 'grid-cols-6'}`}>
-                    {targetRatingPoints.map((point) => {
-                      const displayValue = selectedMode === 'PREMIER' ? (point.value / 1000).toString() : point.value.toString()
-                      const isSelected = selectedTarget === displayValue
-
-                      return (
-                        <button
-                          key={point.value}
-                          onClick={() => handleTargetSelect(point.value)}
-                          className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                            ${isSelected
-                              ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
-                              : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                            }`}
-                        >
-                          {point.display}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Calculate Button and Result */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Calculate Button */}
-              <div className="flex justify-center lg:justify-start">
-                <button
-                  onClick={calculatePrice}
-                  disabled={!selectedCurrent || !selectedTarget || isCalculating}
-                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all
-                    shadow-glow hover:shadow-glow-hover
-                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
-                    font-rajdhani text-sm flex items-center gap-2"
-                >
-                  {isCalculating ? (
-                    <>
-                      <Spinner size="md" />
-                      Calculando...
-                    </>
-                  ) : (
-                    <>
-                      <Calculator className="h-5 w-5" />
-                      CALCULAR PREÇO
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Price Result */}
-              <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
-                <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
-                  <span className="text-brand-purple-light">PREÇO</span>
-                  <span className="text-white"> ESTIMADO</span>
-                </h3>
-
-                {isCalculating ? (
-                  <div className="text-center py-2">
-                    <div className="inline-flex items-center gap-3 text-brand-purple-light">
-                      <Spinner size="md" />
-                      <span className="text-sm md:text-base font-rajdhani font-semibold">
-                        Calculando preço...
-                      </span>
-                    </div>
-                  </div>
-                ) : price > 0 ? (
-                  <div className="text-center">
-                    <div className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1">
-                      R$ {price.toFixed(2)}
-                    </div>
-                    <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
-                      {selectedMode === 'PREMIER'
-                        ? `${selectedCurrent}K → ${selectedTarget}K pontos`
-                        : `Nível ${selectedCurrent} → Nível ${selectedTarget}`}
-                      {selectedServiceType === 'DUO_BOOST' && (
-                        <span className="text-brand-purple-light ml-1">(Duo Boost)</span>
-                      )}
-                    </p>
-                    {user && hasActiveOrderInMode ? (
-                      <div>
-                        <button
-                          disabled={true}
-                          className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
-                        >
-                          BOOST JÁ ATIVO NESTA MODALIDADE
-                        </button>
-                        <p className="text-xs text-amber-500 font-rajdhani">
-                          Finalize seu pedido atual para contratar um novo
+              {/* Warning for Active Orders */}
+              {user && hasActiveOrderInMode && (
+                <Card className="bg-amber-500/20 border border-amber-500/70 mb-6 animate-pulse">
+                  <CardContent className="p-4 md:p-5">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
+                          Você já possui um serviço ativo
+                        </h3>
+                        <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
+                          Finalize ou cancele o serviço atual antes de contratar um novo.
                         </p>
+                        <Link
+                          href="/dashboard"
+                          className="inline-block bg-amber-500 hover:bg-amber-500/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
+                        >
+                          Ver Meus Pedidos
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {/* Coaching: hours selector */}
+                {selectedServiceType === 'COACHING' ? (
+                  isLoadingRanges ? (
+                    <div>
+                      <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {Array.from({ length: 10 }).map((_, i) => (
+                          <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
+                        QUANTIDADE DE HORAS:
+                      </h3>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {availableHours.map((h) => {
+                          const isSelected = selectedHours === h
+                          return (
+                            <button
+                              key={h}
+                              onClick={() => { setSelectedHours(h); setPrice(0) }}
+                              className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
+                                ${isSelected
+                                  ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
+                                  : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
+                                }`}
+                            >
+                              {h}h
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  /* Rank Boost / Duo Boost: current and target rating */
+                  isLoadingRanges ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {Array.from({ length: 10 }).map((_, i) => (
+                            <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Skeleton className="h-6 w-44 mb-2 bg-white/5" />
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {Array.from({ length: 10 }).map((_, i) => (
+                            <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Current Rating */}
+                      <div>
+                        <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
+                          PONTUAÇÃO ATUAL:
+                        </h3>
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {currentRatingPoints.map((point) => {
+                            const displayValue = (point.value / 1000).toString()
+                            const isSelected = selectedCurrent === displayValue
+
+                            return (
+                              <button
+                                key={point.value}
+                                onClick={() => handleCurrentSelect(point.value)}
+                                className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
+                                  ${isSelected
+                                    ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
+                                    : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
+                                  }`}
+                              >
+                                {point.display}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Target Rating */}
+                      <div>
+                        <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
+                          PONTUAÇÃO DESEJADA:
+                        </h3>
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {targetRatingPoints.map((point) => {
+                            const displayValue = (point.value / 1000).toString()
+                            const isSelected = selectedTarget === displayValue
+
+                            return (
+                              <button
+                                key={point.value}
+                                onClick={() => handleTargetSelect(point.value)}
+                                className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
+                                  ${isSelected
+                                    ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
+                                    : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
+                                  }`}
+                              >
+                                {point.display}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {/* Calculate Button and Result */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Calculate Button */}
+                  <div className="flex justify-center lg:justify-start">
+                    <button
+                      onClick={calculatePrice}
+                      disabled={isCalculateDisabled}
+                      className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all
+                        shadow-glow hover:shadow-glow-hover
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
+                        font-rajdhani text-sm flex items-center gap-2"
+                    >
+                      {isCalculating ? (
+                        <>
+                          <Spinner size="md" />
+                          Calculando...
+                        </>
+                      ) : (
+                        <>
+                          <Calculator className="h-5 w-5" />
+                          CALCULAR PREÇO
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Price Result */}
+                  <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
+                    <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
+                      <span className="text-brand-purple-light">PREÇO</span>
+                      <span className="text-white"> ESTIMADO</span>
+                    </h3>
+
+                    {isCalculating ? (
+                      <div className="text-center py-2">
+                        <div className="inline-flex items-center gap-3 text-brand-purple-light">
+                          <Spinner size="md" />
+                          <span className="text-sm md:text-base font-rajdhani font-semibold">
+                            Calculando preço...
+                          </span>
+                        </div>
+                      </div>
+                    ) : price > 0 ? (
+                      <div className="text-center">
+                        <div className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1">
+                          R$ {price.toFixed(2)}
+                        </div>
+                        <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
+                          {selectedServiceType === 'COACHING'
+                            ? `${selectedHours} hora${selectedHours && selectedHours > 1 ? 's' : ''} de coaching`
+                            : `${selectedCurrent}K → ${selectedTarget}K pontos`}
+                          {selectedServiceType === 'DUO_BOOST' && (
+                            <span className="text-brand-purple-light ml-1">(Duo Boost)</span>
+                          )}
+                        </p>
+                        {user && hasActiveOrderInMode ? (
+                          <div>
+                            <button
+                              disabled={true}
+                              className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                            >
+                              BOOST JÁ ATIVO NESTA MODALIDADE
+                            </button>
+                            <p className="text-xs text-amber-500 font-rajdhani">
+                              Finalize seu pedido atual para contratar um novo
+                            </p>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={handleHire}
+                            disabled={isLoading}
+                            className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all
+                              shadow-glow hover:shadow-glow-hover
+                              disabled:opacity-50 disabled:cursor-not-allowed
+                              font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"
+                          >
+                            {isLoading ? (
+                              <>
+                                <Spinner size="md" />
+                                Processando...
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="h-5 w-5" />
+                                CONTRATAR AGORA
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     ) : (
-                      <button
-                        onClick={handleHire}
-                        disabled={isLoading}
-                        className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all
-                          shadow-glow hover:shadow-glow-hover
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Spinner size="md" />
-                            Processando...
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="h-5 w-5" />
-                            CONTRATAR AGORA
-                          </>
-                        )}
-                      </button>
+                      <div className="text-center text-xs md:text-sm text-brand-gray-500 font-rajdhani py-4">
+                        {selectedServiceType === 'COACHING'
+                          ? 'Selecione a quantidade de horas e clique em "Calcular Preço"'
+                          : 'Selecione as pontuações e clique em "Calcular Preço"'}
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <div className="text-center text-xs md:text-sm text-brand-gray-500 font-rajdhani py-4">
-                    {selectedMode === 'PREMIER'
-                      ? 'Selecione as pontuações e clique em "Calcular Preço"'
-                      : 'Selecione os níveis e clique em "Calcular Preço"'}
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
             </div>
           )}
         </CardContent>

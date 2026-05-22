@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       adminId,
+      order: { isTest: false },
     }
 
     if (status && ['PENDING', 'PAID', 'CANCELLED'].includes(status)) {
@@ -81,16 +82,16 @@ export async function GET(request: NextRequest) {
       pendingRevenues,
     ] = await Promise.all([
       prisma.adminRevenue.aggregate({
-        where: { adminId, status: 'PAID' },
+        where: { adminId, status: 'PAID', order: { isTest: false } },
         _sum: { amount: true },
       }),
       prisma.adminRevenue.aggregate({
-        where: { adminId, status: 'PENDING' },
+        where: { adminId, status: 'PENDING', order: { isTest: false } },
         _sum: { amount: true },
       }),
-      prisma.adminRevenue.count({ where: { adminId } }),
-      prisma.adminRevenue.count({ where: { adminId, status: 'PAID' } }),
-      prisma.adminRevenue.count({ where: { adminId, status: 'PENDING' } }),
+      prisma.adminRevenue.count({ where: { adminId, order: { isTest: false } } }),
+      prisma.adminRevenue.count({ where: { adminId, status: 'PAID', order: { isTest: false } } }),
+      prisma.adminRevenue.count({ where: { adminId, status: 'PENDING', order: { isTest: false } } }),
     ])
 
     return NextResponse.json(
