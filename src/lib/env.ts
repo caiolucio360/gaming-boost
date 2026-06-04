@@ -17,6 +17,8 @@ const requiredEnvVars = [
 
 const optionalButRecommended = [
     'ABACATEPAY_API_KEY',
+    'ASAAS_API_KEY',
+    'ASAAS_WEBHOOK_SECRET',
     'RESEND_API_KEY',
     'EMAIL_FROM',
     'ORDER_TIMEOUT_HOURS',
@@ -45,6 +47,22 @@ export function validateEnv() {
         }
     }
 
+    // Validate ASAAS_API_KEY format.
+    // Asaas keys always start with "$aact_" (sandbox: "$aact_hmlg_", prod: "$aact_prod_").
+    // Common pitfall: the leading "$" is eaten by dotenv/@next/env variable expansion when
+    // it isn't escaped in a .env file (use "\$aact_..."), leaving the value empty or mangled —
+    // which makes the app "fail to read the key". Surface this loudly at startup instead of
+    // only discovering it when a PIX charge silently fails.
+    const asaasKey = process.env.ASAAS_API_KEY
+    if (asaasKey && !asaasKey.startsWith('$aact_')) {
+        console.warn(
+            '⚠️  WARNING: ASAAS_API_KEY is set but does not start with "$aact_" — it looks invalid or mangled.\n' +
+            '   • Expected: "$aact_hmlg_..." (sandbox) or "$aact_prod_..." (production).\n' +
+            '   • In .env files, escape the leading "$" as "\\$" so it is not expanded.\n' +
+            '   • In the Vercel dashboard, paste the key literally (no backslash).'
+        )
+    }
+
     // Warn about missing optional variables in production
     if (process.env.NODE_ENV === 'production') {
         const missingOptional = optionalButRecommended.filter((key) => !process.env[key])
@@ -65,6 +83,9 @@ export function validateEnv() {
         }
         if (!process.env.ORDER_TIMEOUT_HOURS) {
             console.log('ℹ️  ORDER_TIMEOUT_HOURS not set - auto-refund will be disabled')
+        }
+        if (!process.env.ASAAS_API_KEY) {
+            console.log('ℹ️  ASAAS_API_KEY not set - real Asaas PIX charges will fail; use the dev "simulate payment" button')
         }
     }
 }
