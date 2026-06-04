@@ -85,75 +85,86 @@ export default function CS2Page() {
 
           <div className="max-w-6xl xl:max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {services.map((service, index) => (
-                <Card
-                  key={index}
-                  className={`group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border transition-all duration-500 overflow-hidden ${
-                    service.available
-                      ? 'border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 hover:scale-[1.02] cursor-pointer'
-                      : 'border-gray-500/30 opacity-60 cursor-not-allowed'
-                  }`}
-                  style={{
-                  }}
-                >
-                  {/* Efeito de brilho no hover */}
-                  {service.available && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/10 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
-                  )}
-                  
-                  <CardHeader className="text-center pb-2 relative z-10">
-                    <div className="text-6xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 inline-block">
-                      {service.icon}
-                    </div>
-                    <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
-                      {service.title}
-                    </CardTitle>
-                    <CardDescription className="text-brand-gray-300 font-rajdhani text-lg mt-2 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                      {service.description}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-4 relative z-10">
-                    <ul className="space-y-3 mb-8">
-                      {service.features.map((feature, featureIndex) => (
-                        <li 
-                          key={featureIndex} 
-                          className="flex items-center text-brand-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300"
-                          style={{ 
-                            fontFamily: 'Rajdhani, sans-serif', 
-                            fontWeight: '400',
-                          }}
-                        >
-                          <div className={`w-2 h-2 rounded-full mr-3 transition-all duration-300 ${service.available ? 'bg-brand-purple-light group-hover:bg-brand-purple-light group-hover:scale-125' : 'bg-gray-400'}`}></div>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+              {services.map((service, index) => {
+                const isClickable = service.available
 
-                    <div className="text-center">
-                      {service.available ? (
-                        <Link href={service.href} className="block w-full">
-                          <Button 
-                            className="w-full bg-gradient-to-r from-brand-purple to-brand-purple-light text-white font-rajdhani font-bold py-6 text-lg group shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 relative overflow-hidden"
+                const cardElement = (
+                  <Card
+                    className={`group relative h-full bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border transition-all duration-500 overflow-hidden ${
+                      isClickable
+                        ? 'border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 hover:scale-[1.02] cursor-pointer'
+                        : 'border-gray-500/30 opacity-60 cursor-not-allowed'
+                    }`}
+                  >
+                    {/* Efeito de brilho no hover */}
+                    {isClickable && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/10 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+                    )}
+                    
+                    <CardHeader className="text-center pb-2 relative z-10">
+                      <div className="text-6xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 inline-block">
+                        {service.icon}
+                      </div>
+                      <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                        {service.title}
+                      </CardTitle>
+                      <CardDescription className="text-brand-gray-300 font-rajdhani text-lg mt-2 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                        {service.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="pt-4 relative z-10 flex flex-col justify-between h-[calc(100%-140px)]">
+                      <ul className="space-y-3 mb-8">
+                        {service.features.map((feature, featureIndex) => (
+                          <li 
+                            key={featureIndex} 
+                            className="flex items-center text-brand-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300"
+                            style={{ 
+                              fontFamily: 'Rajdhani, sans-serif', 
+                              fontWeight: '400',
+                            }}
                           >
-                            <span className="relative z-10 flex items-center justify-center">
-                              Continuar
-                              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </span>
-                          </Button>
-                        </Link>
-                      ) : (
-                        <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani w-full" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
-                          <span className="text-sm text-brand-purple-light font-semibold mr-2">(em breve)</span>
-                          <span>Em desenvolvimento</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                            <div className={`w-2 h-2 rounded-full mr-3 transition-all duration-300 ${isClickable ? 'bg-brand-purple-light group-hover:bg-brand-purple-light group-hover:scale-125' : 'bg-gray-400'}`}></div>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="text-center mt-auto">
+                        {isClickable ? (
+                          <div className="block w-full">
+                            <div 
+                              className="w-full inline-flex items-center justify-center bg-gradient-to-r from-brand-purple to-brand-purple-light text-white font-rajdhani font-bold py-4 rounded-md text-lg group shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 relative overflow-hidden"
+                            >
+                              <span className="relative z-10 flex items-center justify-center">
+                                Continuar
+                                <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani w-full" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                            <span className="text-sm text-brand-purple-light font-semibold mr-2">(em breve)</span>
+                            <span>Em desenvolvimento</span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+
+                return isClickable ? (
+                  <Link href={service.href} key={index} className="block outline-none focus:ring-2 focus:ring-brand-purple-light focus:ring-offset-2 focus:ring-offset-brand-black rounded-xl h-full">
+                    {cardElement}
+                  </Link>
+                ) : (
+                  <div key={index} className="h-full">
+                    {cardElement}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
