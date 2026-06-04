@@ -4,7 +4,7 @@ import { ElojobHero } from "@/components/layout/elojob-hero"
 
 export const metadata: Metadata = generateMetadata({
   title: 'Início - FlautasBoost',
-  description: 'Plataforma profissional de boost para Counter-Strike 2. Subimos seu rank Premier e Gamers Club com segurança e rapidez. Boosters verificados, entrega garantida.',
+  description: 'Subimos seu rank com segurança e rapidez. Boosters verificados, entrega garantida.',
   keywords: [
     'boost cs2',
     'boost counter strike 2',
@@ -20,7 +20,7 @@ export const metadata: Metadata = generateMetadata({
 
 export default function HomePage() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'
-  
+
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
