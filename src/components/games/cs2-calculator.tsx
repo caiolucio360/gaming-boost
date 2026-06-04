@@ -69,11 +69,19 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
           if (selectedServiceType === 'COACHING') {
             const hours = data.data?.hours
+            const min = data.data?.min
+            const max = data.data?.max
+            
+            if (min !== undefined) setMinRating(min)
+            if (max !== undefined) setMaxRating(max)
+
             if (hours && hours.length > 0) {
               setAvailableHours(hours)
             } else {
               // Fallback: generate 1–10 hours
               setAvailableHours(Array.from({ length: 10 }, (_, i) => i + 1))
+              setMinRating(1)
+              setMaxRating(10)
             }
             setDynamicPoints(null)
           } else {
