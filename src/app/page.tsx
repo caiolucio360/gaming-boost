@@ -15,11 +15,11 @@ export const metadata: Metadata = generateMetadata({
     'serviço de boost profissional',
     'boost seguro',
   ],
-  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br',
 })
 
 export default function HomePage() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'
   
   const organizationSchema = {
     '@context': 'https://schema.org',

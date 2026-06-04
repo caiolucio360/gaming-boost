@@ -12,7 +12,7 @@ export const metadata: Metadata = generateMetadata({
     'preço boost premier',
     'preço boost gamers club',
   ],
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/games/cs2/pricing`,
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'}/games/cs2/pricing`,
 })
 
 export default function CS2PricingPage() {

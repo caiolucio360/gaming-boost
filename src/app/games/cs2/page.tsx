@@ -51,7 +51,7 @@ export default function CS2Page() {
             provider: {
               '@type': 'Organization',
               name: 'FlautasBoost',
-              url: 'https://gameboostpro.com.br',
+              url: 'https://www.flautasboost.com.br',
             },
             areaServed: 'BR',
             serviceType: 'Gaming Service',

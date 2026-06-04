@@ -134,7 +134,7 @@ export function getEmailTemplate(content: string): string {
 <body>
   <div class="email-container">
     <div class="header">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gameboost.com.br'}" class="logo">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.flautasboost.com.br'}" class="logo">
         FlautasBoost 🎮
       </a>
     </div>
@@ -145,7 +145,7 @@ export function getEmailTemplate(content: string): string {
       <p>FlautasBoost - Plataforma de Boost Profissional</p>
       <p>Este é um email automático, por favor não responda.</p>
       <p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gameboost.com.br'}" style="color: #9333ea;">Acessar Plataforma</a>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.flautasboost.com.br'}" style="color: #9333ea;">Acessar Plataforma</a>
       </p>
     </div>
   </div>

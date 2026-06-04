@@ -12,7 +12,7 @@ export const metadata: Metadata = generateMetadata({
     'boost profissional',
     'boost seguro',
   ],
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/about`,
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'}/about`,
 })
 
 export default function AboutPage() {
@@ -50,8 +50,8 @@ export default function AboutPage() {
             '@type': 'Organization',
             name: 'FlautasBoost',
             description: 'Plataforma profissional de boost para jogos',
-            url: 'https://gameboostpro.com.br',
-            logo: 'https://gameboostpro.com.br/principal.png',
+            url: 'https://www.flautasboost.com.br',
+            logo: 'https://www.flautasboost.com.br/principal.png',
             foundingDate: '2020',
             numberOfEmployees: {
               '@type': 'QuantitativeValue',
