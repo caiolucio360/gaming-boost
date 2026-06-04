@@ -139,9 +139,9 @@ export async function calculatePremierPrice(
       throw new Error('Erro no cálculo de preço: configuração de faixas inválida.')
     }
 
-    // Calcular preço proporcional para esses pontos (preço base é por 1000 pontos)
-    const thousands = pointsToProcess / 1000
-    total += thousands * currentRange.price
+    // Calcular preço proporcional para esses pontos (preço base é por 100 pontos)
+    const hundreds = pointsToProcess / 100
+    total += hundreds * currentRange.price
 
     // Avançar para a próxima faixa
     currentRating += pointsToProcess

@@ -298,7 +298,9 @@ export default function PrivacyPage() {
                   </p>
                   <p>
                     <strong className="text-white">Suporte:</strong>{' '}
-                    suporte@flautasboost.com.br
+                    <a href="https://discord.gg/AqhGaTd3r" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">
+                      Nosso servidor do Discord
+                    </a>
                   </p>
                   <p className="text-sm">
                     Prazo de resposta: até 15 dias conforme estabelecido pela LGPD
