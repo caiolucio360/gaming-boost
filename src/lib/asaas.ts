@@ -1,3 +1,18 @@
+/**
+ * Asaas Payment Provider Integration
+ * Documentação: https://docs.asaas.com/reference/comece-por-aqui
+ *
+ * Fluxo PIX:
+ *   1. Criar customer (getOrCreateAsaasCustomer)
+ *   2. Criar cobrança com billingType=PIX (POST /v3/payments)
+ *   3. Buscar QR Code (GET /v3/payments/{id}/pixQrCode)
+ *   4. Receber webhook PAYMENT_RECEIVED → confirmar pagamento
+ *
+ * Fluxo Saque (Booster):
+ *   1. Criar transferência PIX (POST /v3/transfers)
+ *   2. Receber webhook TRANSFER_DONE → marcar saque como concluído
+ */
+
 export interface AsaasCustomer {
   id: string
   name: string
@@ -13,10 +28,39 @@ export interface AsaasPixResponse {
   expirationDate: string
 }
 
+export interface AsaasPaymentDetails {
+  id: string
+  status: string
+  value: number
+  netValue: number
+  billingType: string
+  description: string | null
+  externalReference: string | null
+  paymentDate: string | null
+  confirmedDate: string | null
+  invoiceUrl: string | null
+  deleted: boolean
+}
+
+export interface AsaasTransferDetails {
+  id: string
+  status: string
+  value: number
+  netValue: number
+  transferFee: number
+  operationType: string
+  failReason: string | null
+  transactionReceiptUrl: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
 const getBaseUrl = () => {
-  return process.env.NODE_ENV === 'production' 
+  return process.env.NODE_ENV === 'production'
     ? 'https://api.asaas.com/v3'
-    : 'https://sandbox.asaas.com/api/v3'
+    : 'https://api-sandbox.asaas.com/v3'
 }
 
 const getHeaders = () => {
@@ -30,8 +74,13 @@ const getHeaders = () => {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Customer
+// ---------------------------------------------------------------------------
+
 /**
- * Ensures a customer exists in Asaas and returns their ID
+ * Ensures a customer exists in Asaas and returns their ID.
+ * First searches by CPF/CNPJ, creates if not found.
  */
 export async function getOrCreateAsaasCustomer(data: { name: string, email: string, cpfCnpj: string, phone?: string }): Promise<string> {
   // First try to find by CPF/CNPJ
@@ -41,9 +90,9 @@ export async function getOrCreateAsaasCustomer(data: { name: string, email: stri
   })
 
   if (!searchRes.ok) throw new Error('Failed to search Asaas customer')
-  
+
   const searchData = await searchRes.json()
-  
+
   if (searchData.data && searchData.data.length > 0) {
     return searchData.data[0].id
   }
@@ -70,8 +119,18 @@ export async function getOrCreateAsaasCustomer(data: { name: string, email: stri
   return createData.id
 }
 
+// ---------------------------------------------------------------------------
+// PIX Charge (Cobrança)
+// ---------------------------------------------------------------------------
+
 /**
- * Creates a PIX charge in Asaas and retrieves the QR Code
+ * Creates a PIX charge in Asaas and retrieves the QR Code.
+ *
+ * Flow:
+ *   POST /v3/payments  (billingType: PIX)
+ *   GET  /v3/payments/{id}/pixQrCode
+ *
+ * Returns encodedImage (Base64), payload (copia-e-cola), expirationDate.
  */
 export async function createAsaasPixCharge(params: {
   amount: number; // in Reais (R$)
@@ -80,13 +139,13 @@ export async function createAsaasPixCharge(params: {
   externalReference?: string;
   dueDate?: Date;
 }): Promise<AsaasPixResponse> {
-  
+
   // 1. Get or Create Customer
   const customerId = await getOrCreateAsaasCustomer(params.customer)
 
-  // 2. Create Payment (Charge)
-  const dueDateStr = params.dueDate 
-    ? params.dueDate.toISOString().split('T')[0] 
+  // 2. Create Payment (Charge) — POST /v3/payments
+  const dueDateStr = params.dueDate
+    ? params.dueDate.toISOString().split('T')[0]
     : new Date().toISOString().split('T')[0]
 
   const paymentRes = await fetch(`${getBaseUrl()}/payments`, {
@@ -109,7 +168,7 @@ export async function createAsaasPixCharge(params: {
 
   const paymentData = await paymentRes.json()
 
-  // 3. Get PIX QR Code for this payment
+  // 3. Get PIX QR Code — GET /v3/payments/{id}/pixQrCode
   const qrRes = await fetch(`${getBaseUrl()}/payments/${paymentData.id}/pixQrCode`, {
     method: 'GET',
     headers: getHeaders()
@@ -131,8 +190,82 @@ export async function createAsaasPixCharge(params: {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Payment Queries
+// ---------------------------------------------------------------------------
+
 /**
- * Creates a PIX Transfer (Payout) to a third party (e.g., Booster)
+ * Get full payment details from Asaas — GET /v3/payments/{id}
+ */
+export async function getAsaasPaymentById(paymentId: string): Promise<AsaasPaymentDetails> {
+  const res = await fetch(`${getBaseUrl()}/payments/${paymentId}`, {
+    method: 'GET',
+    headers: getHeaders()
+  })
+
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(`Failed to get Asaas payment: ${JSON.stringify(err)}`)
+  }
+
+  return await res.json()
+}
+
+/**
+ * Check payment status — GET /v3/payments/{id}
+ * Returns just the status string (e.g. 'PENDING', 'RECEIVED', 'CONFIRMED', 'OVERDUE')
+ */
+export async function checkAsaasPaymentStatus(paymentId: string): Promise<string> {
+  const data = await getAsaasPaymentById(paymentId)
+  return data.status
+}
+
+// ---------------------------------------------------------------------------
+// Payment Actions (Refund / Cancel)
+// ---------------------------------------------------------------------------
+
+/**
+ * Refund a PIX payment — POST /v3/payments/{id}/refund
+ */
+export async function refundAsaasPayment(paymentId: string): Promise<any> {
+  const refundRes = await fetch(`${getBaseUrl()}/payments/${paymentId}/refund`, {
+    method: 'POST',
+    headers: getHeaders()
+  })
+
+  if (!refundRes.ok) {
+    const err = await refundRes.json()
+    throw new Error(`Failed to refund Asaas payment: ${JSON.stringify(err)}`)
+  }
+
+  return await refundRes.json()
+}
+
+/**
+ * Cancel/delete a pending payment — DELETE /v3/payments/{id}
+ * Only works for payments that haven't been paid yet.
+ */
+export async function cancelAsaasPayment(paymentId: string): Promise<any> {
+  const res = await fetch(`${getBaseUrl()}/payments/${paymentId}`, {
+    method: 'DELETE',
+    headers: getHeaders()
+  })
+
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(`Failed to cancel Asaas payment: ${JSON.stringify(err)}`)
+  }
+
+  return await res.json()
+}
+
+// ---------------------------------------------------------------------------
+// Transfers (Saques para Boosters)
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a PIX Transfer (Payout) to a third party (e.g., Booster)
+ * POST /v3/transfers
  */
 export async function createAsaasPixTransfer(params: {
   amount: number; // in Reais (R$)
@@ -161,36 +294,18 @@ export async function createAsaasPixTransfer(params: {
 }
 
 /**
- * Refunds a PIX payment in Asaas
+ * Get transfer details — GET /v3/transfers/{id}
  */
-export async function refundAsaasPayment(paymentId: string): Promise<any> {
-  const refundRes = await fetch(`${getBaseUrl()}/payments/${paymentId}/refund`, {
-    method: 'POST',
-    headers: getHeaders()
-  })
-
-  if (!refundRes.ok) {
-    const err = await refundRes.json()
-    throw new Error(`Failed to refund Asaas payment: ${JSON.stringify(err)}`)
-  }
-
-  return await refundRes.json()
-}
-
-/**
- * Checks the status of a PIX payment in Asaas
- */
-export async function checkAsaasPaymentStatus(paymentId: string): Promise<string> {
-  const statusRes = await fetch(`${getBaseUrl()}/payments/${paymentId}`, {
+export async function getAsaasTransferStatus(transferId: string): Promise<AsaasTransferDetails> {
+  const res = await fetch(`${getBaseUrl()}/transfers/${transferId}`, {
     method: 'GET',
     headers: getHeaders()
   })
 
-  if (!statusRes.ok) {
-    const err = await statusRes.json()
-    throw new Error(`Failed to check Asaas payment status: ${JSON.stringify(err)}`)
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(`Failed to get Asaas transfer: ${JSON.stringify(err)}`)
   }
 
-  const data = await statusRes.json()
-  return data.status // e.g. 'PENDING', 'RECEIVED', 'CONFIRMED', 'OVERDUE'
+  return await res.json()
 }
