@@ -158,30 +158,21 @@ export async function calculatePremierPrice(
 async function calculateCoachingPrice(hours: number, ranges: PricingRange[]): Promise<number> {
   if (ranges.length === 0) throw new Error('Nenhuma configuração de coaching encontrada')
 
-  let total = 0
-  let currentHour = 0
-
-  while (currentHour < hours) {
-    let currentRange = ranges.find(r => (currentHour + 1) >= r.rangeStart && (currentHour + 1) <= r.rangeEnd)
-    
-    if (!currentRange) {
-      currentRange = ranges.find(r => r.rangeStart > currentHour)
-      if (!currentRange) {
-        throw new Error(`Sem configuração de preço acima de ${currentHour} horas`)
-      }
+  // Encontra a faixa de preço que cobre a quantidade total de horas
+  let applicableRange = ranges.find(r => hours >= r.rangeStart && hours <= r.rangeEnd)
+  
+  if (!applicableRange) {
+    // Se o cliente escolheu mais horas do que o limite máximo configurado, aplica o preço da última faixa
+    const maxRange = [...ranges].sort((a, b) => b.rangeEnd - a.rangeEnd)[0]
+    if (hours > maxRange.rangeEnd) {
+       applicableRange = maxRange
+    } else {
+       throw new Error(`Nenhuma configuração de coaching encontrada para ${hours} horas`)
     }
-
-    const rangeLimit = currentRange.rangeEnd
-    const endPoint = Math.min(hours, rangeLimit)
-    const hoursToProcess = endPoint - currentHour
-
-    if (hoursToProcess <= 0) break
-
-    total += hoursToProcess * currentRange.price
-    currentHour += hoursToProcess
   }
 
-  return total
+  // Lógica de volume: multiplica TODAS as horas pelo preço da faixa em que o total se encontra
+  return hours * applicableRange.price
 }
 
 /**
