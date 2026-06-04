@@ -13,7 +13,7 @@ export interface SEOConfig {
 }
 
 const DEFAULT_SITE_URL = 'https://www.flautasboost.com.br'
-const DEFAULT_OG_IMAGE = '/principal.png'
+const DEFAULT_OG_IMAGE = '/flautas/flautasboost-horizontal.png'
 
 export function generateMetadata({
   title,
