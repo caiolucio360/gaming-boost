@@ -63,17 +63,6 @@ const getBaseUrl = () => {
     : 'https://api-sandbox.asaas.com/v3'
 }
 
-const getHeaders = () => {
-  const apiKey = process.env.ASAAS_API_KEY
-  if (!apiKey) {
-    throw new Error('ASAAS_API_KEY is not configured')
-  }
-  return {
-    'Content-Type': 'application/json',
-    'access_token': apiKey
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Customer
 // ---------------------------------------------------------------------------
@@ -83,10 +72,15 @@ const getHeaders = () => {
  * First searches by CPF/CNPJ, creates if not found.
  */
 export async function getOrCreateAsaasCustomer(data: { name: string, email: string, cpfCnpj: string, phone?: string }): Promise<string> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   // First try to find by CPF/CNPJ
   const searchRes = await fetch(`${getBaseUrl()}/customers?cpfCnpj=${data.cpfCnpj}`, {
     method: 'GET',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!searchRes.ok) {
@@ -103,7 +97,7 @@ export async function getOrCreateAsaasCustomer(data: { name: string, email: stri
   // If not found, create new
   const createRes = await fetch(`${getBaseUrl()}/customers`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey },
     body: JSON.stringify({
       name: data.name,
       email: data.email,
@@ -142,6 +136,10 @@ export async function createAsaasPixCharge(params: {
   externalReference?: string;
   dueDate?: Date;
 }): Promise<AsaasPixResponse> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
 
   // 1. Get or Create Customer
   const customerId = await getOrCreateAsaasCustomer(params.customer)
@@ -153,7 +151,7 @@ export async function createAsaasPixCharge(params: {
 
   const paymentRes = await fetch(`${getBaseUrl()}/payments`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey },
     body: JSON.stringify({
       customer: customerId,
       billingType: 'PIX',
@@ -174,7 +172,7 @@ export async function createAsaasPixCharge(params: {
   // 3. Get PIX QR Code — GET /v3/payments/{id}/pixQrCode
   const qrRes = await fetch(`${getBaseUrl()}/payments/${paymentData.id}/pixQrCode`, {
     method: 'GET',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!qrRes.ok) {
@@ -201,9 +199,14 @@ export async function createAsaasPixCharge(params: {
  * Get full payment details from Asaas — GET /v3/payments/{id}
  */
 export async function getAsaasPaymentById(paymentId: string): Promise<AsaasPaymentDetails> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   const res = await fetch(`${getBaseUrl()}/payments/${paymentId}`, {
     method: 'GET',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!res.ok) {
@@ -231,9 +234,14 @@ export async function checkAsaasPaymentStatus(paymentId: string): Promise<string
  * Refund a PIX payment — POST /v3/payments/{id}/refund
  */
 export async function refundAsaasPayment(paymentId: string): Promise<any> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   const refundRes = await fetch(`${getBaseUrl()}/payments/${paymentId}/refund`, {
     method: 'POST',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!refundRes.ok) {
@@ -249,9 +257,14 @@ export async function refundAsaasPayment(paymentId: string): Promise<any> {
  * Only works for payments that haven't been paid yet.
  */
 export async function cancelAsaasPayment(paymentId: string): Promise<any> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   const res = await fetch(`${getBaseUrl()}/payments/${paymentId}`, {
     method: 'DELETE',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!res.ok) {
@@ -276,9 +289,14 @@ export async function createAsaasPixTransfer(params: {
   pixAddressKeyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP';
   description?: string;
 }): Promise<any> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   const transferRes = await fetch(`${getBaseUrl()}/transfers`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey },
     body: JSON.stringify({
       value: params.amount,
       pixAddressKey: params.pixAddressKey,
@@ -300,9 +318,14 @@ export async function createAsaasPixTransfer(params: {
  * Get transfer details — GET /v3/transfers/{id}
  */
 export async function getAsaasTransferStatus(transferId: string): Promise<AsaasTransferDetails> {
+  const apiKey = process.env.ASAAS_API_KEY
+  if (!apiKey) {
+    throw new Error('ASAAS_API_KEY is not configured')
+  }
+
   const res = await fetch(`${getBaseUrl()}/transfers/${transferId}`, {
     method: 'GET',
-    headers: getHeaders()
+    headers: { 'Content-Type': 'application/json', 'access_token': apiKey }
   })
 
   if (!res.ok) {
