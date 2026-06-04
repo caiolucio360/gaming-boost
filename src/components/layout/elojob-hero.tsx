@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-react"
 
@@ -27,8 +28,18 @@ export function ElojobHero() {
 
         {/* Título Principal */}
         <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8">
-          <div className="mb-4 md:mb-6">
-            <h1 className="text-2xl md:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-wide px-2 font-orbitron">
+          <div className="mb-4 md:mb-6 flex flex-col items-center">
+            <div className="mb-6 md:mb-8 animate-float">
+              <Image
+                src="/flautas/flautasboost-flauta.svg"
+                alt="FlautasBoost Ícone"
+                width={300}
+                height={300}
+                className="w-full max-w-[160px] md:max-w-[220px] lg:max-w-[280px] h-auto object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] mx-auto"
+                priority
+              />
+            </div>
+            <h2 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-wide px-2 font-orbitron">
               <span className="text-white drop-shadow-2xl">
                 Boost Profissional
               </span>
@@ -36,13 +47,13 @@ export function ElojobHero() {
               <span className="text-white drop-shadow-2xl">
                 Para Gamers
               </span>
-            </h1>
+            </h2>
           </div>
 
           <div className="mb-6 md:mb-8">
-            <h2 className="text-lg md:text-2xl lg:text-4xl xl:text-5xl font-semibold bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-xl px-2 font-rajdhani">
+            <p className="text-lg md:text-2xl lg:text-3xl font-semibold bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-xl px-2 font-rajdhani">
               Alcance seu potencial máximo!
-            </h2>
+            </p>
           </div>
 
           <div className="mb-8 md:mb-12">

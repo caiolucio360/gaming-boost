@@ -19,13 +19,12 @@ export function Footer() {
             <Card className="col-span-2 md:col-span-1 bg-transparent border-0 shadow-none p-0">
               <CardContent className="p-0">
                 <div className="mb-3 md:mb-4">
-                  <Image
-                    src="/flautas/flautasboost-horizontal.png"
-                    alt="FlautasBoost"
-                    width={200}
-                    height={45}
-                    className="h-10 md:h-12 w-auto object-contain"
-                  />
+                  <Link href="/" className="flex items-center">
+                    <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
+                      <span className="text-brand-purple-light">FLAUTAS</span>
+                      <span className="text-white">BOOST</span>
+                    </span>
+                  </Link>
                 </div>
                 <p className="text-xs md:text-sm text-brand-gray-400">
                   Sua plataforma confiável para serviços de boost em jogos competitivos.

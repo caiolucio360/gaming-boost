@@ -33,6 +33,7 @@ module.exports = {
       fontFamily: {
         'orbitron': ['var(--font-orbitron)', 'sans-serif'],
         'rajdhani': ['var(--font-rajdhani)', 'sans-serif'],
+        brush: ['var(--font-brush)', 'cursive'],
       },
       colors: {
         // =============================================

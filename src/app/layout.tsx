@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Orbitron, Rajdhani } from 'next/font/google'
+import { Orbitron, Rajdhani, Knewave } from 'next/font/google'
 import './globals.css'
 import { ConditionalShell } from '@/components/layout/conditional-shell'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
@@ -10,7 +10,14 @@ import { LiveRegion } from '@/components/common/live-region'
 
 import { QueryProvider } from '@/providers/query-provider'
 
-const orbitron = Orbitron({ 
+const knewave = Knewave({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-brush',   // vira uma CSS var
+  display: 'swap',
+})
+
+const orbitron = Orbitron({
   subsets: ['latin'],
   variable: '--font-orbitron',
   weight: ['400', '700', '800', '900'], // Apenas pesos utilizados
@@ -18,7 +25,7 @@ const orbitron = Orbitron({
   preload: true,
 })
 
-const rajdhani = Rajdhani({ 
+const rajdhani = Rajdhani({
   subsets: ['latin'],
   variable: '--font-rajdhani',
   weight: ['300', '400', '500', '600'], // Apenas pesos utilizados
@@ -67,15 +74,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={`${orbitron.variable} ${rajdhani.variable} font-rajdhani text-white bg-black`}>
+      <body className={`${orbitron.variable} ${rajdhani.variable} ${knewave.variable} font-rajdhani text-white bg-black`}>
         <QueryProvider>
           <AuthProviderWrapper>
-              <ToastProvider />
-              <SkipLink />
-              <LiveRegion message="" id="live-region" />
-              <ConditionalShell>
-                {children}
-              </ConditionalShell>
+            <ToastProvider />
+            <SkipLink />
+            <LiveRegion message="" id="live-region" />
+            <ConditionalShell>
+              {children}
+            </ConditionalShell>
           </AuthProviderWrapper>
         </QueryProvider>
         <AnalyticsProvider />

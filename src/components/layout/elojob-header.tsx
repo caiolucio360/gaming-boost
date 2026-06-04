@@ -70,14 +70,10 @@ export function ElojobHeader() {
         
         {/* Logo - Centered on mobile, left on desktop */}
         <Link href="/" className="flex items-center flex-shrink-0 mx-auto lg:mx-0">
-          <Image
-            src="/flautas/flautasboost-horizontal.png"
-            alt="FlautasBoost"
-            width={180}
-            height={40}
-            className="h-8 md:h-10 w-auto object-contain"
-            priority
-          />
+          <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
+            <span className="text-brand-purple-light">FLAUTAS</span>
+            <span className="text-white">BOOST</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
