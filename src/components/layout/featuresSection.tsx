@@ -56,7 +56,7 @@ export default function FeaturesSection() {
     <section className="py-20 bg-black text-white" aria-labelledby="features-heading">
       <div className="container mx-auto px-6">
         <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-center mb-14">
-          Por que escolher a <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-dark bg-clip-text text-transparent">GameBoost</span>?
+          Por que escolher a <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-dark bg-clip-text text-transparent">FlautasBoost</span>?
         </h2>
 
         {/* Grid se adapta automaticamente para menos ou mais itens */}

@@ -41,11 +41,11 @@ export const VerificationService = {
       try {
         await sendEmail({
           to: email,
-          subject: 'Seu código de verificação - Gaming Boost',
+          subject: 'Seu código de verificação - FlautasBoost',
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
               <h1 style="color: #7C3AED;">Verifique sua conta</h1>
-              <p>Use o código abaixo para ativar sua conta na Gaming Boost:</p>
+              <p>Use o código abaixo para ativar sua conta na FlautasBoost:</p>
               <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
                 <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #000;">${code}</span>
               </div>

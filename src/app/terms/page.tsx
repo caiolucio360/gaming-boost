@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Termos de Uso - GameBoost',
-  description: 'Termos e condições de uso da GameBoost. Conheça nossas políticas de uso, responsabilidades e condições para utilização dos serviços de boost.',
+  title: 'Termos de Uso - FlautasBoost',
+  description: 'Termos e condições de uso da FlautasBoost. Conheça nossas políticas de uso, responsabilidades e condições para utilização dos serviços de boost.',
   keywords: [
     'termos de uso',
     'termos e condições',
@@ -26,13 +26,13 @@ export default function TermsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Termos de Uso - GameBoost',
-            description: 'Termos e condições de uso da GameBoost',
+            name: 'Termos de Uso - FlautasBoost',
+            description: 'Termos e condições de uso da FlautasBoost',
             url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/terms',
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
-              name: 'GameBoost',
+              name: 'FlautasBoost',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
             },
           }),
@@ -60,7 +60,7 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Aceitação dos Termos
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Ao acessar e utilizar a plataforma GameBoost, você concorda em cumprir e estar vinculado a estes Termos de Uso.
+                  Ao acessar e utilizar a plataforma FlautasBoost, você concorda em cumprir e estar vinculado a estes Termos de Uso.
                   Se você não concordar com qualquer parte destes termos, não deve utilizar nossos serviços. O uso continuado da
                   plataforma constitui aceitação de quaisquer modificações futuras destes termos.
                 </p>
@@ -73,7 +73,7 @@ export default function TermsPage() {
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li><strong className="text-white">Cliente:</strong> Usuário que contrata serviços de boost</li>
                   <li><strong className="text-white">Booster:</strong> Profissional que executa os serviços de boost</li>
-                  <li><strong className="text-white">Plataforma:</strong> Sistema GameBoost e todos os seus componentes</li>
+                  <li><strong className="text-white">Plataforma:</strong> Sistema FlautasBoost e todos os seus componentes</li>
                   <li><strong className="text-white">Serviço:</strong> Qualquer serviço de boost oferecido pela plataforma</li>
                 </ul>
               </section>
@@ -83,7 +83,7 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">3.</span> Descrição dos Serviços
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  A GameBoost é uma plataforma que conecta jogadores a profissionais qualificados para serviços de boost em jogos competitivos:
+                  A FlautasBoost é uma plataforma que conecta jogadores a profissionais qualificados para serviços de boost em jogos competitivos:
                 </p>
                 <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
                   <li>Boost de rank em Counter-Strike 2 (Premier e Gamers Club)</li>
@@ -205,7 +205,7 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">11.</span> Limitação de Responsabilidade
                 </h2>
                 <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  <p>A GameBoost não se responsabiliza por:</p>
+                  <p>A FlautasBoost não se responsabiliza por:</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Suspensões ou banimentos aplicados pelas desenvolvedoras dos jogos</li>
                     <li>Problemas técnicos fora de nosso controle</li>

@@ -8,7 +8,7 @@ dotenv.config({ path: envPath })
 
 async function main() {
     const apiKey = process.env.RESEND_API_KEY
-    const originalFrom = process.env.EMAIL_FROM || 'GameBoost <noreply@gameboost.com.br>'
+    const originalFrom = process.env.EMAIL_FROM || 'FlautasBoost <noreply@gameboost.com.br>'
 
     // Get email from args
     const toEmail = process.argv[2] ? process.argv[2].trim() : ''
@@ -37,7 +37,7 @@ async function main() {
         const payload = {
             from: from,
             to: toEmail,
-            subject: `Teste de Envio (${label}) - GameBoost`,
+            subject: `Teste de Envio (${label}) - FlautasBoost`,
             html: '<strong>Se você recebeu isso, o envio de emails está funcionando!</strong>',
         }
 
