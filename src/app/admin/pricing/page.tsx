@@ -297,7 +297,7 @@ export default function PricingConfigPage() {
     e.preventDefault()
 
     if (!rangeStart || !rangeEnd || !price) {
-      showError('Erro', 'Preencha todos os campos')
+      showError('Erro', 'Por favor, preencha o valor inicial, valor final e o preço desta faixa.')
       return
     }
 
