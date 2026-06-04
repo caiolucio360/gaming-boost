@@ -57,4 +57,5 @@ gh pr create --base main --head dev --title "release: <versão/escopo>"
 - **Squash merge** é a estratégia padrão dos PRs.
 - **Sempre apagar** o branch temporário após o merge (local e remoto). Não acumular branches.
 - Branches devem ser de vida curta — sincronize com `dev` com frequência (`git merge dev` ou rebase) para evitar conflitos grandes.
+- **Sempre verificar e resolver conflitos de branch.** Ao abrir um PR, conferir o estado de merge (`gh pr view <n> --json mergeable,mergeStateStatus`). Se estiver `CONFLICTING`, trazer a branch base para a branch de trabalho (`git merge main`/`git merge dev`), resolver os conflitos mantendo a intenção de ambos os lados, e dar push — deixando o PR `MERGEABLE` antes de entregá-lo. Nunca deixar um PR com conflito pendente para o dono resolver.
 - Mensagens de commit e títulos de PR seguem **Conventional Commits** (`feat:`, `fix:`, `chore:`, `refactor:`, `style:`, `test:`, `docs:`).
