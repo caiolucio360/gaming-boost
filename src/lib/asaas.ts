@@ -89,7 +89,10 @@ export async function getOrCreateAsaasCustomer(data: { name: string, email: stri
     headers: getHeaders()
   })
 
-  if (!searchRes.ok) throw new Error('Failed to search Asaas customer')
+  if (!searchRes.ok) {
+    const err = await searchRes.json().catch(() => ({}))
+    throw new Error(`Failed to search Asaas customer: ${JSON.stringify(err)} | Status: ${searchRes.status}`)
+  }
 
   const searchData = await searchRes.json()
 

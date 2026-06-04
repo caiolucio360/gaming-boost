@@ -35,13 +35,9 @@ export function ElojobHero() {
                 <span className="text-white">BOOST</span>
               </h1>
             </div>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-wide px-2 font-orbitron">
+            <h2 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight tracking-wide px-4 font-orbitron max-w-4xl mx-auto">
               <span className="text-white drop-shadow-2xl">
-                Boost Profissional
-              </span>
-              <br />
-              <span className="text-white drop-shadow-2xl">
-                Para Gamers
+                Jogue, suba e evolua ao lado de quem viveu o CS2 de verdade, experiência com um ex jogador profissional.
               </span>
             </h2>
           </div>

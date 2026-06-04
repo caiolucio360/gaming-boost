@@ -72,8 +72,12 @@ export function createApiErrorResponse(
   }
 
   // Default 500 Internal Server Error
+  const isDev = process.env.NODE_ENV !== 'production'
   return NextResponse.json(
-    { message: defaultMessage, error: ErrorCodes.INTERNAL_SERVER_ERROR },
+    { 
+      message: isDev && error instanceof Error ? `${defaultMessage} (Dev Debug: ${error.message})` : defaultMessage, 
+      error: ErrorCodes.INTERNAL_SERVER_ERROR 
+    },
     { status: 500 }
   )
 }
