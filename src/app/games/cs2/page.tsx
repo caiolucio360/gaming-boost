@@ -64,7 +64,7 @@ export default function CS2Page() {
             description: 'Serviço profissional de boost de rank para Counter-Strike 2',
             provider: {
               '@type': 'Organization',
-              name: 'GameBoost',
+              name: 'FlautasBoost',
               url: 'https://gameboostpro.com.br',
             },
             areaServed: 'BR',

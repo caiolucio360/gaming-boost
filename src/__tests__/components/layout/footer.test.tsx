@@ -29,7 +29,7 @@ describe('Footer', () => {
   })
 
   it('renders copyright notice', () => {
-    expect(screen.getByText(/GameBoost/i)).toBeInTheDocument()
+    expect(screen.getByText(/FlautasBoost/i)).toBeInTheDocument()
     expect(screen.getByText(/2025/)).toBeInTheDocument()
   })
 })

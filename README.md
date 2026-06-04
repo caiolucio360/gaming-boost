@@ -1,4 +1,4 @@
-# GameBoost
+# FlautasBoost
 
 Plataforma web full-stack para serviços de boost em jogos eletrônicos. Conecta jogadores que precisam de boost com boosters profissionais de forma segura e eficiente, com pagamentos via PIX.
 

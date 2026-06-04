@@ -6,8 +6,8 @@ import { Card, CardContent} from '@/components/ui/card'
 const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Política de Privacidade - GameBoost',
-  description: 'Política de privacidade da GameBoost. Saiba como protegemos e utilizamos suas informações pessoais. Conformidade com LGPD e proteção de dados.',
+  title: 'Política de Privacidade - FlautasBoost',
+  description: 'Política de privacidade da FlautasBoost. Saiba como protegemos e utilizamos suas informações pessoais. Conformidade com LGPD e proteção de dados.',
   keywords: [
     'política de privacidade',
     'privacidade gameboost',
@@ -27,13 +27,13 @@ export default function PrivacyPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Política de Privacidade - GameBoost',
-            description: 'Política de privacidade da GameBoost',
+            name: 'Política de Privacidade - FlautasBoost',
+            description: 'Política de privacidade da FlautasBoost',
             url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/privacy',
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
-              name: 'GameBoost',
+              name: 'FlautasBoost',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
             },
           }),
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Introdução e Compromisso com a LGPD
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  A GameBoost respeita sua privacidade e está comprometida com a proteção de seus dados pessoais em conformidade
+                  A FlautasBoost respeita sua privacidade e está comprometida com a proteção de seus dados pessoais em conformidade
                   com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) e demais legislações aplicáveis.
                 </p>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>

@@ -58,7 +58,7 @@ export function validateEnv() {
     // In development, provide helpful defaults
     if (process.env.NODE_ENV === 'development') {
         if (!process.env.EMAIL_FROM) {
-            console.log('ℹ️  Using default EMAIL_FROM: GameBoost <noreply@gameboost.com.br>')
+            console.log('ℹ️  Using default EMAIL_FROM: FlautasBoost <noreply@flautasboost.com.br>')
         }
         if (!process.env.RESEND_API_KEY) {
             console.log('ℹ️  RESEND_API_KEY not set - emails will be logged to console')
