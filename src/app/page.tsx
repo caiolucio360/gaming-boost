@@ -27,7 +27,7 @@ export default function HomePage() {
     name: 'FlautasBoost',
     description: 'Plataforma profissional de boost para Counter-Strike 2',
     url: siteUrl,
-    logo: `${siteUrl}/principal.png`,
+    logo: `${siteUrl}/flautas/flautasboost-horizontal.png`,
     foundingDate: '2025',
     numberOfEmployees: {
       '@type': 'QuantitativeValue',

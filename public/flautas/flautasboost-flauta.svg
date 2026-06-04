@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 160" width="500" height="160">
+  <defs>
+    <linearGradient id="fluteGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#C084FC"></stop><stop offset="45%" stop-color="#A855F7"></stop><stop offset="100%" stop-color="#7C3AED"></stop>
+    </linearGradient>
+    <linearGradient id="fluteGradDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"></stop><stop offset="100%" stop-color="#4C1D95"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="44" y="70" width="416" height="22" rx="11" fill="url(#fluteGrad)"></rect>
+  <rect x="50" y="73" width="404" height="5" rx="2.5" fill="#E9D5FF" opacity="0.5"></rect>
+  <rect x="30" y="63" width="44" height="36" rx="15" fill="url(#fluteGradDark)"></rect>
+  <circle cx="28" cy="81" r="9" fill="#A855F7"></circle><circle cx="28" cy="81" r="3.5" fill="#4C1D95"></circle>
+  <ellipse cx="96" cy="67" rx="20" ry="9" fill="#8B5CF6"></ellipse><ellipse cx="96" cy="66" rx="9" ry="4.6" fill="#2A1259"></ellipse>
+  <rect x="150" y="61" width="296" height="4" rx="2" fill="#C084FC"></rect>
+  <g fill="#C084FC">
+    <rect x="171" y="58" width="3" height="14" rx="1.5"></rect><rect x="212" y="58" width="3" height="14" rx="1.5"></rect>
+    <rect x="253" y="58" width="3" height="14" rx="1.5"></rect><rect x="312" y="58" width="3" height="14" rx="1.5"></rect>
+    <rect x="353" y="58" width="3" height="14" rx="1.5"></rect><rect x="394" y="58" width="3" height="14" rx="1.5"></rect>
+    <rect x="431" y="58" width="3" height="14" rx="1.5"></rect>
+  </g>
+  <g>
+    <circle cx="172.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="213.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="254.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="313.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="354.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="395.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+    <circle cx="432.5" cy="54" r="9" fill="#A855F7" stroke="#E9D5FF" stroke-width="1.5"></circle>
+  </g>
+  <g fill="#3B1A6B" opacity="0.85">
+    <circle cx="172.5" cy="81" r="4"></circle><circle cx="213.5" cy="81" r="4"></circle><circle cx="254.5" cy="81" r="4"></circle>
+    <circle cx="313.5" cy="81" r="4"></circle><circle cx="354.5" cy="81" r="4"></circle><circle cx="395.5" cy="81" r="4"></circle>
+  </g>
+  <ellipse cx="458" cy="81" rx="5.5" ry="11" fill="#2A1259"></ellipse>
+</svg>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -18,10 +19,12 @@ export function Footer() {
             <Card className="col-span-2 md:col-span-1 bg-transparent border-0 shadow-none p-0">
               <CardContent className="p-0">
                 <div className="mb-3 md:mb-4">
-                  <h1 className="text-xl md:text-3xl font-black text-white drop-shadow-2xl font-orbitron">
-                    <span className="text-brand-purple-light drop-shadow-2xl">FLAUTAS</span>
-                    <span className="text-white drop-shadow-2xl">BOOST</span>
-                  </h1>
+                  <Link href="/" className="flex items-center">
+                    <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
+                      <span className="text-brand-purple-light">FLAUTAS</span>
+                      <span className="text-white">BOOST</span>
+                    </span>
+                  </Link>
                 </div>
                 <p className="text-xs md:text-sm text-brand-gray-400">
                   Sua plataforma confiável para serviços de boost em jogos competitivos.

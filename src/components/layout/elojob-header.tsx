@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -68,13 +69,11 @@ export function ElojobHeader() {
       <div className="container mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-2 md:py-3 flex items-center justify-between">
         
         {/* Logo - Centered on mobile, left on desktop */}
-        <Link href="/" className="flex items-center group flex-shrink-0 mx-auto lg:mx-0">
-          <div>
-            <h1 className="text-lg md:text-3xl font-black text-white font-orbitron">
-              <span className="text-brand-purple-light group-hover:text-brand-purple transition-colors duration-300">FLAUTAS</span>
-              <span className="text-white">BOOST</span>
-            </h1>
-          </div>
+        <Link href="/" className="flex items-center flex-shrink-0 mx-auto lg:mx-0">
+          <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
+            <span className="text-brand-purple-light">FLAUTAS</span>
+            <span className="text-white">BOOST</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

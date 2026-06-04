@@ -4,6 +4,7 @@
 import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ChevronLeft,
   ChevronRight,
@@ -156,19 +157,23 @@ export function AppShell({ role, children }: AppShellProps) {
           {/* Logo + badge */}
           <div className={cn('flex items-center gap-2 min-w-0', !collapsed && 'flex-1')}>
             <Link href={dashboardHref} className="flex items-center min-w-0">
-              <h1
-                className="text-lg font-black font-orbitron leading-none"
-                style={{ fontFamily: 'Orbitron, sans-serif' }}
-              >
-                {collapsed ? (
-                  <span className="text-brand-purple-light">F</span>
-                ) : (
-                  <>
-                    <span className="text-brand-purple-light">FLAUTAS</span>
-                    <span className="text-white">BOOST</span>
-                  </>
-                )}
-              </h1>
+              {collapsed ? (
+                <Image
+                  src="/flautas/flautasboost-flauta.svg"
+                  alt="FlautasBoost"
+                  width={32}
+                  height={32}
+                  className="h-7 w-auto object-contain"
+                />
+              ) : (
+                <Image
+                  src="/flautas/flautasboost-horizontal.png"
+                  alt="FlautasBoost"
+                  width={160}
+                  height={36}
+                  className="h-8 w-auto object-contain"
+                />
+              )}
             </Link>
           </div>
 

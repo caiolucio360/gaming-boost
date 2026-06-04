@@ -51,7 +51,7 @@ export default function AboutPage() {
             name: 'FlautasBoost',
             description: 'Plataforma profissional de boost para jogos',
             url: 'https://www.flautasboost.com.br',
-            logo: 'https://www.flautasboost.com.br/principal.png',
+            logo: 'https://www.flautasboost.com.br/flautas/flautasboost-horizontal.png',
             foundingDate: '2020',
             numberOfEmployees: {
               '@type': 'QuantitativeValue',
