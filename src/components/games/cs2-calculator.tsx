@@ -583,6 +583,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                               type="number" 
                               min={minRating} 
                               max={targetRating - 1} 
+                              step={maxRating > 1000 ? 100 : 1}
                               value={currentRating}
                               onChange={(e) => handleCurrentChange(Number(e.target.value))}
                               className="w-32 bg-brand-black-light border-brand-purple/30 text-white text-center font-rajdhani font-bold text-lg"
@@ -601,6 +602,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                               type="number" 
                               min={currentRating + 1} 
                               max={maxRating} 
+                              step={maxRating > 1000 ? 100 : 1}
                               value={targetRating}
                               onChange={(e) => handleTargetChange(Number(e.target.value))}
                               className="w-32 bg-brand-black-light border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
@@ -612,7 +614,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                           <Slider
                             min={minRating}
                             max={maxRating}
-                            step={1}
+                            step={maxRating > 1000 ? 100 : 1}
                             value={[currentRating, targetRating]}
                             onValueChange={(val) => {
                               setCurrentRating(val[0])
