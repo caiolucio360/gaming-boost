@@ -80,48 +80,35 @@ describe('/api/cron/auto-refund', () => {
   })
 })
 
-// ─── /api/webhooks/abacatepay ─────────────────────────────────────────────────
+// ─── /api/webhooks/asaas ─────────────────────────────────────────────────
 
-describe('/api/webhooks/abacatepay', () => {
+describe('/api/webhooks/asaas', () => {
   beforeEach(() => {
-    jest.resetModules()
-    // Mock rate limiter to always pass so we reach the secret check
-    jest.mock('@/lib/rate-limit', () => ({
-      webhookRateLimiter: { check: jest.fn().mockResolvedValue({ success: true, remaining: 99, reset: Date.now() }) },
-      getIdentifier: jest.fn().mockReturnValue('test-ip'),
-      createRateLimitHeaders: jest.fn().mockReturnValue({}),
-    }))
+    process.env.ASAAS_WEBHOOK_SECRET = 'test-secret'
   })
 
-  afterEach(() => {
-    jest.resetModules()
-  })
+  it('returns 500 when ASAAS_WEBHOOK_SECRET is not configured', async () => {
+    delete process.env.ASAAS_WEBHOOK_SECRET
 
-  it('returns 500 when ABACATEPAY_WEBHOOK_SECRET is not configured', async () => {
-    const original = process.env.ABACATEPAY_WEBHOOK_SECRET
-    delete process.env.ABACATEPAY_WEBHOOK_SECRET
-
-    const { POST } = await import('@/app/api/webhooks/abacatepay/route')
-    const req = new NextRequest('http://localhost/api/webhooks/abacatepay', {
+    const { POST } = await import('@/app/api/webhooks/asaas/route')
+    const req = new NextRequest('http://localhost/api/webhooks/asaas', {
       method: 'POST',
-      body: JSON.stringify({ event: 'billing.paid', data: {} }),
+      body: JSON.stringify({ event: 'PAYMENT_RECEIVED', payment: { id: 'pay_123' } }),
+      headers: { 'asaas-access-token': 'test-secret' },
     })
 
     const res = await POST(req)
     expect(res.status).toBe(500)
-
-    if (original) process.env.ABACATEPAY_WEBHOOK_SECRET = original
-    else delete process.env.ABACATEPAY_WEBHOOK_SECRET
   })
 
-  it('returns 401 when signature is invalid', async () => {
-    process.env.ABACATEPAY_WEBHOOK_SECRET = 'test-secret'
+  it('returns 401 when token is invalid', async () => {
+    process.env.ASAAS_WEBHOOK_SECRET = 'test-secret'
 
-    const { POST } = await import('@/app/api/webhooks/abacatepay/route')
-    const req = new NextRequest('http://localhost/api/webhooks/abacatepay', {
+    const { POST } = await import('@/app/api/webhooks/asaas/route')
+    const req = new NextRequest('http://localhost/api/webhooks/asaas', {
       method: 'POST',
-      headers: { 'x-signature': 'invalidsignature' },
-      body: JSON.stringify({ event: 'billing.paid', data: {} }),
+      headers: { 'asaas-access-token': 'invalidtoken' },
+      body: JSON.stringify({ event: 'PAYMENT_RECEIVED' }),
     })
 
     const res = await POST(req)

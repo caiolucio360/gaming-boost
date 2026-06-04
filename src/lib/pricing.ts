@@ -139,8 +139,8 @@ export async function calculatePremierPrice(
       throw new Error('Erro no cálculo de preço: configuração de faixas inválida.')
     }
 
-    // Calcular preço para esses pontos (preço é por 1000 pontos)
-    const thousands = Math.ceil(pointsToProcess / 1000)
+    // Calcular preço proporcional para esses pontos (preço base é por 1000 pontos)
+    const thousands = pointsToProcess / 1000
     total += thousands * currentRange.price
 
     // Avançar para a próxima faixa
@@ -152,16 +152,36 @@ export async function calculatePremierPrice(
 
 
 /**
- * Calcula o preço total para Coaching (baseado em horas)
+ * Calcula o preço total para Coaching (baseado em horas com desconto progressivo)
  * target = número de horas
  */
 async function calculateCoachingPrice(hours: number, ranges: PricingRange[]): Promise<number> {
   if (ranges.length === 0) throw new Error('Nenhuma configuração de coaching encontrada')
-  const range = ranges[0]
-  if (hours < range.rangeStart || hours > range.rangeEnd) {
-    throw new Error(`Número de horas inválido. Mínimo: ${range.rangeStart}, Máximo: ${range.rangeEnd}`)
+
+  let total = 0
+  let currentHour = 0
+
+  while (currentHour < hours) {
+    let currentRange = ranges.find(r => (currentHour + 1) >= r.rangeStart && (currentHour + 1) <= r.rangeEnd)
+    
+    if (!currentRange) {
+      currentRange = ranges.find(r => r.rangeStart > currentHour)
+      if (!currentRange) {
+        throw new Error(`Sem configuração de preço acima de ${currentHour} horas`)
+      }
+    }
+
+    const rangeLimit = currentRange.rangeEnd
+    const endPoint = Math.min(hours, rangeLimit)
+    const hoursToProcess = endPoint - currentHour
+
+    if (hoursToProcess <= 0) break
+
+    total += hoursToProcess * currentRange.price
+    currentHour += hoursToProcess
   }
-  return hours * range.price
+
+  return total
 }
 
 /**
@@ -207,22 +227,40 @@ export async function validatePricingRange(
       }
     }
 
-    // Para COACHING, verificar apenas se a quantidade de horas (current) está dentro do range
+    // Para COACHING, verificar se existe pelo menos uma configuração cobrindo alguma hora
+    // Deixamos o motor calcular progressivamente. Validamos apenas se há configs que alcançam a hora solicitada
     if (serviceType === 'COACHING') {
-      const range = ranges[0]
       const hours = current // current é reutilizado como horas no contexto de coaching
-      if (hours < range.rangeStart || hours > range.rangeEnd) {
+      const maxConfigured = Math.max(...ranges.map(r => r.rangeEnd))
+      const minConfigured = Math.min(...ranges.map(r => r.rangeStart))
+      if (hours < minConfigured) {
         return {
           valid: false,
-          error: `Número de horas inválido. Mínimo: ${range.rangeStart}, Máximo: ${range.rangeEnd}`
+          error: `Mínimo permitido é ${minConfigured} horas`
         }
+      }
+      if (hours > maxConfigured) {
+         return {
+           valid: false,
+           error: `Máximo permitido é ${maxConfigured} horas`
+         }
       }
       return { valid: true }
     }
 
-    // Verificar se todos os valores entre current e target têm configuração
     if (gameMode === 'PREMIER') {
+      const minConfigured = ranges[0].rangeStart;
+      const maxConfigured = ranges[ranges.length - 1].rangeEnd;
+      
+      if (current < minConfigured || target > maxConfigured) {
+        return {
+          valid: false,
+          error: `Faixa de pontuação fora dos limites. Mínimo: ${minConfigured}, Máximo: ${maxConfigured}`
+        }
+      }
+
       // Para Premier, verificar se há cobertura completa do range
+      // Checando pontos-chave para garantir que não existam gaps grandes não cobertos.
       for (let rating = current; rating < target; rating += 1000) {
         const hasRange = ranges.some(
           r => rating >= r.rangeStart && rating <= r.rangeEnd

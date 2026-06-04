@@ -13,6 +13,8 @@ import { AlertCircle, Calculator, Sword, Users, Zap, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
+import { Slider } from '@/components/ui/slider'
+import { Input } from '@/components/ui/input'
 
 interface GameCalculatorProps {
   gameId?: GameId
@@ -30,8 +32,10 @@ const gameMode = 'PREMIER'
 export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
-  const [selectedCurrent, setSelectedCurrent] = useState('')
-  const [selectedTarget, setSelectedTarget] = useState('')
+  const [currentRating, setCurrentRating] = useState<number>(0)
+  const [targetRating, setTargetRating] = useState<number>(1000)
+  const [minRating, setMinRating] = useState<number>(0)
+  const [maxRating, setMaxRating] = useState<number>(26000)
   const [selectedHours, setSelectedHours] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
@@ -74,8 +78,17 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
             setDynamicPoints(null)
           } else {
             const points = data.data?.points
+            const min = data.data?.min
+            const max = data.data?.max
+            if (min !== undefined) setMinRating(min)
+            if (max !== undefined) setMaxRating(max)
+            
             if (points && points.length > 0) {
               setDynamicPoints(points)
+              if (currentRating === 0 && targetRating === 1000) {
+                setCurrentRating(min ?? 0)
+                setTargetRating(Math.min((min ?? 0) + 1000, max ?? 26000))
+              }
             } else {
               setDynamicPoints(null)
             }
@@ -143,7 +156,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     if (selectedServiceType === 'COACHING') {
       if (!selectedHours || price <= 0) return
     } else {
-      if (!selectedCurrent || !selectedTarget || price <= 0) return
+      if (currentRating >= targetRating || price <= 0) return
     }
 
     setIsLoading(true)
@@ -168,10 +181,10 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
         },
       }
     } else {
-      const currentValue = parseInt(selectedCurrent) * 1000
-      const targetValue = parseInt(selectedTarget) * 1000
-      const displayCurrent = `${selectedCurrent}K`
-      const displayTarget = `${selectedTarget}K`
+      const currentValue = currentRating
+      const targetValue = targetRating
+      const displayCurrent = currentValue.toLocaleString('pt-BR')
+      const displayTarget = targetValue.toLocaleString('pt-BR')
 
       cartItem = {
         game: gameId,
@@ -218,8 +231,8 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     if (type === selectedServiceType) return
 
     setSelectedServiceType(type)
-    setSelectedCurrent('')
-    setSelectedTarget('')
+    setCurrentRating(minRating)
+    setTargetRating(Math.min(minRating + 1000, maxRating))
     setPrice(0)
 
     if (type === 'COACHING') {
@@ -250,6 +263,8 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   const targetRatingPoints = getRatingPoints(true)
 
   const calculatePrice = async () => {
+    // Disable calculate manual caching if needed
+    // Calculate is handled by effect now
     if (!modeConfig || !selectedServiceType) {
       setPrice(0)
       return
@@ -293,21 +308,16 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
       return
     }
 
-    if (!selectedCurrent || !selectedTarget) {
-      setPrice(0)
-      return
-    }
-
-    const current = parseInt(selectedCurrent)
-    const target = parseInt(selectedTarget)
+    const current = currentRating
+    const target = targetRating
 
     if (current >= target) {
       setPrice(0)
       return
     }
 
-    const currentValue = current * 1000
-    const targetValue = target * 1000
+    const currentValue = current
+    const targetValue = target
 
     setIsCalculating(true)
     try {
@@ -341,17 +351,37 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     }
   }
 
-  const handleCurrentSelect = (value: number) => {
-    setSelectedCurrent((value / 1000).toString())
+  const handleCurrentChange = (value: number) => {
+    setCurrentRating(Math.min(value, targetRating - 1))
   }
 
-  const handleTargetSelect = (value: number) => {
-    setSelectedTarget((value / 1000).toString())
+  const handleTargetChange = (value: number) => {
+    setTargetRating(Math.max(value, currentRating + 1))
   }
+
+  // Auto-calculate effect
+  useEffect(() => {
+    const isCoaching = selectedServiceType === 'COACHING'
+    if (isCoaching && !selectedHours) {
+      setPrice(0)
+      return
+    }
+    if (!isCoaching && currentRating >= targetRating) {
+      setPrice(0)
+      return
+    }
+
+    const timer = setTimeout(() => {
+      calculatePrice()
+    }, 400)
+
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRating, targetRating, selectedHours, selectedServiceType, gameId, gameMode])
 
   const isCalculateDisabled = selectedServiceType === 'COACHING'
     ? !selectedHours || isCalculating
-    : !selectedCurrent || !selectedTarget || isCalculating
+    : currentRating >= targetRating || isCalculating
 
   const getServiceIcon = (type: ServiceType) => {
     if (type === 'RANK_BOOST') return Sword
@@ -485,34 +515,37 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                   isLoadingRanges ? (
                     <div>
                       <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                          <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
-                        ))}
-                      </div>
+                      <Skeleton className="h-12 w-full bg-white/5 rounded-md" />
                     </div>
                   ) : (
-                    <div>
-                      <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                        QUANTIDADE DE HORAS:
-                      </h3>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {availableHours.map((h) => {
-                          const isSelected = selectedHours === h
-                          return (
-                            <button
-                              key={h}
-                              onClick={() => { setSelectedHours(h); setPrice(0) }}
-                              className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                                ${isSelected
-                                  ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
-                                  : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                                }`}
-                            >
-                              {h}h
-                            </button>
-                          )
-                        })}
+                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5">
+                      <div className="flex flex-col items-center justify-center mb-8 gap-4">
+                        <h3 className="text-sm md:text-base font-bold text-white font-orbitron mb-2">
+                          QUANTIDADE DE HORAS
+                        </h3>
+                        <Input 
+                          type="number" 
+                          min={minRating || 1} 
+                          max={maxRating || 10} 
+                          value={selectedHours || minRating || 1}
+                          onChange={(e) => setSelectedHours(Number(e.target.value))}
+                          className="w-32 bg-brand-black-light border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
+                        />
+                      </div>
+
+                      <div className="px-2">
+                        <Slider
+                          min={minRating || 1}
+                          max={maxRating || 10}
+                          step={1}
+                          value={[selectedHours || minRating || 1]}
+                          onValueChange={(val) => setSelectedHours(val[0])}
+                          className="py-4 cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-brand-gray-500 mt-2 font-rajdhani font-bold">
+                        <span>{minRating || 1}h</span>
+                        <span>{maxRating || 10}h</span>
                       </div>
                     </div>
                   )
@@ -539,89 +572,66 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {/* Current Rating */}
-                      <div>
-                        <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                          PONTUAÇÃO ATUAL:
-                        </h3>
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {currentRatingPoints.map((point) => {
-                            const displayValue = (point.value / 1000).toString()
-                            const isSelected = selectedCurrent === displayValue
+                      {/* Range Selection */}
+                      <div className="lg:col-span-2 bg-black/20 p-4 md:p-6 rounded-lg border border-white/5">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
+                            <h3 className="text-sm md:text-base font-bold text-white font-orbitron mb-2">
+                              PONTUAÇÃO ATUAL
+                            </h3>
+                            <Input 
+                              type="number" 
+                              min={minRating} 
+                              max={targetRating - 1} 
+                              value={currentRating}
+                              onChange={(e) => handleCurrentChange(Number(e.target.value))}
+                              className="w-32 bg-brand-black-light border-brand-purple/30 text-white text-center font-rajdhani font-bold text-lg"
+                            />
+                          </div>
+                          
+                          <div className="hidden md:flex items-center justify-center flex-1">
+                             <div className="h-px bg-white/10 w-full mx-4"></div>
+                          </div>
 
-                            return (
-                              <button
-                                key={point.value}
-                                onClick={() => handleCurrentSelect(point.value)}
-                                className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                                  ${isSelected
-                                    ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
-                                    : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                                  }`}
-                              >
-                                {point.display}
-                              </button>
-                            )
-                          })}
+                          <div className="flex flex-col items-center md:items-end w-full md:w-auto">
+                            <h3 className="text-sm md:text-base font-bold text-brand-purple-light font-orbitron mb-2">
+                              PONTUAÇÃO DESEJADA
+                            </h3>
+                            <Input 
+                              type="number" 
+                              min={currentRating + 1} 
+                              max={maxRating} 
+                              value={targetRating}
+                              onChange={(e) => handleTargetChange(Number(e.target.value))}
+                              className="w-32 bg-brand-black-light border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
+                            />
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Target Rating */}
-                      <div>
-                        <h3 className="text-base md:text-lg font-bold text-white font-orbitron mb-2">
-                          PONTUAÇÃO DESEJADA:
-                        </h3>
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {targetRatingPoints.map((point) => {
-                            const displayValue = (point.value / 1000).toString()
-                            const isSelected = selectedTarget === displayValue
-
-                            return (
-                              <button
-                                key={point.value}
-                                onClick={() => handleTargetSelect(point.value)}
-                                className={`p-1.5 md:p-2 rounded-md border-2 transition-all duration-200 font-rajdhani font-bold text-xs
-                                  ${isSelected
-                                    ? 'bg-brand-purple border-brand-purple-light text-white shadow-glow'
-                                    : 'bg-brand-black-light border-white/10 text-brand-gray-300 hover:border-brand-purple/50 hover:bg-brand-purple/20 hover:text-white'
-                                  }`}
-                              >
-                                {point.display}
-                              </button>
-                            )
-                          })}
+                        <div className="px-2">
+                          <Slider
+                            min={minRating}
+                            max={maxRating}
+                            step={1}
+                            value={[currentRating, targetRating]}
+                            onValueChange={(val) => {
+                              setCurrentRating(val[0])
+                              setTargetRating(val[1])
+                            }}
+                            className="py-4 cursor-pointer"
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-brand-gray-500 mt-2 font-rajdhani font-bold">
+                          <span>{minRating}</span>
+                          <span>{maxRating}</span>
                         </div>
                       </div>
                     </div>
                   )
                 )}
 
-                {/* Calculate Button and Result */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Calculate Button */}
-                  <div className="flex justify-center lg:justify-start">
-                    <button
-                      onClick={calculatePrice}
-                      disabled={isCalculateDisabled}
-                      className="bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-2 px-6 rounded-lg transition-all
-                        shadow-glow hover:shadow-glow-hover
-                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-purple disabled:hover:shadow-glow
-                        font-rajdhani text-sm flex items-center gap-2"
-                    >
-                      {isCalculating ? (
-                        <>
-                          <Spinner size="md" />
-                          Calculando...
-                        </>
-                      ) : (
-                        <>
-                          <Calculator className="h-5 w-5" />
-                          CALCULAR PREÇO
-                        </>
-                      )}
-                    </button>
-                  </div>
-
+                {/* Price Result Block */}
+                <div className="grid grid-cols-1 gap-4">
                   {/* Price Result */}
                   <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
                     <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
@@ -639,14 +649,14 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                         </div>
                       </div>
                     ) : price > 0 ? (
-                      <div className="text-center">
-                        <div className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1">
+                      <div className="text-center transition-all duration-300 ease-in-out">
+                        <div key={price} className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1 animate-in fade-in zoom-in-95 duration-500">
                           R$ {price.toFixed(2)}
                         </div>
                         <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
                           {selectedServiceType === 'COACHING'
                             ? `${selectedHours} hora${selectedHours && selectedHours > 1 ? 's' : ''} de coaching`
-                            : `${selectedCurrent}K → ${selectedTarget}K pontos`}
+                            : `${currentRating.toLocaleString('pt-BR')} → ${targetRating.toLocaleString('pt-BR')} pontos`}
                           {selectedServiceType === 'DUO_BOOST' && (
                             <span className="text-brand-purple-light ml-1">(Duo Boost)</span>
                           )}
@@ -689,8 +699,8 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                     ) : (
                       <div className="text-center text-xs md:text-sm text-brand-gray-500 font-rajdhani py-4">
                         {selectedServiceType === 'COACHING'
-                          ? 'Selecione a quantidade de horas e clique em "Calcular Preço"'
-                          : 'Selecione as pontuações e clique em "Calcular Preço"'}
+                          ? 'Selecione a quantidade de horas para ver o preço'
+                          : 'Selecione as pontuações para ver o preço'}
                       </div>
                     )}
                   </div>

@@ -116,11 +116,17 @@ enum ServiceType {
   COACHING
 }
 
+enum PaymentProvider {
+  ASAAS
+  ABACATEPAY
+}
+
 model Payment {
   id        Int       @id @default(autoincrement())
   orderId   Int
   order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  providerId String?       @unique // ID externo do provider (AbacatePay, etc)
+  provider  PaymentProvider @default(ASAAS)
+  providerId String?       @unique // ID externo do provider (Asaas, AbacatePay, etc)
   pixCode   String? // Código PIX
   qrCode    String? // Base64 do QR Code
   status    PaymentStatus @default(PENDING)
@@ -288,7 +294,8 @@ model Withdrawal {
   id          Int              @id @default(autoincrement())
   userId      Int
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  providerId  String?          // ID do saque no AbacatePay (tran_123456)
+  provider    PaymentProvider  @default(ASAAS)
+  providerId  String?          // ID do saque no Gateway
   externalId  String           @unique  // ID único no nosso sistema
   amount      Int              // Valor em centavos
   platformFee Int?             // Taxa da plataforma

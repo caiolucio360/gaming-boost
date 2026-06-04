@@ -249,7 +249,7 @@ export default function PricingConfigPage() {
     const maxExpected = selectedServiceType === 'COACHING' ? 10 : 26000
 
     // Check if first range starts at expected minimum
-    if (enabledConfigs[0].rangeStart > minExpected) {
+    if (selectedServiceType !== 'COACHING' && enabledConfigs[0].rangeStart > minExpected) {
       detectedGaps.push({ start: minExpected, end: enabledConfigs[0].rangeStart - 1 })
     }
 
@@ -264,7 +264,7 @@ export default function PricingConfigPage() {
 
     // Check if last range covers maximum
     const lastConfig = enabledConfigs[enabledConfigs.length - 1]
-    if (lastConfig.rangeEnd < maxExpected) {
+    if (selectedServiceType !== 'COACHING' && lastConfig.rangeEnd < maxExpected) {
       detectedGaps.push({ start: lastConfig.rangeEnd + 1, end: maxExpected })
     }
 
@@ -467,8 +467,8 @@ export default function PricingConfigPage() {
           hours: parseInt(calcCurrent),
         }
       } else {
-        const currentValue = selectedMode === 'PREMIER' ? parseInt(calcCurrent) * 1000 : parseInt(calcCurrent)
-        const targetValue = selectedMode === 'PREMIER' ? parseInt(calcTarget) * 1000 : parseInt(calcTarget)
+        const currentValue = parseInt(calcCurrent)
+        const targetValue = parseInt(calcTarget)
         body = {
           game: selectedGame,
           gameMode: selectedMode,
@@ -514,7 +514,7 @@ export default function PricingConfigPage() {
       return `${config.rangeStart}h - ${config.rangeEnd}h`
     }
     if (selectedMode === 'PREMIER') {
-      return `${(config.rangeStart / 1000).toFixed(0)}K - ${(config.rangeEnd / 1000).toFixed(0)}K`
+      return `${config.rangeStart.toLocaleString('pt-BR')} - ${config.rangeEnd.toLocaleString('pt-BR')}`
     }
     return `Nível ${config.rangeStart} - ${config.rangeEnd}`
   }
@@ -615,7 +615,7 @@ export default function PricingConfigPage() {
                     {selectedServiceType === 'COACHING'
                       ? `${gap.start}h - ${gap.end}h`
                       : selectedMode === 'PREMIER'
-                        ? `${(gap.start / 1000).toFixed(0)}K - ${(gap.end / 1000).toFixed(0)}K`
+                        ? `${gap.start.toLocaleString('pt-BR')} - ${gap.end.toLocaleString('pt-BR')}`
                         : `Níveis ${gap.start} - ${gap.end}`}
                   </li>
                 ))}
@@ -672,7 +672,7 @@ export default function PricingConfigPage() {
                         {selectedServiceType === 'COACHING' ? 'Horas mínimas' : selectedMode === 'PREMIER' ? 'Rating Inicial' : 'Nível Inicial'}
                         {rangeStart && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
-                            {selectedMode === 'PREMIER' ? `${(parseInt(rangeStart) / 1000).toFixed(0)}K` : `Nível ${rangeStart}`}
+                            {selectedMode === 'PREMIER' ? parseInt(rangeStart).toLocaleString('pt-BR') : `Nível ${rangeStart}`}
                           </span>
                         )}
                       </Label>
@@ -692,7 +692,7 @@ export default function PricingConfigPage() {
                         {selectedServiceType === 'COACHING' ? 'Horas máximas' : selectedMode === 'PREMIER' ? 'Rating Final' : 'Nível Final'}
                         {rangeEnd && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
-                            {selectedMode === 'PREMIER' ? `${(parseInt(rangeEnd) / 1000).toFixed(0)}K` : `Nível ${rangeEnd}`}
+                            {selectedMode === 'PREMIER' ? parseInt(rangeEnd).toLocaleString('pt-BR') : `Nível ${rangeEnd}`}
                           </span>
                         )}
                       </Label>
@@ -740,7 +740,7 @@ export default function PricingConfigPage() {
                         {selectedServiceType === 'COACHING'
                           ? `${rangeStart}h - ${rangeEnd}h`
                           : selectedMode === 'PREMIER'
-                            ? `${(parseInt(rangeStart) / 1000).toFixed(0)}K - ${(parseInt(rangeEnd) / 1000).toFixed(0)}K`
+                            ? `${parseInt(rangeStart).toLocaleString('pt-BR')} - ${parseInt(rangeEnd).toLocaleString('pt-BR')}`
                             : `Nível ${rangeStart} - ${rangeEnd}`}
                         {' → '}
                         <span className="text-brand-purple-light font-semibold">

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { ErrorMessages } from '@/lib/error-constants'
-import { simulatePixPayment } from '@/lib/abacatepay'
 
 export async function POST(request: NextRequest) {
     if (process.env.NODE_ENV === 'production') {
@@ -80,8 +79,8 @@ export async function POST(request: NextRequest) {
             console.log('Provider ID:', payment.providerId)
             console.log('============================================')
 
-            // Simular pagamento no AbacatePay
-            const result = await simulatePixPayment(payment.providerId)
+            // Simular pagamento localmente (apenas ambiente dev)
+            const result = { status: 'PAID' as const }
 
             console.log('Simulation result:', result.status)
 
