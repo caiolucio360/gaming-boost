@@ -61,11 +61,11 @@ export async function PUT(
 
     // Validações
     if (rangeStart !== undefined && rangeEnd !== undefined && rangeStart >= rangeEnd) {
-      return Response.json({ error: 'rangeStart must be less than rangeEnd' }, { status: 400 })
+      return Response.json({ error: 'O valor final da faixa deve ser maior que o valor inicial' }, { status: 400 })
     }
 
     if (price !== undefined && price <= 0) {
-      return Response.json({ error: 'price must be greater than 0' }, { status: 400 })
+      return Response.json({ error: 'O preço deve ser maior que zero' }, { status: 400 })
     }
 
     // Verificar se existe

@@ -95,15 +95,15 @@ export async function POST(request: NextRequest) {
 
     // Validações
     if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price) {
-      return Response.json({ message: 'Missing required fields' }, { status: 400 })
+      return Response.json({ message: 'Preencha todos os campos (Início da faixa, Fim da faixa e Preço)' }, { status: 400 })
     }
 
     if (rangeStart >= rangeEnd) {
-      return Response.json({ message: 'rangeStart must be less than rangeEnd' }, { status: 400 })
+      return Response.json({ message: 'O valor final da faixa deve ser maior que o valor inicial. Ex: Inicial 0, Final 4999.' }, { status: 400 })
     }
 
     if (price <= 0) {
-      return Response.json({ message: 'price must be greater than 0' }, { status: 400 })
+      return Response.json({ message: 'O preço configurado deve ser maior que zero' }, { status: 400 })
     }
 
     // Check for overlapping ranges
