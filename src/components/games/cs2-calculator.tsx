@@ -530,9 +530,18 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 {/* Coaching: hours selector */}
                 {selectedServiceType === 'COACHING' ? (
                   isLoadingRanges ? (
-                    <div>
-                      <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
-                      <Skeleton className="h-12 w-full bg-white/5 rounded-md" />
+                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5 animate-pulse">
+                      <div className="flex flex-col items-center justify-center mb-8 gap-4">
+                        <Skeleton className="h-5 w-48 mb-2 bg-white/5" />
+                        <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
+                      </div>
+                      <div className="px-2">
+                        <Skeleton className="h-2 w-full bg-white/10 rounded-full my-4" />
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <Skeleton className="h-3 w-6 bg-white/5" />
+                        <Skeleton className="h-3 w-8 bg-white/5" />
+                      </div>
                     </div>
                   ) : (
                     <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5">
@@ -569,22 +578,24 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 ) : (
                   /* Rank Boost / Duo Boost: current and target rating */
                   isLoadingRanges ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div>
-                        <Skeleton className="h-6 w-40 mb-2 bg-white/5" />
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
-                          ))}
+                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5 animate-pulse">
+                      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <div className="flex flex-col items-center md:items-start w-full md:w-auto">
+                          <Skeleton className="h-5 w-32 mb-2 bg-white/5" />
+                          <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
+                        </div>
+                        <Skeleton className="h-6 w-6 rounded-full bg-white/5 hidden md:block" />
+                        <div className="flex flex-col items-center md:items-end w-full md:w-auto">
+                          <Skeleton className="h-5 w-32 mb-2 bg-white/5" />
+                          <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
                         </div>
                       </div>
-                      <div>
-                        <Skeleton className="h-6 w-44 mb-2 bg-white/5" />
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <Skeleton key={i} className="h-9 bg-white/5 rounded-md" />
-                          ))}
-                        </div>
+                      <div className="px-2">
+                        <Skeleton className="h-2 w-full bg-white/10 rounded-full my-4" />
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <Skeleton className="h-3 w-10 bg-white/5" />
+                        <Skeleton className="h-3 w-12 bg-white/5" />
                       </div>
                     </div>
                   ) : (
