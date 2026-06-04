@@ -30,14 +30,10 @@ export function ElojobHero() {
         <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8">
           <div className="mb-4 md:mb-6 flex flex-col items-center">
             <div className="mb-6 md:mb-8 animate-float">
-              <Image
-                src="/flautas/flautasboost-flauta.svg"
-                alt="FlautasBoost Ícone"
-                width={300}
-                height={300}
-                className="w-full max-w-[160px] md:max-w-[220px] lg:max-w-[280px] h-auto object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] mx-auto"
-                priority
-              />
+              <h1 className="font-brush -skew-x-6 text-5xl md:text-7xl lg:text-8xl mb-2 drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] tracking-widest text-center">
+                <span className="text-brand-purple-light">FLAUTAS</span>
+                <span className="text-white">BOOST</span>
+              </h1>
             </div>
             <h2 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-wide px-2 font-orbitron">
               <span className="text-white drop-shadow-2xl">
