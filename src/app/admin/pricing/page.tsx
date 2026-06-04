@@ -749,7 +749,7 @@ export default function PricingConfigPage() {
                           R$ {parseFloat(price || '0').toFixed(2)}
                         </span>
                         <span className="text-brand-gray-500 text-xs ml-1">
-                          / {selectedServiceType === 'COACHING' ? '1 hora' : selectedMode === 'PREMIER' ? '1000 pontos' : '1 nível'}
+                          / {selectedServiceType === 'COACHING' ? '1 hora' : selectedMode === 'PREMIER' ? '100 pontos' : '1 nível'}
                         </span>
                       </p>
                     </div>

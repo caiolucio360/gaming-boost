@@ -178,7 +178,7 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Resolução de Conflitos
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Em caso de conflitos entre cliente e booster, entre em contato com nossa equipe de suporte via WhatsApp.
+                  Em caso de conflitos entre cliente e booster, entre em contato com nossa equipe de suporte via Discord.
                   A administração atua como mediadora e suas decisões são finais e vinculantes. Ambas as partes comprometem-se
                   a cooperar durante o processo de mediação.
                 </p>
