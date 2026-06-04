@@ -53,6 +53,7 @@ gh pr create --base main --head dev --title "release: <versão/escopo>"
 
 - **Nunca** commitar direto em `main` ou `dev` — sempre via branch temporário + PR.
 - **Nunca** fazer PR de um branch de feature direto para `main` (exceto `hotfix/*`).
+- **Nunca fazer merge de PR automaticamente.** O dono do repositório aprova e faz o merge de **todos** os PRs manualmente — vale para qualquer branch e é absoluto para `main`. A IA cria/empurra o branch, abre o PR e **para ali**, reportando o link. Não rodar `gh pr merge`. A limpeza do branch após o merge também é decisão do dono.
 - **Squash merge** é a estratégia padrão dos PRs.
 - **Sempre apagar** o branch temporário após o merge (local e remoto). Não acumular branches.
 - Branches devem ser de vida curta — sincronize com `dev` com frequência (`git merge dev` ou rebase) para evitar conflitos grandes.
