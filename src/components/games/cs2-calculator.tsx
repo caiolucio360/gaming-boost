@@ -110,8 +110,17 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
       }
     }
 
+    // Reset ratings isolando os progress bars entre abas/jogos
+    const resetRatings = () => {
+      const isPremier = gameMode === 'PREMIER'
+      setCurrentRating(isPremier ? 0 : 1)
+      setTargetRating(isPremier ? 1000 : 2)
+      setSelectedHours(1)
+    }
+
+    resetRatings()
     fetchRanges()
-  }, [gameId, selectedServiceType])
+  }, [gameId, gameMode, selectedServiceType])
 
   // Check for active orders when user is logged in
   useEffect(() => {
