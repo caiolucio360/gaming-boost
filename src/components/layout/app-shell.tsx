@@ -159,7 +159,7 @@ export function AppShell({ role, children }: AppShellProps) {
             <Link href={dashboardHref} className="flex items-center min-w-0">
               {collapsed ? (
                 <Image
-                  src="/flautas/flautasboost-flauta.png"
+                  src="/flautas/flautasboost-flauta.svg"
                   alt="FlautasBoost"
                   width={32}
                   height={32}
