@@ -37,7 +37,7 @@ import { generateMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateMetadata({
   title: 'FlautasBoost - Serviços de Boost para Jogos',
-  description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura. Mais de 10.000 clientes satisfeitos.',
+  description: 'Subimos seu rank com segurança e rapidez. Boosters verificados, entrega garantida.',
   keywords: [
     'counter strike 2',
     'cs2',
