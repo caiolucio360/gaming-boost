@@ -158,21 +158,14 @@ export function AppShell({ role, children }: AppShellProps) {
           <div className={cn('flex items-center gap-2 min-w-0', !collapsed && 'flex-1')}>
             <Link href={dashboardHref} className="flex items-center min-w-0">
               {collapsed ? (
-                <Image
-                  src="/flautas/flautasboost-flauta.svg"
-                  alt="FlautasBoost"
-                  width={32}
-                  height={32}
-                  className="h-7 w-auto object-contain"
-                />
+                <span className="font-brush -skew-x-6 text-xl tracking-widest text-brand-purple-light">
+                  FB
+                </span>
               ) : (
-                <Image
-                  src="/flautas/flautasboost-horizontal.png"
-                  alt="FlautasBoost"
-                  width={160}
-                  height={36}
-                  className="h-8 w-auto object-contain"
-                />
+                <span className="font-brush -skew-x-6 text-xl md:text-2xl tracking-widest">
+                  <span className="text-brand-purple-light">FLAUTAS</span>
+                  <span className="text-white">BOOST</span>
+                </span>
               )}
             </Link>
           </div>

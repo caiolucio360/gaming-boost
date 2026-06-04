@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { PaymentProvider } from '@/generated/prisma/client'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createAsaasPixCharge } from '@/lib/asaas'
 import { createAbacatePixCharge } from '@/lib/abacatepay'
@@ -182,7 +183,7 @@ export async function POST(request: NextRequest) {
       const payment = await prisma.payment.create({
         data: {
           orderId: order.id,
-          provider: selectedProvider,
+          provider: selectedProvider as PaymentProvider,
           providerId: pixData.id,
           pixCode: pixData.payload,
           qrCode: pixData.encodedImage,
