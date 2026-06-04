@@ -71,7 +71,7 @@ export function ElojobHeader() {
         <Link href="/" className="flex items-center group flex-shrink-0 mx-auto lg:mx-0">
           <div>
             <h1 className="text-lg md:text-3xl font-black text-white font-orbitron">
-              <span className="text-brand-purple-light group-hover:text-brand-purple transition-colors duration-300">GAME</span>
+              <span className="text-brand-purple-light group-hover:text-brand-purple transition-colors duration-300">FLAUTAS</span>
               <span className="text-white">BOOST</span>
             </h1>
           </div>

@@ -161,10 +161,10 @@ export function AppShell({ role, children }: AppShellProps) {
                 style={{ fontFamily: 'Orbitron, sans-serif' }}
               >
                 {collapsed ? (
-                  <span className="text-brand-purple-light">G</span>
+                  <span className="text-brand-purple-light">F</span>
                 ) : (
                   <>
-                    <span className="text-brand-purple-light">GAME</span>
+                    <span className="text-brand-purple-light">FLAUTAS</span>
                     <span className="text-white">BOOST</span>
                   </>
                 )}
