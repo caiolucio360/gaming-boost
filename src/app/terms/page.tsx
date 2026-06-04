@@ -3,7 +3,6 @@ import type { Metadata} from 'next'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 
-const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Termos de Uso - FlautasBoost',
@@ -14,7 +13,7 @@ export const metadata: Metadata = generateMetadata({
     'condições de uso gameboost',
     'política de uso',
   ],
-  canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/terms',
+  canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br') + '/terms',
 })
 
 export default function TermsPage() {
@@ -28,12 +27,12 @@ export default function TermsPage() {
             '@type': 'WebPage',
             name: 'Termos de Uso - FlautasBoost',
             description: 'Termos e condições de uso da FlautasBoost',
-            url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/terms',
+            url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br') + '/terms',
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
               name: 'FlautasBoost',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br',
             },
           }),
         }}
@@ -270,8 +269,7 @@ export default function TermsPage() {
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">16.</span> Contato
                 </h2>
                 <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco pelo nosso{' '}
-                  <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">servidor no Discord</Link>.
+                  Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco pelo suporte da plataforma.
                 </p>
               </section>
 

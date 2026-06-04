@@ -9,7 +9,7 @@ describe('robots', () => {
   })
 
   it('points sitemap to correct URL', () => {
-    const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'
+    const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'
     expect(config.sitemap).toBe(`${base}/sitemap.xml`)
   })
 

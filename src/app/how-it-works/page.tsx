@@ -14,13 +14,12 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Como Funciona - FlautasBoost',
   description: 'Entenda como funciona o serviço de boost da FlautasBoost. Processo simples, seguro e rápido em 4 passos.',
   keywords: ['como funciona boost', 'processo boost cs2', 'boost seguro', 'boost rápido'],
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/how-it-works`,
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'}/how-it-works`,
 })
 
 const steps = [
@@ -166,10 +165,7 @@ export default function ComoFuncionaPage() {
             Começar Agora
           </Link>
           <p className="text-sm text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-            Dúvidas?{' '}
-            <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors">
-              Fale conosco no Discord
-            </Link>
+            Dúvidas? Entre em contato pelo suporte.
           </p>
         </div>
       </div>

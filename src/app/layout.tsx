@@ -57,7 +57,7 @@ export const metadata: Metadata = generateMetadata({
     'elojob cs2',
     'gameboost'
   ],
-  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+  canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br',
 })
 
 export default function RootLayout({

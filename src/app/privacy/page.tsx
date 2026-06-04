@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card, CardContent} from '@/components/ui/card'
 
-const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Política de Privacidade - FlautasBoost',
@@ -15,7 +14,7 @@ export const metadata: Metadata = generateMetadata({
     'lgpd',
     'privacidade boost',
   ],
-  canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/privacy',
+  canonical: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br') + '/privacy',
 })
 
 export default function PrivacyPage() {
@@ -29,12 +28,12 @@ export default function PrivacyPage() {
             '@type': 'WebPage',
             name: 'Política de Privacidade - FlautasBoost',
             description: 'Política de privacidade da FlautasBoost',
-            url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br') + '/privacy',
+            url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br') + '/privacy',
             inLanguage: 'pt-BR',
             isPartOf: {
               '@type': 'WebSite',
               name: 'FlautasBoost',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br',
             },
           }),
         }}
@@ -202,8 +201,7 @@ export default function PrivacyPage() {
                   <li><strong className="text-white">Informação:</strong> Sobre entidades públicas e privadas com as quais compartilhamos dados</li>
                 </ul>
                 <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Para exercer seus direitos, entre em contato com nossa equipe pelo{' '}
-                  <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">servidor no Discord</Link>.
+                  Para exercer seus direitos, entre em contato com nossa equipe pelo suporte da plataforma.
                   Responderemos sua solicitação em até 15 dias.
                 </p>
               </section>
@@ -300,9 +298,7 @@ export default function PrivacyPage() {
                   </p>
                   <p>
                     <strong className="text-white">Suporte:</strong>{' '}
-                    <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="text-brand-purple-light hover:text-brand-purple-lighter transition-colors font-semibold">
-                      Servidor no Discord
-                    </Link>
+                    suporte@flautasboost.com.br
                   </p>
                   <p className="text-sm">
                     Prazo de resposta: até 15 dias conforme estabelecido pela LGPD

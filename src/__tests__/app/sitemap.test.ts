@@ -2,7 +2,7 @@ import sitemap from '@/app/sitemap'
 
 describe('sitemap', () => {
   const urls = sitemap().map(entry => entry.url)
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'
+  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'
 
   it('includes homepage', () => {
     expect(urls).toContain(base)
