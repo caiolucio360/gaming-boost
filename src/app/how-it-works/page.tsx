@@ -17,8 +17,8 @@ import Link from 'next/link'
 const DISCORD_URL = 'https://discord.gg/gameboost'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Como Funciona - GameBoost',
-  description: 'Entenda como funciona o serviço de boost da GameBoost. Processo simples, seguro e rápido em 4 passos.',
+  title: 'Como Funciona - FlautasBoost',
+  description: 'Entenda como funciona o serviço de boost da FlautasBoost. Processo simples, seguro e rápido em 4 passos.',
   keywords: ['como funciona boost', 'processo boost cs2', 'boost seguro', 'boost rápido'],
   canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/how-it-works`,
 })
@@ -135,7 +135,7 @@ export default function ComoFuncionaPage() {
         {/* Features */}
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-white font-orbitron text-center mb-10" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            POR QUE <span className="text-brand-purple-light">ESCOLHER</span> A GAMEBOOST
+            POR QUE <span className="text-brand-purple-light">ESCOLHER</span> A FLAUTASBOOST
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
             {features.map((feature) => (

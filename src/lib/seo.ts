@@ -27,7 +27,7 @@ export function generateMetadata({
   modifiedTime,
 }: SEOConfig): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL
-  const fullTitle = title.includes('GameBoost') ? title : `${title} | GameBoost`
+  const fullTitle = title.includes('FlautasBoost') ? title : `${title} | FlautasBoost`
   const fullImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`
   const canonicalUrl = canonical || siteUrl
 
@@ -35,15 +35,15 @@ export function generateMetadata({
     title: fullTitle,
     description,
     keywords: keywords.length > 0 ? keywords.join(', ') : undefined,
-    authors: [{ name: 'GameBoost' }],
-    creator: 'GameBoost',
-    publisher: 'GameBoost',
+    authors: [{ name: 'FlautasBoost' }],
+    creator: 'FlautasBoost',
+    publisher: 'FlautasBoost',
     robots: noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     openGraph: {
       type,
       locale: 'pt_BR',
       url: canonicalUrl,
-      siteName: 'GameBoost',
+      siteName: 'FlautasBoost',
       title: fullTitle,
       description,
       images: [

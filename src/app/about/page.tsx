@@ -3,10 +3,10 @@ import type { Metadata } from 'next'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Sobre Nós - GameBoost',
-  description: 'Conheça a GameBoost, plataforma líder em serviços de boost para jogos. Mais de 10.000 clientes satisfeitos. Profissionais verificados, entrega rápida e segura.',
+  title: 'Sobre Nós - FlautasBoost',
+  description: 'Conheça a FlautasBoost, plataforma líder em serviços de boost para jogos. Mais de 10.000 clientes satisfeitos. Profissionais verificados, entrega rápida e segura.',
   keywords: [
-    'sobre GameBoost',
+    'sobre FlautasBoost',
     'quem somos',
     'história gameboost',
     'boost profissional',
@@ -48,7 +48,7 @@ export default function AboutPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Organization',
-            name: 'GameBoost',
+            name: 'FlautasBoost',
             description: 'Plataforma profissional de boost para jogos',
             url: 'https://gameboostpro.com.br',
             logo: 'https://gameboostpro.com.br/principal.png',
@@ -91,7 +91,7 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent className="space-y-6 relative z-10">
                 <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  Fundada em 2020, a GameBoost nasceu da paixão por jogos e da necessidade de oferecer 
+                  Fundada em 2020, a FlautasBoost nasceu da paixão por jogos e da necessidade de oferecer 
                   serviços de boost profissionais e seguros para a comunidade gamer brasileira. Nossa equipe 
                   é formada por jogadores experientes que entendem as dificuldades de subir de rank e alcançar 
                   objetivos nos jogos mais populares.

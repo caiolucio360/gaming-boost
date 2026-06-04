@@ -1,4 +1,4 @@
-# Design System — GameBoost
+# Design System — FlautasBoost
 
 **Single source of truth for all styling decisions.**
 

@@ -1,6 +1,6 @@
 # Documentação do Projeto
 
-Esta pasta contém toda a documentação técnica do projeto GameBoost.
+Esta pasta contém toda a documentação técnica do projeto FlautasBoost.
 
 ## 📚 Documentos Disponíveis
 

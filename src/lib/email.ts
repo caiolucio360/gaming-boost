@@ -39,7 +39,7 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions): Prom
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'GameBoost <noreply@gameboost.com.br>',
+        from: process.env.EMAIL_FROM || 'FlautasBoost <noreply@flautasboost.com.br>',
         to,
         subject,
         html,
@@ -72,7 +72,7 @@ export function getEmailTemplate(content: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GameBoost</title>
+  <title>FlautasBoost</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -135,14 +135,14 @@ export function getEmailTemplate(content: string): string {
   <div class="email-container">
     <div class="header">
       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gameboost.com.br'}" class="logo">
-        GameBoost 🎮
+        FlautasBoost 🎮
       </a>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p>GameBoost - Plataforma de Boost Profissional</p>
+      <p>FlautasBoost - Plataforma de Boost Profissional</p>
       <p>Este é um email automático, por favor não responda.</p>
       <p>
         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gameboost.com.br'}" style="color: #9333ea;">Acessar Plataforma</a>
@@ -164,7 +164,7 @@ export async function sendPasswordResetEmail(to: string, resetToken: string): Pr
   const html = getEmailTemplate(`
     <h2>Recuperação de Senha</h2>
     <p>Olá,</p>
-    <p>Recebemos uma solicitação para redefinir a senha da sua conta GameBoost.</p>
+    <p>Recebemos uma solicitação para redefinir a senha da sua conta FlautasBoost.</p>
     <div class="highlight">
       <p><strong>Para criar uma nova senha, clique no botão abaixo:</strong></p>
       <a href="${resetUrl}" class="button">Redefinir Senha</a>
@@ -181,7 +181,7 @@ export async function sendPasswordResetEmail(to: string, resetToken: string): Pr
 
   return sendEmail({
     to,
-    subject: 'Recuperação de Senha - GameBoost',
+    subject: 'Recuperação de Senha - FlautasBoost',
     html,
   })
 }
@@ -319,7 +319,7 @@ export async function sendOrderCompletedEmail(
     <p>Esperamos que você esteja satisfeito com o serviço! Que tal deixar uma avaliação para o booster?</p>
     <a href="${orderUrl}" class="button">Avaliar Serviço</a>
     <p style="color: #666; font-size: 14px; margin-top: 30px;">
-      Obrigado por escolher a GameBoost! 🚀
+      Obrigado por escolher a FlautasBoost! 🚀
     </p>
     ${retentionBlock}
   `)
@@ -375,7 +375,7 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
 
   const roleMessages = {
     CLIENT: {
-      title: 'Bem-vindo à GameBoost!',
+      title: 'Bem-vindo à FlautasBoost!',
       message: 'Você está pronto para subir de rank! Explore nossos serviços de boost profissional e escolha o que melhor se encaixa no seu objetivo.',
       cta: 'Explorar Serviços',
     },
@@ -407,7 +407,7 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
 
   return sendEmail({
     to,
-    subject: 'Bem-vindo à GameBoost! 🎮',
+    subject: 'Bem-vindo à FlautasBoost! 🎮',
     html,
   })
 }

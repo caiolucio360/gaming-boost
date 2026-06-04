@@ -67,11 +67,17 @@ export function Footer() {
                       </TooltipContent>
                     </Tooltip>
                   </li>
-                  <li className="flex items-center gap-2 cursor-not-allowed">
-                    <span className="text-xs md:text-sm text-brand-gray-500">Coaching</span>
-                    <Badge variant="outline" className="text-xs border-brand-purple/50 text-brand-purple bg-transparent">
-                      em breve
-                    </Badge>
+                  <li>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link href="/games/cs2/pricing?service=COACHING" className="text-xs md:text-sm text-brand-gray-400 hover:text-brand-purple transition-colors">
+                          Coaching
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-brand-black-light border-brand-purple/50 text-white">
+                        <p>Melhore seu gameplay com coaches profissionais</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </li>
                 </ul>
               </CardContent>
@@ -115,7 +121,7 @@ export function Footer() {
 
           <div className="pt-6 md:pt-8 text-center">
             <p className="text-xs md:text-sm text-brand-gray-400">
-              © 2025 GameBoost. Todos os direitos reservados.
+              © 2025 FlautasBoost. Todos os direitos reservados.
             </p>
           </div>
         </div>

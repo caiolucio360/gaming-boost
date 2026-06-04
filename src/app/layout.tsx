@@ -29,7 +29,7 @@ const rajdhani = Rajdhani({
 import { generateMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'GameBoost - Serviços de Boost para Jogos',
+  title: 'FlautasBoost - Serviços de Boost para Jogos',
   description: 'Plataforma profissional para serviços de boost em Counter-Strike 2. Boost de rank Premier e Gamers Club com boosters verificados. Entrega rápida e segura. Mais de 10.000 clientes satisfeitos.',
   keywords: [
     'counter strike 2',

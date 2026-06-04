@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
       <PageHeader
         highlight="PAINEL"
         title="ADMINISTRATIVO"
-        description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma GameBoost.`}
+        description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma FlautasBoost.`}
       />
 
       {/* Stat cards */}

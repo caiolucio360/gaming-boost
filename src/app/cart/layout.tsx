@@ -2,8 +2,8 @@ import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Carrinho - GameBoost',
-  description: 'Seu carrinho de compras da GameBoost.',
+  title: 'Carrinho - FlautasBoost',
+  description: 'Seu carrinho de compras da FlautasBoost.',
   noindex: true,
 })
 
