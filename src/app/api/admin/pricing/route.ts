@@ -89,7 +89,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { game, gameMode, serviceType: bodyServiceType, rangeStart, rangeEnd, price, enabled } = body
-    const svcType: ServiceType = bodyServiceType === 'DUO_BOOST' ? 'DUO_BOOST' : 'RANK_BOOST'
+    const svcType: ServiceType = ['DUO_BOOST', 'COACHING'].includes(bodyServiceType as string)
+      ? (bodyServiceType as ServiceType)
+      : 'RANK_BOOST'
 
     // Validações
     if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price) {
