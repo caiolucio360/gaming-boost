@@ -12,7 +12,7 @@ export interface SEOConfig {
   modifiedTime?: string
 }
 
-const DEFAULT_SITE_URL = 'https://gaming-boost.vercel.app'
+const DEFAULT_SITE_URL = 'https://www.flautasboost.com.br'
 const DEFAULT_OG_IMAGE = '/principal.png'
 
 export function generateMetadata({
@@ -63,8 +63,6 @@ export function generateMetadata({
       title: fullTitle,
       description,
       images: [fullImage],
-      creator: '@gameboostpro',
-      site: '@gameboostpro',
     },
     alternates: {
       canonical: canonicalUrl,

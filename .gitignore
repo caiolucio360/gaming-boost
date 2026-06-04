@@ -47,5 +47,5 @@ next-env.d.ts
 
 .superpowers/
 
-# Claude Code settings (may contain sensitive data)
+# Claude Code
 .claude/

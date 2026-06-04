@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         message: n.message,
         createdAt: n.createdAt,
       })),
-      webhookUrl: 'https://gaming-boost.vercel.app/api/webhooks/abacatepay',
+      webhookUrl: 'https://www.flautasboost.com.br/api/webhooks/abacatepay',
       diagnostic: {
         paymentFound: !!payment,
         isPaid: payment.status === 'PAID',

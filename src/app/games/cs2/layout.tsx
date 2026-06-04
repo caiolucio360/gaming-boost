@@ -13,7 +13,7 @@ export const metadata: Metadata = generateMetadata({
     'elo job cs2',
     'cs2 boost profissional',
   ],
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gameboostpro.com.br'}/games/cs2`,
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.flautasboost.com.br'}/games/cs2`,
 })
 
 export default function CS2Layout({

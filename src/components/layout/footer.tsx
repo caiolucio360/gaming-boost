@@ -19,7 +19,7 @@ export function Footer() {
               <CardContent className="p-0">
                 <div className="mb-3 md:mb-4">
                   <h1 className="text-xl md:text-3xl font-black text-white drop-shadow-2xl font-orbitron">
-                    <span className="text-brand-purple-light drop-shadow-2xl">GAME</span>
+                    <span className="text-brand-purple-light drop-shadow-2xl">FLAUTAS</span>
                     <span className="text-white drop-shadow-2xl">BOOST</span>
                   </h1>
                 </div>
