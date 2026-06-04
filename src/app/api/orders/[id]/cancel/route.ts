@@ -9,7 +9,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { refundPixPayment } from '@/lib/abacatepay'
+import { refundAsaasPayment } from '@/lib/asaas'
+import { refundAbacatePayment } from '@/lib/abacatepay'
 import { sendOrderCancelledEmail } from '@/lib/email'
 import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { ChatService } from '@/services'
@@ -139,21 +140,25 @@ export async function POST(
 
     // If order was paid, process refund
     if (order.status === 'PAID' && payment) {
-      console.log(`💰 Processing refund for payment ${payment.providerId}`)
+      console.log(`💰 Processing refund for payment ${payment.providerId} (${payment.provider})`)
 
       try {
-        await refundPixPayment(payment.providerId)
+        if (payment.provider === 'ABACATEPAY') {
+          await refundAbacatePayment(payment.providerId)
+        } else {
+          await refundAsaasPayment(payment.providerId)
+        }
         refundProcessed = true
         console.log(`✅ Refund processed successfully`)
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         console.error(`❌ Failed to process refund:`, error)
 
-        // "Not found" means the payment doesn't exist in AbacatePay
+        // "Not found" means the payment doesn't exist in Gateway
         // (e.g. simulated/dev payment or already expired). Allow cancellation.
-        if (errorMessage === 'Not found') {
+        if (errorMessage === 'Not found' || errorMessage.includes('not found')) {
           refundNotFound = true
-          console.warn(`⚠️ Payment ${payment.providerId} not found in AbacatePay — cancelling order without refund`)
+          console.warn(`⚠️ Payment ${payment.providerId} not found in ${payment.provider} — cancelling order without refund`)
         } else {
           return NextResponse.json(
             {

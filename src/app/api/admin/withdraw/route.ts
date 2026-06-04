@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createWithdrawal, PixKeyType } from '@/lib/abacatepay'
+import { createAsaasPixTransfer } from '@/lib/asaas'
 import crypto from 'crypto'
 
 // POST - Criar um novo saque (Admin)
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validar tipo de chave PIX
-        const validPixKeyTypes: PixKeyType[] = ['CPF', 'CNPJ', 'PHONE', 'EMAIL', 'RANDOM', 'BR_CODE']
+        const validPixKeyTypes = ['CPF', 'CNPJ', 'PHONE', 'EMAIL', 'EVP']
         if (!validPixKeyTypes.includes(pixKeyType)) {
             return NextResponse.json(
                 { message: 'Tipo de chave PIX inválido' },
@@ -111,10 +111,10 @@ export async function POST(request: NextRequest) {
 
         // Chamar AbacatePay fora da transação (operação externa)
         try {
-            const withdrawResult = await createWithdrawal({
-                externalId,
+            const withdrawResult = await createAsaasPixTransfer({
                 amount,
-                pix: { type: pixKeyType as PixKeyType, key: pixKey },
+                pixAddressKey: pixKey,
+                pixAddressKeyType: pixKeyType === 'RANDOM' ? 'EVP' : pixKeyType,
                 description: description || `Saque de receitas - Admin #${userId}`,
             })
 
@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
                 where: { id: provisional.id },
                 data: {
                     providerId: withdrawResult.id,
-                    platformFee: withdrawResult.platformFee,
-                    receiptUrl: withdrawResult.receiptUrl,
+                    platformFee: 0,
+                    receiptUrl: withdrawResult.transactionReceiptUrl || null,
                 },
             })
 

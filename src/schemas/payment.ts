@@ -13,6 +13,7 @@ export const CreatePixSchema = z.object({
     orderId: IdSchema,
     phone: PhoneSchema,
     taxId: TaxIdSchema,
+    provider: z.enum(['ASAAS', 'ABACATEPAY']).optional(),
 })
 
 /**

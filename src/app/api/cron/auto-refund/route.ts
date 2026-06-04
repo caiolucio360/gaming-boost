@@ -11,7 +11,8 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getOrderTimeoutHours } from '@/lib/env'
-import { refundPixPayment } from '@/lib/abacatepay'
+import { refundAsaasPayment } from '@/lib/asaas'
+import { refundAbacatePayment } from '@/lib/abacatepay'
 import { sendOrderCancelledEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
@@ -120,9 +121,11 @@ export async function POST(request: Request) {
           continue
         }
 
-        // Process refund via AbacatePay
-        console.log(`🔄 Refunding payment ${payment.providerId}...`)
-        await refundPixPayment(payment.providerId)
+        if (payment.provider === 'ABACATEPAY') {
+          await refundAbacatePayment(payment.providerId)
+        } else {
+          await refundAsaasPayment(payment.providerId)
+        }
 
         // Update order status to CANCELLED
         let metadata: Record<string, unknown> = {}

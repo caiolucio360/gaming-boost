@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
         data: { hours, min, max }
       }, { status: 200 })
     } else if (gameMode === 'PREMIER') {
-      // Generate 1K increments from first available 1K boundary to max (rounded up to nearest 1K)
-      const maxRounded = Math.ceil((max + 1) / 1000) * 1000
+      // Generate 1K increments from first available 1K boundary to max
+      const maxRounded = Math.floor(max / 1000) * 1000
       const startPoint = Math.max(1000, Math.ceil(min / 1000) * 1000)
       points = []
       for (let p = startPoint; p <= maxRounded; p += 1000) {

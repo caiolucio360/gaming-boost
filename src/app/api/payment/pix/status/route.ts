@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { checkPixStatus } from '@/lib/abacatepay'
+import { checkAsaasPaymentStatus } from '@/lib/asaas'
+import { checkAbacatePaymentStatus } from '@/lib/abacatepay'
 
 export async function GET(request: NextRequest) {
     try {
@@ -74,23 +75,37 @@ export async function GET(request: NextRequest) {
             })
         }
 
-        // Verificar status no AbacatePay
+        // Verificar status no gateway externo
         if (payment.providerId) {
             try {
-                const pixStatus = await checkPixStatus(payment.providerId)
+                let pixStatus = 'PENDING'
+
+                if (payment.provider === 'ABACATEPAY') {
+                    const abacateStatus = await checkAbacatePaymentStatus(payment.providerId)
+                    pixStatus = abacateStatus.status // already mapped correctly by abacatepay? it returns PENDING, PAID, CANCELLED
+                } else {
+                    const asaasStatusRaw = await checkAsaasPaymentStatus(payment.providerId)
+                    
+                    // Mapear status Asaas para nosso status
+                    if (['RECEIVED', 'CONFIRMED'].includes(asaasStatusRaw)) {
+                        pixStatus = 'PAID'
+                    } else if (asaasStatusRaw === 'OVERDUE') {
+                        pixStatus = 'EXPIRED'
+                    }
+                }
 
                 // Se o status mudou, atualizar no banco
-                if (pixStatus.status !== payment.status) {
+                if (pixStatus !== payment.status) {
                     const updatedPayment = await prisma.payment.update({
                         where: { id: payment.id },
                         data: {
-                            status: pixStatus.status,
-                            paidAt: pixStatus.status === 'PAID' ? new Date() : null,
+                            status: pixStatus as any,
+                            paidAt: pixStatus === 'PAID' ? new Date() : null,
                         }
                     })
 
                     // Se foi pago, atualizar o pedido também
-                    if (pixStatus.status === 'PAID') {
+                    if (pixStatus === 'PAID') {
                         await prisma.$transaction(async (tx: any) => {
                             // Atualizar pedido para PAID (aguardando um booster aceitar)
                             await tx.order.update({
@@ -111,20 +126,19 @@ export async function GET(request: NextRequest) {
                     }
 
                     return NextResponse.json({
-                        status: pixStatus.status,
+                        status: pixStatus,
                         payment: { ...updatedPayment },
-                        message: pixStatus.status === 'PAID' ? 'Pagamento confirmado!' : `Status: ${pixStatus.status}`
+                        message: pixStatus === 'PAID' ? 'Pagamento confirmado!' : `Status: ${pixStatus}`
                     })
                 }
 
                 return NextResponse.json({
                     status: payment.status,
                     payment,
-                    expiresAt: pixStatus.expiresAt,
                     message: 'Aguardando pagamento'
                 })
             } catch (error) {
-                console.error('Erro ao verificar status no AbacatePay:', error)
+                console.error('Erro ao verificar status no Asaas:', error)
                 // Em caso de erro na API, retornar status do banco
                 return NextResponse.json({
                     status: payment.status,

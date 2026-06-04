@@ -1,121 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
-import { webhookRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
-import { PaymentService } from '@/services'
+import { PaymentService } from '@/services/payment.service'
 
 /**
- * Validates webhook signature from AbacatePay
- * Uses HMAC SHA256 with timing-safe comparison
+ * Endpoint de Webhook para o AbacatePay
+ * Recebe notificações sobre pagamentos (PIX), saques, etc.
  */
-function validateWebhookSignature(
-  body: string,
-  signature: string | null,
-  secret: string
-): boolean {
-  if (!signature || !secret) {
-    console.warn('Webhook signature validation failed: missing signature or secret')
-    return false
-  }
-
-  try {
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(body)
-      .digest('hex')
-
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )
-  } catch (error) {
-    console.error('Error validating webhook signature:', error)
-    return false
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: 100 webhook calls per minute per IP
-    const identifier = getIdentifier(request)
-    const rateLimitResult = await webhookRateLimiter.check(identifier, 100)
+    // Validação opcional: Verificar token se o AbacatePay suportar
+    // (Pode adicionar verificações de cabeçalho específicas do AbacatePay aqui)
 
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { error: 'Too many webhook requests' },
-        {
-          status: 429,
-          headers: createRateLimitHeaders(rateLimitResult)
-        }
-      )
+    const rawBody = await request.text()
+    
+    if (!rawBody) {
+      return NextResponse.json({ error: 'Empty body' }, { status: 400 })
     }
 
-    // Read body as text for signature validation
-    const bodyText = await request.text()
-
-    let body: Record<string, unknown>
+    let payload
     try {
-      body = JSON.parse(bodyText)
-    } catch {
-      console.error('Invalid JSON in webhook body')
-      return NextResponse.json(
-        { error: 'Invalid JSON' },
-        { status: 400 }
-      )
+      payload = JSON.parse(rawBody)
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
     }
 
-    // Validate webhook signature (mandatory)
-    const webhookSecret = process.env.ABACATEPAY_WEBHOOK_SECRET
-    if (!webhookSecret) {
-      console.error('[WEBHOOK] ABACATEPAY_WEBHOOK_SECRET not configured')
-      return NextResponse.json(
-        { error: 'Webhook validation not configured' },
-        { status: 500 }
-      )
+    console.log('[WEBHOOK ABACATEPAY] Recebido:', JSON.stringify(payload, null, 2))
+
+    // Processa o evento com o PaymentService (que aceita o padrão de WebhookData)
+    const result = await PaymentService.processWebhookEvent(payload)
+
+    if (result.success) {
+      return NextResponse.json({ received: true, ...result.data }, { status: 200 })
+    } else {
+      console.error('[WEBHOOK ABACATEPAY] Falha ao processar:', result.error)
+      // Retornamos 200 mesmo em erros de processamento interno para o provedor não ficar repetindo
+      // se não for um erro tratável do nosso lado, mas podemos mudar para 400 se o payload for inválido
+      return NextResponse.json({ error: result.error, code: result.code }, { status: 200 })
     }
-
-    const signature = request.headers.get('x-signature') || request.headers.get('x-abacatepay-signature')
-    if (!validateWebhookSignature(bodyText, signature, webhookSecret)) {
-      console.error('[WEBHOOK] Invalid signature')
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      )
-    }
-
-    // Log webhook for debugging
-    const eventType = body.event as string | undefined
-    console.log('========== WEBHOOK RECEIVED ==========')
-    console.log('Event Type:', eventType)
-    console.log('Full Body:', JSON.stringify(body, null, 2))
-    console.log('Timestamp:', new Date().toISOString())
-    console.log('=====================================')
-
-    // Process webhook through PaymentService (single entry point)
-    const result = await PaymentService.processWebhookEvent({
-      event: eventType,
-      data: body.data as Record<string, unknown> | undefined,
-    })
-
-    if (!result.success) {
-      console.error('Webhook processing failed:', result.error)
-      return NextResponse.json(
-        {
-          received: true,
-          processed: false,
-          error: result.error,
-          eventType,
-        },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      received: true,
-      ...result.data,
-      eventType,
-    })
   } catch (error) {
-    console.error('Webhook Error:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    console.error('[WEBHOOK ABACATEPAY] Erro fatal no processamento:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

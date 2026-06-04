@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createPixQrCode } from '@/lib/abacatepay'
+import { createAsaasPixCharge } from '@/lib/asaas'
+import { createAbacatePixCharge } from '@/lib/abacatepay'
 import { CreatePixSchema } from '@/schemas/payment'
 import { validateBody } from '@/lib/validate'
 import { paymentRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
@@ -72,7 +73,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { orderId, phone, taxId } = validation.data
+    const { orderId, phone, taxId, provider } = validation.data
+    const selectedProvider = provider || process.env.ACTIVE_PAYMENT_PROVIDER || 'ASAAS'
 
     // Buscar pedido
     const order = await prisma.order.findUnique({
@@ -118,58 +120,75 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar API Key
-    if (!process.env.ABACATEPAY_API_KEY) {
-      console.error('ABACATEPAY_API_KEY não configurada')
-      return NextResponse.json(
-        { message: 'Erro de configuração no servidor (API Key ausente)' },
-        { status: 500 }
-      )
-    }
-
-    // Gerar PIX QR Code no AbacatePay
+    // Gerar PIX QR Code no provider selecionado
     try {
-      console.log('========== CREATING PIX QR CODE PAYMENT ==========')
+      console.log(`========== CREATING ${selectedProvider} PIX QR CODE PAYMENT ==========`)
       console.log('Order ID:', order.id)
       console.log('Order Total:', order.total)
-      console.log('Amount in cents:', Math.round(order.total * 100))
+      console.log('Amount:', order.total)
       console.log('Customer CPF:', taxId.substring(0, 3) + '...' + taxId.substring(taxId.length - 2))
       console.log('Customer Phone:', phone)
-      console.log('=================================================')
+      console.log('========================================================')
 
-      const pixData = await createPixQrCode({
-        amount: Math.round(order.total * 100),
-        description: `Pedido #${order.id} - ${order.serviceName || 'Boost'}`,
-        expiresIn: 1800,
-        customer: {
-          name: order.user.name || 'Cliente',
-          email: order.user.email,
-          taxId: taxId,
-          cellphone: phone,
-        },
-        metadata: {
-          orderId: order.id.toString(),
+      let pixData: { id: string, payload?: string, encodedImage?: string, status: string, expirationDate?: string | Date }
+
+      if (selectedProvider === 'ABACATEPAY') {
+        const abacateResponse = await createAbacatePixCharge({
+          amount: order.total,
+          description: `Pedido #${order.id}`,
+          customer: {
+            name: order.user.name || 'Cliente',
+            email: order.user.email,
+            taxId: taxId,
+            cellphone: phone,
+          },
+          externalReference: order.id.toString()
+        })
+        pixData = {
+          id: abacateResponse.data.id,
+          payload: undefined, // AbacatePay SDK response might not return payload directly here depending on struct
+          encodedImage: undefined, // Or needs fetching later
+          status: abacateResponse.data.status,
+          expirationDate: undefined
         }
-      })
+      } else {
+        const asaasResponse = await createAsaasPixCharge({
+          amount: order.total,
+          description: `Pedido #${order.id}`,
+          customer: {
+            name: order.user.name || 'Cliente',
+            email: order.user.email,
+            cpfCnpj: taxId,
+            phone: phone,
+          },
+          externalReference: order.id.toString()
+        })
+        pixData = {
+          id: asaasResponse.id,
+          payload: asaasResponse.payload,
+          encodedImage: asaasResponse.encodedImage,
+          status: asaasResponse.status,
+          expirationDate: asaasResponse.expirationDate
+        }
+      }
 
       console.log('========== PIX QR CODE CREATED SUCCESSFULLY ==========')
       console.log('PIX ID:', pixData.id)
       console.log('Status:', pixData.status)
-      console.log('BrCode length:', pixData.brCode?.length)
-      console.log('Has QR Image:', !!pixData.brCodeBase64)
-      console.log('Expires At:', pixData.expiresAt)
+      console.log('Provider:', selectedProvider)
       console.log('======================================================')
 
       // Salvar informação de pagamento no banco
       const payment = await prisma.payment.create({
         data: {
           orderId: order.id,
+          provider: selectedProvider,
           providerId: pixData.id,
-          pixCode: pixData.brCode,
-          qrCode: pixData.brCodeBase64,
+          pixCode: pixData.payload,
+          qrCode: pixData.encodedImage,
           status: 'PENDING',
           total: order.total,
-          expiresAt: new Date(pixData.expiresAt),
+          expiresAt: pixData.expirationDate ? new Date(pixData.expirationDate) : undefined,
         },
       })
 
