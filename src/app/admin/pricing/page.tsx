@@ -679,6 +679,7 @@ export default function PricingConfigPage() {
                       <Input
                         id="rangeStart"
                         type="number"
+                        step={selectedMode === 'PREMIER' ? "100" : "1"}
                         value={rangeStart}
                         onChange={(e) => setRangeStart(e.target.value)}
                         placeholder={selectedServiceType === 'COACHING' ? '1' : selectedMode === 'PREMIER' ? '0' : '1'}
@@ -699,6 +700,7 @@ export default function PricingConfigPage() {
                       <Input
                         id="rangeEnd"
                         type="number"
+                        step={selectedMode === 'PREMIER' ? "100" : "1"}
                         value={rangeEnd}
                         onChange={(e) => setRangeEnd(e.target.value)}
                         placeholder={selectedServiceType === 'COACHING' ? '10' : selectedMode === 'PREMIER' ? '4999' : '10'}
