@@ -47,5 +47,5 @@ next-env.d.ts
 
 .superpowers/
 
-# Claude Code
-.claude/
+# Claude Code — versiona config compartilhada (rules/, workflows/, settings.json); ignora config pessoal/local
+.claude/settings.local.json
