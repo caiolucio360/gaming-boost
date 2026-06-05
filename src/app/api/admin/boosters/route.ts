@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status')
 
         // Build filter
-        const where: Record<string, unknown> = { user: { isTest: false } }
+        const where: Record<string, unknown> = {}
         if (status && ['PENDING', 'VERIFIED', 'REJECTED'].includes(status)) {
             where.verificationStatus = status
         }
