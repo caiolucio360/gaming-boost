@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return Response.json(
         {
-          error: ErrorMessages.RATE_LIMIT_PASSWORD_RESET
+          message: ErrorMessages.RATE_LIMIT_PASSWORD_RESET
         },
         {
           status: 429,
