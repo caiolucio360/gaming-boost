@@ -85,7 +85,8 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Erro ao gerar pagamento')
+        // Sempre usar data.message (amigável) — nunca data.error (código/técnico)
+        throw new Error(data.message || 'Erro ao gerar pagamento')
       }
 
       onSuccess(data.payment)

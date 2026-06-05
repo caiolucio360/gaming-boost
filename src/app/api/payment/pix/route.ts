@@ -8,6 +8,7 @@ import { CreatePixSchema } from '@/schemas/payment'
 import { validateBody } from '@/lib/validate'
 import { paymentRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorCodes } from '@/lib/error-constants'
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,6 +78,14 @@ export async function POST(request: NextRequest) {
     const { orderId, phone, taxId, provider } = validation.data
     const selectedProvider = provider || process.env.ACTIVE_PAYMENT_PROVIDER || 'ASAAS'
 
+    // Valor mínimo de cobrança PIX exigido por cada gateway (em R$).
+    // O gateway rejeita valores abaixo disso, então validamos aqui para
+    // devolver uma mensagem clara em vez de um 500 vindo do provider.
+    const MIN_PIX_AMOUNT: Record<string, number> = {
+      ASAAS: 5,
+      ABACATEPAY: 1,
+    }
+
     // Buscar pedido
     const order = await prisma.order.findUnique({
       where: { id: parseInt(orderId) },
@@ -117,6 +126,19 @@ export async function POST(request: NextRequest) {
     if (paidPayment) {
       return NextResponse.json(
         { message: 'Este pedido já foi pago', payment: paidPayment },
+        { status: 400 }
+      )
+    }
+
+    // Validar valor mínimo exigido pelo gateway antes de tentar gerar a cobrança
+    const minAmount = MIN_PIX_AMOUNT[selectedProvider] ?? 5
+    if (order.total < minAmount) {
+      const formatBRL = (v: number) =>
+        v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      return NextResponse.json(
+        {
+          message: `O valor mínimo para pagamento via PIX é ${formatBRL(minAmount)}. O total deste pedido é ${formatBRL(order.total)}.`,
+        },
         { status: 400 }
       )
     }
@@ -204,8 +226,8 @@ export async function POST(request: NextRequest) {
         }
       )
     } catch (error) {
+      // Detalhe técnico fica só no log do servidor — nunca vai pro cliente
       console.error('Erro ao gerar PIX QR Code:', error)
-
       if (error instanceof Error) {
         console.error('Error message:', error.message)
         console.error('Error stack:', error.stack)
@@ -213,10 +235,10 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          message: 'Erro ao gerar código PIX',
-          error: error instanceof Error ? error.message : 'Erro desconhecido'
+          message: ErrorMessages.PAYMENT_PIX_FAILED,
+          error: ErrorCodes.PAYMENT_PROVIDER_ERROR,
         },
-        { status: 500 }
+        { status: 502 }
       )
     }
   } catch (error) {
