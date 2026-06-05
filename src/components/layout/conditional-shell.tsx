@@ -27,12 +27,17 @@ export function ConditionalShell({ children }: { children: React.ReactNode }) {
   const appRoute = isAppRoute(pathname, role)
 
   if (appRoute) {
-    // App shell (admin/booster): fixed height, no browser scroll
+    // Shared content pages (/profile, /notifications) use natural document flow
+    // and must scroll inside the app shell; dedicated admin/booster routes keep
+    // the fixed-height, no-browser-scroll layout (they manage their own scroll).
+    const sharedContentRoute = SHARED_ROUTES.some((route) => pathname.startsWith(route))
+
+    // App shell (admin/booster): fixed height
     return (
       <div className="h-screen flex flex-col overflow-hidden">
         <main
           id="main-content"
-          className="flex-1 flex flex-col overflow-hidden"
+          className={`flex-1 flex flex-col ${sharedContentRoute ? 'overflow-y-auto' : 'overflow-hidden'}`}
           aria-label="Conteúdo principal"
         >
           {children}
