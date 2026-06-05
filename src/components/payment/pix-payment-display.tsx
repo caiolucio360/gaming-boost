@@ -185,6 +185,15 @@ export function PixPaymentDisplay({
     )
   }
 
+  // O Asaas retorna o QR Code como base64 puro (sem o prefixo data URI).
+  // Sem `data:image/png;base64,` o <img> não renderiza. Normalizamos aqui para
+  // cobrir tanto valores crus quanto os que já vêm como data URI completo.
+  const qrCodeSrc = qrCodeBase64
+    ? qrCodeBase64.startsWith('data:')
+      ? qrCodeBase64
+      : `data:image/png;base64,${qrCodeBase64}`
+    : ''
+
   return (
     <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader className="text-center pb-2">
@@ -215,9 +224,9 @@ export function PixPaymentDisplay({
             {/* QR Code */}
             <div className="flex justify-center">
               <div className="bg-white p-4 rounded-xl shadow-lg">
-                {qrCodeBase64 ? (
+                {qrCodeSrc ? (
                   <img
-                    src={qrCodeBase64}
+                    src={qrCodeSrc}
                     alt="QR Code PIX"
                     className="w-48 h-48 md:w-64 md:h-64"
                   />
