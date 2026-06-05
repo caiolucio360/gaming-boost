@@ -50,9 +50,21 @@ export function PixPaymentDisplay({
         return
       }
 
-      const minutes = Math.floor(diff / 60000)
-      const seconds = Math.floor((diff % 60000) / 1000)
-      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+      const totalSeconds = Math.floor(diff / 1000)
+      const days = Math.floor(totalSeconds / 86400)
+      const hours = Math.floor((totalSeconds % 86400) / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      const seconds = totalSeconds % 60
+      const pad = (n: number) => n.toString().padStart(2, '0')
+
+      // Formata de forma legível conforme a magnitude do tempo restante
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h`)
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${pad(minutes)}min`)
+      } else {
+        setTimeLeft(`${pad(minutes)}:${pad(seconds)}`)
+      }
     }
 
     updateTimeLeft()
