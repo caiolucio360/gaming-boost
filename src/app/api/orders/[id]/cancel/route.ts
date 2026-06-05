@@ -160,10 +160,11 @@ export async function POST(
           refundNotFound = true
           console.warn(`⚠️ Payment ${payment.providerId} not found in ${payment.provider} — cancelling order without refund`)
         } else {
+          // Detalhe técnico (ex.: "Saldo insuficiente") já vai pro log acima;
+          // o cliente recebe apenas a mensagem amigável.
           return NextResponse.json(
             {
               message: 'Não foi possível processar o reembolso automaticamente. Entre em contato com o suporte.',
-              details: errorMessage,
             },
             { status: 500 }
           )
@@ -248,7 +249,6 @@ export async function POST(
     return NextResponse.json(
       {
         message: 'Erro ao cancelar pedido. Tente novamente ou entre em contato com o suporte.',
-        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

@@ -361,14 +361,13 @@ export const OrderService = {
         }
       }
 
-      // Fetch user discount fields + isTest flag
+      // Fetch user discount fields
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
           currentDiscountPct: true,
           reactivationDiscountPct: true,
           reactivationDiscountExpiresAt: true,
-          isTest: true,
         },
       })
 
@@ -384,7 +383,7 @@ export const OrderService = {
         ? Math.round(total * (1 - discountPct) * 100) / 100
         : total
 
-      // Create order — inherit isTest from client user
+      // Create order
       const order = await prisma.order.create({
         data: {
           userId,
@@ -395,7 +394,6 @@ export const OrderService = {
           discountPct: discountPct,
           status: OrderStatus.PENDING,
           gameMode,
-          isTest: user?.isTest ?? false,
           ...rest,
         },
       })
