@@ -71,7 +71,7 @@ function ResetPasswordForm() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erro ao redefinir senha')
+        throw new Error(result.message || 'Erro ao redefinir senha')
       }
 
       setSuccess(true)

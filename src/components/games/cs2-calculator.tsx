@@ -29,6 +29,10 @@ interface ActiveOrder {
 
 const gameMode = 'PREMIER'
 
+// Valor mínimo por pedido (R$). Os gateways de PIX (Asaas) rejeitam cobranças
+// abaixo de R$ 5,00, então bloqueamos a contratação ainda na calculadora.
+const MIN_ORDER_PRICE = 5
+
 export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
@@ -166,6 +170,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   }, [user])
 
   const hasActiveOrderInMode = activeOrders.length > 0
+  const isBelowMinimum = price > 0 && price < MIN_ORDER_PRICE
 
   const handleHire = async () => {
     if (!gameConfig || !modeConfig || !selectedServiceType) return
@@ -174,6 +179,15 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
       if (!selectedHours || price <= 0) return
     } else {
       if (currentRating >= targetRating || price <= 0) return
+    }
+
+    // Bloqueio de valor mínimo por pedido
+    if (price < MIN_ORDER_PRICE) {
+      showError(
+        'Valor mínimo não atingido',
+        `O valor mínimo por pedido é R$ ${MIN_ORDER_PRICE.toFixed(2)}. Aumente o intervalo para continuar.`
+      )
+      return
     }
 
     setIsLoading(true)
@@ -701,6 +715,19 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                             </button>
                             <p className="text-xs text-amber-500 font-rajdhani">
                               Finalize seu pedido atual para contratar um novo
+                            </p>
+                          </div>
+                        ) : isBelowMinimum ? (
+                          <div>
+                            <button
+                              disabled={true}
+                              className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                            >
+                              VALOR ABAIXO DO MÍNIMO
+                            </button>
+                            <p className="text-xs text-amber-500 font-rajdhani">
+                              O valor mínimo por pedido é R$ {MIN_ORDER_PRICE.toFixed(2)}. Aumente o intervalo
+                              {selectedServiceType === 'COACHING' ? ' de horas' : ' de pontuação'} para continuar.
                             </p>
                           </div>
                         ) : (
