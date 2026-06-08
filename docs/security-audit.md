@@ -122,9 +122,9 @@
 
 ## Pendências / recomendações (PRs dedicados futuros)
 
-1. **Upgrade do Next.js** (🟠 high restante): 15.5.9 está na faixa vulnerável de advisories de DoS
-   (Image Optimizer/RSC/rewrites). Requer upgrade testado (`npm audit fix --force` instalaria, mas
-   precisa validação de build/runtime). Mitigação parcial já aplicada: `remotePatterns` escopado.
+1. ~~**Upgrade do Next.js** (🟠 high restante)~~ → **CORRIGIDO (2026-06-08, ver abaixo).**
+   15.5.9 → 15.5.19: fecha o bypass de middleware/proxy (GHSA-492v-c6pp-mqqv), cache poisoning
+   em RSC e XSS de postcss. Build + 192/192 testes validados.
 2. **uuid <11.1.1 via next-auth** (🟡 moderate): só corrige com next-auth@3 (downgrade/breaking).
    Acompanhar release do next-auth 4.x que atualize o uuid. Impacto real baixo.
 3. **`eslint.ignoreDuringBuilds: true`** (🟡): reabilitar em PR dedicado, corrigindo erros legados
@@ -134,7 +134,37 @@
    `getServerSession`/cookie e ignora o header Bearer) — remover para evitar confusão e token em logs.
 6. **Hardening de Postgres** (infra, fora do código): RLS multi-tenant, roles read-only/read-write
    separados, TLS, backups criptografados, pg_audit. Ver skill `postgres-hardening`.
-7. **Senha definida por admin** (`admin/users/[id]`): ainda usa mínimo 6 — alinhar com o novo mínimo 8.
+7. ~~**Senha definida por admin** (`admin/users/[id]`): ainda usa mínimo 6~~ → **JÁ ESTÁ EM 8**
+   (`route.ts:117`, `password.length >= 8`). Pendência obsoleta.
 
 > Auditoria executada em 2026-06-07. PRs #58–#64 mergeados em `dev`. Verificação final: `npm test`
 > 192/192 e `npm run build` exit 0 no `dev` integrado.
+
+---
+
+## Atualização — 2026-06-08 (re-auditoria + upgrade Next/Prisma)
+
+**Estado do `npm audit` no início:** 1 high + 6 moderate (prod). Causa do high: Next.js 15.5.9 na
+faixa do **bypass de middleware/proxy** — crítico aqui porque `src/middleware.ts` é a camada de
+proteção de `/admin`, `/booster`, `/dashboard`.
+
+**Correções aplicadas (branch `fix/next-security-upgrade`):**
+- `next` **15.5.9 → 15.5.19**: fecha GHSA-492v-c6pp-mqqv (middleware bypass), cache poisoning RSC e
+  XSS de postcss bundled.
+- `@prisma/client` / `@prisma/adapter-pg` / `prisma` **→ 7.8.0** (estavam inconsistentes:
+  package.json 7.0.1 vs instalado 7.8.0). Isso também eliminou um **valibot ReDoS (high,
+  GHSA-vqpr-j7v3-hqw9)** que entrava via `prisma 7.0.1 → @prisma/dev → valibot 1.1.0`, e restaurou
+  build/test consistentes (o client gerado defasado quebrava 6 testes).
+
+**Resultado:** `npm audit` (prod) **0 high**, **7 moderate** — todos transitivos de risco aceito,
+só "corrigíveis" com downgrades breaking e de impacto real desprezível:
+- `uuid <11.1.1` via `next-auth` (path não usado pelo next-auth; só next-auth@3 corrige).
+- `postcss` bundled dentro de `next` (build-time, processa o próprio CSS).
+- `@hono/node-server` via `@prisma/dev` (**ferramenta dev-only**, fora do runtime de produção).
+
+**Re-auditoria de auth (Fase 2):** confirmado — todas as 6 rotas `auth/*` aplicam rate-limit;
+`login` retorna 401 genérico (sem enumeração); `forgot-password` com anti-enumeração + token
+hasheado (sha256) + expiração 1h; `verify` com expiração de código via `VerificationService`.
+Nenhuma correção necessária.
+
+> Verificação final: `npm test` 192/192 e `npm run build` exit 0 na branch `fix/next-security-upgrade`.
