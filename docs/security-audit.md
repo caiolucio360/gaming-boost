@@ -168,3 +168,22 @@ hasheado (sha256) + expiração 1h; `verify` com expiração de código via `Ver
 Nenhuma correção necessária.
 
 > Verificação final: `npm test` 192/192 e `npm run build` exit 0 na branch `fix/next-security-upgrade`.
+
+### Hardening de cabeçalhos (mesma data)
+
+- **CSP: `'unsafe-eval'` removido em produção** (`next.config.js`) — mantido apenas em dev (Turbopack).
+  Reduz a superfície de XSS no runtime de produção. `script-src`/`style-src` ainda usam
+  `'unsafe-inline'` (nonce completo segue como item futuro, ver abaixo).
+- **`Cross-Origin-Opener-Policy: same-origin-allow-popups`** adicionado — isola o contexto de
+  navegação (mitiga XS-Leaks/Spectre) preservando fluxos de popup/redirect de pagamento.
+
+### Pendências ainda abertas (PRs dedicados, fora do escopo de segurança imediata)
+
+- **CSP por nonce** (🟡): exige reescrever o `withAuth` middleware, expandir o matcher para todas as
+  rotas e resolver `style-src` com nonce (inviável direto com Tailwind v4 + framer-motion inline) —
+  requer QA de browser. Não é um simples ajuste de config.
+- **Reabilitar `eslint.ignoreDuringBuilds`** (🟡 qualidade, não-segurança): ~96 erros + 89 warnings
+  (`no-explicit-any`, `no-unused-vars`, `react-hooks/exhaustive-deps`), nenhum é regra de segurança.
+  Chore dedicado e incremental.
+- **Hardening de Postgres** (infra, fora do código): RLS multi-tenant, roles read-only/read-write,
+  TLS, backups criptografados, pg_audit. Ver skill `postgres-hardening`.
