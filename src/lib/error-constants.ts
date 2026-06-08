@@ -140,7 +140,7 @@ export const ErrorMessages = {
   AUTH_FORBIDDEN: 'Acesso negado. Permissão insuficiente.',
   AUTH_EMAIL_PASSWORD_REQUIRED: 'Email e senha são obrigatórios',
   AUTH_INVALID_EMAIL: 'Email inválido',
-  AUTH_PASSWORD_TOO_SHORT: 'A senha deve ter pelo menos 6 caracteres',
+  AUTH_PASSWORD_TOO_SHORT: 'A senha deve ter pelo menos 8 caracteres',
   AUTH_TOKEN_INVALID_OR_EXPIRED: 'Token inválido ou expirado',
   AUTH_TOKEN_AND_PASSWORD_REQUIRED: 'Token e senha são obrigatórios',
   AUTH_EMAIL_REQUIRED: 'Email é obrigatório',

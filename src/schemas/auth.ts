@@ -18,7 +18,7 @@ export const RegisterSchema = z.object({
     email: EmailSchema,
     password: z
         .string()
-        .min(6, 'Senha deve ter pelo menos 6 caracteres'),
+        .min(8, 'Senha deve ter pelo menos 8 caracteres'),
 })
 
 /**
