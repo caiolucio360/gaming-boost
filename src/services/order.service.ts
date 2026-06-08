@@ -617,6 +617,188 @@ export const OrderService = {
   },
 
   /**
+   * Admin assigns / changes / removes the booster on an order.
+   *
+   * Unlike acceptOrder (booster self-serve), this is an admin override: it
+   * still snapshots commission/revenue so the assigned booster is paid on
+   * completion, but skips the PIX-key and active-order guards. Snapshots are
+   * upserted idempotently (BoosterCommission/DevAdminRevenue are unique per
+   * order; AdminRevenue is unique per order+admin), so re-assigning a
+   * different booster just rewrites the pending booster commission.
+   */
+  async assignBooster(input: { orderId: number; boosterId: number | null }): Promise<Result<OrderWithRelations>> {
+    const { orderId, boosterId } = input
+
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: { id: true, total: true, status: true, boosterId: true },
+      })
+
+      if (!order) {
+        return failure(ErrorMessages.ORDER_NOT_FOUND, ErrorCodes.ORDER_NOT_FOUND)
+      }
+
+      // Booster can only be changed while the order is still open
+      if (order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELLED) {
+        return failure(
+          'Não é possível alterar o booster de um pedido concluído ou cancelado.',
+          ErrorCodes.INVALID_STATUS_TRANSITION
+        )
+      }
+
+      // Removal: clear the booster and drop its pending commission snapshot
+      if (boosterId === null) {
+        await prisma.$transaction(async (tx: any) => {
+          await tx.order.update({ where: { id: orderId }, data: { boosterId: null } })
+          await tx.boosterCommission.deleteMany({ where: { orderId, status: 'PENDING' } })
+        })
+
+        const cleared = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+            booster: { select: { id: true, name: true, email: true } },
+          },
+        })
+        return success(cleared as OrderWithRelations)
+      }
+
+      // Validate target booster
+      const booster = await prisma.user.findUnique({
+        where: { id: boosterId },
+        select: { role: true },
+      })
+      if (!booster) {
+        return failure('Booster não encontrado', ErrorCodes.USER_NOT_FOUND)
+      }
+      if (booster.role !== 'BOOSTER') {
+        return failure('Usuário não é um booster', ErrorCodes.VALIDATION_ERROR)
+      }
+
+      // Commission split (same logic as acceptOrder)
+      const configResult = await this.getCommissionConfig(boosterId)
+      if (!configResult.success) {
+        return configResult as Failure
+      }
+      const { boosterPercentage, adminPercentage, devAdminPercentage } = configResult.data
+      const commission = this.calculateCommission(order.total, boosterPercentage, adminPercentage, devAdminPercentage)
+
+      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+        await tx.order.update({ where: { id: orderId }, data: { boosterId } })
+
+        // Booster commission — upsert by unique orderId; only rewrite while PENDING
+        const existingCommission = await tx.boosterCommission.findUnique({
+          where: { orderId },
+          select: { status: true },
+        })
+        if (!existingCommission) {
+          await tx.boosterCommission.create({
+            data: {
+              orderId,
+              boosterId,
+              orderTotal: order.total,
+              percentage: boosterPercentage,
+              amount: commission.boosterCommission,
+              status: 'PENDING',
+            },
+          })
+        } else if (existingCommission.status === 'PENDING') {
+          await tx.boosterCommission.update({
+            where: { orderId },
+            data: {
+              boosterId,
+              orderTotal: order.total,
+              percentage: boosterPercentage,
+              amount: commission.boosterCommission,
+            },
+          })
+        }
+
+        // Dev-admin revenue — create once per order
+        if (commission.devAdminRevenue > 0) {
+          const devAdmin = await tx.user.findFirst({
+            where: { isDevAdmin: true },
+            select: { id: true },
+          })
+          if (devAdmin) {
+            const existingDev = await tx.devAdminRevenue.findUnique({
+              where: { orderId },
+              select: { id: true },
+            })
+            if (!existingDev) {
+              await tx.devAdminRevenue.create({
+                data: {
+                  orderId,
+                  devAdminId: devAdmin.id,
+                  orderTotal: order.total,
+                  percentage: devAdminPercentage,
+                  amount: commission.devAdminRevenue,
+                  status: 'PENDING',
+                },
+              })
+            }
+          }
+        }
+
+        // Admin revenue split — create once per order+admin
+        const admins = await tx.user.findMany({
+          where: { role: 'ADMIN', active: true },
+          select: { id: true, adminProfitShare: true },
+        })
+        if (admins.length > 0) {
+          const totalShares = admins.reduce(
+            (sum: number, a: { adminProfitShare: number | null }) => sum + (a.adminProfitShare || 0),
+            0
+          )
+          for (const admin of admins) {
+            const sharePercentage = totalShares > 0
+              ? (admin.adminProfitShare || 0) / totalShares
+              : 1 / admins.length
+
+            const existingAdmin = await tx.adminRevenue.findUnique({
+              where: { orderId_adminId: { orderId, adminId: admin.id } },
+              select: { id: true },
+            })
+            if (!existingAdmin) {
+              await tx.adminRevenue.create({
+                data: {
+                  orderId,
+                  adminId: admin.id,
+                  orderTotal: order.total,
+                  percentage: adminPercentage * sharePercentage,
+                  amount: commission.adminRevenue * sharePercentage,
+                  status: 'PENDING',
+                },
+              })
+            }
+          }
+        }
+
+        return tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+            booster: { select: { id: true, name: true, email: true } },
+          },
+        })
+      })
+
+      if (!updatedOrder) {
+        return failure('Erro ao buscar pedido atualizado', ErrorCodes.DATABASE_ERROR)
+      }
+
+      return success(updatedOrder as OrderWithRelations)
+    } catch (error: unknown) {
+      if (error instanceof ServiceError) {
+        return failure(error.message, error.code)
+      }
+      console.error('Error assigning booster:', error)
+      return failure('Erro ao atribuir booster', ErrorCodes.DATABASE_ERROR)
+    }
+  },
+
+  /**
    * Booster starts an order - transitions PAID → IN_PROGRESS after credentials are shared
    */
   async startOrder(input: StartOrderInput): Promise<Result<OrderWithRelations>> {

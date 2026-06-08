@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PaymentForm } from '@/components/payment/payment-form'
 import { PixPaymentDisplay } from '@/components/payment/pix-payment-display'
@@ -25,6 +25,36 @@ function PaymentContent() {
 
   const [payment, setPayment] = useState<PaymentData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [initializing, setInitializing] = useState(true)
+
+  // On load/refresh, reopen an existing active PIX charge instead of asking the
+  // user to generate a new one. Only falls back to the form when there's no
+  // valid (non-expired) pending payment for this order.
+  useEffect(() => {
+    if (!orderId) {
+      setInitializing(false)
+      return
+    }
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/payment/pix?orderId=${orderId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (active && data.payment) {
+            setPayment(data.payment)
+          }
+        }
+      } catch {
+        // Ignore — fall back to the generation form
+      } finally {
+        if (active) setInitializing(false)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [orderId])
 
   if (!orderId || !total) {
     return (
@@ -84,6 +114,16 @@ function PaymentContent() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-lg">
+          {/* Checking for an existing active PIX before showing the form */}
+          {initializing && (
+            <div className="flex items-center justify-center gap-3 text-white font-rajdhani py-12">
+              <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+              Verificando pagamento...
+            </div>
+          )}
+
+          {!initializing && (
+            <>
           {/* Show error if any */}
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-6 font-rajdhani">
@@ -143,6 +183,8 @@ function PaymentContent() {
                 )}
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

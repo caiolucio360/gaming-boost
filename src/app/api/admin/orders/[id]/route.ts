@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
-import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
-import { ChatService } from '@/services'
+import { ErrorCodes, ErrorMessages, getStatusForError } from '@/lib/error-constants'
+import { ChatService, OrderService } from '@/services'
 import { rateLimit, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -155,6 +155,25 @@ export async function PUT(
       )
     }
 
+    // Booster assignment is delegated to OrderService so it also snapshots
+    // commission/revenue (admin override — mirrors what acceptOrder does).
+    // Run it before any status change so a subsequent COMPLETED can release
+    // the freshly-created commission.
+    let assignedOrder:
+      | Extract<Awaited<ReturnType<typeof OrderService.assignBooster>>, { success: true }>['data']
+      | null = null
+    if (boosterId !== undefined) {
+      const assignResult = await OrderService.assignBooster({ orderId: orderIdNum, boosterId })
+      if (!assignResult.success) {
+        const statusCode = assignResult.code ? getStatusForError(assignResult.code) : 500
+        return NextResponse.json(
+          { message: assignResult.error, error: assignResult.code },
+          { status: statusCode }
+        )
+      }
+      assignedOrder = assignResult.data
+    }
+
     const updateData: Record<string, unknown> = {}
 
     // Validate status transition if status is being changed
@@ -182,9 +201,19 @@ export async function PUT(
 
       const allowed = VALID_TRANSITIONS[currentOrder.status]
       if (!allowed || !allowed.includes(status)) {
+        // Explain *why* the transition is blocked instead of a generic message.
+        // The most common case: trying to complete a PAID order that no booster
+        // has started yet — it must pass through IN_PROGRESS first.
+        let message: string = ErrorMessages.ADMIN_INVALID_STATUS_TRANSITION
+        if (status === 'COMPLETED' && currentOrder.status === 'PAID') {
+          message =
+            'Não é possível concluir um pedido que ainda está PAGO. ' +
+            'Atribua um booster e mova o pedido para EM ANDAMENTO antes de marcá-lo como CONCLUÍDO.'
+        }
+
         return NextResponse.json(
           {
-            message: ErrorMessages.ADMIN_INVALID_STATUS_TRANSITION,
+            message,
             error: ErrorCodes.INVALID_STATUS_TRANSITION,
             currentStatus: currentOrder.status,
             requestedStatus: status,
@@ -229,38 +258,28 @@ export async function PUT(
             paidAt: new Date(),
           },
         })
-      }
-    }
 
-    if (boosterId !== undefined) {
-      if (boosterId === null) {
-        updateData.boosterId = null
-      } else {
-        // Verificar se o booster existe e tem role BOOSTER
-        const booster = await prisma.user.findUnique({
-          where: { id: boosterId },
-          select: { role: true },
+        await prisma.devAdminRevenue.updateMany({
+          where: {
+            orderId: orderIdNum,
+            status: 'PENDING',
+          },
+          data: {
+            status: 'PAID',
+            paidAt: new Date(),
+          },
         })
-
-        if (!booster) {
-          return NextResponse.json(
-            { message: 'Booster não encontrado' },
-            { status: 404 }
-          )
-        }
-
-        if (booster.role !== 'BOOSTER') {
-          return NextResponse.json(
-            { message: 'Usuário não é um booster' },
-            { status: 400 }
-          )
-        }
-
-        updateData.boosterId = boosterId
       }
     }
 
     if (Object.keys(updateData).length === 0) {
+      // Booster-only update already persisted by OrderService.assignBooster
+      if (assignedOrder) {
+        return NextResponse.json(
+          { message: 'Booster atualizado com sucesso', order: assignedOrder },
+          { status: 200 }
+        )
+      }
       return NextResponse.json(
         { message: 'Nenhum campo para atualizar' },
         { status: 400 }

@@ -10,6 +10,78 @@ import { paymentRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import { ErrorCodes } from '@/lib/error-constants'
 
+/**
+ * GET /api/payment/pix?orderId=123
+ *
+ * Returns the order's currently active PIX charge (status PENDING and not yet
+ * expired), so the payment page can reopen it on refresh/return instead of
+ * generating a new one through the provider. Expired pending charges are
+ * marked EXPIRED and treated as "no active payment". Returns { payment: null }
+ * when there's nothing to reopen.
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = await verifyAuth(request)
+
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponse(authResult.error || 'Não autenticado', 401)
+    }
+
+    const userId = authResult.user.id
+    const { searchParams } = new URL(request.url)
+    const orderId = searchParams.get('orderId')
+
+    if (!orderId) {
+      return NextResponse.json({ message: 'orderId é obrigatório' }, { status: 400 })
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(orderId) },
+      include: { payments: true },
+    })
+
+    if (!order) {
+      return NextResponse.json({ message: 'Pedido não encontrado' }, { status: 404 })
+    }
+
+    if (order.userId !== userId) {
+      return NextResponse.json({ message: 'Não autorizado' }, { status: 403 })
+    }
+
+    // Already paid — surface it so the page can confirm instead of re-charging
+    const paidPayment = order.payments.find((p: { status: string }) => p.status === 'PAID')
+    if (paidPayment) {
+      return NextResponse.json({ payment: paidPayment }, { status: 200 })
+    }
+
+    const now = new Date()
+    const activePayment = order.payments.find(
+      (p: { status: string; expiresAt: Date | null }) =>
+        p.status === 'PENDING' && p.expiresAt !== null && new Date(p.expiresAt) > now
+    )
+
+    if (activePayment) {
+      return NextResponse.json({ payment: activePayment }, { status: 200 })
+    }
+
+    // Clean up any stale pending charge so the UI shows the form to regenerate
+    const stalePending = order.payments.filter(
+      (p: { status: string; expiresAt: Date | null }) =>
+        p.status === 'PENDING' && (p.expiresAt === null || new Date(p.expiresAt) <= now)
+    )
+    if (stalePending.length > 0) {
+      await prisma.payment.updateMany({
+        where: { id: { in: stalePending.map((p: { id: number }) => p.id) } },
+        data: { status: 'EXPIRED' },
+      })
+    }
+
+    return NextResponse.json({ payment: null }, { status: 200 })
+  } catch (error) {
+    return createApiErrorResponse(error, ErrorMessages.PAYMENT_PIX_FAILED, 'GET /api/payment/pix')
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 PIX generation attempts per minute per IP (strict)
