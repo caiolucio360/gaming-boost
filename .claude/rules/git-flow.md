@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 # Git Flow
 
 Este repositório usa **dois branches permanentes**: `main` e `dev`. Nenhum outro branch é permanente.

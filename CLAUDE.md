@@ -116,16 +116,7 @@ Dispute system, review system, booster public profiles (`/booster/[id]`), commis
 
 **Tailwind v4** — `@config "../../tailwind.config.js"` directive in `globals.css` is mandatory.
 
-**Brand palette** (use these, not generic Tailwind purple/black):
-- Backgrounds: `bg-brand-black` (#0A0A0A), `bg-brand-black-light` (#1A1A1A)
-- Primary: `bg-brand-purple` (#7C3AED), `text-brand-purple-light` (#A855F7), `bg-brand-purple-dark` (#4C1D95)
-- Text: `text-brand-gray-300` (secondary), `text-brand-gray-500` (muted)
-- Status: `bg-green-500/20 text-green-300` · `bg-yellow-500/20 text-yellow-300` · `bg-red-500/20 text-red-300`
-- Borders: `border-white/10` (default), `border-brand-purple` (focus/active)
-
-**Fonts:** `font-orbitron` + `style={{ fontFamily: 'Orbitron, sans-serif' }}` for titles; `font-rajdhani` for body/UI.
-
-Full design system reference: `docs/design_system.md`
+Styling is governed by `.claude/rules/design_system.md` (loaded every session): use brand palette classes only — never hex values, CSS token classes, or arbitrary Tailwind values. Titles use `font-orbitron`, body/UI uses `font-rajdhani` (both with the inline `style` fallback). Components: prefer shadcn/ui (`.claude/rules/components.md`).
 
 ## Environment Variables
 
