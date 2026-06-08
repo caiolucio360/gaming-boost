@@ -94,17 +94,47 @@
   `auth/*` (login/register/forgot/reset/verify/resend/logout), `pricing/{calculate,ranges}`.
 - Proteção de páginas em `src/middleware.ts` (admin/booster/dashboard) revisada — coerente.
 
-## Plano de remediação (PRs)
+## Plano de remediação (PRs) — STATUS FINAL
 
-| PR | Tema | Severidade alvo | Status |
-|----|------|-----------------|--------|
-| #58 | Higiene de segredos (.env) | 🟢 (preventivo) | ✅ Merged |
-| PR 2 | Security headers + next.config | 🟠/🟡 | ⏳ |
-| PR 3 | Assinatura webhooks + logging | 🔴/🟠 | ⏳ |
-| PR 4 | AuthZ / IDOR / mass assignment | 🟡 | ⏳ |
-| PR 5 | AuthN hardening | 🟡 | ⏳ |
-| PR 6 | Upload & arquivos | 🟡 | ⏳ |
-| PR 7 | Dados / Postgres | 🟡 | ⏳ |
-| PR 8 | Dependências | 🟠 | ⏳ |
+| PR | Tema | Severidade | Status |
+|----|------|-----------|--------|
+| #58 | Higiene de segredos (.env → .env.example) | 🟢 preventivo | ✅ Merged |
+| #59 | Relatório de auditoria (Fase 1) | — | ✅ Merged |
+| #60 | 🔴 Autenticar webhook AbacatePay + logging | 🔴/🟠 | ✅ Merged |
+| #61 | Security headers + remotePatterns | 🟠/🟡 | ✅ Merged |
+| #62 | AuthN: mínimo de senha 6→8 (NIST) | 🟡 | ✅ Merged |
+| #63 | Validar domínio do completionProofUrl | 🟡 | ✅ Merged |
+| #64 | Dependências (npm audit fix — undici) | 🟠 | ✅ Merged |
+| PR 4 | AuthZ / IDOR / mass assignment | 🟡 | ✅ Auditado — **nenhuma falha** (sem mudança) |
+| PR 7 | Exposição de dados | 🟡 | ✅ Auditado — **nenhum vazamento** (sem mudança) |
 
-> Este documento é atualizado conforme cada PR é mergeado (coluna Status + status por achado).
+### Resultado por achado
+
+- 🔴 Webhook AbacatePay sem auth → **CORRIGIDO** (#60).
+- 🟠 Security headers ausentes → **CORRIGIDO** (#61).
+- 🟠 Deps vulneráveis (undici, 11 high) → **CORRIGIDO** (#64); 18→7 vulns.
+- 🟠 Logging de payload de webhook → **CORRIGIDO** (#60).
+- 🟡 `images.domains` legado → **CORRIGIDO** (#61, remotePatterns).
+- 🟡 AuthN (senha mínima) → **CORRIGIDO** (#62).
+- 🟡 IDOR/BOLA/mass assignment → **AUDITADO, sem falhas** (ownership consistente, whitelist por destructuring).
+- 🟡 Exposição de dados → **AUDITADO, sem vazamentos** (`select` explícito em toda parte; password nunca retornado).
+- 🟡 Upload → **bem implementado**; endurecido o vínculo proof↔storage (#63).
+
+## Pendências / recomendações (PRs dedicados futuros)
+
+1. **Upgrade do Next.js** (🟠 high restante): 15.5.9 está na faixa vulnerável de advisories de DoS
+   (Image Optimizer/RSC/rewrites). Requer upgrade testado (`npm audit fix --force` instalaria, mas
+   precisa validação de build/runtime). Mitigação parcial já aplicada: `remotePatterns` escopado.
+2. **uuid <11.1.1 via next-auth** (🟡 moderate): só corrige com next-auth@3 (downgrade/breaking).
+   Acompanhar release do next-auth 4.x que atualize o uuid. Impacto real baixo.
+3. **`eslint.ignoreDuringBuilds: true`** (🟡): reabilitar em PR dedicado, corrigindo erros legados
+   incrementalmente (atualmente mascara regras de lint no build).
+4. **CSP por nonce** (🟡): evoluir a CSP atual (que usa `unsafe-inline`) para nonce via middleware.
+5. **`realtime` token via query string** (🟢 cleanup): fallback é dead code (`verifyAuth` usa
+   `getServerSession`/cookie e ignora o header Bearer) — remover para evitar confusão e token em logs.
+6. **Hardening de Postgres** (infra, fora do código): RLS multi-tenant, roles read-only/read-write
+   separados, TLS, backups criptografados, pg_audit. Ver skill `postgres-hardening`.
+7. **Senha definida por admin** (`admin/users/[id]`): ainda usa mínimo 6 — alinhar com o novo mínimo 8.
+
+> Auditoria executada em 2026-06-07. PRs #58–#64 mergeados em `dev`. Verificação final: `npm test`
+> 192/192 e `npm run build` exit 0 no `dev` integrado.
