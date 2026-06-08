@@ -185,5 +185,6 @@ Nenhuma correção necessária.
 - **Reabilitar `eslint.ignoreDuringBuilds`** (🟡 qualidade, não-segurança): ~96 erros + 89 warnings
   (`no-explicit-any`, `no-unused-vars`, `react-hooks/exhaustive-deps`), nenhum é regra de segurança.
   Chore dedicado e incremental.
-- **Hardening de Postgres** (infra, fora do código): RLS multi-tenant, roles read-only/read-write,
-  TLS, backups criptografados, pg_audit. Ver skill `postgres-hardening`.
+- **Hardening de Postgres** (infra, fora do código): roles separadas (runtime sem DDL vs migração),
+  TLS `verify-full`, pooling em serverless, backups testados, logging/auditoria. Guia de aplicação
+  manual adaptado ao setup (Prisma + adapter-pg, single-tenant): **`docs/postgres-hardening.md`**.
