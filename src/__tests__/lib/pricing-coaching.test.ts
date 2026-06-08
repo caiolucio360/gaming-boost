@@ -23,41 +23,46 @@ describe('Coaching Pricing Calculation', () => {
     expect(total).toBe(250.0) // 5 hours * 50
   })
 
-  it('calculates progressive discount coaching properly', async () => {
+  it('calculates volume discount coaching properly', async () => {
     ;(db.pricingConfig.findMany as jest.Mock).mockResolvedValue([
-      { rangeStart: 1, rangeEnd: 2, price: 50.0 }, // First 2 hours are 50
-      { rangeStart: 3, rangeEnd: 5, price: 45.0 }, // Hours 3 to 5 are 45
-      { rangeStart: 6, rangeEnd: 10, price: 40.0 } // Hours 6 to 10 are 40
+      { rangeStart: 1, rangeEnd: 2, price: 50.0 }, // totals of 1-2h priced at 50/h
+      { rangeStart: 3, rangeEnd: 5, price: 45.0 }, // totals of 3-5h priced at 45/h
+      { rangeStart: 6, rangeEnd: 10, price: 40.0 } // totals of 6-10h priced at 40/h
     ])
 
-    // Buy 1 hour
+    // Volume pricing (lógica B): ALL hours are charged at the rate of the tier
+    // the total number of hours falls into — not progressive/marginal.
+
+    // 1 hour → tier [1,2] @ 50 → 50
     let total = await calculatePrice('CS2', 'PREMIER', 0, 1, 'COACHING')
     expect(total).toBe(50.0)
 
-    // Buy 2 hours
+    // 2 hours → tier [1,2] @ 50 → 2 * 50 = 100
     total = await calculatePrice('CS2', 'PREMIER', 0, 2, 'COACHING')
     expect(total).toBe(100.0)
 
-    // Buy 3 hours (2 hours at 50, 1 hour at 45 = 100 + 45 = 145)
+    // 3 hours → tier [3,5] @ 45 → 3 * 45 = 135
     total = await calculatePrice('CS2', 'PREMIER', 0, 3, 'COACHING')
-    expect(total).toBe(145.0)
+    expect(total).toBe(135.0)
 
-    // Buy 5 hours (2 at 50, 3 at 45 = 100 + 135 = 235)
+    // 5 hours → tier [3,5] @ 45 → 5 * 45 = 225
     total = await calculatePrice('CS2', 'PREMIER', 0, 5, 'COACHING')
-    expect(total).toBe(235.0)
+    expect(total).toBe(225.0)
 
-    // Buy 7 hours (2 at 50, 3 at 45, 2 at 40 = 100 + 135 + 80 = 315)
+    // 7 hours → tier [6,10] @ 40 → 7 * 40 = 280
     total = await calculatePrice('CS2', 'PREMIER', 0, 7, 'COACHING')
-    expect(total).toBe(315.0)
+    expect(total).toBe(280.0)
   })
 
-  it('throws if requested hours exceed configured ranges', async () => {
+  it('clamps to the last configured tier when hours exceed all ranges', async () => {
     ;(db.pricingConfig.findMany as jest.Mock).mockResolvedValue([
       { rangeStart: 1, rangeEnd: 5, price: 50.0 }
     ])
 
-    await expect(
-      calculatePrice('CS2', 'PREMIER', 0, 6, 'COACHING')
-    ).rejects.toThrow('Sem configuração de preço acima de 5 horas')
+    // 6 hours is above the max configured (5). calculateCoachingPrice applies
+    // the last tier's price to all hours: 6 * 50 = 300 (upstream validation in
+    // validatePricingRange is what blocks out-of-range requests in real flows).
+    const total = await calculatePrice('CS2', 'PREMIER', 0, 6, 'COACHING')
+    expect(total).toBe(300.0)
   })
 })

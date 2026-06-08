@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { showSuccess, showError } from '@/lib/toast'
 import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
@@ -82,31 +81,6 @@ export default function AdminOrdersPage() {
       }
     })
   }
-
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      if (response.ok) {
-        showSuccess('Status atualizado com sucesso!')
-        fetchOrders()
-      } else {
-        const data = await response.json()
-        showError('Erro ao atualizar status', data.message || 'Tente novamente.')
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar status:', error)
-      showError('Erro ao atualizar status')
-    }
-  }
-
-
 
   if (authLoading) {
     return <LoadingSpinner />
@@ -214,21 +188,8 @@ export default function AdminOrdersPage() {
                         </div>
                       )}
 
-                      {/* Atualizar Status */}
+                      {/* Ações — alteração de status acontece na tela de detalhes */}
                       <div className="flex flex-wrap gap-2 pt-4 border-t border-brand-purple/20">
-                        <Select value={order.status} onValueChange={(value) => handleStatusUpdate(order.id, value)}>
-                          <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-brand-black border-brand-purple/50">
-                            <SelectItem value="PENDING">Pendente</SelectItem>
-                            <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
-                            <SelectItem value="COMPLETED">Concluído</SelectItem>
-                            <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        
-                        
                         <Button
                           asChild
                           variant="outline"
