@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return Response.json({
         message:ErrorMessages.AUTH_PASSWORD_TOO_SHORT
       }, { status: 400 })
