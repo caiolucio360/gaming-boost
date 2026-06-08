@@ -225,6 +225,8 @@ export function PixPaymentDisplay({
             <div className="flex justify-center">
               <div className="bg-white p-4 rounded-xl shadow-lg">
                 {qrCodeSrc ? (
+                  // QR code vem como data: URI base64 — next/image não otimiza data URIs.
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={qrCodeSrc}
                     alt="QR Code PIX"

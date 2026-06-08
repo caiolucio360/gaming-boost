@@ -697,6 +697,8 @@ export default function BoosterDashboardPage() {
                 <div className="space-y-4 py-2">
                   {proofPreview ? (
                     <div className="relative">
+                      {/* Preview local do arquivo (blob: URL) antes do upload — next/image não suporta blob: */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={proofPreview}
                         alt="Preview do comprovante"

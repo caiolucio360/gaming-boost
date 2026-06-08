@@ -154,8 +154,10 @@ export function ApplyForm() {
                 rel="noopener noreferrer"
                 className="flex items-center"
               >
-                <img 
-                  src={LEETIFY_ATTRIBUTION_LOGO} 
+                {/* Logo de atribuição externo (Leetify), tamanho fixo — next/image desnecessário */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={LEETIFY_ATTRIBUTION_LOGO}
                   alt="Data provided by Leetify" 
                   className="h-6"
                 />

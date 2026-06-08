@@ -403,6 +403,8 @@ export default function DashboardPage() {
                             <ImageIcon className="h-3.5 w-3.5" />
                             Comprovante do booster
                           </p>
+                          {/* Comprovante enviado pelo usuário (dimensões arbitrárias) — migração p/ next/image exige QA visual */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={order.completionProofUrl}
                             alt="Comprovante de conclusão"

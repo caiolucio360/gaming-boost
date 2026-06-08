@@ -560,6 +560,8 @@ export default function AdminOrderDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {/* Comprovante enviado pelo usuário (dimensões arbitrárias) — migração p/ next/image exige QA visual */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={order.completionProofUrl}
                   alt="Comprovante de conclusão"
