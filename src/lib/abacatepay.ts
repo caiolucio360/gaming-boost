@@ -120,7 +120,7 @@ export async function checkAbacatePaymentStatus(billingId: string) {
 /**
  * Reembolsa um pagamento no AbacatePay
  */
-export async function refundAbacatePayment(billingId: string, amount?: number) {
+export async function refundAbacatePayment(billingId: string, _amount?: number) {
   const token = process.env.ABACATEPAY_API_KEY
   if (!token) {
     throw new Error('ABACATEPAY_API_KEY não configurada')

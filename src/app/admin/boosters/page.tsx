@@ -83,7 +83,7 @@ export default function AdminBoostersPage() {
                 const data = await response.json()
                 setApplications(data.applications)
                 setCounts(data.counts)
-            } catch (error) {
+            } catch {
                 showError('Erro', 'Não foi possível carregar as aplicações')
             }
         })
@@ -116,7 +116,7 @@ export default function AdminBoostersPage() {
             setSelectedApp(null)
             setRejectReason('')
             fetchApplications()
-        } catch (error) {
+        } catch {
             showError('Erro', 'Não foi possível processar a ação')
         } finally {
             setActionLoading(false)

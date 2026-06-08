@@ -7,23 +7,18 @@ import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
 import { apiGet } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   ArrowRight,
   Package,
   X,
   Filter,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  CreditCard,
   ArrowUpDown,
   ImageIcon,
   ExternalLink,
 } from 'lucide-react'
-import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
+import { StatusBadge } from '@/components/common/status-badge'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
@@ -36,7 +31,6 @@ import { ActionButton } from '@/components/common/action-button'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 
-import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
 import { RetentionProgress } from '@/components/common/retention-progress'
 
@@ -44,7 +38,7 @@ export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
-  const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
+  const { loading, withLoading } = useLoading({ initialLoading: true })
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState<number | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
@@ -142,10 +136,6 @@ export default function DashboardPage() {
 
     return filtered
   }, [orders, filterStatus, sortOrder])
-  // Pedidos pendentes de pagamento (destaque no topo)
-  const pendingPaymentOrders = useMemo(() => {
-    return orders.filter(order => order.status === 'PENDING')
-  }, [orders])
 
   const handlePayment = (orderId: number, total: number) => {
     router.replace(`/payment?orderId=${orderId}&total=${total}`)
@@ -349,7 +339,7 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="grid gap-6">
-            {filteredOrders.map((order, index) => {
+            {filteredOrders.map((order) => {
               return (
                 <DashboardCard
                   key={order.id}

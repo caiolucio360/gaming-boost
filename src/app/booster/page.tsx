@@ -14,7 +14,6 @@ import {
   DollarSign,
   Check,
   Loader2,
-  Upload,
   ImageIcon,
   X,
   RefreshCw,

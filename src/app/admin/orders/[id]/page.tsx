@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
@@ -14,7 +13,6 @@ import {
   CreditCard,
   Calendar,
   GamepadIcon,
-  TrendingUp,
   DollarSign,
   ImageIcon,
   ExternalLink,

@@ -1,8 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -29,7 +27,6 @@ import { getAuthToken } from '@/lib/api-client'
 import { NotificationBell } from '@/components/common/notification-bell'
 
 export function ElojobHeader() {
-  const router = useRouter()
   const { user, logout, loading: authLoading } = useAuth()
   const { items } = useCart()
   const [hasToken, setHasToken] = useState(false)

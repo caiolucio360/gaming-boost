@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/auth-context'
 
 const verifySchema = z.object({
   code: z.string().length(6, 'O código deve ter 6 dígitos'),
@@ -33,8 +32,6 @@ function VerifyContent() {
   // But verify API already returns token, so maybe we can use that?
   // Let's rely on manual login or auto-login via token handling if context supports it.
   // For now simpler approach: Verify -> Redirect to Dashboard (handling token manually or via context)
-
-  const { login } = useAuth() // We might use this if verify endpoint doesn't auto-login
 
   useEffect(() => {
     if (!email) {
@@ -130,7 +127,7 @@ function VerifyContent() {
       setCountdown(60) // 60 seconds cooldown
       
       setTimeout(() => setSuccessMessage(null), 5000)
-    } catch (err) {
+    } catch {
       setError('Erro ao reenviar código. Tente novamente.')
     }
   }

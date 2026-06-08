@@ -10,10 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   ShoppingCart,
   ArrowLeft,
-  Loader2,
-  Clock,
-  CheckCircle2,
-  XCircle,
   Edit,
 } from 'lucide-react'
 import Link from 'next/link'

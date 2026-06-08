@@ -18,7 +18,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [, setLoading] = useState(false)
   const pathname = usePathname()
 
   const fetchNotifications = async () => {
@@ -46,7 +46,7 @@ export function NotificationBell() {
   useEffect(() => {
     const eventSource = new EventSource('/api/realtime')
 
-    eventSource.onmessage = (event) => {
+    eventSource.onmessage = () => {
       // Handle generic messages if needed
     }
 

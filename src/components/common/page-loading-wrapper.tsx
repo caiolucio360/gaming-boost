@@ -25,7 +25,6 @@ export function PageLoadingWrapper({
   children,
   useSkeleton = false,
   skeletonType = 'page',
-  skeletonCount = 3,
 }: PageLoadingWrapperProps) {
   if (loading) {
     if (useSkeleton) {
