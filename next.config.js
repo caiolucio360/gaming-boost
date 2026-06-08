@@ -2,12 +2,16 @@
 
 // Content-Security-Policy — baseline funcional para Next.js App Router.
 // script/style usam 'unsafe-inline' porque o Next injeta bootstrap inline e o
-// Tailwind/framer-motion injetam estilos inline; 'unsafe-eval' cobre dev/Turbopack.
-// Hardening futuro: CSP baseada em nonce via middleware. As demais diretivas
+// Tailwind/framer-motion injetam estilos inline. 'unsafe-eval' so e necessario em
+// dev (Turbopack) — em producao e removido para reduzir a superficie de XSS.
+// Hardening futuro: CSP baseada em nonce via middleware (requer reescrever o
+// withAuth middleware + QA de browser para os estilos inline). As demais diretivas
 // (frame-ancestors, object-src, base-uri, form-action) ja mitigam clickjacking e injection.
+const isDev = process.env.NODE_ENV !== 'production'
+
 const cspDirectives = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
   "font-src 'self' data:",
@@ -26,6 +30,9 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+  // Isola o contexto de navegacao (mitiga XS-Leaks/Spectre); allow-popups preserva
+  // fluxos de popup/redirect de pagamento que dependem de window.opener.
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
 ]
 
