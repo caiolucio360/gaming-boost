@@ -114,7 +114,7 @@ export async function PUT(
     if (role !== undefined && ['CLIENT', 'BOOSTER', 'ADMIN'].includes(role)) {
       updateData.role = role
     }
-    if (password !== undefined && password.length >= 6) {
+    if (password !== undefined && password.length >= 8) {
       updateData.password = await bcrypt.hash(password, 10)
     }
 
