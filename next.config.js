@@ -1,4 +1,34 @@
 /** @type {import('next').NextConfig} */
+
+// Content-Security-Policy — baseline funcional para Next.js App Router.
+// script/style usam 'unsafe-inline' porque o Next injeta bootstrap inline e o
+// Tailwind/framer-motion injetam estilos inline; 'unsafe-eval' cobre dev/Turbopack.
+// Hardening futuro: CSP baseada em nonce via middleware. As demais diretivas
+// (frame-ancestors, object-src, base-uri, form-action) ja mitigam clickjacking e injection.
+const cspDirectives = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.public.blob.vercel-storage.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join('; ')
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: cspDirectives },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+]
+
 const nextConfig = {
   experimental: {
     optimizePackageImports: [
@@ -12,8 +42,19 @@ const nextConfig = {
       '@radix-ui/react-tooltip',
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+    ]
+  },
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+    ],
     formats: ['image/avif', 'image/webp'], // Priorizar formatos modernos
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
