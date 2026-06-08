@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@/generated/prisma/client'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import bcrypt from 'bcryptjs'
 
@@ -95,7 +96,7 @@ export async function PUT(
     }
 
     // Preparar dados para atualização
-    const updateData: any = {}
+    const updateData: Prisma.UserUpdateInput = {}
 
     if (name !== undefined) updateData.name = name
     if (email !== undefined) {

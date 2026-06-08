@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createAsaasPixTransfer } from '@/lib/asaas'
+import { Withdrawal } from '@/generated/prisma/client'
 import crypto from 'crypto'
 
 // POST - Criar um novo saque (Admin)
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         // Isto previne que duas requisições simultâneas passem na verificação de saldo
         let provisional: { id: number }
         try {
-            provisional = await prisma.$transaction(async (tx: any) => {
+            provisional = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                 // Re-verificar saldo dentro da transação
                 const agg = await tx.adminRevenue.aggregate({
                     where: { adminId: userId, status: 'PAID' },
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
                 })
                 const available = Math.round((agg._sum.amount || 0) * 100)
                 if (amount > available) {
-                    const err: any = new Error('Saldo insuficiente')
+                    const err = new Error('Saldo insuficiente') as Error & { code: string; availableBalance?: number }
                     err.code = 'INSUFFICIENT'
                     err.availableBalance = available
                     throw err
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
                     where: { userId, status: { in: ['PENDING', 'PROCESSING'] } },
                 })
                 if (pending) {
-                    const err: any = new Error('Você já tem um saque pendente. Aguarde a conclusão.')
+                    const err = new Error('Você já tem um saque pendente. Aguarde a conclusão.') as Error & { code: string }
                     err.code = 'PENDING_EXISTS'
                     throw err
                 }
@@ -96,15 +97,16 @@ export async function POST(request: NextRequest) {
                     },
                 })
             })
-        } catch (err: any) {
-            if (err.code === 'INSUFFICIENT') {
+        } catch (err) {
+            const e = err as { code?: string; message?: string; availableBalance?: number }
+            if (e.code === 'INSUFFICIENT') {
                 return NextResponse.json(
-                    { message: err.message, availableBalance: err.availableBalance, requestedAmount: amount },
+                    { message: e.message, availableBalance: e.availableBalance, requestedAmount: amount },
                     { status: 400 }
                 )
             }
-            if (err.code === 'PENDING_EXISTS') {
-                return NextResponse.json({ message: err.message }, { status: 400 })
+            if (e.code === 'PENDING_EXISTS') {
+                return NextResponse.json({ message: e.message }, { status: 400 })
             }
             throw err
         }
@@ -185,11 +187,11 @@ export async function GET(request: NextRequest) {
         // Calcular estatísticas
         const stats = {
             totalWithdrawals: withdrawals.length,
-            pendingWithdrawals: withdrawals.filter((w: any) => w.status === 'PENDING' || w.status === 'PROCESSING').length,
-            completedWithdrawals: withdrawals.filter((w: any) => w.status === 'COMPLETE').length,
+            pendingWithdrawals: withdrawals.filter((w: Withdrawal) => w.status === 'PENDING' || w.status === 'PROCESSING').length,
+            completedWithdrawals: withdrawals.filter((w: Withdrawal) => w.status === 'COMPLETE').length,
             totalWithdrawn: withdrawals
-                .filter((w: any) => w.status === 'COMPLETE')
-                .reduce((acc: any, w: any) => acc + w.amount, 0),
+                .filter((w: Withdrawal) => w.status === 'COMPLETE')
+                .reduce((acc: number, w: Withdrawal) => acc + w.amount, 0),
         }
 
         // Calcular saldo disponível (revenues marcadas como PAID estão disponíveis para saque)

@@ -16,7 +16,7 @@ import { StatCard } from '@/components/common/stat-card'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { formatDate } from '@/lib/utils'
-import { UserCheck, UserX, Clock, CheckCircle2, XCircle, Users, ArrowLeft } from 'lucide-react'
+import { UserCheck, UserX, Clock, CheckCircle2, XCircle, Users, ArrowLeft, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import {
     Dialog,
@@ -131,7 +131,7 @@ export default function AdminBoostersPage() {
     }
 
     const getStatusBadge = (status: string) => {
-        const configs: Record<string, { label: string; color: string; icon: any }> = {
+        const configs: Record<string, { label: string; color: string; icon: LucideIcon }> = {
             PENDING: {
                 label: 'Pendente',
                 color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',

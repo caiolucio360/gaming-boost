@@ -128,7 +128,7 @@ export async function PUT(
     }
 
     // Cancelar o pedido e pagamentos pendentes
-    const updatedOrder = await prisma.$transaction(async (tx: any) => {
+    const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Cancelar pagamentos pendentes
       await tx.payment.updateMany({
         where: {

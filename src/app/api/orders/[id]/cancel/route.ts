@@ -181,7 +181,7 @@ export async function POST(
     } catch {
       metadata = {}
     }
-    const { updatedOrder } = await db.$transaction(async (tx: any) => {
+    const { updatedOrder } = await db.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       const updated = await tx.order.update({
         where: { id: orderId },
         data: {

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { db } from '@/lib/db'
-import { Game, ServiceType } from '@/generated/prisma/client'
+import { Game, ServiceType, Prisma } from '@/generated/prisma/client'
 
 /**
  * Helper to check if a range overlaps with existing ranges
@@ -102,7 +102,7 @@ export async function PUT(
     }
 
     // Atualizar
-    const updateData: any = {}
+    const updateData: Prisma.PricingConfigUpdateInput = {}
     if (rangeStart !== undefined) updateData.rangeStart = parseInt(rangeStart)
     if (rangeEnd !== undefined) updateData.rangeEnd = parseInt(rangeEnd)
     if (price !== undefined) updateData.price = parseFloat(price)

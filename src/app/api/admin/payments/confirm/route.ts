@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Using any due to Prisma custom output path type resolution issues
-    await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Atualizar comissão do booster se existir e estiver pendente
       if (order.commission && order.commission.status === 'PENDING') {
         await tx.boosterCommission.update({

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { checkAsaasPaymentStatus } from '@/lib/asaas'
 import { checkAbacatePaymentStatus } from '@/lib/abacatepay'
+import { PaymentStatus } from '@/generated/prisma/client'
 
 export async function GET(request: NextRequest) {
     try {
@@ -99,14 +100,14 @@ export async function GET(request: NextRequest) {
                     const updatedPayment = await prisma.payment.update({
                         where: { id: payment.id },
                         data: {
-                            status: pixStatus as any,
+                            status: pixStatus as PaymentStatus,
                             paidAt: pixStatus === 'PAID' ? new Date() : null,
                         }
                     })
 
                     // Se foi pago, atualizar o pedido também
                     if (pixStatus === 'PAID') {
-                        await prisma.$transaction(async (tx: any) => {
+                        await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                             // Atualizar pedido para PAID (aguardando um booster aceitar)
                             await tx.order.update({
                                 where: { id: payment.order.id },

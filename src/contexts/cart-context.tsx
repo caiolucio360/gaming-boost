@@ -94,7 +94,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Processar apenas o primeiro item (fluxo direto para pagamento)
     const item = items[0]
     try {
-      const body: any = {
+      const body: Record<string, unknown> = {
         game: item.game,
         total: item.price,
       }

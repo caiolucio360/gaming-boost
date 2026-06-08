@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
     // adminPercentage stored as 1 - boosterPercentage for DB compatibility
     const adminPercentage = 1 - boosterPercentage
 
-    const config = await prisma.$transaction(async (tx: any) => {
+    const config = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       await tx.commissionConfig.updateMany({
         where: { enabled: true },
         data: { enabled: false },

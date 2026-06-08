@@ -101,7 +101,7 @@ export async function checkAbacatePaymentStatus(billingId: string) {
     const responseData = await response.json()
     const billings = responseData.data || []
     
-    const billing = billings.find((b: any) => b.id === billingId)
+    const billing = billings.find((b: { id: string }) => b.id === billingId)
 
     if (!billing) {
       throw new Error(`Billing ${billingId} not found`)

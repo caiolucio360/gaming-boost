@@ -233,7 +233,7 @@ export async function checkAsaasPaymentStatus(paymentId: string): Promise<string
 /**
  * Refund a PIX payment — POST /v3/payments/{id}/refund
  */
-export async function refundAsaasPayment(paymentId: string): Promise<any> {
+export async function refundAsaasPayment(paymentId: string): Promise<unknown> {
   const apiKey = process.env.ASAAS_API_KEY
   if (!apiKey) {
     throw new Error('ASAAS_API_KEY is not configured')
@@ -256,7 +256,7 @@ export async function refundAsaasPayment(paymentId: string): Promise<any> {
  * Cancel/delete a pending payment — DELETE /v3/payments/{id}
  * Only works for payments that haven't been paid yet.
  */
-export async function cancelAsaasPayment(paymentId: string): Promise<any> {
+export async function cancelAsaasPayment(paymentId: string): Promise<unknown> {
   const apiKey = process.env.ASAAS_API_KEY
   if (!apiKey) {
     throw new Error('ASAAS_API_KEY is not configured')
@@ -288,7 +288,7 @@ export async function createAsaasPixTransfer(params: {
   pixAddressKey: string;
   pixAddressKeyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP';
   description?: string;
-}): Promise<any> {
+}): Promise<{ id: string; transactionReceiptUrl?: string | null }> {
   const apiKey = process.env.ASAAS_API_KEY
   if (!apiKey) {
     throw new Error('ASAAS_API_KEY is not configured')

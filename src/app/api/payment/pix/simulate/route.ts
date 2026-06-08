@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
             // Se foi pago, atualizar o pedido também
             if (result.status === 'PAID') {
-                await prisma.$transaction(async (tx: any) => {
+                await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                     // Atualizar pedido para PAID (aguardando um booster aceitar)
                     await tx.order.update({
                         where: { id: payment.order.id },

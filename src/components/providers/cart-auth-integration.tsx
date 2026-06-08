@@ -17,11 +17,11 @@ export function CartAuthIntegration() {
     // Configurar o callback para processar o carrinho após login
     if (typeof window !== 'undefined') {
       // Expor função que retorna o resultado do processamento
-      (window as any).__processCartAfterLogin = async () => {
+      (window as unknown as Record<string, unknown>).__processCartAfterLogin = async () => {
         return await callbackRef.current()
       }
       // Manter compatibilidade com código antigo
-      (window as any).__setAuthLoginCallback = async () => {
+      (window as unknown as Record<string, unknown>).__setAuthLoginCallback = async () => {
         await callbackRef.current()
       }
     }

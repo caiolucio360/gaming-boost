@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         // Para clientes, verificar se há itens no carrinho para processar
         // O callback processCartAfterLogin será chamado pelo CartAuthIntegration
-        const processCart = (window as any).__processCartAfterLogin
+        const processCart = (window as unknown as { __processCartAfterLogin?: () => Promise<{ success?: boolean; orderId?: number; total?: number; error?: string }> }).__processCartAfterLogin
         if (processCart) {
           try {
             const cartResult = await processCart()

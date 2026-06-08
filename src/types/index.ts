@@ -56,5 +56,5 @@ export interface CartItem {
   targetRank?: string;
   price: number;
   duration?: string;
-  metadata?: Record<string, any>; // Dados adicionais específicos do jogo
+  metadata?: Record<string, unknown>; // Dados adicionais específicos do jogo
 }

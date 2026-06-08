@@ -292,7 +292,7 @@ export const PaymentService = {
       // Atomically update payment status — only proceeds if still PENDING
       // This prevents duplicate processing when AbacatePay retries the webhook
       let alreadyProcessed = false
-      await prisma.$transaction(async (tx: any) => {
+      await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         const updated = await tx.payment.updateMany({
           where: { id: payment.id, status: PaymentStatus.PENDING },
           data: { status: PaymentStatus.PAID, paidAt: new Date() },
@@ -463,7 +463,7 @@ export const PaymentService = {
 
       // Process REFUNDED
       if (newStatus === PaymentStatus.REFUNDED && payment.status !== PaymentStatus.REFUNDED) {
-        await prisma.$transaction(async (tx: any) => {
+        await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
           await tx.payment.update({
             where: { id: payment.id },
             data: { status: PaymentStatus.REFUNDED },
@@ -493,7 +493,7 @@ export const PaymentService = {
 
       // Process EXPIRED or CANCELLED
       if ((newStatus === PaymentStatus.EXPIRED || newStatus === PaymentStatus.CANCELLED) && payment.status === PaymentStatus.PENDING) {
-        await prisma.$transaction(async (tx: any) => {
+        await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
           await tx.payment.update({
             where: { id: payment.id },
             data: { status: newStatus },
