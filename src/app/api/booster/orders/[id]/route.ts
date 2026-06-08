@@ -4,6 +4,22 @@ import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import { getStatusForError } from '@/lib/error-constants'
 import { OrderService } from '@/services'
 
+/**
+ * Valida que a URL do comprovante aponta para o nosso storage (Vercel Blob),
+ * impedindo que um booster registre uma URL externa arbitraria como "prova".
+ */
+function isValidProofUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname.endsWith('.public.blob.vercel-storage.com')
+    )
+  } catch {
+    return false
+  }
+}
+
 // POST - Accept an available order
 export async function POST(
   request: NextRequest,
@@ -88,9 +104,10 @@ export async function PUT(
       )
     }
 
-    // Require proof screenshot when completing
+    // Require proof screenshot when completing — e deve ser uma URL do nosso storage
+    // (Vercel Blob), nunca uma URL externa arbitraria submetida pelo booster.
     if (status === 'COMPLETED') {
-      if (!completionProofUrl || typeof completionProofUrl !== 'string' || !completionProofUrl.startsWith('http')) {
+      if (!completionProofUrl || typeof completionProofUrl !== 'string' || !isValidProofUrl(completionProofUrl)) {
         return NextResponse.json(
           { message: 'É obrigatório enviar um print comprovando o rank atingido para concluir o pedido.' },
           { status: 400 }
