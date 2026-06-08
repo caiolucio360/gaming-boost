@@ -89,10 +89,10 @@ export async function handleServiceHire(
       {
         currentRank: item.currentRank,
         targetRank: item.targetRank,
-        currentRating: metadata.currentRating,
-        targetRating: metadata.targetRating,
-        gameMode: metadata.mode,
-        gameType: metadata.gameType,
+        currentRating: metadata.currentRating as number | undefined,
+        targetRating: metadata.targetRating as number | undefined,
+        gameMode: metadata.mode as string | undefined,
+        gameType: metadata.gameType as string | undefined,
         metadata: metadata,
       }
     )

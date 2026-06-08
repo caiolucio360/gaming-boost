@@ -471,7 +471,7 @@ export const OrderService = {
       const commission = this.calculateCommission(order.total, boosterPercentage, adminPercentage, devAdminPercentage)
 
       // Execute transaction
-      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+      const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         // Atomically update order (with race condition protection)
         const updateResult = await tx.order.updateMany({
           where: {
@@ -649,7 +649,7 @@ export const OrderService = {
 
       // Removal: clear the booster and drop its pending commission snapshot
       if (boosterId === null) {
-        await prisma.$transaction(async (tx: any) => {
+        await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
           await tx.order.update({ where: { id: orderId }, data: { boosterId: null } })
           await tx.boosterCommission.deleteMany({ where: { orderId, status: 'PENDING' } })
         })
@@ -684,7 +684,7 @@ export const OrderService = {
       const { boosterPercentage, adminPercentage, devAdminPercentage } = configResult.data
       const commission = this.calculateCommission(order.total, boosterPercentage, adminPercentage, devAdminPercentage)
 
-      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+      const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         await tx.order.update({ where: { id: orderId }, data: { boosterId } })
 
         // Booster commission — upsert by unique orderId; only rewrite while PENDING
@@ -832,7 +832,7 @@ export const OrderService = {
       }
 
       // Transition to IN_PROGRESS
-      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+      const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         const updateResult = await tx.order.updateMany({
           where: { id: orderId, status: OrderStatus.PAID, boosterId },
           data: { status: OrderStatus.IN_PROGRESS },
@@ -926,7 +926,7 @@ export const OrderService = {
       const waitingDays = config?.withdrawalWaitingDays ?? 7
 
       // Execute transaction
-      const updatedOrder = await prisma.$transaction(async (tx: any) => {
+      const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         // Update order status with completion proof
         await tx.order.update({
           where: { id: orderId },

@@ -4,10 +4,10 @@ import Link from "next/link"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getEnabledGames } from "@/lib/games-config"
-import { Trophy, Gamepad2, Users } from "lucide-react"
+import { Trophy, Gamepad2, Users, type LucideIcon } from "lucide-react"
 
 // Mapeamento de ícones por jogo
-const gameIcons: Record<string, any> = {
+const gameIcons: Record<string, LucideIcon> = {
   CS2: Users,
   LOL: Trophy,
   VALORANT: Gamepad2,

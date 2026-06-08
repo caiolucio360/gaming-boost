@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { db } from '@/lib/db'
-import { Game, ServiceType } from '@/generated/prisma/client'
+import { Game, ServiceType, Prisma } from '@/generated/prisma/client'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 
 /**
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const gameMode = searchParams.get('gameMode')
     const serviceType = searchParams.get('serviceType') as ServiceType | null
 
-    const where: any = {}
+    const where: Prisma.PricingConfigWhereInput = {}
     if (game) where.game = game
     if (gameMode) where.gameMode = gameMode
     if (serviceType) where.serviceType = serviceType

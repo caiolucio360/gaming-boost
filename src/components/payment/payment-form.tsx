@@ -8,10 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { validateCPF, validatePhone, formatTaxId, formatPhone, maskCPF, maskPhone } from '@/lib/brazilian'
 
+interface PaymentResult {
+  id: number
+  pixCode: string
+  qrCode: string
+  total: number
+  expiresAt: string
+  status: string
+}
+
 interface PaymentFormProps {
   orderId: number
   orderTotal: number
-  onSuccess: (payment: any) => void
+  onSuccess: (payment: PaymentResult) => void
   onError: (error: string) => void
 }
 

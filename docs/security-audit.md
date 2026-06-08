@@ -182,9 +182,14 @@ Nenhuma correção necessária.
 - **CSP por nonce** (🟡): exige reescrever o `withAuth` middleware, expandir o matcher para todas as
   rotas e resolver `style-src` com nonce (inviável direto com Tailwind v4 + framer-motion inline) —
   requer QA de browser. Não é um simples ajuste de config.
-- **Reabilitar `eslint.ignoreDuringBuilds`** (🟡 qualidade, não-segurança): ~96 erros + 89 warnings
-  (`no-explicit-any`, `no-unused-vars`, `react-hooks/exhaustive-deps`), nenhum é regra de segurança.
-  Chore dedicado e incremental.
+- ~~**Reabilitar `eslint.ignoreDuringBuilds`**~~ → **FEITO (2026-06-08).** `ignoreDuringBuilds: false`;
+  os 96 erros (`no-explicit-any` + 1 `no-empty-object-type`) foram corrigidos com tipos do Prisma
+  (`Prisma.*WhereInput`/`UpdateInput`, enums, model types) e `unknown`/casts tipados. Override de
+  ESLint libera `any` em testes (mocks). Exceção documentada: os callbacks de `prisma.$transaction`
+  mantêm `tx: any` com `eslint-disable-line` — o client Prisma 7 (output custom) tem um bug de tipos
+  em que `Prisma.TransactionClient` não expõe os delegates de model (e anotar tipo mais rico quebra a
+  atribuição do callback). Restam **89 warnings** (`no-unused-vars`, `react-hooks/exhaustive-deps`,
+  `no-img-element`) — não bloqueiam o build, ficam para limpeza incremental.
 - **Hardening de Postgres** (infra, fora do código): roles separadas (runtime sem DDL vs migração),
   TLS `verify-full`, pooling em serverless, backups testados, logging/auditoria. Guia de aplicação
   manual adaptado ao setup (Prisma + adapter-pg, single-tenant): **`docs/postgres-hardening.md`**.

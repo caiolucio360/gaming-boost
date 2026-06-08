@@ -28,6 +28,7 @@ import {
   Crown,
   DollarSign,
   History,
+  type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { SkeletonTable } from '@/components/common/skeletons'
@@ -147,7 +148,7 @@ export default function AdminUsersPage() {
   }
 
   const getRoleBadge = (role: string) => {
-    const configs: Record<string, { label: string; color: string; icon: any }> = {
+    const configs: Record<string, { label: string; color: string; icon: LucideIcon }> = {
       ADMIN: {
         label: 'Admin',
         color: 'bg-red-500/20 text-red-300 border-red-500/50',

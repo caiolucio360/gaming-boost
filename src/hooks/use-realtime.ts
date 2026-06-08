@@ -4,13 +4,13 @@ import { getAuthToken } from '@/lib/api-client'
 
 interface RealtimeEvent {
   event: string
-  data: any
+  data: Record<string, unknown>
 }
 
 interface UseRealtimeOptions {
   enabled?: boolean
-  onOrderUpdate?: (data: any) => void
-  onPaymentUpdate?: (data: any) => void
+  onOrderUpdate?: (data: Record<string, unknown>) => void
+  onPaymentUpdate?: (data: Record<string, unknown>) => void
   onError?: (error: Error) => void
 }
 
