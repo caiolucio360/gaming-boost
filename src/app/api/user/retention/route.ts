@@ -1,28 +1,15 @@
 // src/app/api/user/retention/route.ts
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createApiErrorResponse } from '@/lib/api-errors'
+import { withApiHandler } from '@/lib/api-handler'
+import { HttpStatus } from '@/lib/http-status'
 import { getStreakDiscount } from '@/lib/retention-utils'
 
-export async function GET(request: NextRequest) {
-  try {
-    const authResult = await verifyAuth(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(authResult.error || 'Não autenticado', 401)
-    }
-
-    const userId = authResult.user.id
-
+export const GET = withApiHandler(
+  async ({ user }) => {
     const completedOrders = await prisma.order.findMany({
-      where: { userId, status: 'COMPLETED' },
-      select: {
-        id: true,
-        targetRating: true,
-        targetRank: true,
-        gameMode: true,
-        updatedAt: true,
-      },
+      where: { userId: user.id, status: 'COMPLETED' },
+      select: { id: true, targetRating: true, targetRank: true, gameMode: true, updatedAt: true },
       orderBy: { updatedAt: 'asc' },
     })
 
@@ -37,8 +24,7 @@ export async function GET(request: NextRequest) {
       completedAt: o.updatedAt,
     }))
 
-    return NextResponse.json({ completedOrders: orders, streak, discountPct }, { status: 200 })
-  } catch (error) {
-    return createApiErrorResponse(error, 'Erro ao buscar dados de retenção', 'GET /api/user/retention')
-  }
-}
+    return NextResponse.json({ completedOrders: orders, streak, discountPct }, { status: HttpStatus.OK })
+  },
+  { auth: true, errorMessage: 'Erro ao buscar dados de retenção', endpoint: 'GET /api/user/retention' }
+)
