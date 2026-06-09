@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -155,8 +154,10 @@ export function ApplyForm() {
                 rel="noopener noreferrer"
                 className="flex items-center"
               >
-                <img 
-                  src={LEETIFY_ATTRIBUTION_LOGO} 
+                {/* Logo de atribuição externo (Leetify), tamanho fixo — next/image desnecessário */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={LEETIFY_ATTRIBUTION_LOGO}
                   alt="Data provided by Leetify" 
                   className="h-6"
                 />

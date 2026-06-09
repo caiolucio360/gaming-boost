@@ -1,7 +1,7 @@
 // src/components/common/withdraw-content.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -62,7 +62,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
   const [pixKeyType, setPixKeyType] = useState('')
   const [pixKey, setPixKey] = useState('')
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       const res = await fetch(apiBasePath)
@@ -80,9 +80,9 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiBasePath])
 
-  useEffect(() => { fetchData() }, [apiBasePath])
+  useEffect(() => { fetchData() }, [fetchData])
 
   const hasPendingWithdrawal = withdrawals.some(
     (w) => w.status === 'PENDING' || w.status === 'PROCESSING'

@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton, SkeletonText, SkeletonAvatar, SkeletonButton } from '@/components/ui/skeleton'
+import { Skeleton, SkeletonAvatar, SkeletonButton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 // Stats card skeleton (for dashboard stats)

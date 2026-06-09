@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 // Como é client component, precisamos usar generateMetadata em um layout ou criar um wrapper
 export default function CS2Page() {

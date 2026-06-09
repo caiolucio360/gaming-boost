@@ -14,7 +14,6 @@ import {
   DollarSign,
   Check,
   Loader2,
-  Upload,
   ImageIcon,
   X,
   RefreshCw,
@@ -125,7 +124,10 @@ export default function BoosterDashboardPage() {
         .then((data) => setHasPixKey(!!data.pixKey))
         .catch(() => setHasPixKey(true)) // fail open — server will enforce
     }
-  }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
+    // Carga inicial única por usuário: fetchOrders depende de activeTab; incluí-lo aqui
+    // dispararia o load COMPLETO a cada troca de tab (o refresh silencioso é feito no effect abaixo).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   // On first stats load, default to 'assigned' tab if booster has in-progress orders
   useEffect(() => {
@@ -142,6 +144,8 @@ export default function BoosterDashboardPage() {
     if (user && user.role === 'BOOSTER' && !loading) {
       fetchOrders(true)
     }
+    // Refresh silencioso apenas na troca de tab (deps amplas re-disparariam fetches indevidos)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   // Função para atualizar apenas os dados sem mostrar banner de refreshing
@@ -698,6 +702,8 @@ export default function BoosterDashboardPage() {
                 <div className="space-y-4 py-2">
                   {proofPreview ? (
                     <div className="relative">
+                      {/* Preview local do arquivo (blob: URL) antes do upload — next/image não suporta blob: */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={proofPreview}
                         alt="Preview do comprovante"

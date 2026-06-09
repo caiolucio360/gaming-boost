@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { AuthService } from '@/services'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
     try {
         // 1. Verify session using NextAuth
         const session = await getServerSession(authOptions)

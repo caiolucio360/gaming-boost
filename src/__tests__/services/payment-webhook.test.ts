@@ -24,7 +24,6 @@ jest.mock('@/lib/email', () => ({
 
 import { prisma } from '@/lib/db'
 import { PaymentService } from '@/services/payment.service'
-import { PaymentStatus, WithdrawalStatus } from '@/generated/prisma/client'
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
 

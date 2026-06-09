@@ -4,7 +4,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ChevronLeft,
   ChevronRight,
@@ -143,7 +142,6 @@ export function AppShell({ role, children }: AppShellProps) {
       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
 
   const roleLabel = role === 'ADMIN' ? 'ADMIN' : 'BOOSTER'
-  const roleShort = role === 'ADMIN' ? 'ADM' : 'BST'
   const dashboardHref = role === 'ADMIN' ? '/admin' : '/booster'
 
   function renderSidebar() {

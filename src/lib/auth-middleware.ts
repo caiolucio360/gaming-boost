@@ -24,7 +24,7 @@ export interface AuthResult {
  * Middleware para verificar autenticação em rotas protegidas
  * Usa getServerSession do NextAuth
  */
-export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
+export async function verifyAuth(_request: NextRequest): Promise<AuthResult> {
   try {
     const session = await getServerSession(authOptions)
 
@@ -45,7 +45,7 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
         isDevAdmin: session.user.isDevAdmin ?? false,
       },
     }
-  } catch (error) {
+  } catch {
     return {
       authenticated: false,
       error: ErrorMessages.AUTH_VERIFY_ERROR,
