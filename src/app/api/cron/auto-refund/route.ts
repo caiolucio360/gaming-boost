@@ -9,8 +9,9 @@
  */
 
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getOrderTimeoutHours } from '@/lib/env'
+import { HttpStatus } from '@/lib/http-status'
 import { refundAsaasPayment } from '@/lib/asaas'
 import { refundAbacatePayment } from '@/lib/abacatepay'
 import { sendOrderCancelledEmail } from '@/lib/email'
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       console.error('[CRON] CRON_SECRET not configured')
       return NextResponse.json(
         { message: 'Cron secret not configured' },
-        { status: 500 }
+        { status: HttpStatus.INTERNAL_SERVER_ERROR }
       )
     }
 
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
       })
       return NextResponse.json(
         { message: 'Unauthorized' },
-        { status: 401 }
+        { status: HttpStatus.UNAUTHORIZED }
       )
     }
 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     // - Status: PAID (payment received but not yet accepted by booster)
     // - boosterId: null (no booster assigned)
     // - updatedAt: older than cutoff time
-    const ordersToRefund = await db.order.findMany({
+    const ordersToRefund = await prisma.order.findMany({
       where: {
         status: 'PAID',
         boosterId: null,
@@ -136,7 +137,7 @@ export async function POST(request: Request) {
         } catch {
           metadata = {}
         }
-        await db.order.update({
+        await prisma.order.update({
           where: { id: order.id },
           data: {
             status: 'CANCELLED',
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
         })
 
         // Update payment status to REFUNDED
-        await db.payment.update({
+        await prisma.payment.update({
           where: { id: payment.id },
           data: {
             status: 'REFUNDED',
@@ -196,11 +197,8 @@ export async function POST(request: Request) {
     console.error('❌ Auto-refund cron job error:', error)
 
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
+      { message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }
