@@ -4,7 +4,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,7 +12,6 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Users,
-  Shield,
   SlidersHorizontal,
   CreditCard,
   Percent,
@@ -49,7 +47,6 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard',    href: '/admin',             icon: LayoutDashboard, exact: true },
   { label: 'Pedidos',      href: '/admin/orders',      icon: ShoppingCart },
   { label: 'Usuários',     href: '/admin/users',       icon: Users },
-  { label: 'Boosters',     href: '/admin/boosters',    icon: Shield },
   { label: 'Precificação', href: '/admin/pricing',     icon: SlidersHorizontal },
   { label: 'Pagamentos',   href: '/admin/payments',    icon: CreditCard },
   { label: 'Saques',       href: '/admin/withdraw',    icon: Wallet },
@@ -81,7 +78,6 @@ const SEGMENT_LABELS: Record<string, string> = {
   booster:     'Meus Trabalhos',
   orders:      'Pedidos',
   users:       'Usuários',
-  boosters:    'Boosters',
   pricing:     'Precificação',
   payments:    'Pagamentos',
   commissions: 'Comissões',
@@ -143,7 +139,6 @@ export function AppShell({ role, children }: AppShellProps) {
       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
 
   const roleLabel = role === 'ADMIN' ? 'ADMIN' : 'BOOSTER'
-  const roleShort = role === 'ADMIN' ? 'ADM' : 'BST'
   const dashboardHref = role === 'ADMIN' ? '/admin' : '/booster'
 
   function renderSidebar() {

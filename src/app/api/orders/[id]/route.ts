@@ -1,176 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { withApiHandler, parseIntParam } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
+
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
+const orderInclude = {
+  booster: { select: { id: true, email: true, name: true } },
+} as const
 
 // GET - Buscar pedido específico
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    // Verificar autenticação via NextAuth
-    const authResult = await verifyAuth(request)
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  return withApiHandler(
+    async ({ user }) => {
+      const { id } = await params
+      const orderId = parseIntParam(id)
+      if (orderId === null) {
+        return NextResponse.json({ message: 'ID do pedido inválido' }, { status: HttpStatus.BAD_REQUEST })
+      }
 
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
+      const order = await prisma.order.findUnique({ where: { id: orderId }, include: orderInclude })
+      if (!order) {
+        return NextResponse.json({ message: ErrorMessages.ORDER_NOT_FOUND }, { status: HttpStatus.NOT_FOUND })
+      }
+      if (order.userId !== user.id) {
+        return NextResponse.json(
+          { message: 'Acesso negado. Este pedido não pertence a você.' },
+          { status: HttpStatus.FORBIDDEN }
+        )
+      }
 
-    const userId = authResult.user.id
-    const { id } = await params
-
-    // Converter id para número
-    const orderId = parseInt(id, 10)
-    if (isNaN(orderId)) {
-      return NextResponse.json(
-        { message: 'ID do pedido inválido' },
-        { status: 400 }
-      )
-    }
-
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        booster: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-      },
-    })
-
-    if (!order) {
-      return NextResponse.json(
-        { message: 'Pedido não encontrado' },
-        { status: 404 }
-      )
-    }
-
-    // Verificar se o pedido pertence ao usuário
-    if (order.userId !== userId) {
-      return NextResponse.json(
-        { message: 'Acesso negado. Este pedido não pertence a você.' },
-        { status: 403 }
-      )
-    }
-
-    return NextResponse.json({ order }, { status: 200 })
-  } catch (error) {
-    console.error('Erro ao buscar pedido:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pedido' },
-      { status: 500 }
-    )
-  }
+      return NextResponse.json({ order }, { status: HttpStatus.OK })
+    },
+    { auth: true, errorMessage: ErrorMessages.ORDER_FETCH_FAILED, endpoint: 'GET /api/orders/[id]' }
+  )(request)
 }
 
 // PUT - Cancelar pedido (apenas para o dono do pedido)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    // Verificar autenticação via NextAuth
-    const authResult = await verifyAuth(request)
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  return withApiHandler(
+    async ({ user }) => {
+      const { id } = await params
+      const orderId = parseIntParam(id)
+      if (orderId === null) {
+        return NextResponse.json({ message: 'ID do pedido inválido' }, { status: HttpStatus.BAD_REQUEST })
+      }
 
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
+      const order = await prisma.order.findUnique({ where: { id: orderId } })
+      if (!order) {
+        return NextResponse.json({ message: ErrorMessages.ORDER_NOT_FOUND }, { status: HttpStatus.NOT_FOUND })
+      }
+      if (order.userId !== user.id) {
+        return NextResponse.json(
+          { message: 'Acesso negado. Este pedido não pertence a você.' },
+          { status: HttpStatus.FORBIDDEN }
+        )
+      }
 
-    const userId = authResult.user.id
-    const { id } = await params
-
-    // Converter id para número
-    const orderId = parseInt(id, 10)
-    if (isNaN(orderId)) {
-      return NextResponse.json(
-        { message: 'ID do pedido inválido' },
-        { status: 400 }
-      )
-    }
-
-    // Buscar o pedido
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-    })
-
-    if (!order) {
-      return NextResponse.json(
-        { message: 'Pedido não encontrado' },
-        { status: 404 }
-      )
-    }
-
-    // Verificar se o pedido pertence ao usuário
-    if (order.userId !== userId) {
-      return NextResponse.json(
-        { message: 'Acesso negado. Este pedido não pertence a você.' },
-        { status: 403 }
-      )
-    }
-
-    // Verificar se o pedido pode ser cancelado
-    // Apenas pedidos PENDING podem ser cancelados pelo cliente
-    if (order.status !== 'PENDING') {
-      return NextResponse.json(
-        {
-          message: `Não é possível cancelar um pedido com status ${order.status}. Apenas pedidos pendentes podem ser cancelados.`,
-        },
-        { status: 400 }
-      )
-    }
-
-    // Cancelar o pedido e pagamentos pendentes
-    const updatedOrder = await prisma.$transaction(async (tx: any) => {
-      // Cancelar pagamentos pendentes
-      await tx.payment.updateMany({
-        where: {
-          orderId: orderId,
-          status: 'PENDING',
-        },
-        data: {
-          status: 'CANCELLED',
-        },
-      })
-
-      // Cancelar o pedido
-      return await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'CANCELLED',
-        },
-        include: {
-          booster: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            },
+      // Apenas pedidos PENDING podem ser cancelados pelo cliente
+      if (order.status !== 'PENDING') {
+        return NextResponse.json(
+          {
+            message: `Não é possível cancelar um pedido com status ${order.status}. Apenas pedidos pendentes podem ser cancelados.`,
           },
-        },
+          { status: HttpStatus.BAD_REQUEST }
+        )
+      }
+
+      const updatedOrder = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        await tx.payment.updateMany({
+          where: { orderId, status: 'PENDING' },
+          data: { status: 'CANCELLED' },
+        })
+
+        return tx.order.update({
+          where: { id: orderId },
+          data: { status: 'CANCELLED' },
+          include: orderInclude,
+        })
       })
-    })
 
-    return NextResponse.json(
-      {
-        message: 'Pedido cancelado com sucesso',
-        order: updatedOrder,
-      },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error('Erro ao cancelar pedido:', error)
-    return NextResponse.json(
-      { message: 'Erro ao cancelar pedido' },
-      { status: 500 }
-    )
-  }
+      return NextResponse.json(
+        { message: 'Pedido cancelado com sucesso', order: updatedOrder },
+        { status: HttpStatus.OK }
+      )
+    },
+    { auth: true, errorMessage: ErrorMessages.ORDER_CANCEL_FAILED, endpoint: 'PUT /api/orders/[id]' }
+  )(request)
 }
-

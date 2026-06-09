@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@/generated/prisma/client'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 import bcrypt from 'bcryptjs'
 
 // GET - Buscar usuário específico
@@ -21,7 +23,7 @@ export async function GET(
     if (isNaN(userId)) {
       return NextResponse.json(
         { message: 'ID do usuário inválido' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -44,16 +46,16 @@ export async function GET(
     if (!user) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
-    return NextResponse.json({ user }, { status: 200 })
+    return NextResponse.json({ user }, { status: HttpStatus.OK })
   } catch (error) {
     console.error('Erro ao buscar usuário:', error)
     return NextResponse.json(
       { message: 'Erro ao buscar usuário' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }
@@ -78,7 +80,7 @@ export async function PUT(
     if (isNaN(userId)) {
       return NextResponse.json(
         { message: 'ID do usuário inválido' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -90,12 +92,12 @@ export async function PUT(
     if (!existingUser) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
     // Preparar dados para atualização
-    const updateData: any = {}
+    const updateData: Prisma.UserUpdateInput = {}
 
     if (name !== undefined) updateData.name = name
     if (email !== undefined) {
@@ -106,7 +108,7 @@ export async function PUT(
       if (emailExists && emailExists.id !== userId) {
         return NextResponse.json(
           { message: 'Email já está em uso' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
       updateData.email = email
@@ -114,7 +116,7 @@ export async function PUT(
     if (role !== undefined && ['CLIENT', 'BOOSTER', 'ADMIN'].includes(role)) {
       updateData.role = role
     }
-    if (password !== undefined && password.length >= 6) {
+    if (password !== undefined && password.length >= 8) {
       updateData.password = await bcrypt.hash(password, 10)
     }
 
@@ -125,7 +127,7 @@ export async function PUT(
       if (isNaN(percentage) || percentage < 0 || percentage > 1) {
         return NextResponse.json(
           { message: 'Porcentagem de comissão deve ser um número entre 0 e 1 (ex: 0.75 para 75%)' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -133,7 +135,7 @@ export async function PUT(
       if (existingUser.role !== 'BOOSTER') {
         return NextResponse.json(
           { message: 'Apenas boosters podem ter comissão personalizada' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -148,7 +150,7 @@ export async function PUT(
       if (isNaN(share) || share < 0 || share > 1) {
         return NextResponse.json(
           { message: 'Share de lucro deve ser um número entre 0 e 1 (ex: 0.5 para 50%)' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -158,7 +160,7 @@ export async function PUT(
       if (newRole !== 'ADMIN') {
         return NextResponse.json(
           { message: 'Apenas admins podem ter share de lucro' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -181,13 +183,13 @@ export async function PUT(
 
     return NextResponse.json(
       { message: 'Usuário atualizado com sucesso', user: updatedUser },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error)
     return NextResponse.json(
       { message: 'Erro ao atualizar usuário' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }
@@ -210,7 +212,7 @@ export async function DELETE(
     if (isNaN(userId)) {
       return NextResponse.json(
         { message: 'ID do usuário inválido' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -222,7 +224,7 @@ export async function DELETE(
     if (!user) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
@@ -231,7 +233,7 @@ export async function DELETE(
     if (currentUserId === userId) {
       return NextResponse.json(
         { message: 'Não é possível deletar seu próprio usuário' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -242,13 +244,13 @@ export async function DELETE(
 
     return NextResponse.json(
       { message: 'Usuário deletado com sucesso' },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Erro ao deletar usuário:', error)
     return NextResponse.json(
       { message: 'Erro ao deletar usuário' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

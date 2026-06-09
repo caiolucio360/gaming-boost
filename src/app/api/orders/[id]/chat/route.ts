@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { rateLimit, createRateLimitHeaders } from '@/lib/rate-limit'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { withApiHandler, parseIntParam } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { getStatusForError } from '@/lib/error-constants'
 import { ChatService } from '@/services'
 import { SendMessageSchema, SendCredentialsSchema, ChatQuerySchema } from '@/schemas'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -19,148 +22,152 @@ const chatRateLimiter = rateLimit({
  * GET /api/orders/[id]/chat - Get chat messages for an order
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  try {
-    const authResult = await verifyAuth(request)
+  return withApiHandler(
+    async ({ user }) => {
+      const { id } = await params
+      const orderId = parseIntParam(id)
 
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
-    const { id } = await params
-    const orderId = parseInt(id)
-    const userId = authResult.user.id
-
-    if (isNaN(orderId)) {
-      return NextResponse.json(
-        { message: 'ID do pedido inválido' },
-        { status: 400 }
-      )
-    }
-
-    // Parse query parameters
-    const { searchParams } = new URL(request.url)
-    const queryResult = ChatQuerySchema.safeParse({
-      limit: searchParams.get('limit'),
-      before: searchParams.get('before'),
-    })
-
-    const limit = queryResult.success ? queryResult.data.limit : 50
-    const before = queryResult.success ? queryResult.data.before : undefined
-
-    // Get messages
-    const result = await ChatService.getMessages({
-      orderId,
-      userId,
-      limit,
-      before,
-    })
-
-    if (!result.success) {
-      const statusMap: Record<string, number> = {
-        'ORDER_NOT_FOUND': 404,
-        'USER_NOT_FOUND': 404,
-        'CHAT_ACCESS_DENIED': 403,
+      if (orderId === null) {
+        return NextResponse.json(
+          { message: 'ID do pedido inválido' },
+          { status: HttpStatus.BAD_REQUEST }
+        )
       }
-      const status = result.code ? statusMap[result.code] || 500 : 500
 
-      return NextResponse.json(
-        { message: result.error, code: result.code },
-        { status }
-      )
+      // Parse query parameters
+      const { searchParams } = new URL(request.url)
+      const queryResult = ChatQuerySchema.safeParse({
+        limit: searchParams.get('limit'),
+        before: searchParams.get('before'),
+      })
+
+      const limit = queryResult.success ? queryResult.data.limit : 50
+      const before = queryResult.success ? queryResult.data.before : undefined
+
+      // Get messages
+      const result = await ChatService.getMessages({
+        orderId,
+        userId: user.id,
+        limit,
+        before,
+      })
+
+      if (!result.success) {
+        const status = result.code ? getStatusForError(result.code) : HttpStatus.INTERNAL_SERVER_ERROR
+        return NextResponse.json(
+          { message: result.error, code: result.code },
+          { status }
+        )
+      }
+
+      // Check if chat is enabled (for UI state)
+      const enabledResult = await ChatService.isChatEnabled(orderId)
+      const chatEnabled = enabledResult.success && enabledResult.data.enabled
+
+      return NextResponse.json({
+        chat: result.data,
+        chatEnabled,
+        disabledReason: enabledResult.success && !enabledResult.data.enabled
+          ? enabledResult.data.reason
+          : null,
+      })
+    },
+    {
+      auth: true,
+      errorMessage: ErrorMessages.ORDER_FETCH_FAILED,
+      endpoint: 'GET /api/orders/[id]/chat',
     }
-
-    // Check if chat is enabled (for UI state)
-    const enabledResult = await ChatService.isChatEnabled(orderId)
-    const chatEnabled = enabledResult.success && enabledResult.data.enabled
-
-    return NextResponse.json({
-      chat: result.data,
-      chatEnabled,
-      disabledReason: enabledResult.success && !enabledResult.data.enabled
-        ? enabledResult.data.reason
-        : null,
-    })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/orders/[id]/chat')
-  }
+  )(request)
 }
 
 /**
  * POST /api/orders/[id]/chat - Send a message in the order chat
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  try {
-    const authResult = await verifyAuth(request)
+  return withApiHandler(
+    async ({ user }) => {
+      const { id } = await params
+      const orderId = parseIntParam(id)
 
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
-    const { id } = await params
-    const orderId = parseInt(id)
-    const userId = authResult.user.id
-
-    if (isNaN(orderId)) {
-      return NextResponse.json(
-        { message: 'ID do pedido inválido' },
-        { status: 400 }
-      )
-    }
-
-    // Rate limiting: 30 messages per minute per user per order
-    const identifier = `chat:${userId}:${orderId}`
-    const rateLimitResult = await chatRateLimiter.check(identifier, 30)
-
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          message: 'Muitas mensagens. Aguarde um momento.',
-          error: 'RATE_LIMIT_EXCEEDED',
-        },
-        {
-          status: 429,
-          headers: createRateLimitHeaders(rateLimitResult),
-        }
-      )
-    }
-
-    // Parse and validate request body
-    const body = await request.json()
-
-    // Route to appropriate handler based on messageType
-    if (body?.messageType === 'STEAM_CREDENTIALS') {
-      const parseResult = SendCredentialsSchema.safeParse(body)
-      if (!parseResult.success) {
+      if (orderId === null) {
         return NextResponse.json(
-          { message: parseResult.error.issues[0]?.message || 'Dados inválidos' },
-          { status: 400, headers: createRateLimitHeaders(rateLimitResult) }
+          { message: 'ID do pedido inválido' },
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
-      const { credentials } = parseResult.data
+      // Rate limiting: 30 messages per minute per user per order
+      const identifier = `chat:${user.id}:${orderId}`
+      const rateLimitResult = await chatRateLimiter.check(identifier, RateLimits.CHAT_MESSAGE)
+
+      if (!rateLimitResult.success) {
+        return NextResponse.json(
+          {
+            message: 'Muitas mensagens. Aguarde um momento.',
+            code: 'RATE_LIMIT_EXCEEDED',
+          },
+          {
+            status: HttpStatus.TOO_MANY_REQUESTS,
+            headers: createRateLimitHeaders(rateLimitResult),
+          }
+        )
+      }
+
+      // Parse and validate request body
+      const body = await request.json()
+
+      // Route to appropriate handler based on messageType
+      if (body?.messageType === 'STEAM_CREDENTIALS') {
+        const parseResult = SendCredentialsSchema.safeParse(body)
+        if (!parseResult.success) {
+          return NextResponse.json(
+            { message: parseResult.error.issues[0]?.message || 'Dados inválidos' },
+            { status: HttpStatus.BAD_REQUEST, headers: createRateLimitHeaders(rateLimitResult) }
+          )
+        }
+
+        const { credentials } = parseResult.data
+        const result = await ChatService.sendMessage({
+          orderId,
+          authorId: user.id,
+          messageType: 'STEAM_CREDENTIALS',
+          credentials,
+        })
+
+        if (!result.success) {
+          const status = result.code ? getStatusForError(result.code) : HttpStatus.INTERNAL_SERVER_ERROR
+          return NextResponse.json(
+            { message: result.error, code: result.code },
+            { status, headers: createRateLimitHeaders(rateLimitResult) }
+          )
+        }
+
+        return NextResponse.json(
+          { message: result.data },
+          { status: HttpStatus.CREATED, headers: createRateLimitHeaders(rateLimitResult) }
+        )
+      }
+
+      const parseResult = SendMessageSchema.safeParse(body)
+
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: parseResult.error.issues[0]?.message || 'Dados inválidos' },
+          { status: HttpStatus.BAD_REQUEST, headers: createRateLimitHeaders(rateLimitResult) }
+        )
+      }
+
+      const { content } = parseResult.data
+
+      // Send message
       const result = await ChatService.sendMessage({
         orderId,
-        authorId: userId,
-        messageType: 'STEAM_CREDENTIALS',
-        credentials,
+        authorId: user.id,
+        content,
       })
 
       if (!result.success) {
-        const statusMap: Record<string, number> = {
-          'ORDER_NOT_FOUND': 404,
-          'USER_NOT_FOUND': 404,
-          'CHAT_ACCESS_DENIED': 403,
-          'CHAT_DISABLED': 400,
-          'ENCRYPTION_ERROR': 500,
-          'INVALID_DATA': 400,
-        }
-        const status = result.code ? statusMap[result.code] || 500 : 500
+        const status = result.code ? getStatusForError(result.code) : HttpStatus.INTERNAL_SERVER_ERROR
         return NextResponse.json(
           { message: result.error, code: result.code },
           { status, headers: createRateLimitHeaders(rateLimitResult) }
@@ -169,49 +176,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       return NextResponse.json(
         { message: result.data },
-        { status: 201, headers: createRateLimitHeaders(rateLimitResult) }
+        { status: HttpStatus.CREATED, headers: createRateLimitHeaders(rateLimitResult) }
       )
+    },
+    {
+      auth: true,
+      errorMessage: ErrorMessages.ORDER_CREATE_FAILED,
+      endpoint: 'POST /api/orders/[id]/chat',
     }
-
-    const parseResult = SendMessageSchema.safeParse(body)
-
-    if (!parseResult.success) {
-      return NextResponse.json(
-        { message: parseResult.error.issues[0]?.message || 'Dados inválidos' },
-        { status: 400, headers: createRateLimitHeaders(rateLimitResult) }
-      )
-    }
-
-    const { content } = parseResult.data
-
-    // Send message
-    const result = await ChatService.sendMessage({
-      orderId,
-      authorId: userId,
-      content,
-    })
-
-    if (!result.success) {
-      const statusMap: Record<string, number> = {
-        'ORDER_NOT_FOUND': 404,
-        'USER_NOT_FOUND': 404,
-        'CHAT_ACCESS_DENIED': 403,
-        'CHAT_DISABLED': 400,
-        'ENCRYPTION_ERROR': 500,
-      }
-      const status = result.code ? statusMap[result.code] || 500 : 500
-
-      return NextResponse.json(
-        { message: result.error, code: result.code },
-        { status, headers: createRateLimitHeaders(rateLimitResult) }
-      )
-    }
-
-    return NextResponse.json(
-      { message: result.data },
-      { status: 201, headers: createRateLimitHeaders(rateLimitResult) }
-    )
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_CREATE_FAILED, 'POST /api/orders/[id]/chat')
-  }
+  )(request)
 }

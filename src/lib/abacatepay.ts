@@ -101,7 +101,7 @@ export async function checkAbacatePaymentStatus(billingId: string) {
     const responseData = await response.json()
     const billings = responseData.data || []
     
-    const billing = billings.find((b: any) => b.id === billingId)
+    const billing = billings.find((b: { id: string }) => b.id === billingId)
 
     if (!billing) {
       throw new Error(`Billing ${billingId} not found`)
@@ -120,7 +120,7 @@ export async function checkAbacatePaymentStatus(billingId: string) {
 /**
  * Reembolsa um pagamento no AbacatePay
  */
-export async function refundAbacatePayment(billingId: string, amount?: number) {
+export async function refundAbacatePayment(billingId: string, _amount?: number) {
   const token = process.env.ABACATEPAY_API_KEY
   if (!token) {
     throw new Error('ABACATEPAY_API_KEY não configurada')

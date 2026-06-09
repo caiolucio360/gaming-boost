@@ -1,9 +1,9 @@
-import { NextRequest } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
-import { db } from '@/lib/db'
-import { Game, ServiceType } from '@/generated/prisma/client'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import { Game, ServiceType, Prisma } from '@/generated/prisma/client'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
 /**
  * Helper to check if a new range overlaps with existing ranges
@@ -17,19 +17,18 @@ async function checkRangeOverlap(
   excludeId?: number,
   serviceType: ServiceType = 'RANK_BOOST'
 ): Promise<{ overlaps: boolean; overlappingRange?: { id: number; rangeStart: number; rangeEnd: number } }> {
-  const existingRanges = await db.pricingConfig.findMany({
+  const existingRanges = await prisma.pricingConfig.findMany({
     where: {
       game,
       gameMode,
       serviceType,
       enabled: true,
-      ...(excludeId ? { id: { not: excludeId } } : {})
+      ...(excludeId ? { id: { not: excludeId } } : {}),
     },
-    select: { id: true, rangeStart: true, rangeEnd: true }
+    select: { id: true, rangeStart: true, rangeEnd: true },
   })
 
   for (const existing of existingRanges) {
-    // Check overlap: new range overlaps if it starts before existing ends AND ends after existing starts
     if (rangeStart <= existing.rangeEnd && rangeEnd >= existing.rangeStart) {
       return { overlaps: true, overlappingRange: existing }
     }
@@ -42,68 +41,56 @@ async function checkRangeOverlap(
  * GET /api/admin/pricing
  * Lista todas as configurações de preços
  */
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || session.user.role !== 'ADMIN') {
-      return Response.json({ message: 'Unauthorized' }, { status: 401 })
-    }
-
+export const GET = withApiHandler(
+  async ({ request }) => {
     const { searchParams } = new URL(request.url)
     const game = searchParams.get('game') as Game | null
     const gameMode = searchParams.get('gameMode')
     const serviceType = searchParams.get('serviceType') as ServiceType | null
 
-    const where: any = {}
+    const where: Prisma.PricingConfigWhereInput = {}
     if (game) where.game = game
     if (gameMode) where.gameMode = gameMode
     if (serviceType) where.serviceType = serviceType
 
-    const pricingConfigs = await db.pricingConfig.findMany({
+    const pricingConfigs = await prisma.pricingConfig.findMany({
       where,
-      orderBy: [
-        { game: 'asc' },
-        { gameMode: 'asc' },
-        { rangeStart: 'asc' }
-      ]
+      orderBy: [{ game: 'asc' }, { gameMode: 'asc' }, { rangeStart: 'asc' }],
     })
 
-    return Response.json({ data: pricingConfigs }, { status: 200 })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/admin/pricing')
-  }
-}
+    return NextResponse.json({ data: pricingConfigs }, { status: HttpStatus.OK })
+  },
+  { auth: { roles: ['ADMIN'] }, errorMessage: ErrorMessages.GENERIC_ERROR, endpoint: 'GET /api/admin/pricing' }
+)
 
 /**
  * POST /api/admin/pricing
  * Cria uma nova configuração de preço
  */
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || session.user.role !== 'ADMIN') {
-      return Response.json({ message: 'Unauthorized' }, { status: 401 })
-    }
-
+export const POST = withApiHandler(
+  async ({ request }) => {
     const body = await request.json()
     const { game, gameMode, serviceType: bodyServiceType, rangeStart, rangeEnd, price, enabled } = body
     const svcType: ServiceType = ['DUO_BOOST', 'COACHING'].includes(bodyServiceType as string)
       ? (bodyServiceType as ServiceType)
       : 'RANK_BOOST'
 
-    // Validações
     if (!game || !gameMode || rangeStart === undefined || rangeEnd === undefined || !price) {
-      return Response.json({ message: 'Preencha todos os campos (Início da faixa, Fim da faixa e Preço)' }, { status: 400 })
+      return NextResponse.json(
+        { message: 'Preencha todos os campos (Início da faixa, Fim da faixa e Preço)' },
+        { status: HttpStatus.BAD_REQUEST }
+      )
     }
 
     if (rangeStart >= rangeEnd) {
-      return Response.json({ message: 'O valor final da faixa deve ser maior que o valor inicial. Ex: Inicial 0, Final 4999.' }, { status: 400 })
+      return NextResponse.json(
+        { message: 'O valor final da faixa deve ser maior que o valor inicial. Ex: Inicial 0, Final 4999.' },
+        { status: HttpStatus.BAD_REQUEST }
+      )
     }
 
     if (price <= 0) {
-      return Response.json({ message: 'O preço configurado deve ser maior que zero' }, { status: 400 })
+      return NextResponse.json({ message: 'O preço configurado deve ser maior que zero' }, { status: HttpStatus.BAD_REQUEST })
     }
 
     // Check for overlapping ranges
@@ -113,28 +100,30 @@ export async function POST(request: NextRequest) {
 
     if (overlapCheck.overlaps) {
       const existing = overlapCheck.overlappingRange!
-      return Response.json({
-        message: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`
-      }, { status: 409 })
+      return NextResponse.json(
+        {
+          message: `Esta faixa sobrepõe uma faixa existente (${existing.rangeStart} - ${existing.rangeEnd}). Ajuste os valores ou desative a faixa existente primeiro.`,
+        },
+        { status: HttpStatus.CONFLICT }
+      )
     }
 
     const unit = gameMode === 'PREMIER' ? '1000 pontos' : '1 nível'
 
-    const pricingConfig = await db.pricingConfig.create({
+    const pricingConfig = await prisma.pricingConfig.create({
       data: {
         game,
         gameMode,
         serviceType: svcType,
-        rangeStart: parseInt(rangeStart),
-        rangeEnd: parseInt(rangeEnd),
+        rangeStart: parsedRangeStart,
+        rangeEnd: parsedRangeEnd,
         price: parseFloat(price),
         unit,
-        enabled: enabled !== undefined ? enabled : true
-      }
+        enabled: enabled !== undefined ? enabled : true,
+      },
     })
 
-    return Response.json({ data: pricingConfig }, { status: 201 })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'POST /api/admin/pricing')
-  }
-}
+    return NextResponse.json({ data: pricingConfig }, { status: HttpStatus.CREATED })
+  },
+  { auth: { roles: ['ADMIN'] }, errorMessage: ErrorMessages.GENERIC_ERROR, endpoint: 'POST /api/admin/pricing' }
+)

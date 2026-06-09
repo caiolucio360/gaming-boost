@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { Prisma, Role } from '@/generated/prisma/client'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Listar todos os usuários
 export async function GET(request: NextRequest) {
@@ -19,10 +21,10 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
-    const where: any = { isDevAdmin: false }
+    const where: Prisma.UserWhereInput = { isDevAdmin: false }
 
     if (role && (role === 'CLIENT' || role === 'BOOSTER' || role === 'ADMIN')) {
-      where.role = role
+      where.role = role as Role
     }
 
     if (search) {
@@ -55,12 +57,12 @@ export async function GET(request: NextRequest) {
       prisma.user.count({ where }),
     ])
 
-    return NextResponse.json({ users, pagination: { total, limit, offset } }, { status: 200 })
+    return NextResponse.json({ users, pagination: { total, limit, offset } }, { status: HttpStatus.OK })
   } catch (error) {
     console.error('Erro ao buscar usuários:', error)
     return NextResponse.json(
       { message: 'Erro ao buscar usuários' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

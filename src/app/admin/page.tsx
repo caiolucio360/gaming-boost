@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -36,7 +36,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts'
 
 interface Stats {
@@ -76,17 +75,7 @@ export default function AdminDashboardPage() {
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace('/login')
-    } else if (user && user.role !== 'ADMIN') {
-      router.replace(user.role === 'CLIENT' ? '/dashboard' : user.role === 'BOOSTER' ? '/booster' : '/')
-    } else if (user && user.role === 'ADMIN') {
-      fetchAll()
-    }
-  }, [user, authLoading, router])
-
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     await withLoading(async () => {
       const [statsRes, chartRes] = await Promise.all([
         fetch('/api/admin/stats', { cache: 'no-store' }),
@@ -102,7 +91,17 @@ export default function AdminDashboardPage() {
         setChartData(await chartRes.json())
       }
     })
-  }
+  }, [withLoading])
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/login')
+    } else if (user && user.role !== 'ADMIN') {
+      router.replace(user.role === 'CLIENT' ? '/dashboard' : user.role === 'BOOSTER' ? '/booster' : '/')
+    } else if (user && user.role === 'ADMIN') {
+      fetchAll()
+    }
+  }, [user, authLoading, router, fetchAll])
 
   if (authLoading) return <LoadingSpinner />
   if (!user || user.role !== 'ADMIN') return null
@@ -224,7 +223,7 @@ export default function AdminDashboardPage() {
                   </CardHeader>
                   <CardContent>
                     {chartData.statusChart.length === 0 ? (
-                      <div className="h-[200px] flex items-center justify-center text-brand-gray-500 font-rajdhani text-sm">
+                      <div className="h-52 flex items-center justify-center text-brand-gray-500 font-rajdhani text-sm">
                         Nenhum pedido registrado
                       </div>
                     ) : (

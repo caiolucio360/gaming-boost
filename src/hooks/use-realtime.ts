@@ -2,15 +2,10 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { getAuthToken } from '@/lib/api-client'
 
-interface RealtimeEvent {
-  event: string
-  data: any
-}
-
 interface UseRealtimeOptions {
   enabled?: boolean
-  onOrderUpdate?: (data: any) => void
-  onPaymentUpdate?: (data: any) => void
+  onOrderUpdate?: (data: Record<string, unknown>) => void
+  onPaymentUpdate?: (data: Record<string, unknown>) => void
   onError?: (error: Error) => void
 }
 
@@ -47,7 +42,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
     if (eventSourceRef.current) {
       try {
         eventSourceRef.current.close()
-      } catch (e) {
+      } catch {
         // Ignorar erro se já estiver fechado
       }
       eventSourceRef.current = null
@@ -85,7 +80,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
           // Fechar conexão atual
           try {
             eventSource.close()
-          } catch (e) {
+          } catch {
             // Ignorar erro
           }
           
@@ -155,7 +150,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
         }
       })
 
-      eventSource.addEventListener('heartbeat', (e) => {
+      eventSource.addEventListener('heartbeat', () => {
         // Manter conexão viva
         setLastUpdate(new Date())
       })
@@ -204,7 +199,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
       if (eventSourceRef.current) {
         try {
           eventSourceRef.current.close()
-        } catch (e) {
+        } catch {
           // Ignorar erro
         }
         eventSourceRef.current = null

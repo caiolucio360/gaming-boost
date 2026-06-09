@@ -1,22 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth } from '@/lib/auth-middleware'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
-export async function GET(request: NextRequest) {
-  try {
-    const authResult = await verifyAuth(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
+export const GET = withApiHandler(
+  async ({ request, user }) => {
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
     const unreadOnly = searchParams.get('unreadOnly') === 'true'
 
     const where = {
-      userId: authResult.user.id,
+      userId: user.id,
       ...(unreadOnly ? { read: false } : {}),
     }
 
@@ -30,7 +26,7 @@ export async function GET(request: NextRequest) {
       prisma.notification.count({ where }),
       prisma.notification.count({
         where: {
-          userId: authResult.user.id,
+          userId: user.id,
           read: false,
         },
       }),
@@ -46,25 +42,23 @@ export async function GET(request: NextRequest) {
       },
       unreadCount,
     })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/notifications')
+  },
+  {
+    auth: true,
+    errorMessage: ErrorMessages.GENERIC_ERROR,
+    endpoint: 'GET /api/notifications',
   }
-}
+)
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const authResult = await verifyAuth(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
+export const PATCH = withApiHandler(
+  async ({ request, user }) => {
     const body = await request.json()
     const { notificationIds, markAllRead } = body
 
     if (markAllRead) {
       await prisma.notification.updateMany({
         where: {
-          userId: authResult.user.id,
+          userId: user.id,
           read: false,
         },
         data: { read: true },
@@ -73,16 +67,22 @@ export async function PATCH(request: NextRequest) {
       await prisma.notification.updateMany({
         where: {
           id: { in: notificationIds },
-          userId: authResult.user.id,
+          userId: user.id,
         },
         data: { read: true },
       })
     } else {
-      return new NextResponse('Invalid request body', { status: 400 })
+      return NextResponse.json(
+        { message: 'Invalid request body' },
+        { status: HttpStatus.BAD_REQUEST }
+      )
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'PATCH /api/notifications')
+  },
+  {
+    auth: true,
+    errorMessage: ErrorMessages.GENERIC_ERROR,
+    endpoint: 'PATCH /api/notifications',
   }
-}
+)

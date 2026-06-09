@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -28,6 +28,7 @@ import {
   Crown,
   DollarSign,
   History,
+  type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { SkeletonTable } from '@/components/common/skeletons'
@@ -74,6 +75,7 @@ export default function AdminUsersPage() {
   const [commissionPercentage, setCommissionPercentage] = useState<string>('')
   const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
+  const [roleChange, setRoleChange] = useState<{ user: AdminUser; toRole: 'BOOSTER' | 'CLIENT' } | null>(null)
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -146,8 +148,34 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleRoleChange = async () => {
+    if (!roleChange) return
+    try {
+      const response = await fetch(`/api/admin/users/${roleChange.user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: roleChange.toRole }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (response.ok) {
+        showSuccess(
+          roleChange.toRole === 'BOOSTER'
+            ? 'Usuário promovido a Booster!'
+            : 'Usuário rebaixado para Cliente!'
+        )
+        setRoleChange(null)
+        fetchUsers(true)
+      } else {
+        showError('Erro ao alterar cargo', data.message || 'Tente novamente.')
+      }
+    } catch (error) {
+      console.error('Erro ao alterar cargo:', error)
+      showError('Erro ao alterar cargo')
+    }
+  }
+
   const getRoleBadge = (role: string) => {
-    const configs: Record<string, { label: string; color: string; icon: any }> = {
+    const configs: Record<string, { label: string; color: string; icon: LucideIcon }> = {
       ADMIN: {
         label: 'Admin',
         color: 'bg-red-500/20 text-red-300 border-red-500/50',
@@ -224,7 +252,7 @@ export default function AdminUsersPage() {
                   setFilterRole(value === 'all' ? '' : value)
                 }}
               >
-                <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   <SelectValue placeholder="Todos os roles" />
                 </SelectTrigger>
                 <SelectContent className="bg-brand-black border-brand-purple/50">
@@ -366,6 +394,30 @@ export default function AdminUsersPage() {
                             Profit Share
                           </Button>
                         )}
+                        {adminUser.role === 'CLIENT' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10 font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            onClick={() => setRoleChange({ user: adminUser, toRole: 'BOOSTER' })}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Promover a Booster
+                          </Button>
+                        )}
+                        {adminUser.role === 'BOOSTER' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-orange-500/50 text-orange-300 hover:bg-orange-500/10 font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            onClick={() => setRoleChange({ user: adminUser, toRole: 'CLIENT' })}
+                          >
+                            <User className="h-4 w-4 mr-2" />
+                            Rebaixar
+                          </Button>
+                        )}
                         <Button
                           asChild
                           variant="outline"
@@ -412,6 +464,21 @@ export default function AdminUsersPage() {
             Total: {users.length} usuário{users.length !== 1 ? 's' : ''}
           </p>
         </div>
+
+      {/* Dialog de promover/rebaixar cargo */}
+      <ConfirmDialog
+        open={roleChange !== null}
+        onOpenChange={(open) => { if (!open) setRoleChange(null) }}
+        title={roleChange?.toRole === 'BOOSTER' ? 'Promover a Booster' : 'Rebaixar para Cliente'}
+        description={
+          roleChange?.toRole === 'BOOSTER'
+            ? `Promover ${roleChange?.user.email} a Booster? O usuário poderá aceitar e realizar pedidos.`
+            : `Rebaixar ${roleChange?.user.email} para Cliente? O usuário deixará de aceitar novos pedidos.`
+        }
+        confirmLabel={roleChange?.toRole === 'BOOSTER' ? 'Promover' : 'Rebaixar'}
+        cancelLabel="Cancelar"
+        onConfirm={handleRoleChange}
+      />
 
       {/* Dialog para configurar comissão */}
       <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>

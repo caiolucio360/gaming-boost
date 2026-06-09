@@ -72,7 +72,7 @@ export default function AdminCommissionsPage() {
     withLoading(async () => {
       await Promise.all([fetchConfig(), fetchBoosters()])
     })
-  }, [user])
+  }, [user, withLoading])
 
   const fetchConfig = async () => {
     const response = await fetch('/api/admin/commission-config')

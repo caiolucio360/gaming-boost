@@ -1,29 +1,24 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
 import { apiGet } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   ArrowRight,
   Package,
   X,
   Filter,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  CreditCard,
   ArrowUpDown,
   ImageIcon,
   ExternalLink,
 } from 'lucide-react'
-import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
+import { StatusBadge } from '@/components/common/status-badge'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
@@ -36,15 +31,55 @@ import { ActionButton } from '@/components/common/action-button'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 
-import { GameId } from '@/lib/games-config'
 import { useRealtime } from '@/hooks/use-realtime'
 import { RetentionProgress } from '@/components/common/retention-progress'
+
+// Filtros de status do dashboard. Cores por status (active/inactive) mantidas
+// em dados para renderizar via <Button> em vez de <button> cru duplicado.
+const STATUS_FILTERS: { value: string; label: string; active: string; inactive: string }[] = [
+  {
+    value: '',
+    label: 'Todos',
+    active: 'bg-gradient-to-r from-brand-purple/20 to-brand-purple-dark/20 border-brand-purple-light text-brand-purple-light shadow-lg shadow-brand-purple/20',
+    inactive: 'bg-brand-black/50 border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10',
+  },
+  {
+    value: 'PENDING',
+    label: 'Pendentes',
+    active: 'bg-yellow-500/20 border-yellow-400 text-yellow-300',
+    inactive: 'bg-brand-black/50 border-yellow-500/30 text-brand-gray-500 hover:border-yellow-500/50 hover:text-yellow-300',
+  },
+  {
+    value: 'PAID',
+    label: 'Pagos',
+    active: 'bg-cyan-500/20 border-cyan-400 text-cyan-300',
+    inactive: 'bg-brand-black/50 border-cyan-500/30 text-brand-gray-500 hover:border-cyan-500/50 hover:text-cyan-300',
+  },
+  {
+    value: 'IN_PROGRESS',
+    label: 'Em Progresso',
+    active: 'bg-blue-500/20 border-blue-400 text-blue-300',
+    inactive: 'bg-brand-black/50 border-blue-500/30 text-brand-gray-500 hover:border-blue-500/50 hover:text-blue-300',
+  },
+  {
+    value: 'COMPLETED',
+    label: 'Concluídos',
+    active: 'bg-green-500/20 border-green-400 text-green-300',
+    inactive: 'bg-brand-black/50 border-green-500/30 text-brand-gray-500 hover:border-green-500/50 hover:text-green-300',
+  },
+  {
+    value: 'CANCELLED',
+    label: 'Cancelados',
+    active: 'bg-red-500/20 border-red-400 text-red-300',
+    inactive: 'bg-brand-black/50 border-red-500/30 text-brand-gray-500 hover:border-red-500/50 hover:text-red-300',
+  },
+]
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
-  const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
+  const { loading, withLoading } = useLoading({ initialLoading: true })
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState<number | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
@@ -67,6 +102,13 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, router])
 
+  const fetchOrders = useCallback(async (isRefresh = false) => {
+    await withLoading(async () => {
+      const data = await apiGet<{ orders: Order[] }>('/api/orders')
+      setOrders(data.orders || [])
+    }, isRefresh)
+  }, [withLoading])
+
   useEffect(() => {
     if (user && user.role === 'CLIENT') {
       fetchOrders()
@@ -74,7 +116,7 @@ export default function DashboardPage() {
         .then((data) => setCurrentDiscountPct(data.user?.currentDiscountPct ?? 0))
         .catch(() => {})
     }
-  }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
+  }, [user, fetchOrders])
 
   // Função para atualizar apenas os dados sem mostrar banner de refreshing
   const updateOrdersSilently = async () => {
@@ -96,13 +138,6 @@ export default function DashboardPage() {
       }
     },
   })
-
-  const fetchOrders = async (isRefresh = false) => {
-    await withLoading(async () => {
-      const data = await apiGet<{ orders: Order[] }>('/api/orders')
-      setOrders(data.orders || [])
-    }, isRefresh)
-  }
 
   // Filtrar e ordenar pedidos
   const filteredOrders = useMemo(() => {
@@ -142,10 +177,6 @@ export default function DashboardPage() {
 
     return filtered
   }, [orders, filterStatus, sortOrder])
-  // Pedidos pendentes de pagamento (destaque no topo)
-  const pendingPaymentOrders = useMemo(() => {
-    return orders.filter(order => order.status === 'PENDING')
-  }, [orders])
 
   const handlePayment = (orderId: number, total: number) => {
     router.replace(`/payment?orderId=${orderId}&total=${total}`)
@@ -230,84 +261,34 @@ export default function DashboardPage() {
               {/* Filtros de Status - Badges Compactos */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-nowrap">
                 <Filter className="h-4 w-4 text-brand-purple-light mr-1 flex-shrink-0" />
-                <button
-                  onClick={() => setFilterStatus('')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    !filterStatus
-                      ? 'bg-gradient-to-r from-brand-purple/20 to-brand-purple-dark/20 border border-brand-purple-light text-brand-purple-light shadow-lg shadow-brand-purple/20'
-                      : 'bg-brand-black/50 border border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setFilterStatus('PENDING')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    filterStatus === 'PENDING'
-                      ? 'bg-yellow-500/20 border border-yellow-400 text-yellow-300'
-                      : 'bg-brand-black/50 border border-yellow-500/30 text-brand-gray-500 hover:border-yellow-500/50 hover:text-yellow-300'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Pendentes
-                </button>
-                <button
-                  onClick={() => setFilterStatus('PAID')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    filterStatus === 'PAID'
-                      ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300'
-                      : 'bg-brand-black/50 border border-cyan-500/30 text-brand-gray-500 hover:border-cyan-500/50 hover:text-cyan-300'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Pagos
-                </button>
-                <button
-                  onClick={() => setFilterStatus('IN_PROGRESS')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    filterStatus === 'IN_PROGRESS'
-                      ? 'bg-blue-500/20 border border-blue-400 text-blue-300'
-                      : 'bg-brand-black/50 border border-blue-500/30 text-brand-gray-500 hover:border-blue-500/50 hover:text-blue-300'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Em Progresso
-                </button>
-                <button
-                  onClick={() => setFilterStatus('COMPLETED')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    filterStatus === 'COMPLETED'
-                      ? 'bg-green-500/20 border border-green-400 text-green-300'
-                      : 'bg-brand-black/50 border border-green-500/30 text-brand-gray-500 hover:border-green-500/50 hover:text-green-300'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Concluídos
-                </button>
-                <button
-                  onClick={() => setFilterStatus('CANCELLED')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 ${
-                    filterStatus === 'CANCELLED'
-                      ? 'bg-red-500/20 border border-red-400 text-red-300'
-                      : 'bg-brand-black/50 border border-red-500/30 text-brand-gray-500 hover:border-red-500/50 hover:text-red-300'
-                  }`}
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                >
-                  Cancelados
-                </button>
+                {STATUS_FILTERS.map((f) => (
+                  <Button
+                    key={f.value || 'all'}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFilterStatus(f.value)}
+                    className={`flex-shrink-0 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium ${
+                      filterStatus === f.value ? f.active : f.inactive
+                    }`}
+                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                  >
+                    {f.label}
+                  </Button>
+                ))}
               </div>
 
               {/* Botão de Ordenação */}
               <div className="flex flex-1 gap-2 md:ml-auto md:justify-end">
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="w-[130px] px-3 py-1.5 rounded-md font-rajdhani text-xs font-medium transition-colors duration-200 bg-brand-black/50 border border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10 flex items-center justify-center gap-1.5"
+                  className="w-32 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium bg-brand-black/50 border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10"
                   style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
-                </button>
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -349,7 +330,7 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="grid gap-6">
-            {filteredOrders.map((order, index) => {
+            {filteredOrders.map((order) => {
               return (
                 <DashboardCard
                   key={order.id}
@@ -413,6 +394,8 @@ export default function DashboardPage() {
                             <ImageIcon className="h-3.5 w-3.5" />
                             Comprovante do booster
                           </p>
+                          {/* Comprovante enviado pelo usuário (dimensões arbitrárias) — migração p/ next/image exige QA visual */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={order.completionProofUrl}
                             alt="Comprovante de conclusão"

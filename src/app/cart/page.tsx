@@ -52,7 +52,7 @@ export default function CartPage() {
 
       for (const item of items) {
         try {
-          const body: any = {
+          const body: Record<string, unknown> = {
             game: item.game,
             total: item.price,
           }
@@ -62,14 +62,14 @@ export default function CartPage() {
           if (item.targetRank) body.targetRank = item.targetRank
           if (item.metadata) {
             if (item.metadata.currentRating !== undefined) {
-              body.currentRating = typeof item.metadata.currentRating === 'number' 
-                ? item.metadata.currentRating 
-                : parseInt(item.metadata.currentRating)
+              body.currentRating = typeof item.metadata.currentRating === 'number'
+                ? item.metadata.currentRating
+                : parseInt(String(item.metadata.currentRating))
             }
             if (item.metadata.targetRating !== undefined) {
               body.targetRating = typeof item.metadata.targetRating === 'number'
                 ? item.metadata.targetRating
-                : parseInt(item.metadata.targetRating)
+                : parseInt(String(item.metadata.targetRating))
             }
             if (item.metadata.mode) body.gameMode = item.metadata.mode
             if (item.metadata.gameType) body.gameType = item.metadata.gameType

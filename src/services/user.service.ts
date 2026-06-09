@@ -223,13 +223,6 @@ export const UserService = {
   },
 
   /**
-   * Check if user can apply to be a booster
-   */
-  canApplyAsBooster(currentRole: Role): boolean {
-    return currentRole === Role.CLIENT
-  },
-
-  /**
    * Get all users with pagination (admin only)
    */
   async getAllUsers(page: number = 1, limit: number = 20): Promise<Result<{ users: UserProfile[]; total: number }>> {

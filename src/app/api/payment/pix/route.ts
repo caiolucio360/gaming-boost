@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { PaymentProvider } from '@/generated/prisma/client'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAuth, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { createAsaasPixCharge } from '@/lib/asaas'
 import { createAbacatePixCharge } from '@/lib/abacatepay'
 import { CreatePixSchema } from '@/schemas/payment'
@@ -9,21 +9,95 @@ import { validateBody } from '@/lib/validate'
 import { paymentRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
 import { ErrorCodes } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
+
+/**
+ * GET /api/payment/pix?orderId=123
+ *
+ * Returns the order's currently active PIX charge (status PENDING and not yet
+ * expired), so the payment page can reopen it on refresh/return instead of
+ * generating a new one through the provider. Expired pending charges are
+ * marked EXPIRED and treated as "no active payment". Returns { payment: null }
+ * when there's nothing to reopen.
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = await verifyAuth(request)
+
+    if (!authResult.authenticated || !authResult.user) {
+      return createAuthErrorResponseFromResult(authResult)
+    }
+
+    const userId = authResult.user.id
+    const { searchParams } = new URL(request.url)
+    const orderId = searchParams.get('orderId')
+
+    if (!orderId) {
+      return NextResponse.json({ message: 'orderId é obrigatório' }, { status: HttpStatus.BAD_REQUEST })
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(orderId) },
+      include: { payments: true },
+    })
+
+    if (!order) {
+      return NextResponse.json({ message: ErrorMessages.ORDER_NOT_FOUND }, { status: HttpStatus.NOT_FOUND })
+    }
+
+    if (order.userId !== userId) {
+      return NextResponse.json({ message: 'Não autorizado' }, { status: HttpStatus.FORBIDDEN })
+    }
+
+    // Already paid — surface it so the page can confirm instead of re-charging
+    const paidPayment = order.payments.find((p: { status: string }) => p.status === 'PAID')
+    if (paidPayment) {
+      return NextResponse.json({ payment: paidPayment }, { status: HttpStatus.OK })
+    }
+
+    const now = new Date()
+    const activePayment = order.payments.find(
+      (p: { status: string; expiresAt: Date | null }) =>
+        p.status === 'PENDING' && p.expiresAt !== null && new Date(p.expiresAt) > now
+    )
+
+    if (activePayment) {
+      return NextResponse.json({ payment: activePayment }, { status: HttpStatus.OK })
+    }
+
+    // Clean up any stale pending charge so the UI shows the form to regenerate
+    const stalePending = order.payments.filter(
+      (p: { status: string; expiresAt: Date | null }) =>
+        p.status === 'PENDING' && (p.expiresAt === null || new Date(p.expiresAt) <= now)
+    )
+    if (stalePending.length > 0) {
+      await prisma.payment.updateMany({
+        where: { id: { in: stalePending.map((p: { id: number }) => p.id) } },
+        data: { status: 'EXPIRED' },
+      })
+    }
+
+    return NextResponse.json({ payment: null }, { status: HttpStatus.OK })
+  } catch (error) {
+    return createApiErrorResponse(error, ErrorMessages.PAYMENT_PIX_FAILED, 'GET /api/payment/pix')
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 PIX generation attempts per minute per IP (strict)
     const identifier = getIdentifier(request)
-    const rateLimitResult = await paymentRateLimiter.check(identifier, 5)
+    const rateLimitResult = await paymentRateLimiter.check(identifier, RateLimits.PAYMENT_PIX)
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
           message: 'Muitas tentativas de pagamento. Aguarde um momento.',
-          error: 'RATE_LIMIT_EXCEEDED'
+          code: ErrorCodes.RATE_LIMIT_EXCEEDED
         },
         {
-          status: 429,
+          status: HttpStatus.TOO_MANY_REQUESTS,
           headers: createRateLimitHeaders(rateLimitResult)
         }
       )
@@ -32,10 +106,7 @@ export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const userId = authResult.user.id
@@ -54,24 +125,23 @@ export async function POST(request: NextRequest) {
       if (missingFields.orderId) {
         return NextResponse.json(
           { message: 'orderId é obrigatório' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
       if (missingFields.phone || missingFields.taxId) {
         return NextResponse.json(
           {
-            message: 'Dados incompletos para pagamento',
-            error: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
+            message: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
             missingFields
           },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
       return NextResponse.json(
         { message: 'Dados inválidos', errors: validation.errors },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -97,15 +167,15 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { message: 'Pedido não encontrado' },
-        { status: 404 }
+        { message: ErrorMessages.ORDER_NOT_FOUND },
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
     if (order.userId !== userId) {
       return NextResponse.json(
         { message: 'Não autorizado' },
-        { status: 403 }
+        { status: HttpStatus.FORBIDDEN }
       )
     }
 
@@ -118,7 +188,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         payment: existingPayment,
         message: 'Pagamento PIX já existente'
-      }, { status: 200 })
+      }, { status: HttpStatus.OK })
     }
 
     // Verificar se já existe pagamento pago
@@ -126,7 +196,7 @@ export async function POST(request: NextRequest) {
     if (paidPayment) {
       return NextResponse.json(
         { message: 'Este pedido já foi pago', payment: paidPayment },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -139,7 +209,7 @@ export async function POST(request: NextRequest) {
         {
           message: `O valor mínimo para pagamento via PIX é ${formatBRL(minAmount)}. O total deste pedido é ${formatBRL(order.total)}.`,
         },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -221,7 +291,7 @@ export async function POST(request: NextRequest) {
           message: 'PIX gerado com sucesso'
         },
         {
-          status: 201,
+          status: HttpStatus.CREATED,
           headers: createRateLimitHeaders(rateLimitResult)
         }
       )
@@ -238,7 +308,7 @@ export async function POST(request: NextRequest) {
           message: ErrorMessages.PAYMENT_PIX_FAILED,
           error: ErrorCodes.PAYMENT_PROVIDER_ERROR,
         },
-        { status: 502 }
+        { status: HttpStatus.BAD_GATEWAY }
       )
     }
   } catch (error) {

@@ -471,20 +471,6 @@ export const endpoints = {
 
   // Booster
   booster: {
-    apply: (data: {
-      pixKey: string
-      pixKeyType: string
-      steamProfileUrl: string
-      discordUsername: string
-      preferredGames: string[]
-      experience: string
-      availability: string
-    }) =>
-      api.post<{ message: string }>('/api/booster/apply', data, {
-        successMessage: 'Candidatura enviada com sucesso!',
-        showSuccessToast: true,
-      }),
-
     orders: {
       list: () =>
         api.get<{ orders: Order[] }>('/api/booster/orders'),

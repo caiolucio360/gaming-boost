@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -67,16 +67,7 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  useEffect(() => {
-    if (!authLoading && !authUser) {
-      // Usar replace para redirecionamento de autenticação
-      router.replace('/login')
-    } else if (authUser) {
-      fetchProfile()
-    }
-  }, [authUser, authLoading, router])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     await withLoading(async () => {
       const response = await fetch('/api/user/profile')
       if (response.ok) {
@@ -87,7 +78,7 @@ export default function ProfilePage() {
       } else {
         showError('Erro', 'Não foi possível carregar o perfil')
       }
-      
+
       // Buscar chave PIX se for booster ou admin
       if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
         try {
@@ -101,7 +92,16 @@ export default function ProfilePage() {
         }
       }
     })
-  }
+  }, [withLoading, authUser])
+
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      // Usar replace para redirecionamento de autenticação
+      router.replace('/login')
+    } else if (authUser) {
+      fetchProfile()
+    }
+  }, [authUser, authLoading, router, fetchProfile])
 
   const handleSave = async () => {
     try {
@@ -118,7 +118,7 @@ export default function ProfilePage() {
         return
       }
 
-      const body: any = {}
+      const body: Record<string, unknown> = {}
       if (name.trim() !== '') body.name = name.trim()
       if (phone.trim() !== '') body.phone = phone.trim()
 
@@ -176,9 +176,9 @@ export default function ProfilePage() {
       
       // Atualizar contexto de autenticação
       await refreshUser()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao salvar perfil:', error)
-      showError('Erro', error.message || 'Erro ao salvar perfil')
+      showError('Erro', error instanceof Error ? error.message : 'Erro ao salvar perfil')
     } finally {
       setSaving(false)
     }
@@ -211,9 +211,9 @@ export default function ProfilePage() {
       logout()
       router.replace('/login?deleted=true')
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao excluir conta:', error)
-      showError('Erro ao excluir conta', error.message || 'Não foi possível excluir sua conta. Verifique se não há pedidos em andamento.')
+      showError('Erro ao excluir conta', error instanceof Error ? error.message : 'Não foi possível excluir sua conta. Verifique se não há pedidos em andamento.')
     } finally {
       setSaving(false)
     }

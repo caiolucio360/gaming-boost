@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
@@ -14,7 +13,6 @@ import {
   CreditCard,
   Calendar,
   GamepadIcon,
-  TrendingUp,
   DollarSign,
   ImageIcon,
   ExternalLink,
@@ -82,24 +80,56 @@ interface Order {
   }[]
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Pendente',
+  PAID: 'Pago',
+  IN_PROGRESS: 'Em Progresso',
+  COMPLETED: 'Concluído',
+  CANCELLED: 'Cancelado',
+}
+
+// Valid status transitions — mirrors VALID_TRANSITIONS in the admin orders API
+// (src/app/api/admin/orders/[id]/route.ts). The admin can only move an order
+// to one of the statuses reachable from its current status.
+const STATUS_TRANSITIONS: Record<string, string[]> = {
+  PENDING: ['PAID', 'CANCELLED'],
+  PAID: ['IN_PROGRESS', 'CANCELLED'],
+  IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
+}
+
 export default function AdminOrderDetailPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const params = useParams()
   const orderId = params.id as string
   const [order, setOrder] = useState<Order | null>(null)
+  const [boosters, setBoosters] = useState<{ id: number; name: string | null; email: string }[]>([])
+  const [assigning, setAssigning] = useState(false)
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
-    } else if (user && user.role === 'ADMIN' && orderId) {
-      fetchOrder()
+  const fetchBoosters = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/users?role=BOOSTER&limit=100')
+      if (response.ok) {
+        const data = await response.json()
+        const list = (data.users ?? []).map(
+          (u: { id: number; name: string | null; email: string }) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+          })
+        )
+        setBoosters(list)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar boosters:', error)
     }
-  }, [user, authLoading, router, orderId])
+  }, [])
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     await withLoading(async () => {
       const response = await fetch(`/api/admin/orders/${orderId}`)
       if (response.ok) {
@@ -113,9 +143,20 @@ export default function AdminOrderDetailPage() {
         })
       }
     })
-  }
+  }, [withLoading, orderId])
+
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+    } else if (user && user.role === 'ADMIN' && orderId) {
+      fetchOrder()
+      fetchBoosters()
+    }
+  }, [user, authLoading, router, orderId, fetchOrder, fetchBoosters])
 
   const handleStatusUpdate = async (newStatus: string) => {
+    // Re-selecting the current status is a no-op (avoids an invalid-transition 400)
+    if (order && newStatus === order.status) return
     try {
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',
@@ -150,6 +191,49 @@ export default function AdminOrderDetailPage() {
         variant: 'destructive',
       })
       setTimeout(() => setAlert(null), 5000)
+    }
+  }
+
+  const handleAssignBooster = async (value: string) => {
+    // 'none' clears the assignment; otherwise parse the booster id
+    const boosterId = value === 'none' ? null : parseInt(value, 10)
+    setAssigning(true)
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ boosterId }),
+      })
+
+      if (response.ok) {
+        setAlert({
+          title: 'Sucesso',
+          description: boosterId === null ? 'Booster removido do pedido.' : 'Booster atribuído com sucesso!',
+          variant: 'default',
+        })
+        fetchOrder()
+        setTimeout(() => setAlert(null), 5000)
+      } else {
+        const data = await response.json()
+        setAlert({
+          title: 'Erro',
+          description: data.message || 'Erro ao atribuir booster',
+          variant: 'destructive',
+        })
+        setTimeout(() => setAlert(null), 5000)
+      }
+    } catch (error) {
+      console.error('Erro ao atribuir booster:', error)
+      setAlert({
+        title: 'Erro',
+        description: 'Erro ao atribuir booster',
+        variant: 'destructive',
+      })
+      setTimeout(() => setAlert(null), 5000)
+    } finally {
+      setAssigning(false)
     }
   }
 
@@ -238,23 +322,29 @@ export default function AdminOrderDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4 items-center">
-              <span className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                Alterar status:
-              </span>
-              <Select value={order.status} onValueChange={handleStatusUpdate}>
-                <SelectTrigger className="w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-brand-black border-brand-purple/50">
-                  <SelectItem value="PENDING">Pendente</SelectItem>
-                  <SelectItem value="PAID">Pago</SelectItem>
-                  <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
-                  <SelectItem value="COMPLETED">Concluído</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {STATUS_TRANSITIONS[order.status]?.length > 0 ? (
+              <div className="flex flex-wrap gap-4 items-center">
+                <span className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  Alterar status:
+                </span>
+                <Select value={order.status} onValueChange={handleStatusUpdate}>
+                  <SelectTrigger className="w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-brand-black border-brand-purple/50">
+                    {/* Current status — shown so the trigger has a label, not an action */}
+                    <SelectItem value={order.status}>{STATUS_LABELS[order.status]} (atual)</SelectItem>
+                    {STATUS_TRANSITIONS[order.status].map((next) => (
+                      <SelectItem key={next} value={next}>{STATUS_LABELS[next]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                Este pedido está {STATUS_LABELS[order.status]?.toLowerCase()} e não pode mais mudar de status.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -325,6 +415,36 @@ export default function AdminOrderDetailPage() {
               <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 Nenhum booster atribuído
               </p>
+            )}
+
+            {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+              <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-brand-purple/20 pt-4">
+                <span className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  {order.booster ? 'Trocar booster:' : 'Atribuir booster:'}
+                </span>
+                <Select
+                  value={order.booster ? String(order.booster.id) : 'none'}
+                  onValueChange={handleAssignBooster}
+                  disabled={assigning}
+                >
+                  <SelectTrigger className="w-64 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <SelectValue placeholder="Selecione um booster" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-brand-black border-brand-purple/50">
+                    <SelectItem value="none">Nenhum (remover)</SelectItem>
+                    {boosters.map((b) => (
+                      <SelectItem key={b.id} value={String(b.id)}>
+                        {b.name || b.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {boosters.length === 0 && (
+                  <span className="text-brand-gray-500 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    Nenhum booster verificado disponível.
+                  </span>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -444,6 +564,8 @@ export default function AdminOrderDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {/* Comprovante enviado pelo usuário (dimensões arbitrárias) — migração p/ next/image exige QA visual */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={order.completionProofUrl}
                   alt="Comprovante de conclusão"

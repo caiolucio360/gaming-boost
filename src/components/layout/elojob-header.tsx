@@ -1,8 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -29,7 +27,6 @@ import { getAuthToken } from '@/lib/api-client'
 import { NotificationBell } from '@/components/common/notification-bell'
 
 export function ElojobHeader() {
-  const router = useRouter()
   const { user, logout, loading: authLoading } = useAuth()
   const { items } = useCart()
   const [hasToken, setHasToken] = useState(false)
@@ -214,12 +211,6 @@ export function ElojobHeader() {
                             <Link href="/dashboard" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <PackageIcon className="mr-2 h-4 w-4" />
                               Meus Pedidos
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/booster/apply" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
-                              <ShieldIcon className="mr-2 h-4 w-4" />
-                              Seja um Booster
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>

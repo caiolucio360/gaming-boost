@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -72,17 +72,7 @@ export default function BoosterPaymentsPage() {
     }
   }, [user, authLoading, router])
 
-  useEffect(() => {
-    if (user?.role === 'BOOSTER') {
-      fetchCommissions()
-    }
-  }, [user?.id])
-
-  useEffect(() => {
-    if (user?.role === 'BOOSTER') fetchCommissions()
-  }, [commissionFilter])
-
-  const fetchCommissions = async () => {
+  const fetchCommissions = useCallback(async () => {
     await withCommissionsLoading(async () => {
       try {
         const status = commissionFilter === 'all' ? '' : commissionFilter
@@ -97,7 +87,11 @@ export default function BoosterPaymentsPage() {
         console.error('Erro ao buscar pagamentos:', error)
       }
     })
-  }
+  }, [withCommissionsLoading, commissionFilter])
+
+  useEffect(() => {
+    if (user?.role === 'BOOSTER') fetchCommissions()
+  }, [user?.role, fetchCommissions])
 
   const getCommissionStatusBadge = (status: string) => {
     switch (status) {

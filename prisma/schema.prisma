@@ -38,7 +38,6 @@ model User {
   boosterCommissions BoosterCommission[] // Comissões como booster
   adminRevenues      AdminRevenue[] // Receitas como admin
   devAdminRevenues   DevAdminRevenue[]   @relation("DevAdminRevenues") // Receitas como dev-admin
-  boosterProfile     BoosterProfile?
   notifications      Notification[]
   orderMessages      OrderMessage[]      @relation("OrderMessageAuthor") // Mensagens do chat de pedidos
   withdrawals        Withdrawal[]        // Saques solicitados
@@ -233,31 +232,6 @@ model CommissionConfig {
   enabled               Boolean  @default(true) // Se a configuração está ativa
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-}
-
-model BoosterProfile {
-  id                Int                  @id @default(autoincrement())
-  userId            Int                  @unique
-  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio               String?
-  languages         String[] // Array de idiomas
-  verificationStatus VerificationStatus  @default(PENDING)
-  completedOrders   Int                  @default(0)
-  // CS2 stats (Steam profile info is on User model)
-  cs2Rank           String?              // Rank atual no CS2 (ex: "Global Elite")
-  cs2PremierRating  Int?                 // Rating Premier (ex: 18500)
-  cs2Hours          Int?                 // Horas jogadas no CS2
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-
-  @@index([userId])
-  @@index([verificationStatus])
-}
-
-enum VerificationStatus {
-  PENDING
-  VERIFIED
-  REJECTED
 }
 
 model Notification {

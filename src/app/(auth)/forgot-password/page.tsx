@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -70,12 +71,12 @@ export default function ForgotPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/login">
-              <button className="w-full bg-transparent border border-brand-purple/50 hover:bg-brand-purple/20 text-white font-bold py-3 px-6 rounded-lg transition-all font-rajdhani flex items-center justify-center gap-2">
+            <Button asChild variant="outline" size="lg" className="w-full font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <Link href="/login">
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para Login
-              </button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -89,7 +90,7 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-brand-purple/20 flex items-center justify-center">
             <Mail className="h-6 w-6 text-brand-purple" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             Recuperar Senha
           </h1>
           <p className="text-sm text-brand-gray-300 font-rajdhani">
@@ -128,12 +129,12 @@ export default function ForgotPasswordPage() {
               )}
             />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-6 rounded-lg transition-all
-                shadow-glow hover:shadow-glow-hover
-                disabled:opacity-50 disabled:cursor-not-allowed font-rajdhani flex items-center justify-center gap-2"
+              size="lg"
+              className="w-full font-bold font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {isLoading ? (
                 <>
@@ -143,7 +144,7 @@ export default function ForgotPasswordPage() {
               ) : (
                 'Enviar Instruções'
               )}
-            </button>
+            </Button>
 
             <div className="text-center">
               <Link

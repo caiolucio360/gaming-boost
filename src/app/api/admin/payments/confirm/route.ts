@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 // POST - Confirmar pagamento de um pedido e liberar comissões/receitas
 export async function POST(request: NextRequest) {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!orderId) {
       return NextResponse.json(
         { message: 'orderId é obrigatório' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (isNaN(orderIdNum)) {
       return NextResponse.json(
         { message: 'ID do pedido inválido' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!order) {
       return NextResponse.json(
         { message: 'Pedido não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     if (!paidPayment) {
       return NextResponse.json(
         { message: 'Nenhum pagamento confirmado encontrado para este pedido' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -59,12 +60,12 @@ export async function POST(request: NextRequest) {
     if (order.status !== 'COMPLETED') {
       return NextResponse.json(
         { message: 'O pedido precisa estar concluído para liberar os pagamentos' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
     // Using any due to Prisma custom output path type resolution issues
-    await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Atualizar comissão do booster se existir e estiver pendente
       if (order.commission && order.commission.status === 'PENDING') {
         await tx.boosterCommission.update({
@@ -96,13 +97,13 @@ export async function POST(request: NextRequest) {
         message: 'Pagamentos liberados com sucesso',
         orderId: orderIdNum,
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Erro ao confirmar pagamento:', error)
     return NextResponse.json(
       { message: 'Erro ao confirmar pagamento' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-react"
 
@@ -30,7 +29,7 @@ export function ElojobHero() {
         <div className="flex flex-col justify-center items-center text-center mb-6 md:mb-8">
           <div className="mb-4 md:mb-6 flex flex-col items-center">
             <div className="mb-6 md:mb-8 animate-float">
-              <h1 className="font-brush -skew-x-6 text-5xl md:text-7xl lg:text-8xl mb-2 drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] tracking-widest text-center">
+              <h1 className="font-brush -skew-x-6 text-5xl md:text-7xl lg:text-8xl mb-2 drop-shadow-glow-lg tracking-widest text-center">
                 <span className="text-brand-purple-light">FLAUTAS</span>
                 <span className="text-white">BOOST</span>
               </h1>

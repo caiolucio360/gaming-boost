@@ -262,7 +262,7 @@ export const ChatService = {
         plainContent = JSON.stringify({ username: credentials!.username, password: credentials!.password })
         try {
           encryptedContent = encrypt(plainContent)
-        } catch (error) {
+        } catch {
           console.error('Error encrypting credentials')
           return failure('Erro ao criptografar credenciais', 'ENCRYPTION_ERROR')
         }

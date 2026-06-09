@@ -1,9 +1,11 @@
-import { NextRequest } from 'next/server'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
 
 /**
  * POST /api/auth/reset-password
@@ -13,15 +15,15 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 password reset attempts per 15 minutes per IP
     const identifier = getIdentifier(request)
-    const rateLimitResult = await authRateLimiter.check(identifier, 5)
+    const rateLimitResult = await authRateLimiter.check(identifier, RateLimits.AUTH_RESET_PASSWORD)
 
     if (!rateLimitResult.success) {
-      return Response.json(
+      return NextResponse.json(
         {
           message: ErrorMessages.RATE_LIMIT_PASSWORD_RESET
         },
         {
-          status: 429,
+          status: HttpStatus.TOO_MANY_REQUESTS,
           headers: createRateLimitHeaders(rateLimitResult)
         }
       )
@@ -31,15 +33,15 @@ export async function POST(request: NextRequest) {
     const { token, password } = body
 
     if (!token || !password) {
-      return Response.json({
+      return NextResponse.json({
         message:ErrorMessages.AUTH_TOKEN_AND_PASSWORD_REQUIRED
-      }, { status: 400 })
+      }, { status: HttpStatus.BAD_REQUEST })
     }
 
-    if (password.length < 6) {
-      return Response.json({
+    if (password.length < 8) {
+      return NextResponse.json({
         message:ErrorMessages.AUTH_PASSWORD_TOO_SHORT
-      }, { status: 400 })
+      }, { status: HttpStatus.BAD_REQUEST })
     }
 
     // Hash the token to compare with stored hash
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Find all users and check metadata for matching token
     // (not ideal for scale, but works for MVP - consider adding a PasswordResetToken table later)
-    const users = await db.user.findMany({
+    const users = await prisma.user.findMany({
       where: {
         metadata: {
           contains: hashedToken,
@@ -56,9 +58,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (users.length === 0) {
-      return Response.json({
+      return NextResponse.json({
         message:ErrorMessages.AUTH_TOKEN_INVALID_OR_EXPIRED
-      }, { status: 400 })
+      }, { status: HttpStatus.BAD_REQUEST })
     }
 
     // Find the user with matching token that hasn't expired
@@ -83,9 +85,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (!targetUser) {
-      return Response.json({
+      return NextResponse.json({
         message:ErrorMessages.AUTH_TOKEN_INVALID_OR_EXPIRED
-      }, { status: 400 })
+      }, { status: HttpStatus.BAD_REQUEST })
     }
 
     // Hash new password
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
     delete metadata.resetToken
     delete metadata.resetTokenExpiry
 
-    await db.user.update({
+    await prisma.user.update({
       where: { id: targetUser.id },
       data: {
         password: hashedPassword,
@@ -106,12 +108,12 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Password reset successfully for user ${targetUser.email}`)
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: 'Senha redefinida com sucesso'
       },
       {
-        status: 200,
+        status: HttpStatus.OK,
         headers: createRateLimitHeaders(rateLimitResult)
       }
     )

@@ -1,35 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { Prisma, CommissionStatus } from '@/generated/prisma/client'
+import { withApiHandler } from '@/lib/api-handler'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Listar pagamentos/comissões do booster
-export async function GET(request: NextRequest) {
-  try {
-    const authResult = await verifyBooster(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
+export const GET = withApiHandler(
+  async ({ request, user }) => {
+    const boosterId = user.id
 
-    const boosterId = authResult.user.id
-
-    // Buscar parâmetros de query
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // PENDING, PAID, CANCELLED
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
-    const where: any = {
-      boosterId,
-    }
-
+    const where: Prisma.BoosterCommissionWhereInput = { boosterId }
     if (status && ['PENDING', 'PAID', 'CANCELLED'].includes(status)) {
-      where.status = status
+      where.status = status as CommissionStatus
     }
 
-    // Buscar comissões
     const [commissions, total] = await prisma.$transaction([
       prisma.boosterCommission.findMany({
         where,
@@ -42,13 +31,7 @@ export async function GET(request: NextRequest) {
               gameMode: true,
               currentRating: true,
               targetRating: true,
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  name: true,
-                },
-              },
+              user: { select: { id: true, email: true, name: true } },
             },
           },
         },
@@ -59,26 +42,14 @@ export async function GET(request: NextRequest) {
       prisma.boosterCommission.count({ where }),
     ])
 
-    // Calcular estatísticas
-    const [
-      totalEarningsAgg,
-      pendingEarningsAgg,
-      totalCommissions,
-      paidCommissions,
-      pendingCommissions,
-    ] = await Promise.all([
-      prisma.boosterCommission.aggregate({
-        where: { boosterId, status: 'PAID' },
-        _sum: { amount: true },
-      }),
-      prisma.boosterCommission.aggregate({
-        where: { boosterId, status: 'PENDING' },
-        _sum: { amount: true },
-      }),
-      prisma.boosterCommission.count({ where: { boosterId } }),
-      prisma.boosterCommission.count({ where: { boosterId, status: 'PAID' } }),
-      prisma.boosterCommission.count({ where: { boosterId, status: 'PENDING' } }),
-    ])
+    const [totalEarningsAgg, pendingEarningsAgg, totalCommissions, paidCommissions, pendingCommissions] =
+      await Promise.all([
+        prisma.boosterCommission.aggregate({ where: { boosterId, status: 'PAID' }, _sum: { amount: true } }),
+        prisma.boosterCommission.aggregate({ where: { boosterId, status: 'PENDING' }, _sum: { amount: true } }),
+        prisma.boosterCommission.count({ where: { boosterId } }),
+        prisma.boosterCommission.count({ where: { boosterId, status: 'PAID' } }),
+        prisma.boosterCommission.count({ where: { boosterId, status: 'PENDING' } }),
+      ])
 
     return NextResponse.json(
       {
@@ -92,14 +63,8 @@ export async function GET(request: NextRequest) {
         },
         pagination: { total, limit, offset },
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
-  } catch (error) {
-    console.error('Erro ao buscar pagamentos do booster:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar pagamentos' },
-      { status: 500 }
-    )
-  }
-}
-
+  },
+  { auth: { roles: ['BOOSTER'] }, errorMessage: 'Erro ao buscar pagamentos', endpoint: 'GET /api/booster/payments' }
+)

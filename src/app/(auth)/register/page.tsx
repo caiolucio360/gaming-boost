@@ -59,7 +59,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
       <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
         <div className="text-center mb-3 sm:mb-5">
-          <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1">
+          <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             <span className="text-brand-purple-light">CRIAR</span>
             <span className="text-white"> CONTA</span>
           </h1>
@@ -171,12 +171,12 @@ export default function RegisterPage() {
               )}
             />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-6 rounded-lg transition-all
-                shadow-glow hover:shadow-glow-hover
-                disabled:opacity-50 disabled:cursor-not-allowed font-rajdhani flex items-center justify-center gap-2"
+              size="lg"
+              className="w-full font-bold font-rajdhani"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {isLoading ? (
                 <>
@@ -186,7 +186,7 @@ export default function RegisterPage() {
               ) : (
                 'CRIAR CONTA'
               )}
-            </button>
+            </Button>
 
             <div className="text-center text-xs">
               <span className="text-brand-gray-500 font-rajdhani">Já tem uma conta? </span>

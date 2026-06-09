@@ -89,7 +89,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
       </div>
 
       <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
-        {ranks.map((rank, index) => {
+        {ranks.map((rank) => {
           const isSelected = (step === 'from' && fromRank?.id === rank.id) || (step === 'to' && toRank?.id === rank.id)
           return (
             <Card 

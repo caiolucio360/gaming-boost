@@ -1,5 +1,1 @@
----
-trigger: always_on
----
-
-Always use shadcn/ui components
+Always use shadcn/ui components from `@/components/ui`. Never hand-roll raw `<button>`, `<input>`, `<select>`, etc. — if a component is missing, add it with `npx shadcn@latest add <name>`. See `.claude/rules/design_system.md` for brand styling.

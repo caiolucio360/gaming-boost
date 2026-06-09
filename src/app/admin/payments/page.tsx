@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -71,17 +71,7 @@ export default function AdminPaymentsPage() {
     }
   }, [user, authLoading, router])
 
-  useEffect(() => {
-    if (user?.role === 'ADMIN') {
-      fetchRevenues()
-    }
-  }, [user?.id])
-
-  useEffect(() => {
-    if (user?.role === 'ADMIN') fetchRevenues()
-  }, [revenueFilter])
-
-  const fetchRevenues = async () => {
+  const fetchRevenues = useCallback(async () => {
     await withRevenueLoading(async () => {
       try {
         const status = revenueFilter === 'all' ? '' : revenueFilter
@@ -96,7 +86,11 @@ export default function AdminPaymentsPage() {
         console.error('Erro ao buscar receitas:', error)
       }
     })
-  }
+  }, [withRevenueLoading, revenueFilter])
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN') fetchRevenues()
+  }, [user?.role, fetchRevenues])
 
   const getRevenueStatusBadge = (status: string) => {
     switch (status) {

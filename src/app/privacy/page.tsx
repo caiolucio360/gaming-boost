@@ -1,6 +1,5 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Card, CardContent} from '@/components/ui/card'
 
 

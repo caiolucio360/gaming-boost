@@ -1,39 +1,32 @@
 // src/app/api/booster/orders/[id]/start/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { withApiHandler, parseIntParam } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
 import { getStatusForError } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
 import { OrderService } from '@/services'
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const authResult = await verifyBooster(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED, 401)
-    }
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
 
-    const { id } = await params
-    const orderId = parseInt(id, 10)
-    if (isNaN(orderId)) {
-      return NextResponse.json({ message: 'ID do pedido inválido' }, { status: 400 })
-    }
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  return withApiHandler(
+    async ({ user }) => {
+      const { id } = await params
+      const orderId = parseIntParam(id)
+      if (orderId === null) {
+        return NextResponse.json({ message: 'ID do pedido inválido' }, { status: HttpStatus.BAD_REQUEST })
+      }
 
-    const boosterId = authResult.user.id
-    const result = await OrderService.startOrder({ orderId, boosterId })
+      const result = await OrderService.startOrder({ orderId, boosterId: user.id })
+      if (!result.success) {
+        const status = result.code ? getStatusForError(result.code) : HttpStatus.INTERNAL_SERVER_ERROR
+        return NextResponse.json({ message: result.error, code: result.code }, { status })
+      }
 
-    if (!result.success) {
-      const status = result.code ? getStatusForError(result.code) : 500
-      return NextResponse.json({ message: result.error, code: result.code }, { status })
-    }
-
-    return NextResponse.json(
-      { message: 'Boost iniciado com sucesso', order: result.data },
-      { status: 200 }
-    )
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.BOOSTER_START_ORDER_FAILED, 'POST /api/booster/orders/[id]/start')
-  }
+      return NextResponse.json({ message: 'Boost iniciado com sucesso', order: result.data }, { status: HttpStatus.OK })
+    },
+    { auth: { roles: ['BOOSTER'] }, errorMessage: ErrorMessages.BOOSTER_START_ORDER_FAILED, endpoint: 'POST /api/booster/orders/[id]/start' }
+  )(request)
 }

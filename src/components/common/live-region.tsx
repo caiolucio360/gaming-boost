@@ -44,7 +44,7 @@ export function LiveRegion({ message, priority = 'polite', id = 'live-region' }:
  * Hook para usar live regions
  */
 export function useLiveRegion() {
-  const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announce = (message: string, _priority: 'polite' | 'assertive' = 'polite') => {
     // Verificar se está no cliente
     if (typeof window === 'undefined') return
 

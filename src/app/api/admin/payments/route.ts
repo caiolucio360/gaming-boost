@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { Prisma, RevenueStatus } from '@/generated/prisma/client'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Listar receitas do admin
 export async function GET(request: NextRequest) {
@@ -18,12 +20,12 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 100)
     const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10), 0)
 
-    const where: any = {
+    const where: Prisma.AdminRevenueWhereInput = {
       adminId,
     }
 
     if (status && ['PENDING', 'PAID', 'CANCELLED'].includes(status)) {
-      where.status = status
+      where.status = status as RevenueStatus
     }
 
     // Buscar receitas
@@ -105,13 +107,13 @@ export async function GET(request: NextRequest) {
         },
         pagination: { total, limit, offset },
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Erro ao buscar receitas do admin:', error)
     return NextResponse.json(
       { message: 'Erro ao buscar receitas' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

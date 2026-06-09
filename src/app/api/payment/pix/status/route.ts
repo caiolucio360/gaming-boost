@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAuth, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { checkAsaasPaymentStatus } from '@/lib/asaas'
 import { checkAbacatePaymentStatus } from '@/lib/abacatepay'
+import { PaymentStatus } from '@/generated/prisma/client'
+import { HttpStatus } from '@/lib/http-status'
 
 export async function GET(request: NextRequest) {
     try {
         const authResult = await verifyAuth(request)
 
         if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
-                401
-            )
+            return createAuthErrorResponseFromResult(authResult)
         }
 
         const userId = authResult.user.id
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
         if (!paymentId) {
             return NextResponse.json(
                 { message: 'paymentId é obrigatório' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -39,7 +38,7 @@ export async function GET(request: NextRequest) {
         if (!payment) {
             return NextResponse.json(
                 { message: 'Pagamento não encontrado' },
-                { status: 404 }
+                { status: HttpStatus.NOT_FOUND }
             )
         }
 
@@ -47,7 +46,7 @@ export async function GET(request: NextRequest) {
         if (payment.order.userId !== userId) {
             return NextResponse.json(
                 { message: 'Não autorizado' },
-                { status: 403 }
+                { status: HttpStatus.FORBIDDEN }
             )
         }
 
@@ -99,14 +98,14 @@ export async function GET(request: NextRequest) {
                     const updatedPayment = await prisma.payment.update({
                         where: { id: payment.id },
                         data: {
-                            status: pixStatus as any,
+                            status: pixStatus as PaymentStatus,
                             paidAt: pixStatus === 'PAID' ? new Date() : null,
                         }
                     })
 
                     // Se foi pago, atualizar o pedido também
                     if (pixStatus === 'PAID') {
-                        await prisma.$transaction(async (tx: any) => {
+                        await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                             // Atualizar pedido para PAID (aguardando um booster aceitar)
                             await tx.order.update({
                                 where: { id: payment.order.id },
@@ -157,7 +156,7 @@ export async function GET(request: NextRequest) {
         console.error('Erro ao verificar status do pagamento:', error)
         return NextResponse.json(
             { message: 'Erro ao verificar status do pagamento' },
-            { status: 500 }
+            { status: HttpStatus.INTERNAL_SERVER_ERROR }
         )
     }
 }

@@ -40,7 +40,7 @@ npm run test:coverage    # Coverage report
 
 **Route protection** (`src/middleware.ts`):
 - `/admin/*` — ADMIN only
-- `/booster/*` — BOOSTER + ADMIN (except `/booster/apply`, open to CLIENTs)
+- `/booster/*` — BOOSTER + ADMIN
 - `/dashboard/*`, `/cart/*`, `/payment/*` — authenticated users only
 
 **Pricing** is entirely database-driven via `PricingConfig` model. Never add calculation logic to `src/lib/games-config.ts` (metadata only). Use `/api/pricing/calculate` for price calculations.
@@ -50,6 +50,8 @@ npm run test:coverage    # Coverage report
 **Commission flow:** On order creation, `DevAdminRevenue` + `AdminRevenue` records are snapshotted. On booster acceptance, `BoosterCommission` is created. On completion, all become PENDING; admin approves to PAID.
 
 ## Key Patterns
+
+> Full conventions live in `.claude/rules/code_patterns.md` (API + frontend) and `.claude/rules/design_system.md` (styling, incl. the email/Recharts hex **exceptions**). The summary below is the quick reference.
 
 ### API Routes
 
@@ -110,22 +112,13 @@ const { loading, withLoading } = useLoading({ initialLoading: true })
 
 ## Removed Features (MVP scope — do not re-add)
 
-Dispute system, review system, booster public profiles (`/booster/[id]`), commission history audit trail, contact form.
+Dispute system, review system, booster public profiles (`/booster/[id]`), commission history audit trail, contact form, **booster application/onboarding flow** (no `/booster/apply`, no `BoosterProfile` model — admins promote users CLIENT↔BOOSTER directly via buttons on `/admin/users`).
 
 ## Design System
 
 **Tailwind v4** — `@config "../../tailwind.config.js"` directive in `globals.css` is mandatory.
 
-**Brand palette** (use these, not generic Tailwind purple/black):
-- Backgrounds: `bg-brand-black` (#0A0A0A), `bg-brand-black-light` (#1A1A1A)
-- Primary: `bg-brand-purple` (#7C3AED), `text-brand-purple-light` (#A855F7), `bg-brand-purple-dark` (#4C1D95)
-- Text: `text-brand-gray-300` (secondary), `text-brand-gray-500` (muted)
-- Status: `bg-green-500/20 text-green-300` · `bg-yellow-500/20 text-yellow-300` · `bg-red-500/20 text-red-300`
-- Borders: `border-white/10` (default), `border-brand-purple` (focus/active)
-
-**Fonts:** `font-orbitron` + `style={{ fontFamily: 'Orbitron, sans-serif' }}` for titles; `font-rajdhani` for body/UI.
-
-Full design system reference: `docs/design_system.md`
+Styling is governed by `.claude/rules/design_system.md` (loaded every session): use brand palette classes only — never hex values, CSS token classes, or arbitrary Tailwind values. Titles use `font-orbitron`, body/UI uses `font-rajdhani` (both with the inline `style` fallback). Components: prefer shadcn/ui (`.claude/rules/components.md`).
 
 ## Environment Variables
 

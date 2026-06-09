@@ -9,7 +9,7 @@ import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, ServiceType } from '@/lib/games-config'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Calculator, Sword, Users, Zap, Clock } from 'lucide-react'
+import { AlertCircle, Sword, Users, Zap, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
@@ -44,8 +44,8 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
-  const [dynamicPoints, setDynamicPoints] = useState<number[] | null>(null)
-  const [availableHours, setAvailableHours] = useState<number[]>([])
+  const [, setDynamicPoints] = useState<number[] | null>(null)
+  const [, setAvailableHours] = useState<number[]>([])
   const [isLoadingRanges, setIsLoadingRanges] = useState(false)
   const { user } = useAuth()
   const { addItem } = useCart()
@@ -132,6 +132,9 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
     resetRatings()
     fetchRanges()
+    // currentRating/targetRating são lidos só como guard de "default inicial"; incluí-los nas deps
+    // re-rodaria o effect (resetando a seleção do usuário) a cada ajuste de slider.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, gameMode, selectedServiceType])
 
   // Check for active orders when user is logged in
@@ -274,25 +277,6 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   }
 
   // Obter pontos de rating (dynamic from API or fallback to static)
-  const getRatingPoints = (isTarget: boolean = false) => {
-    if (!modeConfig) return []
-
-    const basePoints = dynamicPoints || modeConfig.ratingPoints
-    if (!basePoints) return []
-
-    const filteredPoints = isTarget
-      ? basePoints
-      : basePoints.filter(p => p < basePoints[basePoints.length - 1])
-
-    return filteredPoints.map(value => ({
-      value,
-      display: `${value / 1000}K`,
-    }))
-  }
-
-  const currentRatingPoints = getRatingPoints(false)
-  const targetRatingPoints = getRatingPoints(true)
-
   const calculatePrice = async () => {
     // Disable calculate manual caching if needed
     // Calculate is handled by effect now
@@ -409,10 +393,6 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRating, targetRating, selectedHours, selectedServiceType, gameId, gameMode])
-
-  const isCalculateDisabled = selectedServiceType === 'COACHING'
-    ? !selectedHours || isCalculating
-    : currentRating >= targetRating || isCalculating
 
   const getServiceIcon = (type: ServiceType) => {
     if (type === 'RANK_BOOST') return Sword

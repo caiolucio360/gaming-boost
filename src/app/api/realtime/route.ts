@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth } from '@/lib/auth-middleware'
+import { verifyAuth, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 /**
  * Server-Sent Events (SSE) para atualizações em tempo real
@@ -10,29 +11,14 @@ import { verifyAuth } from '@/lib/auth-middleware'
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação
-    // Primeiro tenta via header (padrão), depois via query string (para SSE)
-    let authResult = await verifyAuth(request)
-
-    // Se não autenticado via header, tentar via query string (para EventSource)
-    if (!authResult.authenticated) {
-      const { searchParams } = new URL(request.url)
-      const token = searchParams.get('token')
-
-      if (token) {
-        // Criar request temporário com token no header
-        const tempRequest = new NextRequest(request.url, {
-          headers: {
-            ...Object.fromEntries(request.headers.entries()),
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-        authResult = await verifyAuth(tempRequest)
-      }
-    }
+    // Verificar autenticação via sessão NextAuth (cookie httpOnly).
+    // O EventSource envia o cookie automaticamente em requisições same-origin,
+    // então não há necessidade (nem suporte) de token via query string — passá-lo
+    // na URL apenas o exporia em logs/Referer.
+    const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
-      return new Response('Unauthorized', { status: 401 })
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const userId = authResult.user.id
@@ -253,6 +239,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erro na rota SSE:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return new Response('Internal Server Error', { status: HttpStatus.INTERNAL_SERVER_ERROR })
   }
 }

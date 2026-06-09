@@ -1,26 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { Prisma } from '@/generated/prisma/client'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 import bcrypt from 'bcryptjs'
 
 // GET - Buscar perfil do usuário autenticado
-export async function GET(request: NextRequest) {
-  try {
-    // Verificar autenticação via NextAuth
-    const authResult = await verifyAuth(request)
-
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
-    const userId = authResult.user.id
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+export const GET = withApiHandler(
+  async ({ user }) => {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         id: true,
         email: true,
@@ -39,51 +29,42 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
-    return NextResponse.json({ user }, { status: 200 })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'GET /api/user/profile')
+    return NextResponse.json({ user: dbUser }, { status: HttpStatus.OK })
+  },
+  {
+    auth: true,
+    errorMessage: ErrorMessages.GENERIC_ERROR,
+    endpoint: 'GET /api/user/profile',
   }
-}
+)
 
 // PUT - Atualizar perfil do usuário autenticado
-export async function PUT(request: NextRequest) {
-  try {
-    // Verificar autenticação via NextAuth
-    const authResult = await verifyAuth(request)
-
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
-    const userId = authResult.user.id
-
+export const PUT = withApiHandler(
+  async ({ request, user }) => {
     const body = await request.json()
     const { name, phone, currentPassword, newPassword } = body
 
     // Verificar se usuário existe
     const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: user.id },
     })
 
     if (!existingUser) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
     // Preparar dados para atualização
-    const updateData: any = {}
+    const updateData: Prisma.UserUpdateInput = {}
 
     if (name !== undefined && name.trim() !== '') {
       updateData.name = name.trim()
@@ -98,7 +79,7 @@ export async function PUT(request: NextRequest) {
       if (!currentPassword) {
         return NextResponse.json(
           { message: 'Senha atual é obrigatória para alterar a senha' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -111,15 +92,15 @@ export async function PUT(request: NextRequest) {
       if (!isPasswordValid) {
         return NextResponse.json(
           { message: 'Senha atual incorreta' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
       // Validar nova senha
-      if (newPassword.length < 6) {
+      if (newPassword.length < 8) {
         return NextResponse.json(
-          { message: 'A nova senha deve ter no mínimo 6 caracteres' },
-          { status: 400 }
+          { message: 'A nova senha deve ter no mínimo 8 caracteres' },
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
@@ -130,12 +111,12 @@ export async function PUT(request: NextRequest) {
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { message: 'Nenhum dado para atualizar' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: updateData,
       select: {
         id: true,
@@ -151,10 +132,12 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(
       { message: 'Perfil atualizado com sucesso', user: updatedUser },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.GENERIC_ERROR, 'PUT /api/user/profile')
+  },
+  {
+    auth: true,
+    errorMessage: ErrorMessages.GENERIC_ERROR,
+    endpoint: 'PUT /api/user/profile',
   }
-}
-
+)

@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/auth-context'
 
 const verifySchema = z.object({
   code: z.string().length(6, 'O código deve ter 6 dígitos'),
@@ -33,8 +32,6 @@ function VerifyContent() {
   // But verify API already returns token, so maybe we can use that?
   // Let's rely on manual login or auto-login via token handling if context supports it.
   // For now simpler approach: Verify -> Redirect to Dashboard (handling token manually or via context)
-
-  const { login } = useAuth() // We might use this if verify endpoint doesn't auto-login
 
   useEffect(() => {
     if (!email) {
@@ -93,7 +90,7 @@ function VerifyContent() {
       // Let's redirect to login for security/simplicity unless we want to hack credential provider.
       
       setTimeout(() => {
-        router.push('/login?verified=true')
+        router.replace('/login?verified=true')
       }, 2000)
 
     } catch (err) {
@@ -130,7 +127,7 @@ function VerifyContent() {
       setCountdown(60) // 60 seconds cooldown
       
       setTimeout(() => setSuccessMessage(null), 5000)
-    } catch (err) {
+    } catch {
       setError('Erro ao reenviar código. Tente novamente.')
     }
   }
@@ -138,7 +135,7 @@ function VerifyContent() {
   return (
     <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
       <div className="text-center mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1">
+        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1" style={{ fontFamily: 'Orbitron, sans-serif' }}>
           <span className="text-white">VERIFICAR</span>
           <span className="text-brand-purple-light"> CONTA</span>
         </h1>
@@ -200,14 +197,16 @@ function VerifyContent() {
           </Button>
 
           <div className="text-center pt-2">
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={handleResend}
               disabled={countdown > 0}
-              className="text-sm font-rajdhani text-brand-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-sm font-rajdhani text-brand-gray-400 hover:text-white no-underline hover:no-underline"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {countdown > 0 ? `Reenviar código em ${countdown}s` : 'Não recebeu? Reenviar código'}
-            </button>
+            </Button>
           </div>
 
           <div className="text-center">

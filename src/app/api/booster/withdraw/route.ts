@@ -1,259 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createAsaasPixTransfer } from '@/lib/asaas'
-import crypto from 'crypto'
+import { NextResponse } from 'next/server'
+import { withApiHandler } from '@/lib/api-handler'
+import { WithdrawalService, mapWithdrawalCreateError } from '@/services'
+import { HttpStatus } from '@/lib/http-status'
 
-// POST - Criar um novo saque
-export async function POST(request: NextRequest) {
-    try {
-        const authResult = await verifyAuth(request)
+// POST - Criar um novo saque (Booster)
+export const POST = withApiHandler(
+  async ({ request, user }) => {
+    const { amount, pixKeyType, pixKey, description } = await request.json()
 
-        if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
-                401
-            )
-        }
+    const result = await WithdrawalService.create({
+      userId: user.id,
+      source: 'BOOSTER',
+      amount,
+      pixKeyType,
+      pixKey,
+      description,
+    })
 
-        // Verificar se é BOOSTER
-        if (authResult.user.role !== 'BOOSTER') {
-            return NextResponse.json(
-                { message: 'Apenas boosters podem solicitar saques' },
-                { status: 403 }
-            )
-        }
-
-        const userId = authResult.user.id
-        const body = await request.json()
-        const { amount, pixKeyType, pixKey, description } = body
-
-        // Validações
-        if (!amount || amount < 350) {
-            return NextResponse.json(
-                { message: 'Valor mínimo para saque é R$ 3,50' },
-                { status: 400 }
-            )
-        }
-
-        if (!pixKeyType || !pixKey) {
-            return NextResponse.json(
-                { message: 'Tipo de chave PIX e chave são obrigatórios' },
-                { status: 400 }
-            )
-        }
-
-        // Validar tipo de chave PIX
-        const validPixKeyTypes = ['CPF', 'CNPJ', 'PHONE', 'EMAIL', 'EVP']
-        if (!validPixKeyTypes.includes(pixKeyType)) {
-            return NextResponse.json(
-                { message: 'Tipo de chave PIX inválido' },
-                { status: 400 }
-            )
-        }
-
-        // Gerar ID externo único antes da transação
-        const externalId = `withdraw-booster-${userId}-${crypto.randomUUID()}`
-        const now = new Date()
-
-        // Atomicamente verificar saldo + criar registro provisional
-        // Isto previne que duas requisições simultâneas passem na verificação de saldo
-        let provisional: { id: number }
-        try {
-            provisional = await prisma.$transaction(async (tx: any) => {
-                // Re-verificar saldo dentro da transação
-                const agg = await tx.boosterCommission.aggregate({
-                    where: {
-                        boosterId: userId,
-                        status: 'PAID',
-                        OR: [
-                            { availableForWithdrawalAt: null },
-                            { availableForWithdrawalAt: { lte: now } },
-                        ],
-                    },
-                    _sum: { amount: true },
-                })
-                const available = Math.round((agg._sum.amount || 0) * 100)
-                if (amount > available) {
-                    const err: any = new Error('Saldo insuficiente')
-                    err.code = 'INSUFFICIENT'
-                    err.availableBalance = available
-                    throw err
-                }
-
-                // Re-verificar saques pendentes dentro da transação
-                const pending = await tx.withdrawal.findFirst({
-                    where: { userId, status: { in: ['PENDING', 'PROCESSING'] } },
-                })
-                if (pending) {
-                    const err: any = new Error('Você já tem um saque pendente. Aguarde a conclusão.')
-                    err.code = 'PENDING_EXISTS'
-                    throw err
-                }
-
-                // Criar registro provisional (sem providerId — será preenchido após AbacatePay)
-                return tx.withdrawal.create({
-                    data: {
-                        userId,
-                        externalId,
-                        amount,
-                        pixKeyType,
-                        pixKey,
-                        status: 'PENDING',
-                        description: description || `Saque de comissões - Booster #${userId}`,
-                    },
-                })
-            })
-        } catch (err: any) {
-            if (err.code === 'INSUFFICIENT') {
-                return NextResponse.json(
-                    { message: err.message, availableBalance: err.availableBalance, requestedAmount: amount },
-                    { status: 400 }
-                )
-            }
-            if (err.code === 'PENDING_EXISTS') {
-                return NextResponse.json({ message: err.message }, { status: 400 })
-            }
-            throw err
-        }
-
-        // Chamar AbacatePay fora da transação (operação externa)
-        try {
-            const withdrawResult = await createAsaasPixTransfer({
-                amount,
-                pixAddressKey: pixKey,
-                pixAddressKeyType: pixKeyType === 'RANDOM' ? 'EVP' : pixKeyType,
-                description: description || `Saque de comissões - Booster #${userId}`,
-            })
-
-            // Atualizar registro com dados do provedor
-            const withdrawal = await prisma.withdrawal.update({
-                where: { id: provisional.id },
-                data: {
-                    providerId: withdrawResult.id,
-                    platformFee: 0,
-                    receiptUrl: withdrawResult.transactionReceiptUrl || null,
-                },
-            })
-
-            return NextResponse.json({
-                success: true,
-                withdrawal,
-                message: 'Saque solicitado com sucesso!'
-            }, { status: 201 })
-        } catch (error) {
-            // AbacatePay falhou — remover registro provisional para não bloquear futuros saques
-            await prisma.withdrawal.delete({ where: { id: provisional.id } }).catch(() => {})
-            console.error('Erro ao criar saque:', error)
-            return NextResponse.json(
-                {
-                    message: 'Erro ao processar saque',
-                    error: error instanceof Error ? error.message : 'Erro desconhecido'
-                },
-                { status: 500 }
-            )
-        }
-    } catch (error) {
-        console.error('Erro na rota de saque:', error)
-        return NextResponse.json(
-            { message: 'Erro ao processar solicitação' },
-            { status: 500 }
-        )
+    if (!result.ok) {
+      const { status, body } = mapWithdrawalCreateError(result, amount)
+      return NextResponse.json(body, { status })
     }
-}
+
+    return NextResponse.json(
+      { success: true, withdrawal: result.withdrawal, message: 'Saque solicitado com sucesso!' },
+      { status: HttpStatus.CREATED }
+    )
+  },
+  { auth: { roles: ['BOOSTER'] }, errorMessage: 'Erro ao processar solicitação', endpoint: 'POST /api/booster/withdraw' }
+)
 
 // GET - Listar saques do booster
-export async function GET(request: NextRequest) {
-    try {
-        const authResult = await verifyAuth(request)
-
-        if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
-                401
-            )
-        }
-
-        // Verificar se é BOOSTER
-        if (authResult.user.role !== 'BOOSTER') {
-            return NextResponse.json(
-                { message: 'Apenas boosters podem ver seus saques' },
-                { status: 403 }
-            )
-        }
-
-        const userId = authResult.user.id
-
-        // Buscar saques do booster
-        const withdrawals = await prisma.withdrawal.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' },
-        })
-
-        // Calcular estatísticas
-        const stats = {
-            totalWithdrawals: withdrawals.length,
-            pendingWithdrawals: withdrawals.filter((w: any) => w.status === 'PENDING' || w.status === 'PROCESSING').length,
-            completedWithdrawals: withdrawals.filter((w: any) => w.status === 'COMPLETE').length,
-            totalWithdrawn: withdrawals
-                .filter((w: any) => w.status === 'COMPLETE')
-                .reduce((acc: any, w: any) => acc + w.amount, 0),
-        }
-
-        // Calcular saldo disponível e bloqueado
-        const now = new Date()
-
-        const availableAgg = await prisma.boosterCommission.aggregate({
-            where: {
-                boosterId: userId,
-                status: 'PAID',
-                OR: [
-                    { availableForWithdrawalAt: null },
-                    { availableForWithdrawalAt: { lte: now } },
-                ],
-            },
-            _sum: { amount: true },
-        })
-
-        const lockedAgg = await prisma.boosterCommission.aggregate({
-            where: {
-                boosterId: userId,
-                status: 'PAID',
-                availableForWithdrawalAt: { gt: now },
-            },
-            _sum: { amount: true },
-        })
-
-        const lockedCommissions = await prisma.boosterCommission.findMany({
-            where: {
-                boosterId: userId,
-                status: 'PAID',
-                availableForWithdrawalAt: { gt: now },
-            },
-            select: {
-                id: true,
-                amount: true,
-                availableForWithdrawalAt: true,
-                orderId: true,
-            },
-            orderBy: { availableForWithdrawalAt: 'asc' },
-        })
-
-        const availableBalance = (availableAgg._sum.amount || 0) * 100 // Em centavos
-        const lockedBalance = (lockedAgg._sum.amount || 0) * 100 // Em centavos
-
-        return NextResponse.json({
-            withdrawals,
-            stats,
-            availableBalance,
-            lockedBalance,
-            lockedCommissions,
-        })
-    } catch (error) {
-        console.error('Erro ao listar saques:', error)
-        return NextResponse.json(
-            { message: 'Erro ao buscar saques' },
-            { status: 500 }
-        )
-    }
-}
+export const GET = withApiHandler(
+  async ({ user }) => {
+    const data = await WithdrawalService.getBoosterWithdrawals(user.id)
+    return NextResponse.json(data, { status: HttpStatus.OK })
+  },
+  { auth: { roles: ['BOOSTER'] }, errorMessage: 'Erro ao buscar saques', endpoint: 'GET /api/booster/withdraw' }
+)

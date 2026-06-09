@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -10,15 +10,10 @@ import { Badge } from '@/components/ui/badge'
 import {
   ShoppingCart,
   ArrowLeft,
-  Loader2,
-  Clock,
-  CheckCircle2,
-  XCircle,
   Edit,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { showSuccess, showError } from '@/lib/toast'
 import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
@@ -62,15 +57,7 @@ export default function AdminOrdersPage() {
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterStatus, setFilterStatus] = useState<string>('')
 
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
-    } else if (user && user.role === 'ADMIN') {
-      fetchOrders()
-    }
-  }, [user, authLoading, router, filterStatus])
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     await withLoading(async () => {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
@@ -81,32 +68,15 @@ export default function AdminOrdersPage() {
         setOrders(data.orders || [])
       }
     })
-  }
+  }, [withLoading, filterStatus])
 
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      if (response.ok) {
-        showSuccess('Status atualizado com sucesso!')
-        fetchOrders()
-      } else {
-        const data = await response.json()
-        showError('Erro ao atualizar status', data.message || 'Tente novamente.')
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar status:', error)
-      showError('Erro ao atualizar status')
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+    } else if (user && user.role === 'ADMIN') {
+      fetchOrders()
     }
-  }
-
-
+  }, [user, authLoading, router, fetchOrders])
 
   if (authLoading) {
     return <LoadingSpinner />
@@ -134,7 +104,7 @@ export default function AdminOrdersPage() {
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent className="bg-brand-black border-brand-purple/50">
@@ -214,21 +184,8 @@ export default function AdminOrdersPage() {
                         </div>
                       )}
 
-                      {/* Atualizar Status */}
+                      {/* Ações — alteração de status acontece na tela de detalhes */}
                       <div className="flex flex-wrap gap-2 pt-4 border-t border-brand-purple/20">
-                        <Select value={order.status} onValueChange={(value) => handleStatusUpdate(order.id, value)}>
-                          <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-brand-black border-brand-purple/50">
-                            <SelectItem value="PENDING">Pendente</SelectItem>
-                            <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
-                            <SelectItem value="COMPLETED">Concluído</SelectItem>
-                            <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        
-                        
                         <Button
                           asChild
                           variant="outline"

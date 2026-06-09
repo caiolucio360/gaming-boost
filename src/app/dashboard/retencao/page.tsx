@@ -56,7 +56,7 @@ export default function RetencaoPage() {
         }
       })
     }
-  }, [user?.id])
+  }, [user, withLoading])
 
   if (authLoading || loading) return <LoadingSpinner />
   if (!user) return null
