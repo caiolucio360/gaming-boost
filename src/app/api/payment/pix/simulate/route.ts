@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { verifyAuth, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { ErrorMessages } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
 
 export async function POST(request: NextRequest) {
     if (process.env.NODE_ENV === 'production') {
         return NextResponse.json(
             { message: 'Simulação de pagamento não disponível em produção' },
-            { status: 403 }
+            { status: HttpStatus.FORBIDDEN }
         )
     }
 
@@ -15,10 +16,7 @@ export async function POST(request: NextRequest) {
         const authResult = await verifyAuth(request)
 
         if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
-                401
-            )
+            return createAuthErrorResponseFromResult(authResult)
         }
 
         const userId = authResult.user.id
@@ -28,7 +26,7 @@ export async function POST(request: NextRequest) {
         if (!paymentId) {
             return NextResponse.json(
                 { message: 'paymentId é obrigatório' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -45,7 +43,7 @@ export async function POST(request: NextRequest) {
         if (!payment) {
             return NextResponse.json(
                 { message: ErrorMessages.PAYMENT_NOT_FOUND },
-                { status: 404 }
+                { status: HttpStatus.NOT_FOUND }
             )
         }
 
@@ -53,7 +51,7 @@ export async function POST(request: NextRequest) {
         if (payment.order.userId !== userId) {
             return NextResponse.json(
                 { message: 'Não autorizado' },
-                { status: 403 }
+                { status: HttpStatus.FORBIDDEN }
             )
         }
 
@@ -61,7 +59,7 @@ export async function POST(request: NextRequest) {
         if (payment.status !== 'PENDING') {
             return NextResponse.json(
                 { message: `Pagamento já está ${payment.status}`, payment },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -69,7 +67,7 @@ export async function POST(request: NextRequest) {
         if (!payment.providerId) {
             return NextResponse.json(
                 { message: 'Pagamento sem ID do provedor' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -127,14 +125,14 @@ export async function POST(request: NextRequest) {
                     message: 'Erro ao simular pagamento',
                     error: error instanceof Error ? error.message : 'Erro desconhecido'
                 },
-                { status: 500 }
+                { status: HttpStatus.INTERNAL_SERVER_ERROR }
             )
         }
     } catch (error) {
         console.error('Erro na rota de simulação:', error)
         return NextResponse.json(
             { message: 'Erro ao processar simulação' },
-            { status: 500 }
+            { status: HttpStatus.INTERNAL_SERVER_ERROR }
         )
     }
 }
