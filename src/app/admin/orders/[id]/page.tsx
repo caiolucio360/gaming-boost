@@ -112,12 +112,16 @@ export default function AdminOrderDetailPage() {
 
   const fetchBoosters = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/boosters?status=VERIFIED')
+      const response = await fetch('/api/admin/users?role=BOOSTER&limit=100')
       if (response.ok) {
         const data = await response.json()
-        const list = (data.applications ?? [])
-          .map((a: { user: { id: number; name: string | null; email: string; role: string } }) => a.user)
-          .filter((u: { role: string }) => u.role === 'BOOSTER')
+        const list = (data.users ?? []).map(
+          (u: { id: number; name: string | null; email: string }) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+          })
+        )
         setBoosters(list)
       }
     } catch (error) {

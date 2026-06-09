@@ -214,12 +214,6 @@ export function ElojobHeader() {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/booster/apply" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
-                              <ShieldIcon className="mr-2 h-4 w-4" />
-                              Seja um Booster
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
                             <Link href="/profile" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <UserIcon className="mr-2 h-4 w-4" />
                               Perfil

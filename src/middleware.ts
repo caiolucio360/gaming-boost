@@ -24,13 +24,9 @@ export default withAuth(
             }
         }
 
-        // Rotas de booster - apenas BOOSTER (exceto /booster/apply que CLIENTs podem acessar)
+        // Rotas de booster - apenas BOOSTER + ADMIN
         if (pathname.startsWith('/booster')) {
-            if (pathname === '/booster/apply') {
-                if (token?.role !== 'CLIENT' && token?.role !== 'BOOSTER' && token?.role !== 'ADMIN') {
-                    return NextResponse.redirect(new URL('/dashboard', req.url))
-                }
-            } else if (token?.role !== 'BOOSTER' && token?.role !== 'ADMIN') {
+            if (token?.role !== 'BOOSTER' && token?.role !== 'ADMIN') {
                 return NextResponse.redirect(new URL('/dashboard', req.url))
             }
         }
