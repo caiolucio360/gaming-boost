@@ -328,7 +328,7 @@ export default function AdminOrderDetailPage() {
                   Alterar status:
                 </span>
                 <Select value={order.status} onValueChange={handleStatusUpdate}>
-                  <SelectTrigger className="w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <SelectTrigger className="w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-brand-black border-brand-purple/50">
@@ -427,7 +427,7 @@ export default function AdminOrderDetailPage() {
                   onValueChange={handleAssignBooster}
                   disabled={assigning}
                 >
-                  <SelectTrigger className="w-[260px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <SelectTrigger className="w-64 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                     <SelectValue placeholder="Selecione um booster" />
                   </SelectTrigger>
                   <SelectContent className="bg-brand-black border-brand-purple/50">

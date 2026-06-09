@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { createApiErrorResponse } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Fetch active commission config
 export async function GET(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (!config) {
       return NextResponse.json(
         { message: 'Configuração de comissão não encontrada. Execute o seed.' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       ...(isDevAdmin ? {} : { devAdminPercentage: undefined }),
     }
 
-    return NextResponse.json({ config: enriched }, { status: 200 })
+    return NextResponse.json({ config: enriched }, { status: HttpStatus.OK })
   } catch (error) {
     return createApiErrorResponse(error, 'Erro ao buscar configuração de comissão', 'GET /api/admin/commission-config')
   }
@@ -51,21 +52,21 @@ export async function PUT(request: NextRequest) {
     if (boosterPercentage === undefined || devAdminPercentage === undefined) {
       return NextResponse.json(
         { message: 'boosterPercentage e devAdminPercentage são obrigatórios' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
     if (boosterPercentage < 0 || boosterPercentage > 1) {
       return NextResponse.json(
         { message: 'boosterPercentage deve estar entre 0 e 1' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
     if (devAdminPercentage < 0 || devAdminPercentage > 1) {
       return NextResponse.json(
         { message: 'devAdminPercentage deve estar entre 0 e 1' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -73,7 +74,7 @@ export async function PUT(request: NextRequest) {
         (!Number.isInteger(withdrawalWaitingDays) || withdrawalWaitingDays < 0)) {
       return NextResponse.json(
         { message: 'withdrawalWaitingDays deve ser um inteiro não negativo' },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -102,7 +103,7 @@ export async function PUT(request: NextRequest) {
         message: 'Configuração atualizada com sucesso',
         config: { ...config, adminPercentage: 1 - config.boosterPercentage },
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     return createApiErrorResponse(error, 'Erro ao atualizar configuração de comissão', 'PUT /api/admin/commission-config')

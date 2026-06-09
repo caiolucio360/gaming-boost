@@ -1,31 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { generateToken } from '@/lib/jwt'
 import { LoginSchema } from '@/schemas/auth'
 import { validateBody } from '@/lib/validate'
 import { AuthService } from '@/services'
-import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
 import { ErrorCodes } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
 
-export async function POST(request: NextRequest) {
-  try {
-    // Rate limiting: 5 login attempts per 15 minutes per IP
-    const identifier = getIdentifier(request)
-    const rateLimitResult = await authRateLimiter.check(identifier, 5)
-
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          message: ErrorMessages.RATE_LIMIT_LOGIN,
-          error: ErrorCodes.RATE_LIMIT_EXCEEDED
-        },
-        {
-          status: 429,
-          headers: createRateLimitHeaders(rateLimitResult)
-        }
-      )
-    }
-
+export const POST = withApiHandler(
+  async ({ request, rateLimitResult }) => {
     const body = await request.json()
 
     // Validate with Zod schema
@@ -35,13 +21,13 @@ export async function POST(request: NextRequest) {
       if (!body.email || !body.password) {
         return NextResponse.json(
           { message: ErrorMessages.AUTH_EMAIL_PASSWORD_REQUIRED },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
 
       return NextResponse.json(
         { message: ErrorMessages.INVALID_DATA, errors: validation.errors },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -52,12 +38,12 @@ export async function POST(request: NextRequest) {
       if (result.code === ErrorCodes.USER_NOT_VERIFIED) {
         return NextResponse.json(
           { message: ErrorMessages.AUTH_NOT_VERIFIED, code: ErrorCodes.USER_NOT_VERIFIED },
-          { status: 403 }
+          { status: HttpStatus.FORBIDDEN }
         )
       }
       return NextResponse.json(
         { message: ErrorMessages.AUTH_CREDENTIALS_INVALID },
-        { status: 401 }
+        { status: HttpStatus.UNAUTHORIZED }
       )
     }
 
@@ -91,11 +77,17 @@ export async function POST(request: NextRequest) {
         redirectPath,
       },
       {
-        status: 200,
-        headers: createRateLimitHeaders(rateLimitResult)
+        status: HttpStatus.OK,
+        headers: rateLimitResult
+          ? createRateLimitHeaders(rateLimitResult)
+          : undefined,
       }
     )
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.AUTH_LOGIN_FAILED, 'POST /api/auth/login')
+  },
+  {
+    rateLimit: { limiter: authRateLimiter, max: RateLimits.AUTH_LOGIN },
+    rateLimitMessage: ErrorMessages.RATE_LIMIT_LOGIN,
+    errorMessage: ErrorMessages.AUTH_LOGIN_FAILED,
+    endpoint: 'POST /api/auth/login',
   }
-}
+)

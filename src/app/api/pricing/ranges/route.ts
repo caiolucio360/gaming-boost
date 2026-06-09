@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { Game, ServiceType } from '@/generated/prisma/client'
+import { HttpStatus } from '@/lib/http-status'
 
 /**
  * GET /api/pricing/ranges
@@ -18,14 +19,14 @@ export async function GET(request: NextRequest) {
     else if (rawServiceType === 'COACHING') serviceType = 'COACHING'
     else serviceType = 'RANK_BOOST'
 
-    const configs = await db.pricingConfig.findMany({
+    const configs = await prisma.pricingConfig.findMany({
       where: { game, gameMode, serviceType, enabled: true },
       orderBy: { rangeStart: 'asc' },
       select: { rangeStart: true, rangeEnd: true }
     })
 
     if (configs.length === 0) {
-      return Response.json({ data: { points: [], min: 0, max: 0 } }, { status: 200 })
+      return Response.json({ data: { points: [], min: 0, max: 0 } }, { status: HttpStatus.OK })
     }
 
     const min = configs[0].rangeStart
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
       }
       return Response.json({
         data: { hours, min, max }
-      }, { status: 200 })
+      }, { status: HttpStatus.OK })
     } else if (gameMode === 'PREMIER') {
       // Generate 1K increments from first available 1K boundary to max
       const maxRounded = Math.floor(max / 1000) * 1000
@@ -56,9 +57,9 @@ export async function GET(request: NextRequest) {
 
     return Response.json({
       data: { points, min, max }
-    }, { status: 200 })
+    }, { status: HttpStatus.OK })
   } catch (error) {
     console.error('[API /pricing/ranges] Error:', error)
-    return Response.json({ error: 'Internal server error' }, { status: 500 })
+    return Response.json({ message: 'Erro interno do servidor' }, { status: HttpStatus.INTERNAL_SERVER_ERROR })
   }
 }

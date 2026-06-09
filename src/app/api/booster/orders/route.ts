@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { verifyBooster, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { Prisma, OrderStatus, Order } from '@/generated/prisma/client'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Listar pedidos disponíveis e atribuídos ao booster
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (!authResult.authenticated || !authResult.user) {
       return createAuthErrorResponse(
         authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
-        401
+        HttpStatus.UNAUTHORIZED
       )
     }
 
@@ -149,7 +150,7 @@ export async function GET(request: NextRequest) {
         },
         pagination: { total, limit, offset },
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/booster/orders')

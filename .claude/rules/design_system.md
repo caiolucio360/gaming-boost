@@ -217,3 +217,35 @@ These patterns are removed and must never be reintroduced:
 | `border-border-brand` | `border-brand-purple` |
 | `#7C3AED` (hardcoded hex) | `brand-purple` |
 | `bg-[var(--surface-card)]` | `bg-brand-black-light` |
+
+---
+
+## Glow Drop-Shadows (text & icons)
+
+`shadow-glow*` are **box-shadows** — correct for cards/containers, wrong for glowing **text or SVG icons** (they draw a glow around the bounding box, not the glyph). For text/icon glow use the **drop-shadow filter** utilities (defined in `tailwind.config.js` → `dropShadow`):
+
+| Class | Use |
+|-------|-----|
+| `drop-shadow-glow-sm` | Subtle icon glow (e.g. active nav icon) |
+| `drop-shadow-glow` | Standard text/icon glow |
+| `drop-shadow-glow-lg` | Large hero title glow |
+
+❌ Never `drop-shadow-[0_0_25px_rgba(168,85,247,0.6)]` (arbitrary) → ✅ `drop-shadow-glow-lg`.
+
+---
+
+## Exceptions — NOT design-system violations
+
+The Golden Rule (no hex, no arbitrary values) applies to **Tailwind-rendered JSX**. The following are legitimate and must **not** be "fixed" into brand classes:
+
+1. **HTML email templates** (`src/lib/email.ts`, `src/services/verification.service.ts`).
+   Email clients do not support Tailwind/external CSS reliably — inline `style` and `<style>` with **hex** are mandatory. Use the brand palette **as hex values** (`#7C3AED`, `#A855F7`, `#1A1A1A`, etc.) so emails stay on-brand. Keep colors near the top of the template for easy auditing.
+
+2. **Chart / SVG libraries (Recharts)** (`src/app/admin/page.tsx`, `src/app/api/admin/charts/route.ts`).
+   Recharts takes colors via **JS props** (`stroke`, `fill`, `stopColor`) and tooltip style objects — it cannot consume Tailwind classes. Use brand **hex** values, ideally centralized in a constant (e.g. `TOOLTIP_STYLE`) or returned from the API, not scattered inline.
+
+3. **Data-driven colors** — `style={{ backgroundColor: item.color }}` where `color` comes from the backend/DB (e.g. status-chart segments). Acceptable; ensure the source values are brand-aligned.
+
+4. **Unit-less arbitrary values with no token equivalent** — viewport/percentage/`calc` sizing such as `h-[85vh]` (dialog height), `max-w-[75%]` (chat bubble), `h-[calc(100%-140px)]`, and micro-badge sizes (`text-[10px]`, `min-w-[18px]` for notification counts). Prefer a token when one exists (`w-[200px]` → `w-52`); keep the arbitrary value only when no token fits, and keep it rare.
+
+> **Tables:** the shadcn `table.tsx` primitive was migrated off default shadcn tokens (`text-muted-foreground`, `bg-muted`, uncolored `border-b`) onto the brand palette (`text-brand-gray-400`, `bg-brand-purple/5`, `border-white/10`). Keep new tables on the brand palette — don't reintroduce the default tokens.

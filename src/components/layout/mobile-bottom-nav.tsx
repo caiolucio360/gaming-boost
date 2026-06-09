@@ -154,7 +154,7 @@ export function MobileBottomNav() {
                       <Icon 
                         className={cn(
                           "w-5 h-5 transition-all duration-300",
-                          isActive && "drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                          isActive && "drop-shadow-glow-sm"
                         )} 
                         aria-hidden="true" 
                       />

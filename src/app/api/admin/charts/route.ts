@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 function toDateKey(date: Date) {
   return date.toISOString().slice(0, 10) // YYYY-MM-DD
@@ -87,5 +88,5 @@ export async function GET(request: NextRequest) {
     { name: 'Cancelado',    value: statusCount.CANCELLED,   color: '#EF4444' },
   ].filter((s) => s.value > 0)
 
-  return NextResponse.json({ timeSeries, userSeries, statusChart }, { status: 200 })
+  return NextResponse.json({ timeSeries, userSeries, statusChart }, { status: HttpStatus.OK })
 }

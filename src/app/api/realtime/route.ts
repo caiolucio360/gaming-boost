@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth } from '@/lib/auth-middleware'
+import { verifyAuth, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 /**
  * Server-Sent Events (SSE) para atualizações em tempo real
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const authResult = await verifyAuth(request)
 
     if (!authResult.authenticated || !authResult.user) {
-      return new Response('Unauthorized', { status: 401 })
+      return createAuthErrorResponseFromResult(authResult)
     }
 
     const userId = authResult.user.id
@@ -238,6 +239,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erro na rota SSE:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return new Response('Internal Server Error', { status: HttpStatus.INTERNAL_SERVER_ERROR })
   }
 }

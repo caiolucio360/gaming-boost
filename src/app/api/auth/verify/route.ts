@@ -5,6 +5,8 @@ import { validateBody } from '@/lib/validate'
 import { authRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
 import { prisma } from '@/lib/db'
 import { generateToken } from '@/lib/jwt'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
 
 const VerifySchema = z.object({
     email: z.string().email(),
@@ -15,12 +17,12 @@ export async function POST(request: NextRequest) {
     try {
         // Rate limiting
         const identifier = getIdentifier(request)
-        const rateLimitResult = await authRateLimiter.check(identifier, 5) // 5 attempts per 15 min
+        const rateLimitResult = await authRateLimiter.check(identifier, RateLimits.AUTH_VERIFY)
 
         if (!rateLimitResult.success) {
             return NextResponse.json(
                 { message: 'Muitas tentativas. Tente novamente mais tarde.' },
-                { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+                { status: HttpStatus.TOO_MANY_REQUESTS, headers: createRateLimitHeaders(rateLimitResult) }
             )
         }
 
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest) {
         if (!validation.success) {
             return NextResponse.json(
                 { message: 'Dados inválidos', errors: validation.errors },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -44,14 +46,14 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json(
                 { message: 'Usuário não encontrado' },
-                { status: 404 }
+                { status: HttpStatus.NOT_FOUND }
             )
         }
 
         if (user.active) {
             return NextResponse.json(
                 { message: 'Conta já verificada' },
-                { status: 200 }
+                { status: HttpStatus.OK }
             )
         }
 
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
         if (!result.success) {
             return NextResponse.json(
                 { message: result.error },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -84,14 +86,14 @@ export async function POST(request: NextRequest) {
                     active: true
                 }
             },
-            { status: 200 }
+            { status: HttpStatus.OK }
         )
 
     } catch (error) {
         console.error('Error verifying code:', error)
         return NextResponse.json(
             { message: 'Erro ao verificar código' },
-            { status: 500 }
+            { status: HttpStatus.INTERNAL_SERVER_ERROR }
         )
     }
 }

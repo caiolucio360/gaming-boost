@@ -130,6 +130,13 @@ module.exports = {
         'glow-lg': '0 0 30px rgba(124, 58, 237, 0.7)',
         'glow-hover': '0 0 30px rgba(124, 58, 237, 0.7)',
       },
+      dropShadow: {
+        // Brand glow drop-shadow filters (for text/icon glow — use these
+        // instead of box-shadow glow on text/SVG). Uses brand-purple-light.
+        'glow-sm': '0 0 8px rgba(168, 85, 247, 0.7)',
+        'glow': '0 0 15px rgba(168, 85, 247, 0.6)',
+        'glow-lg': '0 0 25px rgba(168, 85, 247, 0.6)',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

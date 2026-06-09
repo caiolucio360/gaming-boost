@@ -9,6 +9,7 @@
 
 import { NextResponse } from 'next/server'
 import { list, del } from '@vercel/blob'
+import { HttpStatus } from '@/lib/http-status'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // 60 seconds is the max for hobby/pro usually
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
       console.error('[CRON:CLEANUP-BLOB] CRON_SECRET not configured')
       return NextResponse.json(
         { message: 'Cron secret not configured' },
-        { status: 500 }
+        { status: HttpStatus.INTERNAL_SERVER_ERROR }
       )
     }
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       })
       return NextResponse.json(
         { message: 'Unauthorized' },
-        { status: 401 }
+        { status: HttpStatus.UNAUTHORIZED }
       )
     }
 
@@ -91,11 +92,8 @@ export async function POST(request: Request) {
     console.error('❌ Vercel Blob cleanup error:', error)
 
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
+      { message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

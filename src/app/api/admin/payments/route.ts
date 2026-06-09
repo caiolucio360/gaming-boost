@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { Prisma, RevenueStatus } from '@/generated/prisma/client'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 // GET - Listar receitas do admin
 export async function GET(request: NextRequest) {
@@ -106,13 +107,13 @@ export async function GET(request: NextRequest) {
         },
         pagination: { total, limit, offset },
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Erro ao buscar receitas do admin:', error)
     return NextResponse.json(
       { message: 'Erro ao buscar receitas' },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     )
   }
 }

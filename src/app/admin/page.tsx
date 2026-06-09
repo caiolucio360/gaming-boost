@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
                   </CardHeader>
                   <CardContent>
                     {chartData.statusChart.length === 0 ? (
-                      <div className="h-[200px] flex items-center justify-center text-brand-gray-500 font-rajdhani text-sm">
+                      <div className="h-52 flex items-center justify-center text-brand-gray-500 font-rajdhani text-sm">
                         Nenhum pedido registrado
                       </div>
                     ) : (

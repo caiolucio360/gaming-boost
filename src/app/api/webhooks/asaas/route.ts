@@ -29,12 +29,12 @@ export async function POST(request: NextRequest) {
 
     if (!process.env.ASAAS_WEBHOOK_SECRET) {
       console.error('[ASAAS WEBHOOK] ASAAS_WEBHOOK_SECRET is not configured')
-      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
+      return NextResponse.json({ message: 'Webhook secret not configured' }, { status: 500 })
     }
 
     if (webhookToken !== process.env.ASAAS_WEBHOOK_SECRET) {
       console.warn('[ASAAS WEBHOOK] Unauthorized request - invalid token')
-      return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 })
+      return NextResponse.json({ message: 'Unauthorized webhook request' }, { status: 401 })
     }
 
     const payload = await request.json()
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     console.log(`[ASAAS WEBHOOK] Event: ${event}`, payment?.id || transfer?.id || '')
 
     if (!event) {
-      return NextResponse.json({ error: 'Missing event field' }, { status: 400 })
+      return NextResponse.json({ message: 'Missing event field' }, { status: 400 })
     }
 
     // ========================================================================
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[ASAAS WEBHOOK] Processing error:', error)
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { message: 'Webhook processing failed' },
       { status: 500 }
     )
   }

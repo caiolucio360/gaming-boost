@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { apiRateLimiter, getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
-import { ErrorCodes, getStatusForError } from '@/lib/error-constants'
+import { NextResponse } from 'next/server'
+import { apiRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { getStatusForError } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
+import { RateLimits } from '@/lib/rate-limit-config'
 import { OrderService } from '@/services'
 import { z } from 'zod'
 
@@ -20,66 +22,29 @@ const CreateOrderSchema = z.object({
   metadata: z.string().or(z.record(z.string(), z.unknown()).transform(obj => JSON.stringify(obj))).optional(),
 })
 
-export async function GET(request: NextRequest) {
-  try {
-    // Verify authentication
-    const authResult = await verifyAuth(request)
-
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
-        401
-      )
-    }
-
-    const userId = authResult.user.id
-
+export const GET = withApiHandler(
+  async ({ user }) => {
     // Use OrderService to get user's CS2 orders
-    const result = await OrderService.getUserCS2Orders(userId)
+    const result = await OrderService.getUserCS2Orders(user.id)
 
     if (!result.success) {
       return NextResponse.json(
         { message: result.error },
-        { status: 500 }
+        { status: HttpStatus.INTERNAL_SERVER_ERROR }
       )
     }
 
-    return NextResponse.json({ orders: result.data }, { status: 200 })
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_FETCH_FAILED, 'GET /api/orders')
+    return NextResponse.json({ orders: result.data }, { status: HttpStatus.OK })
+  },
+  {
+    auth: true,
+    errorMessage: ErrorMessages.ORDER_FETCH_FAILED,
+    endpoint: 'GET /api/orders',
   }
-}
+)
 
-export async function POST(request: NextRequest) {
-  try {
-    // Rate limiting: 10 order creation attempts per minute per IP
-    const identifier = getIdentifier(request)
-    const rateLimitResult = await apiRateLimiter.check(identifier, 10)
-
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          message: ErrorMessages.RATE_LIMIT_GENERIC,
-          error: ErrorCodes.RATE_LIMIT_EXCEEDED
-        },
-        {
-          status: 429,
-          headers: createRateLimitHeaders(rateLimitResult)
-        }
-      )
-    }
-
-    // Verify authentication
-    const authResult = await verifyAuth(request)
-
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
-        401
-      )
-    }
-
-    const userId = authResult.user.id
+export const POST = withApiHandler(
+  async ({ request, user, rateLimitResult }) => {
     const body = await request.json()
 
     // Validate with Zod
@@ -89,12 +54,12 @@ export async function POST(request: NextRequest) {
       if (!body.total) {
         return NextResponse.json(
           { message: 'total é obrigatório' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       }
       return NextResponse.json(
         { message: ErrorMessages.INVALID_DATA },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       )
     }
 
@@ -102,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     // Use OrderService to create order
     const result = await OrderService.createOrder({
-      userId,
+      userId: user.id,
       game: data.game,
       serviceType: data.serviceType,
       total: typeof data.total === 'number' ? data.total : parseFloat(String(data.total)),
@@ -117,11 +82,11 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       // Map error codes to appropriate HTTP status
-      const status = result.code ? getStatusForError(result.code) : 500
+      const status = result.code ? getStatusForError(result.code) : HttpStatus.INTERNAL_SERVER_ERROR
 
       return NextResponse.json(
         { message: result.error, code: result.code },
-        { status, headers: createRateLimitHeaders(rateLimitResult) }
+        { status, headers: rateLimitResult ? createRateLimitHeaders(rateLimitResult) : undefined }
       )
     }
 
@@ -131,11 +96,16 @@ export async function POST(request: NextRequest) {
         order: result.data,
       },
       {
-        status: 201,
-        headers: createRateLimitHeaders(rateLimitResult)
+        status: HttpStatus.CREATED,
+        headers: rateLimitResult ? createRateLimitHeaders(rateLimitResult) : undefined,
       }
     )
-  } catch (error) {
-    return createApiErrorResponse(error, ErrorMessages.ORDER_CREATE_FAILED, 'POST /api/orders')
+  },
+  {
+    auth: true,
+    rateLimit: { limiter: apiRateLimiter, max: RateLimits.ORDER_CREATE },
+    rateLimitMessage: ErrorMessages.RATE_LIMIT_GENERIC,
+    errorMessage: ErrorMessages.ORDER_CREATE_FAILED,
+    endpoint: 'POST /api/orders',
   }
-}
+)

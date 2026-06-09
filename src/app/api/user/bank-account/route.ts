@@ -1,106 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { withApiHandler } from '@/lib/api-handler'
+import { ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
-// GET - Obter conta bancária do usuário
-export async function GET(request: NextRequest) {
-  try {
-    const authResult = await verifyAuth(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
-    const userId = authResult.user.id
-
-    // Verificar se é booster ou admin
-    if (authResult.user.role !== 'BOOSTER' && authResult.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { message: 'Apenas boosters e admins podem ter conta bancária' },
-        { status: 403 }
-      )
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        pixKey: true,
-      },
+// GET - Obter conta bancária do usuário (boosters e admins)
+export const GET = withApiHandler(
+  async ({ user }) => {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { id: true, pixKey: true },
     })
 
-    if (!user) {
-      return NextResponse.json(
-        { message: 'Usuário não encontrado' },
-        { status: 404 }
-      )
+    if (!dbUser) {
+      return NextResponse.json({ message: ErrorMessages.USER_NOT_FOUND }, { status: HttpStatus.NOT_FOUND })
     }
 
-    return NextResponse.json({ pixKey: user.pixKey }, { status: 200 })
-  } catch (error) {
-    console.error('Erro ao buscar conta bancária:', error)
-    return NextResponse.json(
-      { message: 'Erro ao buscar conta bancária' },
-      { status: 500 }
-    )
-  }
-}
+    return NextResponse.json({ pixKey: dbUser.pixKey }, { status: HttpStatus.OK })
+  },
+  { auth: { roles: ['BOOSTER', 'ADMIN'] }, errorMessage: 'Erro ao buscar conta bancária', endpoint: 'GET /api/user/bank-account' }
+)
 
-// PUT - Atualizar conta bancária do usuário
-export async function PUT(request: NextRequest) {
-  try {
-    const authResult = await verifyAuth(request)
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
+// PUT - Atualizar conta bancária do usuário (boosters e admins)
+export const PUT = withApiHandler(
+  async ({ request, user }) => {
+    const { pixKey } = await request.json()
 
-    const userId = authResult.user.id
-
-    // Verificar se é booster ou admin
-    if (authResult.user.role !== 'BOOSTER' && authResult.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { message: 'Apenas boosters e admins podem ter conta bancária' },
-        { status: 403 }
-      )
-    }
-
-    const body = await request.json()
-    const { pixKey } = body
-
-    // Validar campo obrigatório
     if (!pixKey || pixKey.trim() === '') {
-      return NextResponse.json(
-        { message: 'Chave PIX é obrigatória' },
-        { status: 400 }
-      )
+      return NextResponse.json({ message: 'Chave PIX é obrigatória' }, { status: HttpStatus.BAD_REQUEST })
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        pixKey: pixKey.trim(),
-      },
-      select: {
-        id: true,
-        pixKey: true,
-      },
+      where: { id: user.id },
+      data: { pixKey: pixKey.trim() },
+      select: { id: true, pixKey: true },
     })
 
     return NextResponse.json(
       { message: 'Chave PIX atualizada com sucesso', pixKey: updatedUser.pixKey },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
-  } catch (error) {
-    console.error('Erro ao atualizar conta bancária:', error)
-    return NextResponse.json(
-      { message: 'Erro ao atualizar conta bancária' },
-      { status: 500 }
-    )
-  }
-}
-
+  },
+  { auth: { roles: ['BOOSTER', 'ADMIN'] }, errorMessage: 'Erro ao atualizar conta bancária', endpoint: 'PUT /api/user/bank-account' }
+)

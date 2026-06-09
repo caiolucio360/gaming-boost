@@ -709,19 +709,22 @@ export default function BoosterDashboardPage() {
                         alt="Preview do comprovante"
                         className="w-full rounded-lg border border-brand-purple/30 object-cover max-h-56"
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={handleRemoveProof}
-                        className="absolute top-2 right-2 bg-black/70 rounded-full p-1 hover:bg-red-600/80 transition-colors"
+                        className="absolute top-2 right-2 h-auto w-auto min-h-0 min-w-0 p-1 rounded-full bg-brand-black/70 border-transparent hover:bg-red-600/80"
                       >
                         <X className="h-4 w-4 text-white" />
-                      </button>
+                      </Button>
                     </div>
                   ) : (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 flex flex-col items-center gap-3 transition-colors cursor-pointer bg-brand-purple/5 hover:bg-brand-purple/10"
+                      className="w-full h-auto flex-col border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 gap-3 bg-brand-purple/5 hover:bg-brand-purple/10"
                     >
                       <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
                       <span className="text-brand-gray-400 font-rajdhani text-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
@@ -730,7 +733,7 @@ export default function BoosterDashboardPage() {
                       <span className="text-brand-gray-500 font-rajdhani text-xs" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                         JPG, PNG ou WebP — máx. 5 MB
                       </span>
-                    </button>
+                    </Button>
                   )}
                   <input
                     ref={fileInputRef}
