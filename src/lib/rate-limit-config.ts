@@ -18,6 +18,12 @@ export const RateLimits = {
   /** Auth: email verification resend per 15-minute window */
   AUTH_RESEND_CODE: 3,
 
+  /** Auth: email verification code submissions per 15-minute window */
+  AUTH_VERIFY: 5,
+
+  /** Auth: reset-password submissions per 15-minute window */
+  AUTH_RESET_PASSWORD: 5,
+
   /** Orders: creation attempts per minute */
   ORDER_CREATE: 10,
 
