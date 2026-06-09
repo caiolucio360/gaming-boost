@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db'
 import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
 import { createAsaasPixTransfer } from '@/lib/asaas'
 import { Withdrawal } from '@/generated/prisma/client'
+import { HttpStatus } from '@/lib/http-status'
+import { MINIMUM_WITHDRAWAL_AMOUNT_CENTS, VALID_PIX_KEY_TYPES } from '@/lib/withdraw-constants'
 import crypto from 'crypto'
 
 // POST - Criar um novo saque (Admin)
@@ -13,7 +15,7 @@ export async function POST(request: NextRequest) {
         if (!authResult.authenticated || !authResult.user) {
             return createAuthErrorResponse(
                 authResult.error || 'Não autenticado',
-                401
+                HttpStatus.UNAUTHORIZED
             )
         }
 
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
         if (authResult.user.role !== 'ADMIN') {
             return NextResponse.json(
                 { message: 'Apenas admins podem solicitar saques' },
-                { status: 403 }
+                { status: HttpStatus.FORBIDDEN }
             )
         }
 
@@ -30,26 +32,25 @@ export async function POST(request: NextRequest) {
         const { amount, pixKeyType, pixKey, description } = body
 
         // Validações
-        if (!amount || amount < 350) {
+        if (!amount || amount < MINIMUM_WITHDRAWAL_AMOUNT_CENTS) {
             return NextResponse.json(
                 { message: 'Valor mínimo para saque é R$ 3,50' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
         if (!pixKeyType || !pixKey) {
             return NextResponse.json(
                 { message: 'Tipo de chave PIX e chave são obrigatórios' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
         // Validar tipo de chave PIX
-        const validPixKeyTypes = ['CPF', 'CNPJ', 'PHONE', 'EMAIL', 'EVP']
-        if (!validPixKeyTypes.includes(pixKeyType)) {
+        if (!VALID_PIX_KEY_TYPES.includes(pixKeyType)) {
             return NextResponse.json(
                 { message: 'Tipo de chave PIX inválido' },
-                { status: 400 }
+                { status: HttpStatus.BAD_REQUEST }
             )
         }
 
@@ -102,11 +103,11 @@ export async function POST(request: NextRequest) {
             if (e.code === 'INSUFFICIENT') {
                 return NextResponse.json(
                     { message: e.message, availableBalance: e.availableBalance, requestedAmount: amount },
-                    { status: 400 }
+                    { status: HttpStatus.BAD_REQUEST }
                 )
             }
             if (e.code === 'PENDING_EXISTS') {
-                return NextResponse.json({ message: e.message }, { status: 400 })
+                return NextResponse.json({ message: e.message }, { status: HttpStatus.BAD_REQUEST })
             }
             throw err
         }
@@ -134,7 +135,7 @@ export async function POST(request: NextRequest) {
                 success: true,
                 withdrawal,
                 message: 'Saque solicitado com sucesso!'
-            }, { status: 201 })
+            }, { status: HttpStatus.CREATED })
         } catch (error) {
             // AbacatePay falhou — remover registro provisional para não bloquear futuros saques
             await prisma.withdrawal.delete({ where: { id: provisional.id } }).catch(() => {})
@@ -144,14 +145,14 @@ export async function POST(request: NextRequest) {
                     message: 'Erro ao processar saque',
                     error: error instanceof Error ? error.message : 'Erro desconhecido'
                 },
-                { status: 500 }
+                { status: HttpStatus.INTERNAL_SERVER_ERROR }
             )
         }
     } catch (error) {
         console.error('Erro na rota de saque:', error)
         return NextResponse.json(
             { message: 'Erro ao processar solicitação' },
-            { status: 500 }
+            { status: HttpStatus.INTERNAL_SERVER_ERROR }
         )
     }
 }
@@ -172,7 +173,7 @@ export async function GET(request: NextRequest) {
         if (authResult.user.role !== 'ADMIN') {
             return NextResponse.json(
                 { message: 'Apenas admins podem ver seus saques' },
-                { status: 403 }
+                { status: HttpStatus.FORBIDDEN }
             )
         }
 
@@ -216,7 +217,7 @@ export async function GET(request: NextRequest) {
         console.error('Erro ao listar saques:', error)
         return NextResponse.json(
             { message: 'Erro ao buscar saques' },
-            { status: 500 }
+            { status: HttpStatus.INTERNAL_SERVER_ERROR }
         )
     }
 }

@@ -1,22 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
+import { withApiHandler } from '@/lib/api-handler'
+import { HttpStatus } from '@/lib/http-status'
 
-export async function GET(request: NextRequest) {
-  try {
-    // Verificar autenticação via NextAuth
-    const authResult = await verifyAuth(request)
-
-    if (!authResult.authenticated || !authResult.user) {
-      return createAuthErrorResponse(
-        authResult.error || 'Não autenticado',
-        401
-      )
-    }
-
+export const GET = withApiHandler(
+  async ({ user }) => {
     // Buscar dados completos do usuário no banco
-    const user = await prisma.user.findUnique({
-      where: { id: authResult.user.id },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         id: true,
         email: true,
@@ -29,28 +20,27 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json(
         { message: 'Usuário não encontrado' },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       )
     }
 
     // Verificar se o usuário está ativo
-    if (!user.active) {
+    if (!dbUser.active) {
       return NextResponse.json(
         { message: 'Conta desativada' },
-        { status: 403 }
+        { status: HttpStatus.FORBIDDEN }
       )
     }
 
-    return NextResponse.json({ user }, { status: 200 })
-  } catch (error) {
-    console.error('Erro ao verificar sessão:', error)
-    return NextResponse.json(
-      { message: 'Erro ao verificar sessão' },
-      { status: 500 }
-    )
+    return NextResponse.json({ user: dbUser }, { status: HttpStatus.OK })
+  },
+  {
+    auth: true,
+    errorMessage: 'Erro ao verificar sessão',
+    endpoint: 'GET /api/auth/me',
+    inlineCatch: true,
   }
-}
-
+)

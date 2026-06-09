@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server'
 import { Prisma } from '@/generated/prisma/client'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
 
 // Re-export so existing imports from '@/lib/api-errors' keep working
 export { ErrorMessages } from '@/lib/error-constants'
@@ -29,17 +30,17 @@ export function createApiErrorResponse(
       case 'P2002':
         return NextResponse.json(
           { message: ErrorMessages.DATABASE_DUPLICATE_ENTRY, error: ErrorCodes.DUPLICATE_ENTRY },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       case 'P2003':
         return NextResponse.json(
           { message: ErrorMessages.DATABASE_FOREIGN_KEY, error: ErrorCodes.FOREIGN_KEY_VIOLATION },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         )
       case 'P2025':
         return NextResponse.json(
           { message: ErrorMessages.DATABASE_NOT_FOUND, error: ErrorCodes.NOT_FOUND },
-          { status: 404 }
+          { status: HttpStatus.NOT_FOUND }
         )
     }
   }
@@ -48,7 +49,7 @@ export function createApiErrorResponse(
   if (error instanceof Prisma.PrismaClientInitializationError) {
     return NextResponse.json(
       { message: ErrorMessages.DATABASE_CONNECTION, error: ErrorCodes.DATABASE_CONNECTION_ERROR },
-      { status: 503 }
+      { status: HttpStatus.SERVICE_UNAVAILABLE }
     )
   }
 
@@ -56,7 +57,7 @@ export function createApiErrorResponse(
   if (error instanceof Prisma.PrismaClientValidationError) {
     return NextResponse.json(
       { message: ErrorMessages.DATABASE_VALIDATION, error: ErrorCodes.VALIDATION_ERROR },
-      { status: 400 }
+      { status: HttpStatus.BAD_REQUEST }
     )
   }
 
@@ -66,7 +67,7 @@ export function createApiErrorResponse(
     if (code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'ENOTFOUND') {
       return NextResponse.json(
         { message: ErrorMessages.DATABASE_CONNECTION, error: ErrorCodes.DATABASE_CONNECTION_ERROR },
-        { status: 503 }
+        { status: HttpStatus.SERVICE_UNAVAILABLE }
       )
     }
   }
@@ -78,6 +79,6 @@ export function createApiErrorResponse(
       message: isDev && error instanceof Error ? `${defaultMessage} (Dev Debug: ${error.message})` : defaultMessage, 
       error: ErrorCodes.INTERNAL_SERVER_ERROR 
     },
-    { status: 500 }
+    { status: HttpStatus.INTERNAL_SERVER_ERROR }
   )
 }

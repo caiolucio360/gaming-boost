@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { HttpStatus } from '@/lib/http-status'
 
 interface RecentOrder {
   id: number
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
         }),
       }
 
-      return NextResponse.json({ stats }, { status: 200 })
+      return NextResponse.json({ stats }, { status: HttpStatus.OK })
     } catch (queryError) {
       console.error('Erro ao executar queries:', queryError)
       throw queryError // Re-lança para ser capturado pelo catch externo

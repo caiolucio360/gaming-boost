@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth-config'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
+import { HttpStatus } from '@/lib/http-status'
 
 /**
  * Resultado da verificação de autenticação
@@ -81,7 +82,7 @@ export async function verifyRole(
 /**
  * Helper para criar resposta de erro de autenticação
  */
-export function createAuthErrorResponse(message: string, status: number = 401): NextResponse {
+export function createAuthErrorResponse(message: string, status: number = HttpStatus.UNAUTHORIZED): NextResponse {
   return NextResponse.json(
     { message },
     { status }
@@ -93,7 +94,7 @@ export function createAuthErrorResponse(message: string, status: number = 401): 
  * Usa o campo `code` para determinar o HTTP status — nunca string matching.
  */
 export function createAuthErrorResponseFromResult(authResult: AuthResult): NextResponse {
-  const status = authResult.code === ErrorCodes.FORBIDDEN ? 403 : 401
+  const status = authResult.code === ErrorCodes.FORBIDDEN ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED
   return createAuthErrorResponse(
     authResult.error || ErrorMessages.AUTH_UNAUTHENTICATED,
     status
