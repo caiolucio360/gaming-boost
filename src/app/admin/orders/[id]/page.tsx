@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -110,16 +110,7 @@ export default function AdminOrderDetailPage() {
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
-    } else if (user && user.role === 'ADMIN' && orderId) {
-      fetchOrder()
-      fetchBoosters()
-    }
-  }, [user, authLoading, router, orderId])
-
-  const fetchBoosters = async () => {
+  const fetchBoosters = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/boosters?status=VERIFIED')
       if (response.ok) {
@@ -132,9 +123,9 @@ export default function AdminOrderDetailPage() {
     } catch (error) {
       console.error('Erro ao buscar boosters:', error)
     }
-  }
+  }, [])
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     await withLoading(async () => {
       const response = await fetch(`/api/admin/orders/${orderId}`)
       if (response.ok) {
@@ -148,7 +139,16 @@ export default function AdminOrderDetailPage() {
         })
       }
     })
-  }
+  }, [withLoading, orderId])
+
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+    } else if (user && user.role === 'ADMIN' && orderId) {
+      fetchOrder()
+      fetchBoosters()
+    }
+  }, [user, authLoading, router, orderId, fetchOrder, fetchBoosters])
 
   const handleStatusUpdate = async (newStatus: string) => {
     // Re-selecting the current status is a no-op (avoids an invalid-transition 400)

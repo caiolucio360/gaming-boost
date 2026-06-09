@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -57,15 +57,7 @@ export default function AdminOrdersPage() {
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterStatus, setFilterStatus] = useState<string>('')
 
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
-    } else if (user && user.role === 'ADMIN') {
-      fetchOrders()
-    }
-  }, [user, authLoading, router, filterStatus])
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     await withLoading(async () => {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
@@ -76,7 +68,15 @@ export default function AdminOrdersPage() {
         setOrders(data.orders || [])
       }
     })
-  }
+  }, [withLoading, filterStatus])
+
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+    } else if (user && user.role === 'ADMIN') {
+      fetchOrders()
+    }
+  }, [user, authLoading, router, fetchOrders])
 
   if (authLoading) {
     return <LoadingSpinner />

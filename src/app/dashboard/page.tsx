@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
@@ -61,6 +61,13 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, router])
 
+  const fetchOrders = useCallback(async (isRefresh = false) => {
+    await withLoading(async () => {
+      const data = await apiGet<{ orders: Order[] }>('/api/orders')
+      setOrders(data.orders || [])
+    }, isRefresh)
+  }, [withLoading])
+
   useEffect(() => {
     if (user && user.role === 'CLIENT') {
       fetchOrders()
@@ -68,7 +75,7 @@ export default function DashboardPage() {
         .then((data) => setCurrentDiscountPct(data.user?.currentDiscountPct ?? 0))
         .catch(() => {})
     }
-  }, [user?.id]) // Usar apenas user.id para evitar re-renders desnecessários
+  }, [user, fetchOrders])
 
   // Função para atualizar apenas os dados sem mostrar banner de refreshing
   const updateOrdersSilently = async () => {
@@ -90,13 +97,6 @@ export default function DashboardPage() {
       }
     },
   })
-
-  const fetchOrders = async (isRefresh = false) => {
-    await withLoading(async () => {
-      const data = await apiGet<{ orders: Order[] }>('/api/orders')
-      setOrders(data.orders || [])
-    }, isRefresh)
-  }
 
   // Filtrar e ordenar pedidos
   const filteredOrders = useMemo(() => {

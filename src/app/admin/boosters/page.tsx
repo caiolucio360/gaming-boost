@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -65,17 +65,7 @@ export default function AdminBoostersPage() {
     const [dialogOpen, setDialogOpen] = useState(false)
     const [dialogAction, setDialogAction] = useState<'VERIFIED' | 'REJECTED'>('VERIFIED')
 
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.replace('/login')
-        } else if (user && user.role !== 'ADMIN') {
-            router.replace('/dashboard')
-        } else if (user && user.role === 'ADMIN') {
-            fetchApplications()
-        }
-    }, [user, authLoading, router, filter])
-
-    const fetchApplications = async () => {
+    const fetchApplications = useCallback(async () => {
         await withLoading(async () => {
             try {
                 const response = await fetch(`/api/admin/boosters?status=${filter}`)
@@ -87,7 +77,17 @@ export default function AdminBoostersPage() {
                 showError('Erro', 'Não foi possível carregar as aplicações')
             }
         })
-    }
+    }, [withLoading, filter])
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.replace('/login')
+        } else if (user && user.role !== 'ADMIN') {
+            router.replace('/dashboard')
+        } else if (user && user.role === 'ADMIN') {
+            fetchApplications()
+        }
+    }, [user, authLoading, router, fetchApplications])
 
     const handleAction = async () => {
         if (!selectedApp) return

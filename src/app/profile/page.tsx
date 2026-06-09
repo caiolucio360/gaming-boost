@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -67,16 +67,7 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  useEffect(() => {
-    if (!authLoading && !authUser) {
-      // Usar replace para redirecionamento de autenticação
-      router.replace('/login')
-    } else if (authUser) {
-      fetchProfile()
-    }
-  }, [authUser, authLoading, router])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     await withLoading(async () => {
       const response = await fetch('/api/user/profile')
       if (response.ok) {
@@ -87,7 +78,7 @@ export default function ProfilePage() {
       } else {
         showError('Erro', 'Não foi possível carregar o perfil')
       }
-      
+
       // Buscar chave PIX se for booster ou admin
       if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
         try {
@@ -101,7 +92,16 @@ export default function ProfilePage() {
         }
       }
     })
-  }
+  }, [withLoading, authUser])
+
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      // Usar replace para redirecionamento de autenticação
+      router.replace('/login')
+    } else if (authUser) {
+      fetchProfile()
+    }
+  }, [authUser, authLoading, router, fetchProfile])
 
   const handleSave = async () => {
     try {

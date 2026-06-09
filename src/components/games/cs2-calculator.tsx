@@ -44,7 +44,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   const [isLoading, setIsLoading] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
-  const [dynamicPoints, setDynamicPoints] = useState<number[] | null>(null)
+  const [, setDynamicPoints] = useState<number[] | null>(null)
   const [, setAvailableHours] = useState<number[]>([])
   const [isLoadingRanges, setIsLoadingRanges] = useState(false)
   const { user } = useAuth()
@@ -132,6 +132,9 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
     resetRatings()
     fetchRanges()
+    // currentRating/targetRating são lidos só como guard de "default inicial"; incluí-los nas deps
+    // re-rodaria o effect (resetando a seleção do usuário) a cada ajuste de slider.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, gameMode, selectedServiceType])
 
   // Check for active orders when user is logged in
