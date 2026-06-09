@@ -51,6 +51,8 @@ npm run test:coverage    # Coverage report
 
 ## Key Patterns
 
+> Full conventions live in `.claude/rules/code_patterns.md` (API + frontend) and `.claude/rules/design_system.md` (styling, incl. the email/Recharts hex **exceptions**). The summary below is the quick reference.
+
 ### API Routes
 
 ```typescript

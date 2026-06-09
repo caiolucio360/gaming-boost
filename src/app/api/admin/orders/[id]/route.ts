@@ -168,7 +168,7 @@ export async function PUT(
       if (!assignResult.success) {
         const statusCode = assignResult.code ? getStatusForError(assignResult.code) : HttpStatus.INTERNAL_SERVER_ERROR
         return NextResponse.json(
-          { message: assignResult.error, error: assignResult.code },
+          { message: assignResult.error, code: assignResult.code },
           { status: statusCode }
         )
       }
@@ -195,7 +195,7 @@ export async function PUT(
 
       if (!currentOrder) {
         return NextResponse.json(
-          { message: ErrorMessages.ORDER_NOT_FOUND, error: ErrorCodes.ORDER_NOT_FOUND },
+          { message: ErrorMessages.ORDER_NOT_FOUND, code: ErrorCodes.ORDER_NOT_FOUND },
           { status: HttpStatus.NOT_FOUND }
         )
       }
@@ -215,7 +215,7 @@ export async function PUT(
         return NextResponse.json(
           {
             message,
-            error: ErrorCodes.INVALID_STATUS_TRANSITION,
+            code: ErrorCodes.INVALID_STATUS_TRANSITION,
             currentStatus: currentOrder.status,
             requestedStatus: status,
           },
@@ -228,7 +228,7 @@ export async function PUT(
         return NextResponse.json(
           {
             message: ErrorMessages.ADMIN_ORDER_REQUIRES_BOOSTER,
-            error: ErrorCodes.INVALID_STATUS_TRANSITION,
+            code: ErrorCodes.INVALID_STATUS_TRANSITION,
           },
           { status: HttpStatus.BAD_REQUEST }
         )

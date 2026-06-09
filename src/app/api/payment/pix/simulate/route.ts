@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     message: 'Erro ao simular pagamento',
-                    error: error instanceof Error ? error.message : 'Erro desconhecido'
+                    detail: error instanceof Error ? error.message : 'Erro desconhecido'
                 },
                 { status: HttpStatus.INTERNAL_SERVER_ERROR }
             )

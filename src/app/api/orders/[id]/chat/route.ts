@@ -104,7 +104,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         return NextResponse.json(
           {
             message: 'Muitas mensagens. Aguarde um momento.',
-            error: 'RATE_LIMIT_EXCEEDED',
+            code: 'RATE_LIMIT_EXCEEDED',
           },
           {
             status: HttpStatus.TOO_MANY_REQUESTS,

@@ -61,7 +61,7 @@ function LoginContent() {
   return (
     <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-8">
       <div className="text-center mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2">
+        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
           <span className="text-brand-purple-light">ENTRAR</span>
           <span className="text-white"> NA CONTA</span>
         </h1>
@@ -150,12 +150,12 @@ function LoginContent() {
             </Link>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 px-6 rounded-lg transition-all
-              shadow-glow hover:shadow-glow-hover
-              disabled:opacity-50 disabled:cursor-not-allowed font-rajdhani flex items-center justify-center gap-2"
+            size="lg"
+            className="w-full font-bold font-rajdhani"
+            style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             {isLoading ? (
               <>
@@ -165,7 +165,7 @@ function LoginContent() {
             ) : (
               'ENTRAR'
             )}
-          </button>
+          </Button>
 
           <div className="text-center text-xs">
             <span className="text-brand-gray-500 font-rajdhani">Não tem uma conta? </span>

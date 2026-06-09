@@ -252,7 +252,7 @@ export default function AdminUsersPage() {
                   setFilterRole(value === 'all' ? '' : value)
                 }}
               >
-                <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                   <SelectValue placeholder="Todos os roles" />
                 </SelectTrigger>
                 <SelectContent className="bg-brand-black border-brand-purple/50">

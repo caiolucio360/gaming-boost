@@ -40,7 +40,7 @@ export function NotificationItem({ notification, onRead, compact = false }: Noti
         "transition-all duration-300 ease-in-out",
         notification.read 
           ? "bg-transparent hover:bg-brand-purple/5" 
-          : "bg-gradient-to-r from-brand-purple/15 to-brand-purple/5 border-l-4 border-brand-purple hover:from-brand-purple/20 hover:to-brand-purple/10 hover:shadow-[0_0_15px_rgba(124,58,237,0.3)]",
+          : "bg-gradient-to-r from-brand-purple/15 to-brand-purple/5 border-l-4 border-brand-purple hover:from-brand-purple/20 hover:to-brand-purple/10 hover:shadow-glow-sm",
         compact ? "text-sm p-3" : ""
       )}
       onClick={() => !notification.read && onRead?.(notification.id)}

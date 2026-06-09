@@ -83,7 +83,7 @@ function PaymentContent() {
   const handlePaymentConfirmed = () => {
     // Redirecionar para dashboard após um breve delay
     setTimeout(() => {
-      router.push('/dashboard')
+      router.replace('/dashboard')
     }, 2000)
   }
 

@@ -104,7 +104,7 @@ export default function AdminOrdersPage() {
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-full md:w-[200px] bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent className="bg-brand-black border-brand-purple/50">

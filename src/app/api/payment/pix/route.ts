@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           message: 'Muitas tentativas de pagamento. Aguarde um momento.',
-          error: ErrorCodes.RATE_LIMIT_EXCEEDED
+          code: ErrorCodes.RATE_LIMIT_EXCEEDED
         },
         {
           status: HttpStatus.TOO_MANY_REQUESTS,
@@ -132,8 +132,7 @@ export async function POST(request: NextRequest) {
       if (missingFields.phone || missingFields.taxId) {
         return NextResponse.json(
           {
-            message: 'Dados incompletos para pagamento',
-            error: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
+            message: 'Para realizar pagamentos via PIX, informe seu telefone e CPF.',
             missingFields
           },
           { status: HttpStatus.BAD_REQUEST }
