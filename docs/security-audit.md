@@ -179,17 +179,29 @@ Nenhuma correção necessária.
 
 ### Pendências ainda abertas (PRs dedicados, fora do escopo de segurança imediata)
 
-- **CSP por nonce** (🟡): exige reescrever o `withAuth` middleware, expandir o matcher para todas as
-  rotas e resolver `style-src` com nonce (inviável direto com Tailwind v4 + framer-motion inline) —
-  requer QA de browser. Não é um simples ajuste de config.
+- ~~**CSP por nonce**~~ → **INVESTIGADO E DESCARTADO (2026-06-08).** Foi feito um protótipo funcional
+  (middleware com nonce por-request via `getToken`, CSP `script-src 'self' 'nonce-…'` sem `'unsafe-inline'`
+  em prod, validado por `curl`: o nonce sai no header e o Next nonça seus scripts inline). **Porém** o
+  nonce é **incompatível com renderização estática**: páginas estáticas são geradas no build (sem
+  request/nonce), então seus `<script>self.__next_f.push(…)</script>` inline ficam **sem nonce** e
+  seriam bloqueados pela CSP. A única forma de fazer funcionar é `export const dynamic = 'force-dynamic'`
+  no layout raiz — tornando **todas** as páginas SSR per-request, perdendo o cache estático/CDN de HTML
+  das páginas de marketing (TTFB maior, mais custo de servidor). **Decisão:** não adotar — o único ganho
+  seria remover `'unsafe-inline'` de `script-src` (benefício incremental: o app já tem CSP forte, React
+  escapa por padrão e não há injeção de HTML com dado do usuário), e o custo (tudo dinâmico) supera o
+  benefício. A CSP atual (sem `unsafe-eval` em prod, `frame-ancestors 'none'`, `object-src 'none'`,
+  `base-uri`/`form-action 'self'`, COOP) permanece. Reavaliar só se PPR/Cache Components mudarem o
+  trade-off de renderização.
 - ~~**Reabilitar `eslint.ignoreDuringBuilds`**~~ → **FEITO (2026-06-08).** `ignoreDuringBuilds: false`;
   os 96 erros (`no-explicit-any` + 1 `no-empty-object-type`) foram corrigidos com tipos do Prisma
   (`Prisma.*WhereInput`/`UpdateInput`, enums, model types) e `unknown`/casts tipados. Override de
   ESLint libera `any` em testes (mocks). Exceção documentada: os callbacks de `prisma.$transaction`
   mantêm `tx: any` com `eslint-disable-line` — o client Prisma 7 (output custom) tem um bug de tipos
   em que `Prisma.TransactionClient` não expõe os delegates de model (e anotar tipo mais rico quebra a
-  atribuição do callback). Restam **89 warnings** (`no-unused-vars`, `react-hooks/exhaustive-deps`,
-  `no-img-element`) — não bloqueiam o build, ficam para limpeza incremental.
+  atribuição do callback). Os **89 warnings** restantes (`no-unused-vars`, `react-hooks/exhaustive-deps`,
+  `no-img-element`) foram **todos zerados (PR #72)**: vars/imports removidos, `<img>` documentado, e
+  effects refatorados com `useCallback` (com exceções justificadas onde incluir deps causaria regressão).
+  Lint agora: **0 erros, 0 warnings**.
 - **Hardening de Postgres** (infra, fora do código): roles separadas (runtime sem DDL vs migração),
   TLS `verify-full`, pooling em serverless, backups testados, logging/auditoria. Guia de aplicação
   manual adaptado ao setup (Prisma + adapter-pg, single-tenant): **`docs/postgres-hardening.md`**.
