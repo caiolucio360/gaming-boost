@@ -40,7 +40,7 @@ npm run test:coverage    # Coverage report
 
 **Route protection** (`src/middleware.ts`):
 - `/admin/*` — ADMIN only
-- `/booster/*` — BOOSTER + ADMIN (except `/booster/apply`, open to CLIENTs)
+- `/booster/*` — BOOSTER + ADMIN
 - `/dashboard/*`, `/cart/*`, `/payment/*` — authenticated users only
 
 **Pricing** is entirely database-driven via `PricingConfig` model. Never add calculation logic to `src/lib/games-config.ts` (metadata only). Use `/api/pricing/calculate` for price calculations.
@@ -110,7 +110,7 @@ const { loading, withLoading } = useLoading({ initialLoading: true })
 
 ## Removed Features (MVP scope — do not re-add)
 
-Dispute system, review system, booster public profiles (`/booster/[id]`), commission history audit trail, contact form.
+Dispute system, review system, booster public profiles (`/booster/[id]`), commission history audit trail, contact form, **booster application/onboarding flow** (no `/booster/apply`, no `BoosterProfile` model — admins promote users CLIENT↔BOOSTER directly via buttons on `/admin/users`).
 
 ## Design System
 

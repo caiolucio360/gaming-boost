@@ -75,6 +75,7 @@ export default function AdminUsersPage() {
   const [commissionPercentage, setCommissionPercentage] = useState<string>('')
   const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
+  const [roleChange, setRoleChange] = useState<{ user: AdminUser; toRole: 'BOOSTER' | 'CLIENT' } | null>(null)
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -144,6 +145,32 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error('Erro ao deletar usuário:', error)
       showError('Erro ao deletar usuário')
+    }
+  }
+
+  const handleRoleChange = async () => {
+    if (!roleChange) return
+    try {
+      const response = await fetch(`/api/admin/users/${roleChange.user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: roleChange.toRole }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (response.ok) {
+        showSuccess(
+          roleChange.toRole === 'BOOSTER'
+            ? 'Usuário promovido a Booster!'
+            : 'Usuário rebaixado para Cliente!'
+        )
+        setRoleChange(null)
+        fetchUsers(true)
+      } else {
+        showError('Erro ao alterar cargo', data.message || 'Tente novamente.')
+      }
+    } catch (error) {
+      console.error('Erro ao alterar cargo:', error)
+      showError('Erro ao alterar cargo')
     }
   }
 
@@ -367,6 +394,30 @@ export default function AdminUsersPage() {
                             Profit Share
                           </Button>
                         )}
+                        {adminUser.role === 'CLIENT' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10 font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            onClick={() => setRoleChange({ user: adminUser, toRole: 'BOOSTER' })}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Promover a Booster
+                          </Button>
+                        )}
+                        {adminUser.role === 'BOOSTER' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-orange-500/50 text-orange-300 hover:bg-orange-500/10 font-rajdhani"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            onClick={() => setRoleChange({ user: adminUser, toRole: 'CLIENT' })}
+                          >
+                            <User className="h-4 w-4 mr-2" />
+                            Rebaixar
+                          </Button>
+                        )}
                         <Button
                           asChild
                           variant="outline"
@@ -413,6 +464,21 @@ export default function AdminUsersPage() {
             Total: {users.length} usuário{users.length !== 1 ? 's' : ''}
           </p>
         </div>
+
+      {/* Dialog de promover/rebaixar cargo */}
+      <ConfirmDialog
+        open={roleChange !== null}
+        onOpenChange={(open) => { if (!open) setRoleChange(null) }}
+        title={roleChange?.toRole === 'BOOSTER' ? 'Promover a Booster' : 'Rebaixar para Cliente'}
+        description={
+          roleChange?.toRole === 'BOOSTER'
+            ? `Promover ${roleChange?.user.email} a Booster? O usuário poderá aceitar e realizar pedidos.`
+            : `Rebaixar ${roleChange?.user.email} para Cliente? O usuário deixará de aceitar novos pedidos.`
+        }
+        confirmLabel={roleChange?.toRole === 'BOOSTER' ? 'Promover' : 'Rebaixar'}
+        cancelLabel="Cancelar"
+        onConfirm={handleRoleChange}
+      />
 
       {/* Dialog para configurar comissão */}
       <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>
