@@ -26,6 +26,15 @@ jest.mock('@/lib/rate-limit', () => ({
   createRateLimitHeaders: (...args: unknown[]) => mockCreateRateLimitHeaders(...args),
 }))
 
+// Mock api-errors: the wrapper lazily `import()`s it in the catch block.
+// jest.mock intercepts dynamic imports too, so this also asserts the static
+// graph stays Prisma-free (the real module is never loaded here).
+jest.mock('@/lib/api-errors', () => ({
+  createApiErrorResponse: jest.fn((_err: unknown, message: string) =>
+    NextResponse.json({ message }, { status: HttpStatus.INTERNAL_SERVER_ERROR })
+  ),
+}))
+
 // Import after mocks
 import { withApiHandler, parseIntParam } from '@/lib/api-handler'
 
@@ -184,13 +193,12 @@ describe('withApiHandler', () => {
   })
 
   describe('tratamento de erros', () => {
-    it('deve capturar erros do handler e retornar 500', async () => {
+    it('deve capturar erros do handler e delegar a createApiErrorResponse (500)', async () => {
       const handler = withApiHandler(
         async () => { throw new Error('Unexpected') },
         {
           errorMessage: 'Falha no processamento',
           endpoint: 'GET /api/test',
-          inlineCatch: true,
         }
       )
 

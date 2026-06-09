@@ -11,9 +11,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth, verifyRole, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
 import type { AuthResult } from '@/lib/auth-middleware'
 import { getIdentifier, createRateLimitHeaders } from '@/lib/rate-limit'
-import { createApiErrorResponse } from '@/lib/api-errors'
 import { HttpStatus } from '@/lib/http-status'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
+
+// NOTE: `createApiErrorResponse` is intentionally NOT imported statically.
+// `api-errors.ts` has a transitive Prisma import; pulling it into this module's
+// static graph would load Prisma in every route that uses `withApiHandler`,
+// breaking the Jest tests of routes that don't mock it. We `import()` it lazily
+// inside the catch block instead, so the static graph stays Prisma-free.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,13 +61,6 @@ export interface HandlerOptions {
 
   /** Endpoint context string for logging (e.g. 'POST /api/orders') */
   endpoint?: string
-
-  /**
-   * If true, uses inline catch handler instead of createApiErrorResponse.
-   * Required for routes whose Jest tests would break due to the transitive
-   * Prisma import in api-errors.ts.
-   */
-  inlineCatch?: boolean
 }
 
 type HandlerFn = (ctx: HandlerContext) => Promise<NextResponse>
@@ -135,15 +133,9 @@ export function withApiHandler(
 
       return await handler({ request, user, rateLimitResult })
     } catch (error) {
-      // 4. Error handling
-      if (options.inlineCatch) {
-        console.error(`Error in ${options.endpoint || 'unknown'}:`, error)
-        return NextResponse.json(
-          { message: options.errorMessage || ErrorMessages.GENERIC_ERROR },
-          { status: HttpStatus.INTERNAL_SERVER_ERROR }
-        )
-      }
-
+      // 4. Error handling — lazy import keeps the Prisma-backed api-errors module
+      // out of this file's static graph (see note at top of file).
+      const { createApiErrorResponse } = await import('@/lib/api-errors')
       return createApiErrorResponse(
         error,
         options.errorMessage || ErrorMessages.GENERIC_ERROR,

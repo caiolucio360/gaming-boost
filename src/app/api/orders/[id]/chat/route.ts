@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit, createRateLimitHeaders } from '@/lib/rate-limit'
 import { withApiHandler, parseIntParam } from '@/lib/api-handler'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorMessages } from '@/lib/api-errors'
 import { getStatusForError } from '@/lib/error-constants'
 import { ChatService } from '@/services'
 import { SendMessageSchema, SendCredentialsSchema, ChatQuerySchema } from '@/schemas'
@@ -21,7 +21,7 @@ const chatRateLimiter = rateLimit({
 /**
  * GET /api/orders/[id]/chat - Get chat messages for an order
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   return withApiHandler(
     async ({ user }) => {
       const { id } = await params
@@ -77,13 +77,13 @@ export async function GET(request: Request, { params }: RouteParams) {
       errorMessage: ErrorMessages.ORDER_FETCH_FAILED,
       endpoint: 'GET /api/orders/[id]/chat',
     }
-  )(request as any)
+  )(request)
 }
 
 /**
  * POST /api/orders/[id]/chat - Send a message in the order chat
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   return withApiHandler(
     async ({ user }) => {
       const { id } = await params
@@ -184,5 +184,5 @@ export async function POST(request: Request, { params }: RouteParams) {
       errorMessage: ErrorMessages.ORDER_CREATE_FAILED,
       endpoint: 'POST /api/orders/[id]/chat',
     }
-  )(request as any)
+  )(request)
 }

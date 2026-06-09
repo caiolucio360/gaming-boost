@@ -9,6 +9,7 @@ export { ChatService } from './chat.service'
 export { OrderService } from './order.service'
 export { PaymentService } from './payment.service'
 export { UserService } from './user.service'
+export { WithdrawalService, mapWithdrawalCreateError } from './withdrawal.service'
 
 // Types
 export {

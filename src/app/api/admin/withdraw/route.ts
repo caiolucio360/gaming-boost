@@ -1,223 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { verifyAuth, createAuthErrorResponse } from '@/lib/auth-middleware'
-import { createAsaasPixTransfer } from '@/lib/asaas'
-import { Withdrawal } from '@/generated/prisma/client'
+import { NextResponse } from 'next/server'
+import { withApiHandler } from '@/lib/api-handler'
+import { WithdrawalService, mapWithdrawalCreateError } from '@/services'
 import { HttpStatus } from '@/lib/http-status'
-import { MINIMUM_WITHDRAWAL_AMOUNT_CENTS, VALID_PIX_KEY_TYPES } from '@/lib/withdraw-constants'
-import crypto from 'crypto'
 
 // POST - Criar um novo saque (Admin)
-export async function POST(request: NextRequest) {
-    try {
-        const authResult = await verifyAuth(request)
+export const POST = withApiHandler(
+  async ({ request, user }) => {
+    const { amount, pixKeyType, pixKey, description } = await request.json()
 
-        if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
-                HttpStatus.UNAUTHORIZED
-            )
-        }
+    const result = await WithdrawalService.create({
+      userId: user.id,
+      source: 'ADMIN',
+      amount,
+      pixKeyType,
+      pixKey,
+      description,
+    })
 
-        // Verificar se é ADMIN
-        if (authResult.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { message: 'Apenas admins podem solicitar saques' },
-                { status: HttpStatus.FORBIDDEN }
-            )
-        }
-
-        const userId = authResult.user.id
-        const body = await request.json()
-        const { amount, pixKeyType, pixKey, description } = body
-
-        // Validações
-        if (!amount || amount < MINIMUM_WITHDRAWAL_AMOUNT_CENTS) {
-            return NextResponse.json(
-                { message: 'Valor mínimo para saque é R$ 3,50' },
-                { status: HttpStatus.BAD_REQUEST }
-            )
-        }
-
-        if (!pixKeyType || !pixKey) {
-            return NextResponse.json(
-                { message: 'Tipo de chave PIX e chave são obrigatórios' },
-                { status: HttpStatus.BAD_REQUEST }
-            )
-        }
-
-        // Validar tipo de chave PIX
-        if (!VALID_PIX_KEY_TYPES.includes(pixKeyType)) {
-            return NextResponse.json(
-                { message: 'Tipo de chave PIX inválido' },
-                { status: HttpStatus.BAD_REQUEST }
-            )
-        }
-
-        // Gerar ID externo único antes da transação
-        const externalId = `withdraw-admin-${userId}-${crypto.randomUUID()}`
-
-        // Atomicamente verificar saldo + criar registro provisional
-        // Isto previne que duas requisições simultâneas passem na verificação de saldo
-        let provisional: { id: number }
-        try {
-            provisional = await prisma.$transaction(async (tx: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-                // Re-verificar saldo dentro da transação
-                const agg = await tx.adminRevenue.aggregate({
-                    where: { adminId: userId, status: 'PAID' },
-                    _sum: { amount: true },
-                })
-                const available = Math.round((agg._sum.amount || 0) * 100)
-                if (amount > available) {
-                    const err = new Error('Saldo insuficiente') as Error & { code: string; availableBalance?: number }
-                    err.code = 'INSUFFICIENT'
-                    err.availableBalance = available
-                    throw err
-                }
-
-                // Re-verificar saques pendentes dentro da transação
-                const pending = await tx.withdrawal.findFirst({
-                    where: { userId, status: { in: ['PENDING', 'PROCESSING'] } },
-                })
-                if (pending) {
-                    const err = new Error('Você já tem um saque pendente. Aguarde a conclusão.') as Error & { code: string }
-                    err.code = 'PENDING_EXISTS'
-                    throw err
-                }
-
-                // Criar registro provisional (sem providerId — será preenchido após AbacatePay)
-                return tx.withdrawal.create({
-                    data: {
-                        userId,
-                        externalId,
-                        amount,
-                        pixKeyType,
-                        pixKey,
-                        status: 'PENDING',
-                        description: description || `Saque de receitas - Admin #${userId}`,
-                    },
-                })
-            })
-        } catch (err) {
-            const e = err as { code?: string; message?: string; availableBalance?: number }
-            if (e.code === 'INSUFFICIENT') {
-                return NextResponse.json(
-                    { message: e.message, availableBalance: e.availableBalance, requestedAmount: amount },
-                    { status: HttpStatus.BAD_REQUEST }
-                )
-            }
-            if (e.code === 'PENDING_EXISTS') {
-                return NextResponse.json({ message: e.message }, { status: HttpStatus.BAD_REQUEST })
-            }
-            throw err
-        }
-
-        // Chamar AbacatePay fora da transação (operação externa)
-        try {
-            const withdrawResult = await createAsaasPixTransfer({
-                amount,
-                pixAddressKey: pixKey,
-                pixAddressKeyType: pixKeyType === 'RANDOM' ? 'EVP' : pixKeyType,
-                description: description || `Saque de receitas - Admin #${userId}`,
-            })
-
-            // Atualizar registro com dados do provedor
-            const withdrawal = await prisma.withdrawal.update({
-                where: { id: provisional.id },
-                data: {
-                    providerId: withdrawResult.id,
-                    platformFee: 0,
-                    receiptUrl: withdrawResult.transactionReceiptUrl || null,
-                },
-            })
-
-            return NextResponse.json({
-                success: true,
-                withdrawal,
-                message: 'Saque solicitado com sucesso!'
-            }, { status: HttpStatus.CREATED })
-        } catch (error) {
-            // AbacatePay falhou — remover registro provisional para não bloquear futuros saques
-            await prisma.withdrawal.delete({ where: { id: provisional.id } }).catch(() => {})
-            console.error('Erro ao criar saque:', error)
-            return NextResponse.json(
-                {
-                    message: 'Erro ao processar saque',
-                    error: error instanceof Error ? error.message : 'Erro desconhecido'
-                },
-                { status: HttpStatus.INTERNAL_SERVER_ERROR }
-            )
-        }
-    } catch (error) {
-        console.error('Erro na rota de saque:', error)
-        return NextResponse.json(
-            { message: 'Erro ao processar solicitação' },
-            { status: HttpStatus.INTERNAL_SERVER_ERROR }
-        )
+    if (!result.ok) {
+      const { status, body } = mapWithdrawalCreateError(result, amount)
+      return NextResponse.json(body, { status })
     }
-}
+
+    return NextResponse.json(
+      { success: true, withdrawal: result.withdrawal, message: 'Saque solicitado com sucesso!' },
+      { status: HttpStatus.CREATED }
+    )
+  },
+  { auth: { roles: ['ADMIN'] }, errorMessage: 'Erro ao processar solicitação', endpoint: 'POST /api/admin/withdraw' }
+)
 
 // GET - Listar saques do admin
-export async function GET(request: NextRequest) {
-    try {
-        const authResult = await verifyAuth(request)
-
-        if (!authResult.authenticated || !authResult.user) {
-            return createAuthErrorResponse(
-                authResult.error || 'Não autenticado',
-                401
-            )
-        }
-
-        // Verificar se é ADMIN
-        if (authResult.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { message: 'Apenas admins podem ver seus saques' },
-                { status: HttpStatus.FORBIDDEN }
-            )
-        }
-
-        const userId = authResult.user.id
-
-        // Buscar saques do admin
-        const withdrawals = await prisma.withdrawal.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' },
-        })
-
-        // Calcular estatísticas
-        const stats = {
-            totalWithdrawals: withdrawals.length,
-            pendingWithdrawals: withdrawals.filter((w: Withdrawal) => w.status === 'PENDING' || w.status === 'PROCESSING').length,
-            completedWithdrawals: withdrawals.filter((w: Withdrawal) => w.status === 'COMPLETE').length,
-            totalWithdrawn: withdrawals
-                .filter((w: Withdrawal) => w.status === 'COMPLETE')
-                .reduce((acc: number, w: Withdrawal) => acc + w.amount, 0),
-        }
-
-        // Calcular saldo disponível (revenues marcadas como PAID estão disponíveis para saque)
-        const paidRevenues = await prisma.adminRevenue.aggregate({
-            where: {
-                adminId: userId,
-                status: 'PAID',
-            },
-            _sum: {
-                amount: true,
-            },
-        })
-
-        const availableBalance = (paidRevenues._sum.amount || 0) * 100 // Em centavos
-
-        return NextResponse.json({
-            withdrawals,
-            stats,
-            availableBalance,
-        })
-    } catch (error) {
-        console.error('Erro ao listar saques:', error)
-        return NextResponse.json(
-            { message: 'Erro ao buscar saques' },
-            { status: HttpStatus.INTERNAL_SERVER_ERROR }
-        )
-    }
-}
+export const GET = withApiHandler(
+  async ({ user }) => {
+    const data = await WithdrawalService.getAdminWithdrawals(user.id)
+    return NextResponse.json(data, { status: HttpStatus.OK })
+  },
+  { auth: { roles: ['ADMIN'] }, errorMessage: 'Erro ao buscar saques', endpoint: 'GET /api/admin/withdraw' }
+)

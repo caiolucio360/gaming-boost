@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { Prisma } from '@/generated/prisma/client'
 import { withApiHandler } from '@/lib/api-handler'
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
+import { ErrorMessages } from '@/lib/api-errors'
 import { HttpStatus } from '@/lib/http-status'
 import bcrypt from 'bcryptjs'
 

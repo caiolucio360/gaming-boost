@@ -41,6 +41,5 @@ export const GET = withApiHandler(
     auth: true,
     errorMessage: 'Erro ao verificar sessão',
     endpoint: 'GET /api/auth/me',
-    inlineCatch: true,
   }
 )
