@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
+import { HttpStatus } from '@/lib/http-status'
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,11 +69,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { orders, total, limit, offset },
-      { status: 200 }
+      { status: HttpStatus.OK }
     )
   } catch (error) {
     console.error('Error in GET /api/admin/orders:', error)
-    return NextResponse.json({ message: 'Erro ao buscar pedidos' }, { status: 500 })
+    return NextResponse.json({ message: 'Erro ao buscar pedidos' }, { status: HttpStatus.INTERNAL_SERVER_ERROR })
   }
 }
 
