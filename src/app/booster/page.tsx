@@ -5,22 +5,20 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import {
   Package,
   CheckCircle2,
   DollarSign,
   Check,
   Loader2,
-  ImageIcon,
-  X,
   RefreshCw,
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatCard } from '@/components/common/stat-card'
-import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
+import { StatsGrid } from '@/components/common/stats-grid'
+import { OrderStatus } from '@/components/common/status-badge'
+import { OrderCardShell } from '@/components/common/order-card-shell'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
@@ -33,6 +31,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import { apiGet } from '@/lib/api-client'
 import { showSuccess, showError } from '@/lib/toast'
 import { OrderChat } from '@/components/order/order-chat'
+import { CompletionProofDialog } from '@/app/booster/_components/completion-proof-dialog'
 import { useRealtime } from '@/hooks/use-realtime'
 
 interface Order {
@@ -77,6 +76,29 @@ interface Stats {
   pendingEarnings: number
 }
 
+/** The booster's commission line, with the snapshot/legacy fallback. `withStatus` appends the paid/pending marker. */
+function CommissionInfoItem({ order, withStatus = false }: { order: Order; withStatus?: boolean }) {
+  if (order.commission) {
+    const statusSuffix = withStatus
+      ? ` ${order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}`
+      : ''
+    return (
+      <OrderInfoItem
+        label="Sua Comissão"
+        value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%){statusSuffix}</span>}
+      />
+    )
+  }
+  if (order.boosterCommission) {
+    return (
+      <OrderInfoItem
+        label="Sua Comissão"
+        value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+      />
+    )
+  }
+  return null
+}
 
 export default function BoosterDashboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -91,11 +113,7 @@ export default function BoosterDashboardPage() {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false)
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
-  // Proof upload state
-  const [proofFile, setProofFile] = useState<File | null>(null)
-  const [proofPreview, setProofPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [hasPixKey, setHasPixKey] = useState<boolean | null>(null)
   const [hasCredentialsMap, setHasCredentialsMap] = useState<Record<number, boolean>>({})
   const [startingOrderId, setStartingOrderId] = useState<number | null>(null)
@@ -269,28 +287,11 @@ export default function BoosterDashboardPage() {
 
   const handleCompleteOrderClick = (orderId: number) => {
     setOrderToAction(orderId)
-    setProofFile(null)
-    setProofPreview(null)
     setCompleteDialogOpen(true)
   }
 
-  const handleProofFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setProofFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => setProofPreview(ev.target?.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  const handleRemoveProof = () => {
-    setProofFile(null)
-    setProofPreview(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
-  const handleCompleteOrder = async () => {
-    if (!orderToAction || !proofFile) return
+  const handleCompleteOrder = async (proofFile: File) => {
+    if (!orderToAction) return
 
     setIsUploading(true)
     try {
@@ -322,8 +323,6 @@ export default function BoosterDashboardPage() {
       if (response.ok) {
         setCompleteDialogOpen(false)
         setOrderToAction(null)
-        setProofFile(null)
-        setProofPreview(null)
         showSuccess('Pedido marcado como concluído!')
         fetchOrders(true)
       } else {
@@ -379,67 +378,31 @@ export default function BoosterDashboardPage() {
         {loading && !stats ? (
           <SkeletonStatsGrid count={5} />
         ) : stats ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
-            {/* Card - Disponíveis */}
-            <Card className="bg-brand-black/30 border-yellow-500/30">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
-                      Disponíveis
-                    </p>
-                    <p className="text-3xl font-bold text-yellow-500 font-orbitron">
-                      {stats.available}
-                    </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
-                      Pedidos pendentes
-                    </p>
-                  </div>
-                  <Package className="h-8 w-8 text-yellow-500/60" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card - Em Andamento */}
-            <Card className="bg-brand-black/30 border-blue-500/30">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
-                      Em Andamento
-                    </p>
-                    <p className="text-3xl font-bold text-blue-500 font-orbitron">
-                      {stats.assigned}
-                    </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
-                      Pedidos ativos
-                    </p>
-                  </div>
-                  <Loader2 className="h-8 w-8 text-blue-500/60" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card - Concluídos */}
-            <Card className="bg-brand-black/30 border-green-500/30">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
-                      Concluídos
-                    </p>
-                    <p className="text-3xl font-bold text-green-500 font-orbitron">
-                      {stats.completed}
-                    </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
-                      Pedidos finalizados
-                    </p>
-                  </div>
-                  <CheckCircle2 className="h-8 w-8 text-green-500/60" />
-                </div>
-              </CardContent>
-            </Card>
-
+          <StatsGrid columns={4} className="mb-6 lg:mb-8">
+            <StatCard
+              title="Disponíveis"
+              value={stats.available}
+              description="Pedidos pendentes"
+              icon={Package}
+              iconColor="text-yellow-500"
+              valueColor="text-yellow-500"
+            />
+            <StatCard
+              title="Em Andamento"
+              value={stats.assigned}
+              description="Pedidos ativos"
+              icon={Loader2}
+              iconColor="text-blue-500"
+              valueColor="text-blue-500"
+            />
+            <StatCard
+              title="Concluídos"
+              value={stats.completed}
+              description="Pedidos finalizados"
+              icon={CheckCircle2}
+              iconColor="text-green-500"
+              valueColor="text-green-500"
+            />
             <StatCard
               title="Ganhos Pendentes"
               value={formatPrice(stats.pendingEarnings)}
@@ -447,7 +410,7 @@ export default function BoosterDashboardPage() {
               icon={DollarSign}
               valueColor="text-yellow-300"
             />
-          </div>
+          </StatsGrid>
         ) : null}
 
         {/* Tabs de navegação */}
@@ -501,66 +464,40 @@ export default function BoosterDashboardPage() {
               <div className="grid gap-6">
                 {orders.map((order) => {
                   return (
-                    <Card
+                    <OrderCardShell
                       key={order.id}
-                      className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden"
+                      title={order.service.name}
+                      description={order.service.description}
+                      status={order.status}
                     >
-                      {/* Efeito de brilho no hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
-                      <CardHeader className="relative z-10">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200">
-                              {order.service.name}
-                            </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
-                              {order.service.description}
-                            </CardDescription>
-                          </div>
-                          <StatusBadge status={order.status} />
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <CommissionInfoItem order={order} />
+                          <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
+                          <OrderInfoItem label="Jogo" value={order.service.game} />
                         </div>
-                      </CardHeader>
-                      <CardContent className="relative z-10">
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {order.commission && (
-                              <OrderInfoItem
-                                label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
-                              />
-                            )}
-                            {order.boosterCommission && !order.commission && (
-                              <OrderInfoItem
-                                label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
-                              />
-                            )}
-                            <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
-                            <OrderInfoItem label="Jogo" value={order.service.game} />
-                          </div>
 
-                          <ActionButton
-                            onClick={() => handleAcceptOrderClick(order.id)}
-                            icon={Check}
-                            className="w-full"
-                            disabled={!hasPixKey}
-                            title={!hasPixKey ? 'Cadastre sua chave PIX no perfil para aceitar pedidos' : undefined}
-                          >
-                            Aceitar Pedido
-                          </ActionButton>
-                          <ConfirmDialog
-                            open={acceptDialogOpen && orderToAction === order.id}
-                            onOpenChange={setAcceptDialogOpen}
-                            title="Aceitar Pedido"
-                            description="Tem certeza que deseja aceitar este pedido? Você será responsável por completar o serviço."
-                            confirmLabel="Aceitar"
-                            cancelLabel="Cancelar"
-                            onConfirm={handleAcceptOrder}
-                            loading={isAccepting}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
+                        <ActionButton
+                          onClick={() => handleAcceptOrderClick(order.id)}
+                          icon={Check}
+                          className="w-full"
+                          disabled={!hasPixKey}
+                          title={!hasPixKey ? 'Cadastre sua chave PIX no perfil para aceitar pedidos' : undefined}
+                        >
+                          Aceitar Pedido
+                        </ActionButton>
+                        <ConfirmDialog
+                          open={acceptDialogOpen && orderToAction === order.id}
+                          onOpenChange={setAcceptDialogOpen}
+                          title="Aceitar Pedido"
+                          description="Tem certeza que deseja aceitar este pedido? Você será responsável por completar o serviço."
+                          confirmLabel="Aceitar"
+                          cancelLabel="Cancelar"
+                          onConfirm={handleAcceptOrder}
+                          loading={isAccepting}
+                        />
+                      </div>
+                    </OrderCardShell>
                   )
                 })}
               </div>
@@ -584,40 +521,15 @@ export default function BoosterDashboardPage() {
               <div className="grid gap-6">
                 {orders.map((order) => {
                   return (
-                    <Card
+                    <OrderCardShell
                       key={order.id}
-                      className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden"
+                      title={order.service.name}
+                      description={order.service.description}
+                      status={order.status}
                     >
-                      {/* Efeito de brilho no hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
-                      <CardHeader className="relative z-10">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200">
-                              {order.service.name}
-                            </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
-                              {order.service.description}
-                            </CardDescription>
-                          </div>
-                          <StatusBadge status={order.status} />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="relative z-10">
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {order.commission && (
-                              <OrderInfoItem
-                                label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
-                              />
-                            )}
-                            {order.boosterCommission && !order.commission && (
-                              <OrderInfoItem
-                                label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
-                              />
-                            )}
+                            <CommissionInfoItem order={order} />
                             <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
                             <OrderInfoItem label="Data do Pedido" value={formatDate(order.createdAt)} />
                           </div>
@@ -674,101 +586,20 @@ export default function BoosterDashboardPage() {
                           )}
 
                         </div>
-                      </CardContent>
-                    </Card>
+                    </OrderCardShell>
                   )
                 })}
               </div>
             )}
 
             {/* Single completion proof dialog — outside the map to avoid shared state issues */}
-            <Dialog
+            <CompletionProofDialog
               open={completeDialogOpen}
-              onOpenChange={(open) => {
-                if (!open) { setProofFile(null); setProofPreview(null) }
-                setCompleteDialogOpen(open)
-              }}
-            >
-              <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-white font-orbitron">
-                    Comprovante de Conclusão
-                  </DialogTitle>
-                  <DialogDescription className="text-brand-gray-400 font-rajdhani">
-                    Anexe um print da tela mostrando que o cliente atingiu o rank/rating contratado. Isso é obrigatório para concluir o pedido.
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4 py-2">
-                  {proofPreview ? (
-                    <div className="relative">
-                      {/* Preview local do arquivo (blob: URL) antes do upload — next/image não suporta blob: */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={proofPreview}
-                        alt="Preview do comprovante"
-                        className="w-full rounded-lg border border-brand-purple/30 object-cover max-h-56"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleRemoveProof}
-                        className="absolute top-2 right-2 h-auto w-auto min-h-0 min-w-0 p-1 rounded-full bg-brand-black/70 border-transparent hover:bg-red-600/80"
-                      >
-                        <X className="h-4 w-4 text-white" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full h-auto flex-col border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 gap-3 bg-brand-purple/5 hover:bg-brand-purple/10"
-                    >
-                      <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
-                      <span className="text-brand-gray-400 font-rajdhani text-sm">
-                        Clique para selecionar o print
-                      </span>
-                      <span className="text-brand-gray-500 font-rajdhani text-xs">
-                        JPG, PNG ou WebP — máx. 5 MB
-                      </span>
-                    </Button>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                    className="hidden"
-                    onChange={handleProofFileChange}
-                  />
-                </div>
-
-                <DialogFooter className="gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => { setCompleteDialogOpen(false); setProofFile(null); setProofPreview(null) }}
-                    className="border-brand-purple/40 text-brand-gray-300 hover:bg-brand-purple/10"
-                    disabled={isUploading || isCompleting}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleCompleteOrder}
-                    disabled={!proofFile || isUploading || isCompleting}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {isUploading ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando print...</>
-                    ) : isCompleting ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Concluindo...</>
-                    ) : (
-                      <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluir Pedido</>
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              onOpenChange={setCompleteDialogOpen}
+              onConfirm={handleCompleteOrder}
+              submitting={isUploading || isCompleting}
+              submittingLabel={isUploading ? 'Enviando print...' : 'Concluindo...'}
+            />
           </div>
         )}
 
@@ -788,42 +619,19 @@ export default function BoosterDashboardPage() {
               <div className="grid gap-6">
                 {orders.map((order) => {
                   return (
-                    <Card
+                    <OrderCardShell
                       key={order.id}
-                      className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
+                      title={order.service.name}
+                      description={order.service.description}
+                      status={order.status}
+                      glow={false}
                     >
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2">
-                              {order.service.name}
-                            </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani">
-                              {order.service.description}
-                            </CardDescription>
-                          </div>
-                          <StatusBadge status={order.status} />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {order.commission && (
-                            <OrderInfoItem
-                              label="Sua Comissão"
-                              value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%) {order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}</span>}
-                            />
-                          )}
-                          {order.boosterCommission && !order.commission && (
-                            <OrderInfoItem
-                              label="Sua Comissão"
-                              value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
-                            />
-                          )}
-                          <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
-                          <OrderInfoItem label="Data de Conclusão" value={formatDate(order.createdAt)} />
-                        </div>
-                      </CardContent>
-                    </Card>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <CommissionInfoItem order={order} withStatus />
+                        <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
+                        <OrderInfoItem label="Data de Conclusão" value={formatDate(order.createdAt)} />
+                      </div>
+                    </OrderCardShell>
                   )
                 })}
               </div>

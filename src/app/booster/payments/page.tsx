@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DollarSign,
@@ -16,6 +15,8 @@ import {
   Wallet,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
+import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
+import { StatsGrid } from '@/components/common/stats-grid'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
@@ -93,15 +94,6 @@ export default function BoosterPaymentsPage() {
     if (user?.role === 'BOOSTER') fetchCommissions()
   }, [user?.role, fetchCommissions])
 
-  const getCommissionStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID': return <Badge className="bg-green-500/20 text-green-300 border-green-500/50">Pago</Badge>
-      case 'PENDING': return <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">Pendente</Badge>
-      case 'CANCELLED': return <Badge className="bg-red-500/20 text-red-300 border-red-500/50">Cancelado</Badge>
-      default: return <Badge>{status}</Badge>
-    }
-  }
-
   if (authLoading) return <LoadingSpinner />
   if (!user || user.role !== 'BOOSTER') return null
 
@@ -141,13 +133,13 @@ export default function BoosterPaymentsPage() {
             {commissionsLoading && !stats ? (
               <SkeletonStatsGrid count={5} />
             ) : stats ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
+              <StatsGrid columns={5} className="mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-green-300" />
                 <StatCard title="Pendente" value={formatPrice(stats.pendingEarnings)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-yellow-300" />
                 <StatCard title="Total de Comissões" value={stats.totalCommissions} description="Todas as comissões" icon={DollarSign} iconColor="text-brand-purple" />
                 <StatCard title="Pagas" value={stats.paidCommissions} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" />
                 <StatCard title="Pendentes" value={stats.pendingCommissions} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
-              </div>
+              </StatsGrid>
             ) : null}
 
             <Tabs value={commissionFilter} onValueChange={setCommissionFilter} className="w-full">
@@ -180,7 +172,7 @@ export default function BoosterPaymentsPage() {
                                 Pedido #{commission.order.id}
                               </CardDescription>
                             </div>
-                            {getCommissionStatusBadge(commission.status)}
+                            <PaymentStatusBadge status={commission.status} />
                           </div>
                         </CardHeader>
                         <CardContent>

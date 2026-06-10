@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LucideIcon } from 'lucide-react'
+import { GlowCard } from '@/components/common/glow-card'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -21,10 +22,7 @@ export function EmptyState({
   actionHref,
 }: EmptyStateProps) {
   return (
-    <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 transition-colors duration-200 overflow-hidden">
-      {/* Efeito de brilho sutil */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
-
+    <GlowCard>
       <CardContent className="pt-6 relative z-10">
         <div className="text-center py-12">
           <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 mb-4">
@@ -55,7 +53,7 @@ export function EmptyState({
           ))}
         </div>
       </CardContent>
-    </Card>
+    </GlowCard>
   )
 }
 

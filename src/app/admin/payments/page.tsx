@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DollarSign,
@@ -17,6 +16,8 @@ import {
   Settings,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
+import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
+import { StatsGrid } from '@/components/common/stats-grid'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
@@ -92,15 +93,6 @@ export default function AdminPaymentsPage() {
     if (user?.role === 'ADMIN') fetchRevenues()
   }, [user?.role, fetchRevenues])
 
-  const getRevenueStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID': return <Badge className="bg-green-500/20 text-green-300 border-green-500/50">Pago</Badge>
-      case 'PENDING': return <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">Pendente</Badge>
-      case 'CANCELLED': return <Badge className="bg-red-500/20 text-red-300 border-red-500/50">Cancelado</Badge>
-      default: return <Badge>{status}</Badge>
-    }
-  }
-
   if (authLoading) return <LoadingSpinner />
   if (!user || user.role !== 'ADMIN') return null
 
@@ -144,13 +136,13 @@ export default function AdminPaymentsPage() {
             {revenueLoading && !revenueStats ? (
               <SkeletonStatsGrid count={5} />
             ) : revenueStats ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
+              <StatsGrid columns={5} className="mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(revenueStats.totalRevenue)} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-green-300" />
                 <StatCard title="Pendente" value={formatPrice(revenueStats.pendingRevenue)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-yellow-300" />
                 <StatCard title="Total de Receitas" value={revenueStats.totalRevenues} description="Todas as receitas" icon={DollarSign} iconColor="text-brand-purple" />
                 <StatCard title="Pagas" value={revenueStats.paidRevenues} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" />
                 <StatCard title="Pendentes" value={revenueStats.pendingRevenues} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
-              </div>
+              </StatsGrid>
             ) : null}
 
             <Tabs value={revenueFilter} onValueChange={setRevenueFilter} className="w-full">
@@ -183,7 +175,7 @@ export default function AdminPaymentsPage() {
                                 Pedido #{revenue.order.id}
                               </CardDescription>
                             </div>
-                            {getRevenueStatusBadge(revenue.status)}
+                            <PaymentStatusBadge status={revenue.status} />
                           </div>
                         </CardHeader>
                         <CardContent>
