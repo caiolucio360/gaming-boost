@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { ArrowLeft, Lock, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Spinner } from '@/components/common/loading-spinner'
 
@@ -257,20 +258,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
-        <Card className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-brand-purple/20 flex items-center justify-center">
-              <Lock className="h-6 w-6 text-brand-purple animate-spin" />
-            </div>
-            <CardTitle className="text-xl text-white font-orbitron">
-              Carregando...
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <ResetPasswordForm />
     </Suspense>
   )

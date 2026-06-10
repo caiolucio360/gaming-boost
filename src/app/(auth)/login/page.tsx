@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
-import { Spinner } from '@/components/common/loading-spinner'
+import { Spinner, LoadingSpinner } from '@/components/common/loading-spinner'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -181,7 +181,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
-      <Suspense fallback={<div className="text-white">Carregando...</div>}>
+      <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
          <LoginContent />
       </Suspense>
     </div>

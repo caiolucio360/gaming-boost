@@ -376,7 +376,7 @@ export default function BoosterDashboardPage() {
 
         {/* Cards de Estatísticas e Navegação */}
         {loading && !stats ? (
-          <SkeletonStatsGrid count={5} />
+          <SkeletonStatsGrid count={4} />
         ) : stats ? (
           <StatsGrid columns={4} className="mb-6 lg:mb-8">
             <StatCard

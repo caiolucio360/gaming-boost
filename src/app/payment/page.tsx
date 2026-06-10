@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { PaymentForm } from '@/components/payment/payment-form'
 import { PixPaymentDisplay } from '@/components/payment/pix-payment-display'
 import { Button } from '@/components/ui/button'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import Link from 'next/link'
 import { ArrowLeft, Home } from 'lucide-react'
 
@@ -194,14 +195,7 @@ function PaymentContent() {
 
 export default function PaymentPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-brand-black flex items-center justify-center p-4">
-        <div className="text-white font-rajdhani flex items-center gap-3">
-          <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
-          Carregando...
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <PaymentContent />
     </Suspense>
   )

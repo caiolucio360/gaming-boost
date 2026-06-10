@@ -188,6 +188,26 @@ Need a component you don't have yet? Add it with `npx shadcn@latest add <name>` 
 
 ---
 
+## Loading States (Suspense & Skeleton)
+
+Two consistent loading patterns — don't hand-roll spinners or `"Carregando..."` divs.
+
+**Auth gating & Suspense fallbacks → `LoadingSpinner`** (`@/components/common/loading-spinner`):
+- Route-level auth guard: `if (authLoading) return <LoadingSpinner />`.
+- `<Suspense>` fallback (pages using `useSearchParams`): `fallback={<LoadingSpinner />}` at the
+  top level, or `fallback={<LoadingSpinner fullScreen={false} />}` when the `<Suspense>` is
+  already nested inside a page shell. Use `Spinner` for tiny inline cases (inside a button).
+
+**Content / data loading → Skeletons** (`@/components/common/skeletons`): render the skeleton
+that matches the content it replaces, so layout doesn't shift:
+`SkeletonStatsGrid` (pass `count`/`columns` to mirror the real `StatsGrid`), `SkeletonOrdersList`,
+`SkeletonTable`, `SkeletonProfileCard`, `SkeletonForm`, etc.
+
+Skeleton surfaces use the **flat default `Card`** (brand-black-light + `white/10`) and the
+shimmer `Skeleton` primitive — never the old purple-glass surface.
+
+---
+
 ## Touch Targets (Mobile)
 
 | Class | Size | Use |

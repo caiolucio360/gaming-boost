@@ -2,13 +2,14 @@
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton, SkeletonAvatar, SkeletonButton } from '@/components/ui/skeleton'
+import { StatsGrid } from '@/components/common/stats-grid'
 import { cn } from '@/lib/utils'
 
 // Stats card skeleton (for dashboard stats)
 export function SkeletonStatsCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
     <Card
-      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -27,7 +28,7 @@ export function SkeletonStatsCard({ className, index = 0 }: { className?: string
 export function SkeletonOrderCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
     <Card
-      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <CardContent className="p-4 sm:p-6">
@@ -64,9 +65,9 @@ export function SkeletonTable({
   className?: string
 }) {
   return (
-    <div className={cn("w-full overflow-hidden rounded-lg border border-brand-purple/50", className)}>
+    <div className={cn("w-full overflow-hidden rounded-lg border border-white/10", className)}>
       {/* Header */}
-      <div className="bg-brand-black-light border-b border-brand-purple/30 px-4 py-3">
+      <div className="bg-brand-black-light border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-4">
           {Array.from({ length: columns }).map((_, i) => (
             <Skeleton key={i} className="h-4 flex-1" />
@@ -79,7 +80,7 @@ export function SkeletonTable({
           key={rowIndex}
           className={cn(
             "px-4 py-3 flex items-center gap-4",
-            rowIndex !== rows - 1 && "border-b border-brand-purple/20"
+            rowIndex !== rows - 1 && "border-b border-white/10"
           )}
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
@@ -100,7 +101,7 @@ export function SkeletonTable({
 // Profile card skeleton
 export function SkeletonProfileCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
           <SkeletonAvatar size="lg" />
@@ -130,7 +131,7 @@ export function SkeletonProfileCard({ className }: { className?: string }) {
 // Payment/PIX card skeleton
 export function SkeletonPaymentCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardHeader className="text-center pb-2">
         <Skeleton className="h-7 w-48 mx-auto" />
         <Skeleton className="h-5 w-32 mx-auto mt-2" />
@@ -164,7 +165,7 @@ export function SkeletonPaymentCard({ className }: { className?: string }) {
 // Calculator/service card skeleton
 export function SkeletonCalculatorCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardHeader className="text-center">
         <Skeleton className="h-8 w-56 mx-auto" />
         <Skeleton className="h-4 w-72 mx-auto mt-2" />
@@ -277,7 +278,7 @@ export function SkeletonList({
       {Array.from({ length: items }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-lg bg-brand-black-light/30 border border-brand-purple/30"
+          className="flex items-center gap-4 p-4 rounded-lg bg-brand-black-light border border-white/10"
         >
           <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
           <div className="flex-1 space-y-2">
@@ -291,14 +292,16 @@ export function SkeletonList({
   )
 }
 
-// Grid of stats cards with stagger
-export function SkeletonStatsGrid({ count = 4 }: { count?: number }) {
+// Grid of stats cards with stagger — mirrors the real StatsGrid layout so the
+// skeleton lines up with the content it replaces (no layout shift).
+export function SkeletonStatsGrid({ count = 4, columns }: { count?: number; columns?: 2 | 3 | 4 | 5 }) {
+  const cols = columns ?? (Math.min(Math.max(count, 2), 5) as 2 | 3 | 4 | 5)
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <StatsGrid columns={cols}>
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonStatsCard key={i} index={i} />
       ))}
-    </div>
+    </StatsGrid>
   )
 }
 

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import Link from 'next/link'
 
 const verifySchema = z.object({
@@ -222,7 +223,7 @@ function VerifyContent() {
 export default function VerifyPage() {
   return (
     <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
-      <Suspense fallback={<div className="text-white">Carregando...</div>}>
+      <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
          <VerifyContent />
       </Suspense>
     </div>
