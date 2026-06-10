@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
         <SkeletonStatsGrid count={4} />
       ) : stats ? (
         <>
-          <StatsGrid columns={3} className="mb-6">
+          <StatsGrid columns={4} className="mb-6">
             <StatCard title="Total de Usuários" value={stats.users.total}
               description={`${stats.users.clients} clientes · ${stats.users.boosters} boosters · ${stats.users.admins} admins`}
               icon={Users} />
@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-6 mb-6">
 
               {/* Revenue area chart */}
-              <Card className="">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-white font-orbitron text-base">Receita — últimos 30 dias</CardTitle>
                   <CardDescription className="text-brand-gray-500 font-rajdhani">Valor dos pedidos concluídos por dia (R$)</CardDescription>
@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Orders per day bar chart */}
-                <Card className="">
+                <Card>
                   <CardHeader>
                     <CardTitle className="text-white font-orbitron text-base">Pedidos por dia</CardTitle>
                     <CardDescription className="text-brand-gray-500 font-rajdhani">Novos pedidos nos últimos 30 dias</CardDescription>
@@ -215,7 +215,7 @@ export default function AdminDashboardPage() {
                 </Card>
 
                 {/* Status donut */}
-                <Card className="">
+                <Card>
                   <CardHeader>
                     <CardTitle className="text-white font-orbitron text-base">Status dos pedidos</CardTitle>
                     <CardDescription className="text-brand-gray-500 font-rajdhani">Distribuição geral por status</CardDescription>
@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* New users bar chart */}
-              <Card className="">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-white font-orbitron text-base">Novos usuários — últimos 30 dias</CardTitle>
                   <CardDescription className="text-brand-gray-500 font-rajdhani">Cadastros por dia</CardDescription>
@@ -283,7 +283,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* Recent orders */}
-          <Card className="">
+          <Card>
             <CardHeader>
               <CardTitle className="text-white font-orbitron">Pedidos Recentes</CardTitle>
               <CardDescription className="text-brand-gray-500 font-rajdhani">Últimos 5 pedidos criados</CardDescription>

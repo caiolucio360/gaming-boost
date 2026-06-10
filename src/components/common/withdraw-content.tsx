@@ -120,10 +120,10 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="space-y-6">
       {/* Balance cards */}
       <div className={`grid gap-4 ${lockedBalance > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-        <Card className="bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/10 border-brand-purple/50">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
         </Card>
 
         {lockedBalance > 0 && (
-          <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-500/40">
+          <Card className="border-yellow-500/40">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <Lock className="w-8 h-8 text-yellow-400" />
@@ -162,9 +162,9 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
 
       {/* Locked commissions */}
       {lockedCommissions.length > 0 && (
-        <Card className="bg-brand-black/30 backdrop-blur-md border-yellow-500/30">
+        <Card className="border-yellow-500/30">
           <CardHeader>
-            <CardTitle className="text-yellow-300 font-orbitron flex items-center gap-2">
+            <CardTitle className="text-yellow-300 font-orbitron text-lg flex items-center gap-2">
               <Clock className="w-5 h-5" />Comissões em Período de Espera
             </CardTitle>
             <CardDescription className="text-brand-gray-400 font-rajdhani">
@@ -201,9 +201,9 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       )}
 
       {/* Withdrawal form */}
-      <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-white font-orbitron">Novo Saque</CardTitle>
+          <CardTitle className="text-white font-orbitron text-lg">Novo Saque</CardTitle>
           <CardDescription className="text-brand-gray-400 font-rajdhani">Valor mínimo: R$ 3,50</CardDescription>
         </CardHeader>
         <CardContent>
@@ -247,9 +247,9 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       </Card>
 
       {/* Withdrawal history */}
-      <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-white font-orbitron">Histórico de Saques</CardTitle>
+          <CardTitle className="text-white font-orbitron text-lg">Histórico de Saques</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -261,7 +261,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
           ) : (
             <div className="space-y-4">
               {withdrawals.map((w) => (
-                <div key={w.id} className="flex items-center justify-between p-4 bg-black/30 rounded-lg border border-brand-purple/20">
+                <div key={w.id} className="flex items-center justify-between p-4 bg-brand-black/30 rounded-lg border border-white/10">
                   <div>
                     <p className="text-white font-bold">{formatPrice(w.amount / 100)}</p>
                     <p className="text-brand-gray-400 text-sm font-rajdhani">{w.pixKeyType}: {w.pixKey.substring(0, 10)}...</p>

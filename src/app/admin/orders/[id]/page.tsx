@@ -576,7 +576,7 @@ export default function AdminOrderDetailPage() {
         )}
 
         {/* Datas */}
-        <Card className="">
+        <Card>
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <Calendar className="h-5 w-5 text-brand-purple" />
