@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { GlowCard } from '@/components/common/glow-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -249,9 +250,7 @@ export default function ProfilePage() {
 
         <div className="grid gap-6">
           {/* Informações da Conta */}
-          <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
-            {/* Efeito de brilho sutil */}
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+          <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20">
             <CardHeader className="relative z-10">
               <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
                 <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
@@ -365,12 +364,10 @@ export default function ProfilePage() {
                 )}
               </div>
             </CardContent>
-          </Card>
+          </GlowCard>
 
           {/* Alterar Senha */}
-          <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
-            {/* Efeito de brilho sutil */}
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+          <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20">
             <CardHeader className="relative z-10">
               <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
                 <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
@@ -425,7 +422,7 @@ export default function ProfilePage() {
                 />
               </div>
             </CardContent>
-          </Card>
+          </GlowCard>
 
           {/* Botão Salvar */}
           <div className="flex justify-end gap-4">
