@@ -241,7 +241,12 @@ These patterns are removed and must never be reintroduced:
 
 > **Grays:** `brand.gray.*` has the **same hex** as Tailwind `gray.*`, so the rename is
 > visually identical — but always use the `brand-gray-*` form so the palette is auditable and
-> the ESLint guard can enforce it. Raw `text-gray-*` / `bg-gray-*` are forbidden in JSX.
+> the design-system guard can enforce it. Raw `text-gray-*` / `bg-gray-*` are forbidden in JSX.
+
+> **Enforcement:** `npm run lint` runs `next lint` **and** the design-system guard
+> (`scripts/check-design-system.mjs`, also `npm run lint:ds`). The guard fails the build on raw
+> `gray-*`, the legacy token classes above, inline `fontFamily` fallbacks, and hex in
+> `className`. Vendored `src/components/ui/**` and the documented exception files are skipped.
 
 ---
 
