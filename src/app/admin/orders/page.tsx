@@ -8,12 +8,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   ShoppingCart,
-  ArrowLeft,
   Edit,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { OrderStatus } from '@/components/common/status-badge'
 import { OrderCardShell } from '@/components/common/order-card-shell'
@@ -88,21 +87,14 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar ao Dashboard
-          </Link>
-          <PageHeader
-            highlight="GERENCIAR"
-            title="PEDIDOS"
-            description="Visualize e gerencie todos os pedidos da plataforma"
-          />
-        </div>
-
+    <AdminPageShell
+      highlight="GERENCIAR"
+      title="PEDIDOS"
+      description="Visualize e gerencie todos os pedidos da plataforma"
+      backHref="/admin"
+    >
         {/* Filtro */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
               <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani">
@@ -192,7 +184,7 @@ export default function AdminOrdersPage() {
             Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         </div>
-    </div>
+    </AdminPageShell>
   )
 }
 

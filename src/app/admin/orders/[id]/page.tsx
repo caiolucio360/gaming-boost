@@ -7,7 +7,6 @@ import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
   User,
   UserCheck,
   CreditCard,
@@ -17,10 +16,10 @@ import {
   ImageIcon,
   ExternalLink,
 } from 'lucide-react'
-import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
+import { BackButton } from '@/components/common/back-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { OrderInfoItem } from '@/components/common/order-info-item'
@@ -277,21 +276,24 @@ export default function AdminOrderDetailPage() {
 
   if (!order) {
     return (
-      <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-          <Alert variant="destructive">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <Alert variant="destructive" className="mb-4">
             <AlertTitle>Erro</AlertTitle>
             <AlertDescription>Pedido não encontrado</AlertDescription>
           </Alert>
-          <Link href="/admin/orders" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mt-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Pedidos
-          </Link>
+          <BackButton href="/admin/orders">Voltar para Pedidos</BackButton>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <AdminPageShell
+      highlight="DETALHES DO"
+      title={`PEDIDO #${order.id}`}
+      description={order.service.name}
+      backHref="/admin/orders"
+      backLabel="Voltar para Pedidos"
+    >
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -299,20 +301,8 @@ export default function AdminOrderDetailPage() {
           </Alert>
         )}
 
-        <div className="mb-8">
-          <Link href="/admin/orders" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Pedidos
-          </Link>
-          <PageHeader
-            highlight="DETALHES DO"
-            title={`PEDIDO #${order.id}`}
-            description={order.service.name}
-          />
-        </div>
-
         {/* Status e Ações */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-white font-orbitron">
@@ -349,7 +339,7 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Informações do Pedido */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <GamepadIcon className="h-5 w-5 text-brand-purple" />
@@ -382,7 +372,7 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Cliente */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <User className="h-5 w-5 text-brand-purple" />
@@ -398,7 +388,7 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Booster */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <UserCheck className="h-5 w-5 text-brand-purple" />
@@ -450,7 +440,7 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Pagamentos */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-brand-purple" />
@@ -488,7 +478,7 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Comissões e Receitas */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-brand-purple" />
@@ -586,7 +576,7 @@ export default function AdminOrderDetailPage() {
         )}
 
         {/* Datas */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+        <Card className="">
           <CardHeader>
             <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <Calendar className="h-5 w-5 text-brand-purple" />
@@ -600,6 +590,6 @@ export default function AdminOrderDetailPage() {
             </div>
           </CardContent>
         </Card>
-    </div>
+    </AdminPageShell>
   )
 }

@@ -22,14 +22,13 @@ import {
   Plus,
   Trash2,
   Edit,
-  ArrowLeft,
   Save,
   X,
   AlertTriangle,
   Calculator,
   RefreshCw,
 } from 'lucide-react'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { showSuccess, showError } from '@/lib/toast'
 import Link from 'next/link'
 import {
@@ -528,22 +527,12 @@ export default function PricingConfigPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <PageHeader
-          highlight="GERENCIAR"
-          title="PREÇOS"
-          description="Gerencie os preços de boost por faixas de rating ou níveis"
-        />
-
-        <div className="mb-6">
-          <Button variant="outline" asChild className="border-white/10 hover:border-brand-purple/50">
-            <Link href="/admin">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar ao Dashboard
-            </Link>
-          </Button>
-        </div>
-
+    <AdminPageShell
+      highlight="GERENCIAR"
+      title="PREÇOS"
+      description="Gerencie os preços de boost por faixas de rating ou níveis"
+      backHref="/admin"
+    >
         {/* Filtros */}
         <Card className="mb-6 bg-brand-black-light border-white/10">
           <CardHeader className="pb-4">
@@ -1009,6 +998,6 @@ export default function PricingConfigPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-    </div>
+    </AdminPageShell>
   )
 }

@@ -22,7 +22,6 @@ import {
   Edit,
   Trash2,
   Loader2,
-  ArrowLeft,
   Shield,
   User,
   Crown,
@@ -33,6 +32,7 @@ import {
 import Link from 'next/link'
 import { SkeletonTable } from '@/components/common/skeletons'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -205,7 +205,13 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <AdminPageShell
+      highlight="GERENCIAR"
+      title="USUÁRIOS"
+      description="Visualize e gerencie todos os usuários da plataforma"
+      backHref="/admin"
+      backLabel="Voltar ao Dashboard"
+    >
         {refreshing && (
           <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
             <p className="text-sm text-brand-purple-light font-rajdhani text-center">
@@ -214,23 +220,8 @@ export default function AdminUsersPage() {
             </p>
           </div>
         )}
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar ao Dashboard
-          </Link>
-          <h1 className="text-4xl font-bold text-white font-orbitron mb-2" style={{ fontWeight: '800' }}>
-            <span className="text-brand-purple-light">GERENCIAR</span>
-            <span className="text-white"> USUÁRIOS</span>
-          </h1>
-          <p className="text-brand-gray-300 font-rajdhani" style={{ fontWeight: '500' }}>
-            Visualize e gerencie todos os usuários da plataforma
-          </p>
-        </div>
-
         {/* Filtros e Busca */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardContent className="pt-6">
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -276,7 +267,7 @@ export default function AdminUsersPage() {
         {loading ? (
           <SkeletonTable rows={8} columns={5} />
         ) : users.length === 0 ? (
-          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+          <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <Users className="h-16 w-16 text-brand-gray-500 mx-auto mb-4" />
@@ -298,7 +289,7 @@ export default function AdminUsersPage() {
               return (
                 <Card
                   key={adminUser.id}
-                  className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
+                  className="hover:border-brand-purple/50 transition-colors"
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
@@ -640,7 +631,7 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-    </div>
+    </AdminPageShell>
   )
 }
 

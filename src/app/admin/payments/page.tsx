@@ -11,14 +11,13 @@ import {
   DollarSign,
   CheckCircle2,
   Clock,
-  ArrowLeft,
   Wallet,
   Settings,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
 import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
 import { StatsGrid } from '@/components/common/stats-grid'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
@@ -97,22 +96,13 @@ export default function AdminPaymentsPage() {
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-6">
-          <Link href="/admin">
-            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <PageHeader
-          highlight="FINANCEIRO"
-          title="ADMIN"
-          description={`Olá, ${user.name || user.email}! Gerencie receitas e comissões.`}
-        />
-
+    <AdminPageShell
+      highlight="FINANCEIRO"
+      title="ADMIN"
+      description={`Olá, ${user.name || user.email}! Gerencie receitas e comissões.`}
+      backHref="/admin"
+      backLabel="Voltar para Dashboard"
+    >
         <div className="flex justify-end mb-4">
           <Link href="/admin/withdraw">
             <Button variant="outline" className="border-brand-purple/50 text-brand-purple-light hover:bg-brand-purple/10">
@@ -122,7 +112,7 @@ export default function AdminPaymentsPage() {
         </div>
 
         <Tabs defaultValue="receitas" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-brand-black/30 border border-brand-purple/50 mb-6">
+          <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-white/10 mb-6">
             <TabsTrigger value="receitas" className="data-[state=active]:bg-brand-purple/20">
               <DollarSign className="h-4 w-4 mr-2" />Receitas
             </TabsTrigger>
@@ -146,7 +136,7 @@ export default function AdminPaymentsPage() {
             ) : null}
 
             <Tabs value={revenueFilter} onValueChange={setRevenueFilter} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-brand-black/30 border border-brand-purple/50">
+              <TabsList className="grid w-full grid-cols-4 bg-brand-black-light border border-white/10">
                 <TabsTrigger value="all" className="data-[state=active]:bg-brand-purple/20">Todas</TabsTrigger>
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-yellow-500/20">Pendentes</TabsTrigger>
                 <TabsTrigger value="PAID" className="data-[state=active]:bg-green-500/20">Pagas</TabsTrigger>
@@ -164,11 +154,11 @@ export default function AdminPaymentsPage() {
                 ) : (
                   <div className="grid gap-4 lg:gap-6">
                     {revenues.map((revenue) => (
-                      <Card key={revenue.id} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+                      <Card key={revenue.id}>
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white font-orbitron mb-2">
+                              <CardTitle className="text-white font-orbitron text-lg mb-2">
                                 {revenue.order.service.name}
                               </CardTitle>
                               <CardDescription className="text-brand-gray-400 font-rajdhani">
@@ -199,7 +189,7 @@ export default function AdminPaymentsPage() {
 
           {/* ── Tab: Configurações ────────────────────────────────────────── */}
           <TabsContent value="configuracoes">
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
                 <p className="text-brand-gray-300 font-rajdhani text-center max-w-sm">
                   As configurações de comissão foram movidas para uma página dedicada.
@@ -213,6 +203,6 @@ export default function AdminPaymentsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-    </div>
+    </AdminPageShell>
   )
 }

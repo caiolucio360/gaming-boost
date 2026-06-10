@@ -48,9 +48,5 @@ export function OrderCardShell({
   if (glow) {
     return <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20">{inner}</GlowCard>
   }
-  return (
-    <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors">
-      {inner}
-    </Card>
-  )
+  return <Card className="hover:border-brand-purple/50 transition-colors">{inner}</Card>
 }

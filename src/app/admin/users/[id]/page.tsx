@@ -17,8 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ArrowLeft, Save, User, Crown, Shield, Loader2 } from 'lucide-react'
-import Link from 'next/link'
+import { Save, User, Crown, Shield, Loader2 } from 'lucide-react'
+import { BackButton } from '@/components/common/back-button'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -151,15 +151,8 @@ export default function AdminUserDetailPage() {
   const RoleIcon = roleInfo?.icon || User
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6">
-      {/* Back */}
-      <Link
-        href="/admin/users"
-        className="inline-flex items-center text-brand-purple-light hover:text-brand-purple transition-colors font-rajdhani mb-6"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Voltar para Usuários
-      </Link>
+    <div className="max-w-2xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
+      <BackButton href="/admin/users">Voltar para Usuários</BackButton>
 
       {alert && (
         <Alert variant={alert.variant} className="mb-6">
@@ -196,9 +189,9 @@ export default function AdminUserDetailPage() {
           </div>
 
           {/* Form */}
-          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white font-orbitron text-base">
+              <CardTitle className="text-white font-orbitron text-lg">
                 Editar Usuário
               </CardTitle>
             </CardHeader>
