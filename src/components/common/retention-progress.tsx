@@ -53,7 +53,6 @@ export function RetentionProgress({
       <div className="flex items-center justify-between">
         <h3
           className="text-white text-sm font-bold tracking-wide font-orbitron"
-          style={{ fontFamily: 'Orbitron, sans-serif' }}
         >
           PROGRESSÃO
         </h3>
@@ -70,7 +69,6 @@ export function RetentionProgress({
           <p className="text-xs text-brand-gray-500 mb-0.5">Rating atual</p>
           <p
             className="text-2xl font-bold text-white font-orbitron"
-            style={{ fontFamily: 'Orbitron, sans-serif' }}
           >
             {formatRating(currentRating, gameMode)}
           </p>
@@ -80,7 +78,6 @@ export function RetentionProgress({
             <p className="text-xs text-brand-gray-500 mb-0.5">Próximo marco</p>
             <p
               className="text-lg font-bold text-brand-purple-light font-orbitron"
-              style={{ fontFamily: 'Orbitron, sans-serif' }}
             >
               {formatRating(nextMilestone, gameMode)}
             </p>

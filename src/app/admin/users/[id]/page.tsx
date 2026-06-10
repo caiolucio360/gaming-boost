@@ -156,7 +156,6 @@ export default function AdminUserDetailPage() {
       <Link
         href="/admin/users"
         className="inline-flex items-center text-brand-purple-light hover:text-brand-purple transition-colors font-rajdhani mb-6"
-        style={{ fontFamily: 'Rajdhani, sans-serif' }}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar para Usuários
@@ -180,7 +179,7 @@ export default function AdminUserDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <h1 className="text-xl font-bold text-white font-orbitron">
                   {userData.name || userData.email}
                 </h1>
                 {roleInfo && (
@@ -199,7 +198,7 @@ export default function AdminUserDetailPage() {
           {/* Form */}
           <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
             <CardHeader>
-              <CardTitle className="text-white font-orbitron text-base" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              <CardTitle className="text-white font-orbitron text-base">
                 Editar Usuário
               </CardTitle>
             </CardHeader>
@@ -289,7 +288,7 @@ export default function AdminUserDetailPage() {
                   onClick={handleSave}
                   disabled={saving}
                   className="bg-brand-purple hover:bg-brand-purple-light text-white font-rajdhani border border-transparent hover:border-white/20"
-                  style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+                  style={{ fontWeight: '600' }}
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -38,7 +38,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">{title}</h2>
-        <p className="text-gray-600">
+        <p className="text-brand-gray-600">
           {step === 'from' 
             ? 'Selecione seu rank atual' 
             : 'Selecione o rank desejado'
@@ -59,7 +59,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               <p className="text-sm font-medium">{fromRank.name}</p>
             </div>
             
-            <span className="text-2xl text-gray-400">→</span>
+            <span className="text-2xl text-brand-gray-400">→</span>
             
             {toRank ? (
               <div className="text-center">
@@ -74,8 +74,8 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                 <p className="text-sm font-medium">{toRank.name}</p>
               </div>
             ) : (
-              <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400 text-xs">?</span>
+              <div className="w-16 h-16 border-2 border-dashed border-brand-gray-300 rounded-lg flex items-center justify-center">
+                <span className="text-brand-gray-400 text-xs">?</span>
               </div>
             )}
           </div>
@@ -102,7 +102,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                 isSelected
                   ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/50'
                   : 'hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 hover:border-brand-purple-light/50'
-              } bg-gradient-to-br from-gray-900/50 via-gray-800/50 to-gray-900/50 border-brand-purple/30`}
+              } bg-gradient-to-br from-brand-gray-900/50 via-brand-gray-800/50 to-brand-gray-900/50 border-brand-purple/30`}
               onClick={() => handleRankSelect(rank)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -129,7 +129,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                   {rank.name}
                 </h3>
                 {rank.tier && (
-                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-gray-400 group-hover:text-gray-300'}`}>
+                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-brand-gray-400 group-hover:text-brand-gray-300'}`}>
                     {rank.tier}
                   </p>
                 )}

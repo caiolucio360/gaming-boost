@@ -360,10 +360,10 @@ export default function BoosterDashboardPage() {
         {hasPixKey === false && (
           <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/40 rounded-xl flex items-center gap-3">
             <div className="flex-1">
-              <p className="text-yellow-300 font-semibold font-orbitron text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              <p className="text-yellow-300 font-semibold font-orbitron text-sm">
                 CHAVE PIX NÃO CADASTRADA
               </p>
-              <p className="text-yellow-400/80 text-sm font-rajdhani mt-0.5" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-yellow-400/80 text-sm font-rajdhani mt-0.5">
                 Você precisa cadastrar sua chave PIX para aceitar pedidos e receber pagamentos.
               </p>
             </div>
@@ -385,13 +385,13 @@ export default function BoosterDashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
                       Disponíveis
                     </p>
-                    <p className="text-3xl font-bold text-yellow-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    <p className="text-3xl font-bold text-yellow-500 font-orbitron">
                       {stats.available}
                     </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
                       Pedidos pendentes
                     </p>
                   </div>
@@ -405,13 +405,13 @@ export default function BoosterDashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
                       Em Andamento
                     </p>
-                    <p className="text-3xl font-bold text-blue-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    <p className="text-3xl font-bold text-blue-500 font-orbitron">
                       {stats.assigned}
                     </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
                       Pedidos ativos
                     </p>
                   </div>
@@ -425,13 +425,13 @@ export default function BoosterDashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">
                       Concluídos
                     </p>
-                    <p className="text-3xl font-bold text-green-500 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    <p className="text-3xl font-bold text-green-500 font-orbitron">
                       {stats.completed}
                     </p>
-                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <p className="text-xs text-brand-gray-500 mt-1 font-rajdhani">
                       Pedidos finalizados
                     </p>
                   </div>
@@ -510,10 +510,10 @@ export default function BoosterDashboardPage() {
                       <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200">
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -526,13 +526,13 @@ export default function BoosterDashboardPage() {
                             {order.commission && (
                               <OrderInfoItem
                                 label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
                               />
                             )}
                             {order.boosterCommission && !order.commission && (
                               <OrderInfoItem
                                 label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                               />
                             )}
                             <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
@@ -593,10 +593,10 @@ export default function BoosterDashboardPage() {
                       <CardHeader className="relative z-10">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2 group-hover:text-brand-purple-light transition-colors duration-200">
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -609,13 +609,13 @@ export default function BoosterDashboardPage() {
                             {order.commission && (
                               <OrderInfoItem
                                 label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%)</span>}
                               />
                             )}
                             {order.boosterCommission && !order.commission && (
                               <OrderInfoItem
                                 label="Sua Comissão"
-                                value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                                value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                               />
                             )}
                             <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />
@@ -626,7 +626,7 @@ export default function BoosterDashboardPage() {
                           {order.status === 'PAID' && (
                             <div className="border-t border-white/10 pt-4">
                               <div className="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                                <p className="text-yellow-300 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                <p className="text-yellow-300 text-sm font-rajdhani">
                                   Aguardando credenciais Steam do cliente. Peça ao cliente para enviar pelo chat abaixo.
                                 </p>
                               </div>
@@ -691,10 +691,10 @@ export default function BoosterDashboardPage() {
             >
               <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <DialogTitle className="text-white font-orbitron">
                     Comprovante de Conclusão
                   </DialogTitle>
-                  <DialogDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <DialogDescription className="text-brand-gray-400 font-rajdhani">
                     Anexe um print da tela mostrando que o cliente atingiu o rank/rating contratado. Isso é obrigatório para concluir o pedido.
                   </DialogDescription>
                 </DialogHeader>
@@ -727,10 +727,10 @@ export default function BoosterDashboardPage() {
                       className="w-full h-auto flex-col border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 gap-3 bg-brand-purple/5 hover:bg-brand-purple/10"
                     >
                       <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
-                      <span className="text-brand-gray-400 font-rajdhani text-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <span className="text-brand-gray-400 font-rajdhani text-sm">
                         Clique para selecionar o print
                       </span>
-                      <span className="text-brand-gray-500 font-rajdhani text-xs" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <span className="text-brand-gray-500 font-rajdhani text-xs">
                         JPG, PNG ou WebP — máx. 5 MB
                       </span>
                     </Button>
@@ -795,10 +795,10 @@ export default function BoosterDashboardPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            <CardTitle className="text-white font-orbitron mb-2">
                               {order.service.name}
                             </CardTitle>
-                            <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            <CardDescription className="text-brand-gray-500 font-rajdhani">
                               {order.service.description}
                             </CardDescription>
                           </div>
@@ -810,13 +810,13 @@ export default function BoosterDashboardPage() {
                           {order.commission && (
                             <OrderInfoItem
                               label="Sua Comissão"
-                              value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%) {order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}</span>}
+                              value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.commission.amount)} ({(order.commission.percentage * 100).toFixed(0)}%) {order.commission.status === 'PAID' ? '✓ Pago' : '⏳ Pendente'}</span>}
                             />
                           )}
                           {order.boosterCommission && !order.commission && (
                             <OrderInfoItem
                               label="Sua Comissão"
-                              value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
+                              value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(order.boosterCommission)} ({(order.boosterPercentage ? order.boosterPercentage * 100 : 70).toFixed(0)}%)</span>}
                             />
                           )}
                           <OrderInfoItem label="Cliente" value={order.user.name || order.user.email} />

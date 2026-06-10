@@ -74,10 +74,10 @@ export default function CS2Page() {
       <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+            <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontWeight: '800' }}>
               <span className="text-brand-purple-light">COUNTER-STRIKE 2</span>
             </h1>
-            <p className="text-xl text-brand-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            <p className="text-xl text-brand-gray-300 font-rajdhani" style={{ fontWeight: '500' }}>
               Escolha o serviço que melhor atende suas necessidades
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function CS2Page() {
                     className={`group relative h-full bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border transition-all duration-500 overflow-hidden ${
                       isClickable
                         ? 'border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 hover:scale-[1.02] cursor-pointer'
-                        : 'border-gray-500/30 opacity-60 cursor-not-allowed'
+                        : 'border-brand-gray-500/30 opacity-60 cursor-not-allowed'
                     }`}
                   >
                     {/* Efeito de brilho no hover */}
@@ -104,10 +104,10 @@ export default function CS2Page() {
                       <div className="text-6xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 inline-block">
                         {service.icon}
                       </div>
-                      <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                      <CardTitle className="text-3xl font-bold text-white font-orbitron group-hover:text-brand-purple-light transition-colors duration-300" style={{ fontWeight: '700' }}>
                         {service.title}
                       </CardTitle>
-                      <CardDescription className="text-brand-gray-300 font-rajdhani text-lg mt-2 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                      <CardDescription className="text-brand-gray-300 font-rajdhani text-lg mt-2 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                         {service.description}
                       </CardDescription>
                     </CardHeader>
@@ -117,13 +117,9 @@ export default function CS2Page() {
                         {service.features.map((feature, featureIndex) => (
                           <li 
                             key={featureIndex} 
-                            className="flex items-center text-brand-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300"
-                            style={{ 
-                              fontFamily: 'Rajdhani, sans-serif', 
-                              fontWeight: '400',
-                            }}
+                            className="flex items-center text-brand-gray-300 font-rajdhani group-hover:text-brand-gray-200 transition-colors duration-300"
                           >
-                            <div className={`w-2 h-2 rounded-full mr-3 transition-all duration-300 ${isClickable ? 'bg-brand-purple-light group-hover:bg-brand-purple-light group-hover:scale-125' : 'bg-gray-400'}`}></div>
+                            <div className={`w-2 h-2 rounded-full mr-3 transition-all duration-300 ${isClickable ? 'bg-brand-purple-light group-hover:bg-brand-purple-light group-hover:scale-125' : 'bg-brand-gray-400'}`}></div>
                             {feature}
                           </li>
                         ))}
@@ -144,7 +140,7 @@ export default function CS2Page() {
                             </div>
                           </div>
                         ) : (
-                          <div className="inline-flex items-center justify-center px-6 py-3 bg-gray-500/20 border border-gray-500/50 rounded-lg text-gray-400 font-rajdhani w-full" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+                          <div className="inline-flex items-center justify-center px-6 py-3 bg-brand-gray-500/20 border border-brand-gray-500/50 rounded-lg text-brand-gray-400 font-rajdhani w-full" style={{ fontWeight: '500' }}>
                             <span className="text-sm text-brand-purple-light font-semibold mr-2">(em breve)</span>
                             <span>Em desenvolvimento</span>
                           </div>

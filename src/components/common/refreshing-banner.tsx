@@ -12,7 +12,7 @@ interface RefreshingBannerProps {
 export function RefreshingBanner({ message = 'Atualizando...' }: RefreshingBannerProps) {
   return (
     <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
-      <p className="text-sm text-brand-purple-light font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+      <p className="text-sm text-brand-purple-light font-rajdhani text-center">
         <Loader2 className="h-4 w-4 inline-block mr-2 animate-spin" />
         {message}
       </p>

@@ -173,10 +173,10 @@ export default function BoosterPaymentsPage() {
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                              <CardTitle className="text-white font-orbitron mb-2">
                                 {commission.order.gameMode || commission.order.serviceType}
                               </CardTitle>
-                              <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              <CardDescription className="text-brand-gray-500 font-rajdhani">
                                 Pedido #{commission.order.id}
                               </CardDescription>
                             </div>
@@ -185,7 +185,7 @@ export default function BoosterPaymentsPage() {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem label="Valor da Comissão" value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.amount)} ({(commission.percentage * 100).toFixed(0)}%)</span>} />
+                            <OrderInfoItem label="Valor da Comissão" value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(commission.amount)} ({(commission.percentage * 100).toFixed(0)}%)</span>} />
                             <OrderInfoItem label="Cliente" value={commission.order.user.name || commission.order.user.email} />
                             {commission.status === 'PAID' && commission.paidAt && <OrderInfoItem label="Data do Pagamento" value={formatDate(commission.paidAt)} />}
                             <OrderInfoItem label="Data da Comissão" value={formatDate(commission.createdAt)} />

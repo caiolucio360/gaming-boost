@@ -129,8 +129,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
               <div className="flex items-center gap-3">
                 <Wallet className="w-8 h-8 text-brand-purple-light" />
                 <div>
-                  <p className="text-gray-400 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Saldo Disponível</p>
-                  <p className="text-2xl font-bold text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <p className="text-brand-gray-400 text-sm font-rajdhani">Saldo Disponível</p>
+                  <p className="text-2xl font-bold text-white font-orbitron">
                     {loading ? '...' : formatPrice(availableBalance / 100)}
                   </p>
                 </div>
@@ -148,11 +148,11 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
               <div className="flex items-center gap-3">
                 <Lock className="w-8 h-8 text-yellow-400" />
                 <div>
-                  <p className="text-gray-400 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Saldo Bloqueado</p>
-                  <p className="text-2xl font-bold text-yellow-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <p className="text-brand-gray-400 text-sm font-rajdhani">Saldo Bloqueado</p>
+                  <p className="text-2xl font-bold text-yellow-300 font-orbitron">
                     {formatPrice(lockedBalance / 100)}
                   </p>
-                  <p className="text-xs text-yellow-500 font-rajdhani mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Aguardando período de espera</p>
+                  <p className="text-xs text-yellow-500 font-rajdhani mt-1">Aguardando período de espera</p>
                 </div>
               </div>
             </CardContent>
@@ -164,10 +164,10 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {lockedCommissions.length > 0 && (
         <Card className="bg-brand-black/30 backdrop-blur-md border-yellow-500/30">
           <CardHeader>
-            <CardTitle className="text-yellow-300 font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-yellow-300 font-orbitron flex items-center gap-2">
               <Clock className="w-5 h-5" />Comissões em Período de Espera
             </CardTitle>
-            <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <CardDescription className="text-brand-gray-400 font-rajdhani">
               Estas comissões serão liberadas para saque nas datas abaixo
             </CardDescription>
           </CardHeader>
@@ -181,8 +181,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 return (
                   <div key={commission.id} className="flex items-center justify-between p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/20">
                     <div>
-                      <p className="text-white font-bold font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(commission.amount)}</p>
-                      <p className="text-gray-400 text-xs font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Pedido #{commission.orderId}</p>
+                      <p className="text-white font-bold font-orbitron">{formatPrice(commission.amount)}</p>
+                      <p className="text-brand-gray-400 text-xs font-rajdhani">Pedido #{commission.orderId}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-yellow-300 text-sm font-medium">
@@ -190,7 +190,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                           ? (diffHours <= 1 ? 'Libera em breve' : `Libera em ${diffHours}h`)
                           : diffDays === 1 ? 'Libera amanhã' : `Libera em ${diffDays} dias`}
                       </p>
-                      <p className="text-gray-500 text-xs font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{formatDate(commission.availableForWithdrawalAt)}</p>
+                      <p className="text-brand-gray-500 text-xs font-rajdhani">{formatDate(commission.availableForWithdrawalAt)}</p>
                     </div>
                   </div>
                 )
@@ -203,8 +203,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {/* Withdrawal form */}
       <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
         <CardHeader>
-          <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>Novo Saque</CardTitle>
-          <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Valor mínimo: R$ 3,50</CardDescription>
+          <CardTitle className="text-white font-orbitron">Novo Saque</CardTitle>
+          <CardDescription className="text-brand-gray-400 font-rajdhani">Valor mínimo: R$ 3,50</CardDescription>
         </CardHeader>
         <CardContent>
           {hasPendingWithdrawal ? (
@@ -249,23 +249,23 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {/* Withdrawal history */}
       <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
         <CardHeader>
-          <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>Histórico de Saques</CardTitle>
+          <CardTitle className="text-white font-orbitron">Histórico de Saques</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-gray-400 gap-3">
+            <div className="flex items-center justify-center py-8 text-brand-gray-400 gap-3">
               <RefreshCw className="w-5 h-5 animate-spin" />Carregando...
             </div>
           ) : withdrawals.length === 0 ? (
-            <p className="text-gray-400 text-center py-8 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Nenhum saque realizado ainda.</p>
+            <p className="text-brand-gray-400 text-center py-8 font-rajdhani">Nenhum saque realizado ainda.</p>
           ) : (
             <div className="space-y-4">
               {withdrawals.map((w) => (
                 <div key={w.id} className="flex items-center justify-between p-4 bg-black/30 rounded-lg border border-brand-purple/20">
                   <div>
                     <p className="text-white font-bold">{formatPrice(w.amount / 100)}</p>
-                    <p className="text-gray-400 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{w.pixKeyType}: {w.pixKey.substring(0, 10)}...</p>
-                    <p className="text-gray-500 text-xs font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{formatDate(w.createdAt)}</p>
+                    <p className="text-brand-gray-400 text-sm font-rajdhani">{w.pixKeyType}: {w.pixKey.substring(0, 10)}...</p>
+                    <p className="text-brand-gray-500 text-xs font-rajdhani">{formatDate(w.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     {getStatusBadge(w.status)}

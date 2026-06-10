@@ -135,7 +135,7 @@ function VerifyContent() {
   return (
     <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
       <div className="text-center mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1">
           <span className="text-white">VERIFICAR</span>
           <span className="text-brand-purple-light"> CONTA</span>
         </h1>
@@ -203,7 +203,6 @@ function VerifyContent() {
               onClick={handleResend}
               disabled={countdown > 0}
               className="text-sm font-rajdhani text-brand-gray-400 hover:text-white no-underline hover:no-underline"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {countdown > 0 ? `Reenviar código em ${countdown}s` : 'Não recebeu? Reenviar código'}
             </Button>

@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline" size="lg" className="w-full font-bold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <Button asChild variant="outline" size="lg" className="w-full font-bold font-rajdhani">
               <Link href="/login">
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para Login
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-brand-purple/20 flex items-center justify-center">
             <Mail className="h-6 w-6 text-brand-purple" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2">
             Recuperar Senha
           </h1>
           <p className="text-sm text-brand-gray-300 font-rajdhani">
@@ -134,7 +134,6 @@ export default function ForgotPasswordPage() {
               disabled={isLoading}
               size="lg"
               className="w-full font-bold font-rajdhani"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {isLoading ? (
                 <>

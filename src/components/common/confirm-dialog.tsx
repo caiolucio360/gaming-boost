@@ -57,10 +57,10 @@ export function ConfirmDialog({
       {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
       <AlertDialogContent className="bg-black/90 border-brand-purple/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <AlertDialogTitle className="text-white font-orbitron">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-brand-gray-300 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <AlertDialogDescription className="text-brand-gray-300 font-rajdhani">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -68,7 +68,6 @@ export function ConfirmDialog({
           <AlertDialogCancel
             disabled={loading}
             className="border-brand-purple/50 text-white hover:border-white/50 font-rajdhani"
-            style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             {cancelLabel}
           </AlertDialogCancel>
@@ -77,7 +76,7 @@ export function ConfirmDialog({
             loading={loading}
             loadingText="Processando..."
             className={confirmButtonClass}
-            style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+            style={{ fontWeight: '600' }}
           >
             {confirmLabel}
           </ButtonLoading>

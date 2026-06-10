@@ -240,7 +240,7 @@ export default function ProfilePage() {
           <SkeletonProfileCard />
         ) : !profile ? (
           <div className="text-center py-12">
-            <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <p className="text-brand-gray-500 font-rajdhani">
               Erro ao carregar perfil
             </p>
           </div>

@@ -228,7 +228,7 @@ export default function AdminCommissionsPage() {
             {/* ── Block 1: Global Config ──────────────────────────────────── */}
             <Card className="bg-brand-black-light border-brand-purple/20">
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-white font-orbitron">
                   Configuração Global
                 </CardTitle>
                 <CardDescription className="text-brand-gray-500 font-rajdhani">
@@ -315,20 +315,20 @@ export default function AdminCommissionsPage() {
                     {isDevAdmin && (
                       <div>
                         <p className="text-xs text-brand-gray-500 font-rajdhani">Dev-Admin</p>
-                        <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <p className="text-white font-orbitron font-bold">
                           {formatPrice(previewDev)}
                         </p>
                       </div>
                     )}
                     <div>
                       <p className="text-xs text-brand-gray-500 font-rajdhani">Booster</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-white font-orbitron font-bold">
                         {formatPrice(previewBooster)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-brand-gray-500 font-rajdhani">Admin</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-white font-orbitron font-bold">
                         {formatPrice(previewAdmin)}
                       </p>
                     </div>
@@ -358,7 +358,7 @@ export default function AdminCommissionsPage() {
             {/* ── Block 2: Booster Table ──────────────────────────────────── */}
             <Card className="bg-brand-black-light border-brand-purple/20">
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-white font-orbitron">
                   Boosters
                 </CardTitle>
                 <CardDescription className="text-brand-gray-500 font-rajdhani">
@@ -429,7 +429,7 @@ export default function AdminCommissionsPage() {
                               <>
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
-                                    <span className="text-white font-orbitron text-sm font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                    <span className="text-white font-orbitron text-sm font-bold">
                                       {Math.round(pct * 100)}%
                                     </span>
                                     {hasOverride && (

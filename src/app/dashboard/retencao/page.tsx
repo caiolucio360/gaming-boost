@@ -24,7 +24,7 @@ interface CompletedOrder {
 }
 
 const TIERS = [
-  { orders: 1, discount: 0,  label: '0%',  icon: Star,   color: 'text-gray-400' },
+  { orders: 1, discount: 0,  label: '0%',  icon: Star,   color: 'text-brand-gray-400' },
   { orders: 2, discount: 5,  label: '5%',  icon: Zap,    color: 'text-brand-purple-light' },
   { orders: 3, discount: 10, label: '10%', icon: Gift,   color: 'text-yellow-400' },
   { orders: 4, discount: 15, label: '15%', icon: Trophy, color: 'text-green-400' },
@@ -91,10 +91,10 @@ export default function RetencaoPage() {
               <div className="flex items-center gap-4">
                 <Trophy className="w-10 h-10 text-green-400 flex-shrink-0" />
                 <div>
-                  <p className="text-green-300 font-bold text-xl font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <p className="text-green-300 font-bold text-xl font-orbitron">
                     {Math.round(discountPct * 100)}% DE DESCONTO DISPONÍVEL
                   </p>
-                  <p className="text-green-400/80 text-sm font-rajdhani mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <p className="text-green-400/80 text-sm font-rajdhani mt-1">
                     Seu desconto de fidelidade é aplicado automaticamente no próximo boost.
                   </p>
                 </div>
@@ -107,10 +107,10 @@ export default function RetencaoPage() {
               <div className="flex items-center gap-4">
                 <Gift className="w-10 h-10 text-brand-purple-light flex-shrink-0" />
                 <div>
-                  <p className="text-white font-bold text-lg font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <p className="text-white font-bold text-lg font-orbitron">
                     {streak === 0 ? 'COMPLETE SEU PRIMEIRO BOOST' : 'COMPLETE MAIS UM BOOST'}
                   </p>
-                  <p className="text-brand-gray-400 text-sm font-rajdhani mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <p className="text-brand-gray-400 text-sm font-rajdhani mt-1">
                     {streak === 0
                       ? 'Faça seu primeiro pedido e comece a acumular descontos.'
                       : 'Mais 1 boost concluído para desbloquear 5% de desconto.'}
@@ -145,7 +145,7 @@ export default function RetencaoPage() {
       {/* Tier table */}
       <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
         <CardHeader>
-          <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <CardTitle className="text-white font-orbitron">
             Níveis de Desconto
           </CardTitle>
         </CardHeader>
@@ -168,12 +168,12 @@ export default function RetencaoPage() {
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-5 h-5 ${tier.color}`} />
-                    <span className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    <span className="text-white font-rajdhani">
                       {tier.orders === 4 ? '4+ pedidos concluídos' : `${tier.orders} pedido${tier.orders > 1 ? 's' : ''} concluído${tier.orders > 1 ? 's' : ''}`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={tier.discount > 0 ? 'bg-green-500/20 text-green-300 border-green-500/50' : 'bg-white/10 text-gray-400 border-white/20'}>
+                    <Badge className={tier.discount > 0 ? 'bg-green-500/20 text-green-300 border-green-500/50' : 'bg-white/10 text-brand-gray-400 border-white/20'}>
                       {tier.discount > 0 ? `${tier.discount}% off` : 'Sem desconto'}
                     </Badge>
                     {isCurrent && <Badge className="bg-brand-purple/30 text-brand-purple-light border-brand-purple/50">Você está aqui</Badge>}
@@ -191,8 +191,8 @@ export default function RetencaoPage() {
           <div className="flex gap-3">
             <Zap className="w-5 h-5 text-brand-purple-light flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-white font-semibold font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Como usar meu desconto?</p>
-              <p className="text-brand-gray-400 text-sm mt-1 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-white font-semibold font-rajdhani">Como usar meu desconto?</p>
+              <p className="text-brand-gray-400 text-sm mt-1 font-rajdhani">
                 Seu desconto de fidelidade é aplicado automaticamente ao contratar um novo boost. Não é necessário nenhum cupom — basta escolher o serviço e o desconto aparece no checkout.
               </p>
             </div>
@@ -204,7 +204,7 @@ export default function RetencaoPage() {
       {completedOrders.length > 0 && (
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron">
               Histórico de Boosts Concluídos
             </CardTitle>
           </CardHeader>
@@ -216,9 +216,9 @@ export default function RetencaoPage() {
                     <p className="text-white text-sm font-semibold">
                       {order.gameMode || 'CS2'}{order.targetRating ? ` → ${order.targetRating.toLocaleString('pt-BR')} pts` : order.targetRank ? ` → ${order.targetRank}` : ''}
                     </p>
-                    <p className="text-gray-500 text-xs font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Pedido #{order.id}</p>
+                    <p className="text-brand-gray-500 text-xs font-rajdhani">Pedido #{order.id}</p>
                   </div>
-                  <p className="text-brand-gray-400 text-xs font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <p className="text-brand-gray-400 text-xs font-rajdhani">
                     {formatDate(order.completedAt)}
                   </p>
                 </div>
@@ -231,7 +231,7 @@ export default function RetencaoPage() {
       {completedOrders.length === 0 && (
         <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/30">
           <CardContent className="pt-6 pb-6 text-center">
-            <p className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <p className="text-brand-gray-400 font-rajdhani">
               Você ainda não tem boosts concluídos. Complete seu primeiro pedido para começar a acumular descontos!
             </p>
             <Link href="/games/cs2" className="mt-4 inline-block">

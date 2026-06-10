@@ -51,13 +51,13 @@ export default function FeaturedServicesSection() {
                     <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 group-hover:from-brand-purple/30 group-hover:to-brand-purple-dark/30 transition-all duration-300 mb-4">
                       <IconComponent className="h-12 w-12 text-brand-purple-light group-hover:text-brand-purple-light transition-colors duration-300" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white font-orbitron mb-3 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                    <h3 className="text-2xl font-bold text-white font-orbitron mb-3 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                       {service.title}
                       {!service.available && (
                         <span className="text-sm text-brand-purple-light font-semibold ml-2">(em breve)</span>
                       )}
                     </h3>
-                    <p className="text-brand-gray-300 font-rajdhani mb-6 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <p className="text-brand-gray-300 font-rajdhani mb-6 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                       {service.description}
                     </p>
                     {service.available ? (

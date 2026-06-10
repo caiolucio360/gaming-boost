@@ -176,10 +176,10 @@ export default function AdminPaymentsPage() {
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                              <CardTitle className="text-white font-orbitron mb-2">
                                 {revenue.order.service.name}
                               </CardTitle>
-                              <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              <CardDescription className="text-brand-gray-400 font-rajdhani">
                                 Pedido #{revenue.order.id}
                               </CardDescription>
                             </div>
@@ -188,8 +188,8 @@ export default function AdminPaymentsPage() {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem label="Valor da Receita" value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.amount)} ({(revenue.percentage * 100).toFixed(0)}%)</span>} />
-                            <OrderInfoItem label="Valor Total do Pedido" value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.orderTotal)}</span>} />
+                            <OrderInfoItem label="Valor da Receita" value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(revenue.amount)} ({(revenue.percentage * 100).toFixed(0)}%)</span>} />
+                            <OrderInfoItem label="Valor Total do Pedido" value={<span className="text-lg font-bold text-brand-purple-light font-orbitron">{formatPrice(revenue.orderTotal)}</span>} />
                             <OrderInfoItem label="Cliente" value={revenue.order.user.name || revenue.order.user.email} />
                             {revenue.order.booster && <OrderInfoItem label="Booster" value={revenue.order.booster.name || revenue.order.booster.email} />}
                             {revenue.status === 'PAID' && revenue.paidAt && <OrderInfoItem label="Data do Pagamento" value={formatDate(revenue.paidAt)} />}

@@ -30,17 +30,17 @@ export function EmptyState({
           <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 mb-4">
             <Icon className="h-16 w-16 text-brand-purple-light group-hover:text-brand-purple-lighter transition-colors duration-300" />
           </div>
-          <h3 className="text-xl font-bold text-white font-orbitron mb-2 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <h3 className="text-xl font-bold text-white font-orbitron mb-2 group-hover:text-brand-purple-lighter transition-colors duration-300">
             {title}
           </h3>
-          <p className="text-brand-gray-400 font-rajdhani mb-6 group-hover:text-brand-gray-300 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <p className="text-brand-gray-400 font-rajdhani mb-6 group-hover:text-brand-gray-300 transition-colors duration-300">
             {description}
           </p>
           {actionLabel && (actionHref ? (
             <Button
               asChild
               className="bg-gradient-to-r from-brand-purple-dark to-brand-purple text-white font-rajdhani shadow-lg border border-transparent hover:border-white/50 transition-all duration-200"
-              style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+              style={{ fontWeight: '600' }}
             >
               <Link href={actionHref}>{actionLabel}</Link>
             </Button>
@@ -48,7 +48,7 @@ export function EmptyState({
             <Button
               onClick={onAction}
               className="bg-gradient-to-r from-brand-purple-dark to-brand-purple text-white font-rajdhani shadow-lg border border-transparent hover:border-white/50 transition-all duration-200"
-              style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+              style={{ fontWeight: '600' }}
             >
               {actionLabel}
             </Button>

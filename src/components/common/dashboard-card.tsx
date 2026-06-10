@@ -58,11 +58,11 @@ export function DashboardCard({ title, description, children, className, status 
       <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none`} style={{ willChange: 'opacity' }} />
       
       <CardHeader className="relative z-10">
-        <CardTitle className="text-white font-orbitron group-hover:text-brand-purple-lighter transition-colors duration-200" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <CardTitle className="text-white font-orbitron group-hover:text-brand-purple-lighter transition-colors duration-200">
           {title}
         </CardTitle>
         {description && (
-          <CardDescription className="text-brand-gray-400 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <CardDescription className="text-brand-gray-400 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
             {description}
           </CardDescription>
         )}

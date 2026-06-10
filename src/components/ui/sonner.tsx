@@ -29,13 +29,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
           toast:
             "w-full flex items-start gap-3 p-4 rounded-xl border shadow-2xl backdrop-blur-xl font-rajdhani",
           title: "font-semibold text-[15px] text-white",
-          description: "text-sm text-gray-400 mt-0.5",
+          description: "text-sm text-brand-gray-400 mt-0.5",
           actionButton:
             "bg-brand-purple hover:bg-brand-purple-light text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors",
           cancelButton:
             "bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors",
           closeButton:
-            "absolute top-2 right-2 p-1 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors",
+            "absolute top-2 right-2 p-1 rounded-md text-brand-gray-500 hover:text-white hover:bg-white/10 transition-colors",
           success: "bg-green-950/80 border-green-500/30",
           error: "bg-red-950/80 border-red-500/30",
           warning: "bg-yellow-950/80 border-yellow-500/30",
