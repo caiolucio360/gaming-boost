@@ -4,9 +4,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   ShoppingCart,
   ArrowLeft,
@@ -16,7 +15,9 @@ import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { PageHeader } from '@/components/common/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
+import { OrderStatus } from '@/components/common/status-badge'
+import { OrderCardShell } from '@/components/common/order-card-shell'
+import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
@@ -131,24 +132,13 @@ export default function AdminOrdersPage() {
           <div className="grid gap-6">
             {orders.map((order) => {
               return (
-                <Card
+                <OrderCardShell
                   key={order.id}
-                  className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
+                  title={order.service.name}
+                  description={`${order.user.name || order.user.email} • ${order.service.game}`}
+                  status={order.status as OrderStatus}
+                  glow={false}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-white font-orbitron mb-2">
-                          {order.service.name}
-                        </CardTitle>
-                        <CardDescription className="text-brand-gray-500 font-rajdhani">
-                          {order.user.name || order.user.email} • {order.service.game}
-                        </CardDescription>
-                      </div>
-                      <StatusBadge status={order.status as OrderStatus} />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         <OrderInfoItem
@@ -171,15 +161,7 @@ export default function AdminOrdersPage() {
                         <div className="pt-2 border-t border-brand-purple/20">
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-brand-gray-500">Status do Pagamento:</span>
-                            {order.payments.some(p => p.status === 'PAID') ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/50">
-                                Pago
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">
-                                Pendente
-                              </Badge>
-                            )}
+                            <PaymentStatusBadge status={order.payments.some(p => p.status === 'PAID') ? 'PAID' : 'PENDING'} />
                           </div>
                         </div>
                       )}
@@ -199,8 +181,7 @@ export default function AdminOrdersPage() {
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </OrderCardShell>
               )
             })}
           </div>

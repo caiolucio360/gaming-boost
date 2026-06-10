@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
 import { apiGet } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
+import { GlowCard } from '@/components/common/glow-card'
 import { Button } from '@/components/ui/button'
 import {
   ArrowRight,
@@ -253,9 +254,7 @@ export default function DashboardPage() {
         />
 
         {/* Filtros */}
-        <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 mb-6 overflow-hidden">
-          {/* Efeito de brilho sutil */}
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+        <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20 mb-6">
           <CardContent className="pt-4 pb-4 relative z-10">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Filtros de Status - Badges Compactos */}
@@ -290,7 +289,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </GlowCard>
 
         {/* Currently only PREMIER mode is shown. GC support can be added by rendering a second widget with gameMode="GC" */}
         {completedOrders.length > 0 && (
