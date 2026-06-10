@@ -4,6 +4,12 @@
 
 > **Golden Rule:** NEVER use hexadecimal values (`#7C3AED`), CSS token classes (`bg-surface-card`, `text-primary`, `bg-action-primary`), or arbitrary Tailwind values. ALWAYS use brand palette classes.
 
+> **Reuse first:** before writing UI markup, check `src/components/common/` (e.g. `PageHeader`,
+> `StatCard`, `StatusBadge`, `EmptyState`, `DashboardCard`, `ConfirmDialog`, `OrderCard`) and the
+> typography primitives in `src/components/common/typography.tsx` (`Heading`, `Text`). Don't
+> re-implement a card/header/badge/empty-state inline when a shared component already exists —
+> extend the shared one instead.
+
 ---
 
 ## Colors
@@ -66,13 +72,23 @@
 
 ## Typography
 
-| Font | Class | `style` fallback | Use |
-|------|-------|-----------------|-----|
-| Orbitron | `font-orbitron` | `style={{ fontFamily: 'Orbitron, sans-serif' }}` | Page titles, headings |
-| Rajdhani | `font-rajdhani` | `style={{ fontFamily: 'Rajdhani, sans-serif' }}` | Labels, UI elements, descriptions |
-| System | `font-sans` | — | Body text, long-form content |
+| Font | Class | Use |
+|------|-------|-----|
+| Orbitron | `font-orbitron` | Page titles, headings |
+| Rajdhani | `font-rajdhani` | Labels, UI elements, descriptions |
+| System | `font-sans` | Body text, long-form content |
 
-**Important:** Always add the inline `style` attribute alongside `font-orbitron` and `font-rajdhani` to ensure correct rendering if the CSS variable hasn't loaded.
+**Prefer the typography primitives over raw font classes.** Use `<Heading>` and `<Text>`
+from `@/components/common/typography` for standalone headings/paragraphs — they apply the
+brand font once. The shadcn `CardTitle`, `DialogTitle`, `AlertDialogTitle`, and `AlertTitle`
+**already carry `font-orbitron`**, and `CardDescription`/`DialogDescription` already carry
+`font-rajdhani text-brand-gray-300` — don't re-add those classes on them.
+
+**Never add an inline `style={{ fontFamily: ... }}` fallback.** Fonts are loaded by
+`next/font` in `src/app/layout.tsx` (with `display:'swap'` + `preload`) and exposed via the
+`font-orbitron` / `font-rajdhani` Tailwind classes (mapped to the CSS vars in
+`tailwind.config.js`). The old inline fallback named a system font, not the loaded face, so it
+silently degraded rendering. The Tailwind class alone is correct and sufficient.
 
 Font weights: `font-normal` (400), `font-medium` (500), `font-semibold` (600), `font-bold` (700).
 
@@ -217,6 +233,15 @@ These patterns are removed and must never be reintroduced:
 | `border-border-brand` | `border-brand-purple` |
 | `#7C3AED` (hardcoded hex) | `brand-purple` |
 | `bg-[var(--surface-card)]` | `bg-brand-black-light` |
+| `text-gray-300` / `-400` / `-500` | `text-brand-gray-300` / `-400` / `-500` |
+| `bg-gray-800` / `bg-gray-900` | `bg-brand-black-light` |
+| `border-gray-700` | `border-white/10` |
+| `text-muted-foreground` (shadcn token) | `text-brand-gray-300` |
+| inline `style={{ fontFamily: 'Orbitron…' }}` | `font-orbitron` class alone |
+
+> **Grays:** `brand.gray.*` has the **same hex** as Tailwind `gray.*`, so the rename is
+> visually identical — but always use the `brand-gray-*` form so the palette is auditable and
+> the ESLint guard can enforce it. Raw `text-gray-*` / `bg-gray-*` are forbidden in JSX.
 
 ---
 
