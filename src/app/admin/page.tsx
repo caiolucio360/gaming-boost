@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { StatCard } from '@/components/common/stat-card'
-import { PageHeader } from '@/components/common/page-header'
+import { StatsGrid } from '@/components/common/stats-grid'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/common/empty-state'
@@ -107,7 +108,11 @@ export default function AdminDashboardPage() {
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <AdminPageShell
+      highlight="PAINEL"
+      title="ADMINISTRATIVO"
+      description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma FlautasBoost.`}
+    >
       {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertTitle>Erro</AlertTitle>
@@ -115,18 +120,12 @@ export default function AdminDashboardPage() {
         </Alert>
       )}
 
-      <PageHeader
-        highlight="PAINEL"
-        title="ADMINISTRATIVO"
-        description={`Bem-vindo, ${user.name || user.email}. Gerencie a plataforma FlautasBoost.`}
-      />
-
       {/* Stat cards */}
       {loading && !stats ? (
         <SkeletonStatsGrid count={4} />
       ) : stats ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+          <StatsGrid columns={3} className="mb-6">
             <StatCard title="Total de Usuários" value={stats.users.total}
               description={`${stats.users.clients} clientes · ${stats.users.boosters} boosters · ${stats.users.admins} admins`}
               icon={Users} />
@@ -139,7 +138,7 @@ export default function AdminDashboardPage() {
               <StatCard title="Receita Dev" value={formatPrice(stats.revenue.devRevenue || 0)}
                 description="Sua comissão (10%)" icon={DollarSign} valueColor="text-amber-400" />
             )}
-          </div>
+          </StatsGrid>
 
           {/* Pending alert */}
           {stats.orders.pending > 0 && (
@@ -161,7 +160,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-6 mb-6">
 
               {/* Revenue area chart */}
-              <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+              <Card className="">
                 <CardHeader>
                   <CardTitle className="text-white font-orbitron text-base">Receita — últimos 30 dias</CardTitle>
                   <CardDescription className="text-brand-gray-500 font-rajdhani">Valor dos pedidos concluídos por dia (R$)</CardDescription>
@@ -193,7 +192,7 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Orders per day bar chart */}
-                <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+                <Card className="">
                   <CardHeader>
                     <CardTitle className="text-white font-orbitron text-base">Pedidos por dia</CardTitle>
                     <CardDescription className="text-brand-gray-500 font-rajdhani">Novos pedidos nos últimos 30 dias</CardDescription>
@@ -216,7 +215,7 @@ export default function AdminDashboardPage() {
                 </Card>
 
                 {/* Status donut */}
-                <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+                <Card className="">
                   <CardHeader>
                     <CardTitle className="text-white font-orbitron text-base">Status dos pedidos</CardTitle>
                     <CardDescription className="text-brand-gray-500 font-rajdhani">Distribuição geral por status</CardDescription>
@@ -258,7 +257,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* New users bar chart */}
-              <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+              <Card className="">
                 <CardHeader>
                   <CardTitle className="text-white font-orbitron text-base">Novos usuários — últimos 30 dias</CardTitle>
                   <CardDescription className="text-brand-gray-500 font-rajdhani">Cadastros por dia</CardDescription>
@@ -284,7 +283,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* Recent orders */}
-          <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+          <Card className="">
             <CardHeader>
               <CardTitle className="text-white font-orbitron">Pedidos Recentes</CardTitle>
               <CardDescription className="text-brand-gray-500 font-rajdhani">Últimos 5 pedidos criados</CardDescription>
@@ -331,6 +330,6 @@ export default function AdminDashboardPage() {
           </Card>
         </>
       ) : null}
-    </div>
+    </AdminPageShell>
   )
 }

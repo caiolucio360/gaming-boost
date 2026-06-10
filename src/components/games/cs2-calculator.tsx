@@ -453,10 +453,10 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                     flex flex-col items-center text-center"
                 >
                   <Icon className="h-10 w-10 text-brand-purple-light mb-3" />
-                  <h3 className="text-lg font-bold text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  <h3 className="text-lg font-bold text-white font-orbitron mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <p className="text-sm text-brand-gray-400 font-rajdhani">
                     {description}
                   </p>
                 </button>

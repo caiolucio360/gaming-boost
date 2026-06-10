@@ -112,7 +112,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
         <CardTitle className="text-2xl font-bold text-white font-orbitron">
           Pagamento via <span className="text-brand-purple-light">PIX</span>
         </CardTitle>
-        <CardDescription className="text-gray-400 font-rajdhani">
+        <CardDescription className="text-brand-gray-400 font-rajdhani">
           Total: <span className="text-white font-bold">R$ {orderTotal.toFixed(2)}</span>
         </CardDescription>
       </CardHeader>
@@ -130,12 +130,12 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="(11) 99999-9999"
               required
               maxLength={15}
-              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-black/50 border-brand-purple/50 text-white placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.phone && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.phone}</p>
             )}
-            <p className="text-gray-500 text-xs font-rajdhani">
+            <p className="text-brand-gray-500 text-xs font-rajdhani">
               Necessário para confirmar o pagamento PIX
             </p>
           </div>
@@ -152,18 +152,18 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="000.000.000-00"
               required
               maxLength={14}
-              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-black/50 border-brand-purple/50 text-white placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.taxId && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.taxId}</p>
             )}
-            <p className="text-gray-500 text-xs font-rajdhani">
+            <p className="text-brand-gray-500 text-xs font-rajdhani">
               Requerido pela operadora de pagamento
             </p>
           </div>
 
           <Alert className="bg-brand-purple/10 border-brand-purple/30">
-            <AlertDescription className="text-gray-300 text-sm font-rajdhani">
+            <AlertDescription className="text-brand-gray-300 text-sm font-rajdhani">
               ℹ️ Seus dados são usados apenas para processar o pagamento e não serão armazenados.
             </AlertDescription>
           </Alert>

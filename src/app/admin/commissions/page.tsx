@@ -11,10 +11,9 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { ArrowLeft, Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
 import { showSuccess, showError } from '@/lib/toast'
 import { formatPrice } from '@/lib/utils'
 
@@ -204,31 +203,22 @@ export default function AdminCommissionsPage() {
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-6">
-          <Link href="/admin">
-            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <PageHeader
-          highlight="COMISSÕES"
-          title="GERENCIAR"
-          description="Configure as porcentagens de comissão. Mudanças afetam apenas pedidos futuros."
-        />
-
+    <AdminPageShell
+      highlight="COMISSÕES"
+      title="GERENCIAR"
+      description="Configure as porcentagens de comissão. Mudanças afetam apenas pedidos futuros."
+      backHref="/admin"
+      backLabel="Voltar para Dashboard"
+    >
         {loading ? (
           <LoadingSpinner />
         ) : (
           <div className="space-y-8">
 
             {/* ── Block 1: Global Config ──────────────────────────────────── */}
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-white font-orbitron text-lg">
                   Configuração Global
                 </CardTitle>
                 <CardDescription className="text-brand-gray-500 font-rajdhani">
@@ -315,20 +305,20 @@ export default function AdminCommissionsPage() {
                     {isDevAdmin && (
                       <div>
                         <p className="text-xs text-brand-gray-500 font-rajdhani">Dev-Admin</p>
-                        <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <p className="text-white font-orbitron font-bold">
                           {formatPrice(previewDev)}
                         </p>
                       </div>
                     )}
                     <div>
                       <p className="text-xs text-brand-gray-500 font-rajdhani">Booster</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-white font-orbitron font-bold">
                         {formatPrice(previewBooster)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-brand-gray-500 font-rajdhani">Admin</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-white font-orbitron font-bold">
                         {formatPrice(previewAdmin)}
                       </p>
                     </div>
@@ -356,9 +346,9 @@ export default function AdminCommissionsPage() {
             </Card>
 
             {/* ── Block 2: Booster Table ──────────────────────────────────── */}
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-white font-orbitron text-lg">
                   Boosters
                 </CardTitle>
                 <CardDescription className="text-brand-gray-500 font-rajdhani">
@@ -429,7 +419,7 @@ export default function AdminCommissionsPage() {
                               <>
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
-                                    <span className="text-white font-orbitron text-sm font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                    <span className="text-white font-orbitron text-sm font-bold">
                                       {Math.round(pct * 100)}%
                                     </span>
                                     {hasOverride && (
@@ -462,6 +452,6 @@ export default function AdminCommissionsPage() {
             </Card>
           </div>
         )}
-    </div>
+    </AdminPageShell>
   )
 }

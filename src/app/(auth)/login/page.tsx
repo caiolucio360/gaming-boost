@@ -61,7 +61,7 @@ function LoginContent() {
   return (
     <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-8">
       <div className="text-center mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2">
           <span className="text-brand-purple-light">ENTRAR</span>
           <span className="text-white"> NA CONTA</span>
         </h1>
@@ -155,7 +155,6 @@ function LoginContent() {
             disabled={isLoading}
             size="lg"
             className="w-full font-bold font-rajdhani"
-            style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             {isLoading ? (
               <>

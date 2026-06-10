@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
 import { apiGet } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
+import { GlowCard } from '@/components/common/glow-card'
 import { Button } from '@/components/ui/button'
 import {
   ArrowRight,
@@ -253,9 +254,7 @@ export default function DashboardPage() {
         />
 
         {/* Filtros */}
-        <Card className="group relative bg-gradient-to-br from-brand-black/40 via-brand-black/30 to-brand-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 mb-6 overflow-hidden">
-          {/* Efeito de brilho sutil */}
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
+        <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20 mb-6">
           <CardContent className="pt-4 pb-4 relative z-10">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Filtros de Status - Badges Compactos */}
@@ -270,7 +269,6 @@ export default function DashboardPage() {
                     className={`flex-shrink-0 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium ${
                       filterStatus === f.value ? f.active : f.inactive
                     }`}
-                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
                   >
                     {f.label}
                   </Button>
@@ -284,7 +282,6 @@ export default function DashboardPage() {
                   variant="outline"
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
                   className="w-32 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium bg-brand-black/50 border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10"
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
@@ -292,7 +289,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </GlowCard>
 
         {/* Currently only PREMIER mode is shown. GC support can be added by rendering a second widget with gameMode="GC" */}
         {completedOrders.length > 0 && (
@@ -347,7 +344,7 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                       <OrderInfoItem
                         label="Valor Total"
-                        value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                        value={<span className="text-lg font-bold text-brand-purple-light font-orbitron">{formatPrice(order.total)}</span>}
                       />
                       <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
                       <OrderInfoItem label="Jogo" value={order.game || 'CS2'} />
@@ -390,7 +387,7 @@ export default function DashboardPage() {
 
                       {order.status === 'COMPLETED' && order.completionProofUrl && (
                         <div className="w-full space-y-2 p-3 rounded-lg border border-green-500/30 bg-green-500/5">
-                          <p className="text-xs text-green-400 font-rajdhani font-semibold flex items-center gap-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <p className="text-xs text-green-400 font-rajdhani font-semibold flex items-center gap-1">
                             <ImageIcon className="h-3.5 w-3.5" />
                             Comprovante do booster
                           </p>
@@ -406,7 +403,6 @@ export default function DashboardPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs text-brand-purple-light hover:text-brand-purple-lighter font-rajdhani"
-                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                           >
                             <ExternalLink className="h-3 w-3" />
                             Ver em tamanho original
@@ -419,7 +415,7 @@ export default function DashboardPage() {
                     {(order.status === 'PAID' && order.boosterId) && (
                       <div className="mt-4 border-t border-white/10 pt-4">
                         <div className="mb-3 p-3 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
-                          <p className="text-brand-purple-light text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                          <p className="text-brand-purple-light text-sm font-rajdhani">
                             Seu booster está pronto! Envie suas credenciais Steam pelo chat para iniciar o boost.
                           </p>
                         </div>
@@ -440,7 +436,7 @@ export default function DashboardPage() {
 
         {!loading && orders.length > 0 && (
           <div className="mt-4 text-center">
-            <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <p className="text-brand-gray-500 font-rajdhani">
               Mostrando {filteredOrders.length} de {orders.length} pedido{orders.length !== 1 ? 's' : ''}
             </p>
           </div>

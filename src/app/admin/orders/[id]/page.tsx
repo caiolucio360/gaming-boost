@@ -7,7 +7,6 @@ import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
   User,
   UserCheck,
   CreditCard,
@@ -17,10 +16,10 @@ import {
   ImageIcon,
   ExternalLink,
 } from 'lucide-react'
-import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
+import { BackButton } from '@/components/common/back-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
 import { OrderInfoItem } from '@/components/common/order-info-item'
@@ -277,21 +276,24 @@ export default function AdminOrderDetailPage() {
 
   if (!order) {
     return (
-      <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-          <Alert variant="destructive">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <Alert variant="destructive" className="mb-4">
             <AlertTitle>Erro</AlertTitle>
             <AlertDescription>Pedido não encontrado</AlertDescription>
           </Alert>
-          <Link href="/admin/orders" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mt-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Pedidos
-          </Link>
+          <BackButton href="/admin/orders">Voltar para Pedidos</BackButton>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <AdminPageShell
+      highlight="DETALHES DO"
+      title={`PEDIDO #${order.id}`}
+      description={order.service.name}
+      backHref="/admin/orders"
+      backLabel="Voltar para Pedidos"
+    >
         {alert && (
           <Alert variant={alert.variant} className="mb-4">
             <AlertTitle>{alert.title}</AlertTitle>
@@ -299,23 +301,11 @@ export default function AdminOrderDetailPage() {
           </Alert>
         )}
 
-        <div className="mb-8">
-          <Link href="/admin/orders" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Pedidos
-          </Link>
-          <PageHeader
-            highlight="DETALHES DO"
-            title={`PEDIDO #${order.id}`}
-            description={order.service.name}
-          />
-        </div>
-
         {/* Status e Ações */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              <CardTitle className="text-white font-orbitron">
                 Status do Pedido
               </CardTitle>
               <StatusBadge status={order.status as OrderStatus} />
@@ -324,11 +314,11 @@ export default function AdminOrderDetailPage() {
           <CardContent>
             {STATUS_TRANSITIONS[order.status]?.length > 0 ? (
               <div className="flex flex-wrap gap-4 items-center">
-                <span className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <span className="text-brand-gray-400 font-rajdhani">
                   Alterar status:
                 </span>
                 <Select value={order.status} onValueChange={handleStatusUpdate}>
-                  <SelectTrigger className="w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <SelectTrigger className="w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-brand-black border-brand-purple/50">
@@ -341,7 +331,7 @@ export default function AdminOrderDetailPage() {
                 </Select>
               </div>
             ) : (
-              <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-brand-gray-500 font-rajdhani">
                 Este pedido está {STATUS_LABELS[order.status]?.toLowerCase()} e não pode mais mudar de status.
               </p>
             )}
@@ -349,9 +339,9 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Informações do Pedido */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <GamepadIcon className="h-5 w-5 text-brand-purple" />
               Informações do Serviço
             </CardTitle>
@@ -375,16 +365,16 @@ export default function AdminOrderDetailPage() {
               )}
               <OrderInfoItem
                 label="Valor Total"
-                value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                value={<span className="text-lg font-bold text-brand-purple-light font-orbitron">{formatPrice(order.total)}</span>}
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Cliente */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <User className="h-5 w-5 text-brand-purple" />
               Cliente
             </CardTitle>
@@ -398,9 +388,9 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Booster */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <UserCheck className="h-5 w-5 text-brand-purple" />
               Booster
             </CardTitle>
@@ -412,14 +402,14 @@ export default function AdminOrderDetailPage() {
                 <OrderInfoItem label="Email" value={order.booster.email} />
               </div>
             ) : (
-              <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-brand-gray-500 font-rajdhani">
                 Nenhum booster atribuído
               </p>
             )}
 
             {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
               <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-brand-purple/20 pt-4">
-                <span className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <span className="text-brand-gray-400 font-rajdhani">
                   {order.booster ? 'Trocar booster:' : 'Atribuir booster:'}
                 </span>
                 <Select
@@ -427,7 +417,7 @@ export default function AdminOrderDetailPage() {
                   onValueChange={handleAssignBooster}
                   disabled={assigning}
                 >
-                  <SelectTrigger className="w-64 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <SelectTrigger className="w-64 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani">
                     <SelectValue placeholder="Selecione um booster" />
                   </SelectTrigger>
                   <SelectContent className="bg-brand-black border-brand-purple/50">
@@ -440,7 +430,7 @@ export default function AdminOrderDetailPage() {
                   </SelectContent>
                 </Select>
                 {boosters.length === 0 && (
-                  <span className="text-brand-gray-500 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                  <span className="text-brand-gray-500 text-sm font-rajdhani">
                     Nenhum booster verificado disponível.
                   </span>
                 )}
@@ -450,9 +440,9 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Pagamentos */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-brand-purple" />
               Pagamentos
             </CardTitle>
@@ -463,15 +453,15 @@ export default function AdminOrderDetailPage() {
                 {order.payments.map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between p-4 bg-brand-black/50 rounded-lg border border-brand-purple/30">
                     <div>
-                      <p className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-white font-rajdhani">
                         Pagamento #{payment.id}
                       </p>
-                      <p className="text-brand-gray-500 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-brand-gray-500 text-sm font-rajdhani">
                         {formatDate(payment.createdAt)}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <span className="text-brand-purple-light font-orbitron">
                         {formatPrice(payment.total)}
                       </span>
                       {getPaymentStatusBadge(payment.status)}
@@ -480,7 +470,7 @@ export default function AdminOrderDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <p className="text-brand-gray-500 font-rajdhani">
                 Nenhum pagamento registrado
               </p>
             )}
@@ -488,9 +478,9 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Comissões e Receitas */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-brand-purple" />
               Comissões e Receitas
             </CardTitle>
@@ -502,15 +492,15 @@ export default function AdminOrderDetailPage() {
                 <div className="p-4 bg-brand-black/50 rounded-lg border border-brand-purple/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-white font-rajdhani">
                         Comissão do Booster
                       </p>
-                      <p className="text-brand-gray-500 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-brand-gray-500 text-sm font-rajdhani">
                         {(order.commission.percentage * 100).toFixed(0)}% do valor total
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <span className="text-green-300 font-orbitron">
                         {formatPrice(order.commission.amount)}
                       </span>
                       {getCommissionStatusBadge(order.commission.status)}
@@ -524,15 +514,15 @@ export default function AdminOrderDetailPage() {
                 <div key={revenue.id} className="p-4 bg-brand-black/50 rounded-lg border border-brand-purple/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-white font-rajdhani">
                         Receita Admin {revenue.admin.name ? `(${revenue.admin.name})` : ''}
                       </p>
-                      <p className="text-brand-gray-500 text-sm font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-brand-gray-500 text-sm font-rajdhani">
                         {(revenue.percentage * 100).toFixed(0)}% do valor total
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <span className="text-green-300 font-orbitron">
                         {formatPrice(revenue.amount)}
                       </span>
                       {getCommissionStatusBadge(revenue.status)}
@@ -542,7 +532,7 @@ export default function AdminOrderDetailPage() {
               ))}
 
               {!order.commission && order.revenues.length === 0 && (
-                <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <p className="text-brand-gray-500 font-rajdhani">
                   Nenhuma comissão ou receita registrada
                 </p>
               )}
@@ -554,11 +544,11 @@ export default function AdminOrderDetailPage() {
         {order.completionProofUrl && (
           <Card className="bg-brand-black/30 backdrop-blur-md border-green-500/40 mb-6">
             <CardHeader>
-              <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              <CardTitle className="text-white font-orbitron flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-green-400" />
                 Comprovante de Conclusão
               </CardTitle>
-              <CardDescription className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <CardDescription className="text-brand-gray-400 font-rajdhani">
                 Print enviado pelo booster comprovando o rank atingido
               </CardDescription>
             </CardHeader>
@@ -576,7 +566,6 @@ export default function AdminOrderDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-brand-purple-light hover:text-brand-purple-lighter font-rajdhani"
-                  style={{ fontFamily: 'Rajdhani, sans-serif' }}
                 >
                   <ExternalLink className="h-4 w-4" />
                   Ver em tamanho original
@@ -587,9 +576,9 @@ export default function AdminOrderDetailPage() {
         )}
 
         {/* Datas */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+        <Card className="">
           <CardHeader>
-            <CardTitle className="text-white font-orbitron flex items-center gap-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <CardTitle className="text-white font-orbitron flex items-center gap-2">
               <Calendar className="h-5 w-5 text-brand-purple" />
               Datas
             </CardTitle>
@@ -601,6 +590,6 @@ export default function AdminOrderDetailPage() {
             </div>
           </CardContent>
         </Card>
-    </div>
+    </AdminPageShell>
   )
 }

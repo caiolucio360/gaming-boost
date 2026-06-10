@@ -41,7 +41,7 @@ export default function GamesSection() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {games.map((game, i) => (
               <Link key={i} href={game.href} className="group" aria-label={`Ver serviços de ${game.name} - ${game.description}`}>
-                <Card className="overflow-hidden border-brand-purple-dark/50 bg-gray-900 hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 transition-all duration-300 group-hover:scale-105">
+                <Card className="overflow-hidden border-brand-purple-dark/50 bg-brand-gray-900 hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 transition-all duration-300 group-hover:scale-105">
                   <div
                     className={cn(
                       "h-48 flex items-center justify-center bg-gradient-to-br",
@@ -54,7 +54,7 @@ export default function GamesSection() {
                     <CardTitle className="text-xl font-bold text-white">
                       {game.name}
                     </CardTitle>
-                    <p className="text-gray-400">{game.description}</p>
+                    <p className="text-brand-gray-400">{game.description}</p>
                   </CardHeader>
                 </Card>
               </Link>

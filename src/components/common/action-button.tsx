@@ -38,7 +38,7 @@ export function ActionButton({
         variantClasses[variant],
         className
       )}
-      style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}
+      style={{ fontWeight: '600' }}
       {...props}
     >
       {Icon && iconPosition === 'left' && <Icon className="mr-2 h-4 w-4" />}

@@ -75,8 +75,8 @@ export default function NotificationsPage() {
     <div className="container py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold font-orbitron text-brand-purple-light mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>Notificações</h1>
-          <p className="text-brand-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Acompanhe atualizações dos seus pedidos e mensagens do sistema.</p>
+          <h1 className="text-3xl font-bold font-orbitron text-brand-purple-light mb-2">Notificações</h1>
+          <p className="text-brand-gray-400 font-rajdhani">Acompanhe atualizações dos seus pedidos e mensagens do sistema.</p>
         </div>
         <Button variant="outline" size="sm" onClick={markAllRead} className="border-brand-purple/50 text-brand-purple-light hover:border-white/50 transition-all duration-300">
           <CheckCheck className="mr-2 h-4 w-4" />
@@ -88,7 +88,7 @@ export default function NotificationsPage() {
         {notifications.length === 0 && !loading ? (
           <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-all hover-glow">
             <CardContent className="flex flex-col items-center justify-center py-12 text-brand-gray-400">
-              <p className="font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Você não tem notificações.</p>
+              <p className="font-rajdhani">Você não tem notificações.</p>
             </CardContent>
           </Card>
         ) : (

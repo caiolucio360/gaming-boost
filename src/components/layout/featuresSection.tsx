@@ -66,7 +66,7 @@ export default function FeaturesSection() {
               key={i}
               className={cn(
                 "group relative flex flex-col items-center justify-center p-8 text-center transition-colors duration-200 overflow-hidden",
-                "bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-gray-800/60 border-brand-purple-dark/50 hover:border-brand-purple-light/80",
+                "bg-gradient-to-br from-brand-gray-900/60 via-brand-gray-900/50 to-brand-gray-800/60 border-brand-purple-dark/50 hover:border-brand-purple-light/80",
                 "shadow-lg hover:shadow-2xl hover:shadow-brand-purple/30 backdrop-blur-sm"
               )}
               style={{ transformOrigin: 'center center' }}
@@ -83,7 +83,7 @@ export default function FeaturesSection() {
                 <h3 className="text-xl font-bold mb-2 text-white group-hover:text-brand-purple-lighter transition-colors duration-300">
                   {feature.title}
                 </h3>
-                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
+                <p className="text-brand-gray-400 text-sm group-hover:text-brand-gray-300 transition-colors duration-300">
                   {feature.subtitle}
                 </p>
               </CardContent>

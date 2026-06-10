@@ -59,7 +59,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
       <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
         <div className="text-center mb-3 sm:mb-5">
-          <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1">
             <span className="text-brand-purple-light">CRIAR</span>
             <span className="text-white"> CONTA</span>
           </h1>
@@ -176,7 +176,6 @@ export default function RegisterPage() {
               disabled={isLoading}
               size="lg"
               className="w-full font-bold font-rajdhani"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {isLoading ? (
                 <>

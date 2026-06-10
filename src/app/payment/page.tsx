@@ -167,7 +167,7 @@ function PaymentContent() {
               <div className="flex gap-4 mt-6">
                 <Button
                   variant="outline"
-                  className="flex-1 border-gray-500/50 text-brand-gray-500 hover:text-white hover:bg-gray-500/10"
+                  className="flex-1 border-brand-gray-500/50 text-brand-gray-500 hover:text-white hover:bg-brand-gray-500/10"
                   onClick={() => router.push('/dashboard')}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />

@@ -40,11 +40,11 @@ export default function PrivacyPage() {
       <div className="min-h-screen bg-brand-black">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+            <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontWeight: '800' }}>
               <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">POLÍTICA</span>
               <span className="text-white"> DE PRIVACIDADE</span>
             </h1>
-            <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            <p className="text-xl text-brand-gray-300 font-rajdhani group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '500' }}>
               Como protegemos e utilizamos suas informações
             </p>
           </div>
@@ -55,29 +55,29 @@ export default function PrivacyPage() {
               <CardContent className="p-8 space-y-8 relative z-10">
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Introdução e Compromisso com a LGPD
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   A FlautasBoost respeita sua privacidade e está comprometida com a proteção de seus dados pessoais em conformidade
                   com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) e demais legislações aplicáveis.
                 </p>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais.
                 </p>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">2.</span> Dados Pessoais Coletados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Coletamos as seguintes categorias de dados pessoais:
                 </p>
                 <div className="space-y-4">
                   <div className="ml-4">
-                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>2.1 Dados de Cadastro:</h3>
-                    <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontWeight: '600' }}>2.1 Dados de Cadastro:</h3>
+                    <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                       <li>Nome completo</li>
                       <li>Endereço de e-mail</li>
                       <li>Senha (armazenada com hash bcrypt)</li>
@@ -85,8 +85,8 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>2.2 Dados de Pagamento:</h3>
-                    <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontWeight: '600' }}>2.2 Dados de Pagamento:</h3>
+                    <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                       <li>CPF/CNPJ (apenas para processar pagamentos)</li>
                       <li>Número de telefone (para transações PIX)</li>
                       <li>Chave PIX (para boosters/admins receberem pagamentos)</li>
@@ -94,8 +94,8 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>2.3 Dados de Serviço:</h3>
-                    <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontWeight: '600' }}>2.3 Dados de Serviço:</h3>
+                    <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                       <li>Credenciais Steam enviadas via chat (criptografadas com AES-256-GCM; apagadas automaticamente ao concluir ou cancelar o pedido)</li>
                       <li>Mensagens do chat entre cliente e booster (armazenadas enquanto o pedido estiver ativo)</li>
                       <li>Screenshots de prova de conclusão enviadas pelo booster (armazenadas em serviço de blob seguro)</li>
@@ -104,8 +104,8 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '600' }}>2.4 Dados de Navegação:</h3>
-                    <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <h3 className="text-white font-rajdhani font-semibold mb-2" style={{ fontWeight: '600' }}>2.4 Dados de Navegação:</h3>
+                    <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                       <li>Endereço IP</li>
                       <li>Tipo de navegador e dispositivo</li>
                       <li>Páginas visitadas e tempo de navegação</li>
@@ -116,13 +116,13 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">3.</span> Finalidade do Tratamento de Dados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Utilizamos seus dados pessoais exclusivamente para as seguintes finalidades:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Execução de Contrato:</strong> Fornecer os serviços de boost contratados</li>
                   <li><strong className="text-white">Processamento de Pagamentos:</strong> Processar transações via PIX através da AbacatePay</li>
                   <li><strong className="text-white">Comunicação:</strong> Enviar notificações sobre status de pedidos, pagamentos e atualizações</li>
@@ -134,13 +134,13 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">4.</span> Base Legal para Tratamento
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Conforme a LGPD, tratamos seus dados pessoais com base nas seguintes hipóteses legais:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Consentimento:</strong> Você consente ao criar conta e utilizar nossos serviços</li>
                   <li><strong className="text-white">Execução de Contrato:</strong> Necessário para executar o contrato de serviço</li>
                   <li><strong className="text-white">Legítimo Interesse:</strong> Segurança da plataforma e prevenção de fraudes</li>
@@ -149,13 +149,13 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">5.</span> Compartilhamento de Dados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <strong className="text-white">Nunca vendemos ou alugamos seus dados pessoais.</strong> Compartilhamos dados apenas quando estritamente necessário:
                 </p>
-                <div className="space-y-3 text-gray-300 font-rajdhani ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <div className="space-y-3 text-brand-gray-300 font-rajdhani ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <p><strong className="text-white">5.1 Processadores de Pagamento:</strong> AbacatePay para processar transações PIX (CPF, telefone, valor)</p>
                   <p><strong className="text-white">5.2 Serviço de Email:</strong> Resend para enviar notificações transacionais (email, nome)</p>
                   <p><strong className="text-white">5.3 Boosters Designados:</strong> Credenciais de jogo (criptografadas) compartilhadas apenas com o booster atribuído ao seu pedido</p>
@@ -164,13 +164,13 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">6.</span> Segurança e Proteção de Dados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Implementamos medidas técnicas e organizacionais rigorosas para proteger seus dados:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Criptografia AES-256-GCM:</strong> Credenciais de jogo são armazenadas com criptografia de nível militar</li>
                   <li><strong className="text-white">Hash Bcrypt:</strong> Senhas nunca são armazenadas em texto claro</li>
                   <li><strong className="text-white">HTTPS/TLS:</strong> Todas as comunicações são criptografadas em trânsito</li>
@@ -183,13 +183,13 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">7.</span> Seus Direitos (LGPD)
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   De acordo com a LGPD, você possui os seguintes direitos sobre seus dados pessoais:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Acesso:</strong> Confirmar que tratamos seus dados e solicitar cópia</li>
                   <li><strong className="text-white">Correção:</strong> Solicitar correção de dados incompletos, inexatos ou desatualizados</li>
                   <li><strong className="text-white">Anonimização, Bloqueio ou Eliminação:</strong> De dados desnecessários, excessivos ou tratados em desconformidade</li>
@@ -199,20 +199,20 @@ export default function PrivacyPage() {
                   <li><strong className="text-white">Oposição:</strong> Opor-se ao tratamento realizado com base em legítimo interesse</li>
                   <li><strong className="text-white">Informação:</strong> Sobre entidades públicas e privadas com as quais compartilhamos dados</li>
                 </ul>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Para exercer seus direitos, entre em contato com nossa equipe pelo suporte da plataforma.
                   Responderemos sua solicitação em até 15 dias.
                 </p>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">8.</span> Retenção de Dados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Mantemos seus dados pessoais apenas pelo tempo necessário para cumprir as finalidades descritas:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Dados de Conta:</strong> Enquanto sua conta estiver ativa ou conforme necessário para fornecer serviços</li>
                   <li><strong className="text-white">Dados Financeiros:</strong> 5 anos conforme legislação fiscal brasileira</li>
                   <li><strong className="text-white">Credenciais Steam:</strong> Apagadas automaticamente ao concluir ou cancelar o pedido (substituídas por placeholder no chat)</li>
@@ -220,33 +220,33 @@ export default function PrivacyPage() {
                   <li><strong className="text-white">Mensagens de Chat:</strong> Retidas enquanto o pedido estiver ativo; após encerramento, armazenadas por até 90 dias para fins de suporte</li>
                   <li><strong className="text-white">Logs de Segurança:</strong> Até 6 meses para fins de auditoria e segurança</li>
                 </ul>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Após esses períodos, seus dados serão excluídos ou anonimizados de forma segura.
                 </p>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Cookies e Tecnologias Similares
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Utilizamos cookies e tecnologias similares para:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-brand-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li><strong className="text-white">Essenciais:</strong> Manter sua sessão ativa e autenticação (JWT)</li>
                   <li><strong className="text-white">Funcionais:</strong> Lembrar suas preferências e configurações</li>
                   <li><strong className="text-white">Segurança:</strong> Detectar atividades fraudulentas e proteger contra ataques</li>
                 </ul>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed mt-4 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Você pode gerenciar cookies através das configurações do seu navegador, mas isso pode afetar a funcionalidade da plataforma.
                 </p>
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">10.</span> Transferência Internacional de Dados
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Nossos servidores e parceiros podem estar localizados fora do Brasil. Quando houver transferência internacional
                   de dados, garantimos que sejam adotadas medidas de segurança adequadas e que o país de destino ou o destinatário
                   ofereça grau de proteção de dados pessoais adequado, conforme exigido pela LGPD.
@@ -254,10 +254,10 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">11.</span> Privacidade de Menores
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Nossos serviços são destinados a pessoas com 18 anos ou mais. Não coletamos intencionalmente dados de menores
                   de 18 anos. Se você acredita que coletamos inadvertidamente dados de um menor, entre em contato imediatamente
                   para que possamos tomar as medidas apropriadas.
@@ -265,10 +265,10 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">12.</span> Alterações nesta Política
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Podemos atualizar esta Política de Privacidade ocasionalmente para refletir mudanças em nossas práticas ou
                   na legislação. Alterações significativas serão notificadas através do nosso site ou por e-mail. A data da
                   última atualização está indicada no final desta página. Recomendamos revisar periodicamente esta política.
@@ -276,10 +276,10 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">13.</span> Incidentes de Segurança
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-brand-gray-300 font-rajdhani leading-relaxed group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Em caso de incidente de segurança que possa acarretar risco ou dano relevante aos titulares de dados,
                   comunicaremos os afetados e a Autoridade Nacional de Proteção de Dados (ANPD) em conformidade com a LGPD,
                   informando sobre a natureza do incidente, os dados afetados e as medidas tomadas.
@@ -287,10 +287,10 @@ export default function PrivacyPage() {
               </section>
 
               <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">14.</span> Contato e Encarregado de Dados (DPO)
                 </h2>
-                <div className="text-gray-300 font-rajdhani leading-relaxed space-y-3 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <div className="text-brand-gray-300 font-rajdhani leading-relaxed space-y-3 group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <p>
                     Para questões sobre privacidade, exercer seus direitos ou reportar preocupações relacionadas a dados pessoais,
                     entre em contato com nosso Encarregado de Proteção de Dados:
@@ -308,10 +308,10 @@ export default function PrivacyPage() {
               </section>
 
               <div className="border-t border-brand-purple/30 pt-8 mt-8">
-                <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-sm text-brand-gray-400 font-rajdhani text-center" style={{ fontWeight: '400' }}>
                   Última atualização: Abril de 2026
                 </p>
-                <p className="text-xs text-gray-500 font-rajdhani text-center mt-2" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-xs text-brand-gray-500 font-rajdhani text-center mt-2" style={{ fontWeight: '400' }}>
                   Esta Política de Privacidade está em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)
                 </p>
               </div>

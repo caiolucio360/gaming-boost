@@ -6,18 +6,18 @@ import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DollarSign,
   CheckCircle2,
   Clock,
-  ArrowLeft,
   Wallet,
   Settings,
 } from 'lucide-react'
 import { StatCard } from '@/components/common/stat-card'
-import { PageHeader } from '@/components/common/page-header'
+import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
+import { StatsGrid } from '@/components/common/stats-grid'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
@@ -92,35 +92,17 @@ export default function AdminPaymentsPage() {
     if (user?.role === 'ADMIN') fetchRevenues()
   }, [user?.role, fetchRevenues])
 
-  const getRevenueStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID': return <Badge className="bg-green-500/20 text-green-300 border-green-500/50">Pago</Badge>
-      case 'PENDING': return <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">Pendente</Badge>
-      case 'CANCELLED': return <Badge className="bg-red-500/20 text-red-300 border-red-500/50">Cancelado</Badge>
-      default: return <Badge>{status}</Badge>
-    }
-  }
-
   if (authLoading) return <LoadingSpinner />
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-6">
-          <Link href="/admin">
-            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <PageHeader
-          highlight="FINANCEIRO"
-          title="ADMIN"
-          description={`Olá, ${user.name || user.email}! Gerencie receitas e comissões.`}
-        />
-
+    <AdminPageShell
+      highlight="FINANCEIRO"
+      title="ADMIN"
+      description={`Olá, ${user.name || user.email}! Gerencie receitas e comissões.`}
+      backHref="/admin"
+      backLabel="Voltar para Dashboard"
+    >
         <div className="flex justify-end mb-4">
           <Link href="/admin/withdraw">
             <Button variant="outline" className="border-brand-purple/50 text-brand-purple-light hover:bg-brand-purple/10">
@@ -130,7 +112,7 @@ export default function AdminPaymentsPage() {
         </div>
 
         <Tabs defaultValue="receitas" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-brand-black/30 border border-brand-purple/50 mb-6">
+          <TabsList className="grid w-full grid-cols-2 bg-brand-black-light border border-white/10 mb-6">
             <TabsTrigger value="receitas" className="data-[state=active]:bg-brand-purple/20">
               <DollarSign className="h-4 w-4 mr-2" />Receitas
             </TabsTrigger>
@@ -144,17 +126,17 @@ export default function AdminPaymentsPage() {
             {revenueLoading && !revenueStats ? (
               <SkeletonStatsGrid count={5} />
             ) : revenueStats ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
+              <StatsGrid columns={5} className="mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(revenueStats.totalRevenue)} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-green-300" />
                 <StatCard title="Pendente" value={formatPrice(revenueStats.pendingRevenue)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-yellow-300" />
                 <StatCard title="Total de Receitas" value={revenueStats.totalRevenues} description="Todas as receitas" icon={DollarSign} iconColor="text-brand-purple" />
                 <StatCard title="Pagas" value={revenueStats.paidRevenues} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" />
                 <StatCard title="Pendentes" value={revenueStats.pendingRevenues} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
-              </div>
+              </StatsGrid>
             ) : null}
 
             <Tabs value={revenueFilter} onValueChange={setRevenueFilter} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-brand-black/30 border border-brand-purple/50">
+              <TabsList className="grid w-full grid-cols-4 bg-brand-black-light border border-white/10">
                 <TabsTrigger value="all" className="data-[state=active]:bg-brand-purple/20">Todas</TabsTrigger>
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-yellow-500/20">Pendentes</TabsTrigger>
                 <TabsTrigger value="PAID" className="data-[state=active]:bg-green-500/20">Pagas</TabsTrigger>
@@ -172,24 +154,24 @@ export default function AdminPaymentsPage() {
                 ) : (
                   <div className="grid gap-4 lg:gap-6">
                     {revenues.map((revenue) => (
-                      <Card key={revenue.id} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+                      <Card key={revenue.id}>
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                              <CardTitle className="text-white font-orbitron text-lg mb-2">
                                 {revenue.order.service.name}
                               </CardTitle>
-                              <CardDescription className="text-gray-400 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                              <CardDescription className="text-brand-gray-400 font-rajdhani">
                                 Pedido #{revenue.order.id}
                               </CardDescription>
                             </div>
-                            {getRevenueStatusBadge(revenue.status)}
+                            <PaymentStatusBadge status={revenue.status} />
                           </div>
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem label="Valor da Receita" value={<span className="text-lg font-bold text-green-300 font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.amount)} ({(revenue.percentage * 100).toFixed(0)}%)</span>} />
-                            <OrderInfoItem label="Valor Total do Pedido" value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(revenue.orderTotal)}</span>} />
+                            <OrderInfoItem label="Valor da Receita" value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(revenue.amount)} ({(revenue.percentage * 100).toFixed(0)}%)</span>} />
+                            <OrderInfoItem label="Valor Total do Pedido" value={<span className="text-lg font-bold text-brand-purple-light font-orbitron">{formatPrice(revenue.orderTotal)}</span>} />
                             <OrderInfoItem label="Cliente" value={revenue.order.user.name || revenue.order.user.email} />
                             {revenue.order.booster && <OrderInfoItem label="Booster" value={revenue.order.booster.name || revenue.order.booster.email} />}
                             {revenue.status === 'PAID' && revenue.paidAt && <OrderInfoItem label="Data do Pagamento" value={formatDate(revenue.paidAt)} />}
@@ -207,7 +189,7 @@ export default function AdminPaymentsPage() {
 
           {/* ── Tab: Configurações ────────────────────────────────────────── */}
           <TabsContent value="configuracoes">
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
                 <p className="text-brand-gray-300 font-rajdhani text-center max-w-sm">
                   As configurações de comissão foram movidas para uma página dedicada.
@@ -221,6 +203,6 @@ export default function AdminPaymentsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-    </div>
+    </AdminPageShell>
   )
 }

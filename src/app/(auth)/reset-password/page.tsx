@@ -166,7 +166,7 @@ function ResetPasswordForm() {
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-brand-purple/20 flex items-center justify-center">
             <Lock className="h-6 w-6 text-brand-purple" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <h1 className="text-xl sm:text-2xl font-bold text-white font-orbitron mb-1 sm:mb-2">
             Nova Senha
           </h1>
           <p className="text-sm text-brand-gray-300 font-rajdhani">
@@ -228,7 +228,6 @@ function ResetPasswordForm() {
               disabled={isLoading}
               size="lg"
               className="w-full font-bold font-rajdhani"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               {isLoading ? (
                 <>

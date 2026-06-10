@@ -59,7 +59,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
           <TooltipTrigger asChild>
             <Badge
               className={`${config.color} border font-rajdhani flex items-center gap-2 shadow-lg hover:scale-105 transition-transform duration-300 cursor-help`}
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               <Icon className={`h-4 w-4 ${status === 'IN_PROGRESS' ? 'animate-spin' : ''}`} />
               {config.label}
@@ -74,7 +73,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       {status === 'PAID' && (
         <Badge
           className="bg-orange-500/20 text-orange-300 border border-orange-500/50 font-rajdhani flex items-center gap-2 animate-pulse"
-          style={{ fontFamily: 'Rajdhani, sans-serif' }}
         >
           <Hourglass className="h-3 w-3" />
           Aguardando Booster
