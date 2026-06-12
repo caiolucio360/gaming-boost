@@ -59,7 +59,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               <p className="text-sm font-medium">{fromRank.name}</p>
             </div>
             
-            <span className="text-2xl text-brand-gray-400">→</span>
+            <span className="text-2xl text-muted-foreground">→</span>
             
             {toRank ? (
               <div className="text-center">
@@ -75,7 +75,7 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
               </div>
             ) : (
               <div className="w-16 h-16 border-2 border-dashed border-brand-gray-300 rounded-lg flex items-center justify-center">
-                <span className="text-brand-gray-400 text-xs">?</span>
+                <span className="text-muted-foreground text-xs">?</span>
               </div>
             )}
           </div>
@@ -125,11 +125,11 @@ export function RankSelector({ ranks, title, onSelectionChange }: RankSelectorPr
                     className="object-contain drop-shadow-lg"
                   />
                 </div>
-                <h3 className={`font-bold text-sm transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-white group-hover:text-brand-purple-lighter'}`}>
+                <h3 className={`font-bold text-sm transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-foreground group-hover:text-brand-purple-lighter'}`}>
                   {rank.name}
                 </h3>
                 {rank.tier && (
-                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-brand-gray-400 group-hover:text-brand-gray-300'}`}>
+                  <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-brand-purple-light' : 'text-muted-foreground group-hover:text-muted-foreground'}`}>
                     {rank.tier}
                   </p>
                 )}

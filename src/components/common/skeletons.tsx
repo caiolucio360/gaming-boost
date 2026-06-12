@@ -2,13 +2,14 @@
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton, SkeletonAvatar, SkeletonButton } from '@/components/ui/skeleton'
+import { StatsGrid } from '@/components/common/stats-grid'
 import { cn } from '@/lib/utils'
 
 // Stats card skeleton (for dashboard stats)
 export function SkeletonStatsCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
     <Card
-      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -27,7 +28,7 @@ export function SkeletonStatsCard({ className, index = 0 }: { className?: string
 export function SkeletonOrderCard({ className, index = 0 }: { className?: string; index?: number }) {
   return (
     <Card
-      className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50 animate-fadeInUp opacity-0", className)}
+      className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <CardContent className="p-4 sm:p-6">
@@ -64,9 +65,9 @@ export function SkeletonTable({
   className?: string
 }) {
   return (
-    <div className={cn("w-full overflow-hidden rounded-lg border border-brand-purple/50", className)}>
+    <div className={cn("w-full overflow-hidden rounded-lg border border-border", className)}>
       {/* Header */}
-      <div className="bg-brand-black-light border-b border-brand-purple/30 px-4 py-3">
+      <div className="bg-card border-b border-border px-4 py-3">
         <div className="flex items-center gap-4">
           {Array.from({ length: columns }).map((_, i) => (
             <Skeleton key={i} className="h-4 flex-1" />
@@ -79,7 +80,7 @@ export function SkeletonTable({
           key={rowIndex}
           className={cn(
             "px-4 py-3 flex items-center gap-4",
-            rowIndex !== rows - 1 && "border-b border-brand-purple/20"
+            rowIndex !== rows - 1 && "border-b border-border"
           )}
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
@@ -100,7 +101,7 @@ export function SkeletonTable({
 // Profile card skeleton
 export function SkeletonProfileCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
           <SkeletonAvatar size="lg" />
@@ -127,10 +128,68 @@ export function SkeletonProfileCard({ className }: { className?: string }) {
   )
 }
 
+// Profile page skeleton — mirrors the "Informações da Conta" + "Alterar Senha" form cards and
+// the save/cancel button row on /profile. (The avatar-style SkeletonProfileCard above doesn't
+// match that layout; use this on the profile page.)
+export function SkeletonProfileForm() {
+  const fieldRows = (n: number) =>
+    Array.from({ length: n }).map((_, i) => (
+      <div key={i} className="space-y-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+    ))
+
+  return (
+    <div className="grid gap-6">
+      {/* Account info card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-9 rounded-lg" />
+            <Skeleton className="h-5 w-48" />
+          </div>
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {fieldRows(3)}
+          <div className="border-t border-border" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Change password card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-9 rounded-lg" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <Skeleton className="h-4 w-56" />
+        </CardHeader>
+        <CardContent className="space-y-4">{fieldRows(3)}</CardContent>
+      </Card>
+
+      {/* Save / cancel buttons */}
+      <div className="flex justify-end gap-4">
+        <SkeletonButton />
+        <SkeletonButton />
+      </div>
+    </div>
+  )
+}
+
 // Payment/PIX card skeleton
 export function SkeletonPaymentCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardHeader className="text-center pb-2">
         <Skeleton className="h-7 w-48 mx-auto" />
         <Skeleton className="h-5 w-32 mx-auto mt-2" />
@@ -164,7 +223,7 @@ export function SkeletonPaymentCard({ className }: { className?: string }) {
 // Calculator/service card skeleton
 export function SkeletonCalculatorCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50", className)}>
+    <Card className={className}>
       <CardHeader className="text-center">
         <Skeleton className="h-8 w-56 mx-auto" />
         <Skeleton className="h-4 w-72 mx-auto mt-2" />
@@ -187,7 +246,7 @@ export function SkeletonCalculatorCard({ className }: { className?: string }) {
           </div>
         </div>
         {/* Price display */}
-        <div className="bg-brand-black-light rounded-lg p-4 space-y-2">
+        <div className="bg-card rounded-lg p-4 space-y-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-10 w-32" />
         </div>
@@ -264,6 +323,78 @@ export function SkeletonAdminDashboard() {
   )
 }
 
+// Chart card skeleton — header (title + description) plus a chart-area block.
+// `height` mirrors the real ResponsiveContainer height so layout doesn't shift.
+export function SkeletonChart({
+  height = 220,
+  className,
+  index = 0,
+}: {
+  height?: number
+  className?: string
+  index?: number
+}) {
+  return (
+    <Card
+      className={cn("animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <CardHeader className="space-y-2">
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="w-full rounded-lg" style={{ height }} />
+      </CardContent>
+    </Card>
+  )
+}
+
+// Admin charts skeleton — mirrors the chart grid on /admin (area chart, bar + donut row,
+// users bar chart) so the loading state lines up with the real content.
+export function SkeletonAdminCharts() {
+  return (
+    <div className="space-y-6">
+      {/* Revenue area chart */}
+      <SkeletonChart height={220} index={0} />
+
+      {/* Orders bar + status donut row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SkeletonChart height={200} index={1} />
+
+        {/* Status donut */}
+        <Card className="animate-fadeInUp opacity-0" style={{ animationDelay: '120ms' }}>
+          <CardHeader className="space-y-2">
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-4 w-56" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="w-[55%] flex justify-center">
+                <Skeleton className="h-40 w-40 rounded-full" />
+              </div>
+              <div className="flex-1 space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="h-2.5 w-2.5 rounded-full" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
+                    <Skeleton className="h-4 w-6" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* New users bar chart */}
+      <SkeletonChart height={180} index={3} />
+    </div>
+  )
+}
+
 // List skeleton with configurable items
 export function SkeletonList({
   items = 3,
@@ -277,7 +408,7 @@ export function SkeletonList({
       {Array.from({ length: items }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-lg bg-brand-black-light/30 border border-brand-purple/30"
+          className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border"
         >
           <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
           <div className="flex-1 space-y-2">
@@ -291,14 +422,16 @@ export function SkeletonList({
   )
 }
 
-// Grid of stats cards with stagger
-export function SkeletonStatsGrid({ count = 4 }: { count?: number }) {
+// Grid of stats cards with stagger — mirrors the real StatsGrid layout so the
+// skeleton lines up with the content it replaces (no layout shift).
+export function SkeletonStatsGrid({ count = 4, columns }: { count?: number; columns?: 2 | 3 | 4 | 5 }) {
+  const cols = columns ?? (Math.min(Math.max(count, 2), 5) as 2 | 3 | 4 | 5)
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <StatsGrid columns={cols}>
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonStatsCard key={i} index={i} />
       ))}
-    </div>
+    </StatsGrid>
   )
 }
 
@@ -316,7 +449,7 @@ export function SkeletonOrdersList({ count = 3 }: { count?: number }) {
 // Full page skeleton (stats grid + orders list)
 export function SkeletonPage() {
   return (
-    <div className="min-h-screen bg-brand-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="space-y-2">
           <Skeleton className="h-10 w-64" />

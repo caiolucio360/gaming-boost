@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Copy, Check, RefreshCw, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { showSuccess, showError } from '@/lib/toast'
+import { api, ApiError } from '@/lib/api-client'
 
 interface PixPaymentDisplayProps {
   paymentId: number
@@ -66,8 +67,7 @@ export function PixPaymentDisplay({
 
     try {
       setIsChecking(true)
-      const response = await fetch(`/api/payment/pix/status?paymentId=${paymentId}`)
-      const data = await response.json()
+      const data = await api.get<{ status?: string }>(`/api/payment/pix/status?paymentId=${paymentId}`)
 
       if (data.status && data.status !== status) {
         setStatus(data.status)
@@ -110,25 +110,19 @@ export function PixPaymentDisplay({
   const simulatePayment = async () => {
     try {
       setIsSimulating(true)
-      const response = await fetch('/api/payment/pix/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId }),
-      })
+      const data = await api.post<{ status?: string }>('/api/payment/pix/simulate', { paymentId })
 
-      const data = await response.json()
-
-      if (response.ok && data.status === 'PAID') {
+      if (data.status === 'PAID') {
         setStatus('PAID')
         onStatusChange?.('PAID')
         showSuccess('Pagamento simulado com sucesso!')
         onPaymentConfirmed?.()
       } else {
-        showError(data.message || 'Erro ao simular pagamento')
+        showError('Erro ao simular pagamento')
       }
     } catch (error) {
       console.error('Erro ao simular:', error)
-      showError('Erro ao simular pagamento')
+      showError(error instanceof ApiError ? error.message : 'Erro ao simular pagamento')
     } finally {
       setIsSimulating(false)
     }
@@ -153,7 +147,7 @@ export function PixPaymentDisplay({
         )
       case 'CANCELLED':
         return (
-          <div className="flex items-center gap-2 text-brand-gray-500 bg-brand-black-light px-4 py-2 rounded-lg">
+          <div className="flex items-center gap-2 text-muted-foreground bg-card px-4 py-2 rounded-lg">
             <XCircle className="w-5 h-5" />
             <span className="font-bold">Cancelado</span>
           </div>
@@ -176,7 +170,7 @@ export function PixPaymentDisplay({
           <div className="flex flex-col items-center gap-4">
             <CheckCircle2 className="w-16 h-16 text-emerald-500" />
             <h2 className="text-2xl font-bold text-emerald-500 font-orbitron">Pagamento Confirmado!</h2>
-            <p className="text-brand-gray-300 font-rajdhani">
+            <p className="text-muted-foreground font-rajdhani">
               Seu pedido foi pago e está sendo processado.
             </p>
           </div>
@@ -195,13 +189,13 @@ export function PixPaymentDisplay({
     : ''
 
   return (
-    <Card className="bg-brand-black-light/30 backdrop-blur-md border-brand-purple/50">
+    <Card className="bg-card/30 backdrop-blur-md border-brand-purple/50">
       <CardHeader className="text-center pb-2">
-        <CardTitle className="text-2xl font-bold text-white font-orbitron">
+        <CardTitle className="text-2xl font-bold text-foreground font-orbitron">
           Pagamento via <span className="text-brand-purple">PIX</span>
         </CardTitle>
-        <p className="text-brand-gray-500 font-rajdhani">
-          Valor: <span className="text-white font-bold text-xl">R$ {total.toFixed(2)}</span>
+        <p className="text-muted-foreground font-rajdhani">
+          Valor: <span className="text-foreground font-bold text-xl">R$ {total.toFixed(2)}</span>
         </p>
       </CardHeader>
       
@@ -214,10 +208,10 @@ export function PixPaymentDisplay({
         {status === 'PENDING' && (
           <>
             {/* Timer */}
-            <div className="flex items-center justify-center gap-2 text-brand-gray-500">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Clock className="w-4 h-4" />
               <span className="font-mono text-lg">
-                Expira em: <span className={timeLeft === 'Expirado' ? 'text-brand-red' : 'text-white'}>{timeLeft}</span>
+                Expira em: <span className={timeLeft === 'Expirado' ? 'text-brand-red' : 'text-foreground'}>{timeLeft}</span>
               </span>
             </div>
 
@@ -233,7 +227,7 @@ export function PixPaymentDisplay({
                     className="w-48 h-48 md:w-64 md:h-64"
                   />
                 ) : (
-                  <div className="w-48 h-48 md:w-64 md:h-64 flex items-center justify-center text-brand-gray-500">
+                  <div className="w-48 h-48 md:w-64 md:h-64 flex items-center justify-center text-muted-foreground">
                     QR Code não disponível
                   </div>
                 )}
@@ -242,12 +236,12 @@ export function PixPaymentDisplay({
 
             {/* Código copia-e-cola */}
             <div className="space-y-2">
-              <p className="text-center text-brand-gray-500 text-sm font-rajdhani">
+              <p className="text-center text-muted-foreground text-sm font-rajdhani">
                 Ou copie o código PIX abaixo:
               </p>
               <div className="relative">
-                <div className="bg-brand-black-light border border-brand-purple/30 rounded-lg p-3 pr-12 overflow-x-auto">
-                  <code className="text-xs text-brand-gray-300 break-all font-mono">
+                <div className="bg-card border border-brand-purple/30 rounded-lg p-3 pr-12 overflow-x-auto">
+                  <code className="text-xs text-muted-foreground break-all font-mono">
                     {pixCode?.substring(0, 100)}...
                   </code>
                 </div>
@@ -325,7 +319,7 @@ export function PixPaymentDisplay({
 
             {/* Instruções */}
             <Alert className="bg-brand-purple/10 border-brand-purple/30">
-              <AlertDescription className="text-brand-gray-300 text-sm font-rajdhani">
+              <AlertDescription className="text-muted-foreground text-sm font-rajdhani">
                 <ol className="list-decimal list-inside space-y-1">
                   <li>Abra o app do seu banco</li>
                   <li>Escolha pagar via PIX</li>

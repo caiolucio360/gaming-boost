@@ -6,6 +6,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api-client'
 
 // Types
 interface User {
@@ -31,16 +32,9 @@ export const userKeys = {
  * Fetch current user
  */
 async function fetchCurrentUser(): Promise<UserResponse> {
-    const response = await fetch('/api/auth/me', {
-        credentials: 'include',
-    })
-
-    if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao buscar usuário')
-    }
-
-    return response.json()
+    // requireAuth:false → a 401 (not logged in) must NOT trigger the client's login redirect;
+    // React Query surfaces it as an error so `isAuthenticated` resolves to false.
+    return api.get<UserResponse>('/api/auth/me', { requireAuth: false })
 }
 
 /**

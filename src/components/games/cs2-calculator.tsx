@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
+import { api, ApiError } from '@/lib/api-client'
 
 interface GameCalculatorProps {
   gameId?: GameId
@@ -67,9 +68,8 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
           gameMode,
           serviceType: selectedServiceType,
         })
-        const response = await fetch(`/api/pricing/ranges?${params}`)
-        if (response.ok) {
-          const data = await response.json()
+        const data = await api.get<{ data?: { hours?: number[]; points?: number[]; min?: number; max?: number } }>(`/api/pricing/ranges?${params}`)
+        if (data) {
 
           if (selectedServiceType === 'COACHING') {
             const hours = data.data?.hours
@@ -146,24 +146,15 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
       }
 
       try {
-        const response = await fetch('/api/orders', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        const data = await api.get<{ orders?: ActiveOrder[] }>('/api/orders')
+        const orders = data.orders || []
 
-        if (response.ok) {
-          const data = await response.json()
-          const orders = data.orders || []
+        const activeInMode = orders.filter((order: ActiveOrder) =>
+          ['PENDING', 'PAID', 'IN_PROGRESS'].includes(order.status) &&
+          order.gameMode === gameMode
+        )
 
-          const activeInMode = orders.filter((order: ActiveOrder) =>
-            ['PENDING', 'PAID', 'IN_PROGRESS'].includes(order.status) &&
-            order.gameMode === gameMode
-          )
-
-          setActiveOrders(activeInMode)
-        }
+        setActiveOrders(activeInMode)
       } catch (error) {
         console.error('Error checking active orders:', error)
       }
@@ -293,29 +284,16 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
       setIsCalculating(true)
       try {
-        const response = await fetch('/api/pricing/calculate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            game: gameId,
-            gameMode,
-            serviceType: selectedServiceType,
-            hours: selectedHours,
-          }),
+        const data = await api.post<{ data: { price: number } }>('/api/pricing/calculate', {
+          game: gameId,
+          gameMode,
+          serviceType: selectedServiceType,
+          hours: selectedHours,
         })
-
-        if (!response.ok) {
-          const error = await response.json()
-          showError('Erro ao calcular preço', error.message || 'Não foi possível calcular o preço')
-          setPrice(0)
-          return
-        }
-
-        const data = await response.json()
         setPrice(data.data.price)
       } catch (error) {
         console.error('Error calculating price:', error)
-        showError('Erro', 'Não foi possível calcular o preço. Tente novamente.')
+        showError('Erro ao calcular preço', error instanceof ApiError ? error.message : 'Não foi possível calcular o preço. Tente novamente.')
         setPrice(0)
       } finally {
         setIsCalculating(false)
@@ -336,30 +314,17 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
     setIsCalculating(true)
     try {
-      const response = await fetch('/api/pricing/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          game: gameId,
-          gameMode,
-          serviceType: selectedServiceType,
-          current: currentValue,
-          target: targetValue,
-        }),
+      const data = await api.post<{ data: { price: number } }>('/api/pricing/calculate', {
+        game: gameId,
+        gameMode,
+        serviceType: selectedServiceType,
+        current: currentValue,
+        target: targetValue,
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        showError('Erro ao calcular preço', error.message || 'Não foi possível calcular o preço')
-        setPrice(0)
-        return
-      }
-
-      const data = await response.json()
       setPrice(data.data.price)
     } catch (error) {
       console.error('Error calculating price:', error)
-      showError('Erro', 'Não foi possível calcular o preço. Tente novamente.')
+      showError('Erro ao calcular preço', error instanceof ApiError ? error.message : 'Não foi possível calcular o preço. Tente novamente.')
       setPrice(0)
     } finally {
       setIsCalculating(false)
@@ -403,9 +368,9 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   if (!gameConfig || !modeConfig) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card className="bg-brand-black-light border border-white/5">
+        <Card className="bg-card border border-border">
           <CardContent className="p-6">
-            <p className="text-white text-center">Configuração do jogo não encontrada.</p>
+            <p className="text-foreground text-center">Configuração do jogo não encontrada.</p>
           </CardContent>
         </Card>
       </div>
@@ -414,11 +379,11 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="bg-brand-black-light border border-white/5 hover:border-brand-purple/50 transition-colors">
+      <Card className="bg-card border border-border hover:border-brand-purple/50 transition-colors">
         <CardHeader className="py-3 pb-2">
           <CardTitle className="text-lg md:text-2xl font-bold font-orbitron text-center">
             <span className="text-brand-purple-light">{gameConfig.displayName}</span>
-            <span className="text-white"> CALCULATOR</span>
+            <span className="text-foreground"> CALCULATOR</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -448,15 +413,15 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 <button
                   key={type}
                   onClick={() => handleServiceTypeChange(type)}
-                  className="bg-brand-black-light border border-brand-purple/30 rounded-xl p-6 cursor-pointer
+                  className="bg-card border border-brand-purple/30 rounded-xl p-6 cursor-pointer
                     hover:border-brand-purple hover:shadow-glow transition-all duration-300
                     flex flex-col items-center text-center"
                 >
                   <Icon className="h-10 w-10 text-brand-purple-light mb-3" />
-                  <h3 className="text-lg font-bold text-white font-orbitron mb-2">
+                  <h3 className="text-lg font-bold text-foreground font-orbitron mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-brand-gray-400 font-rajdhani">
+                  <p className="text-sm text-muted-foreground font-rajdhani">
                     {description}
                   </p>
                 </button>
@@ -475,7 +440,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                     className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 font-rajdhani font-bold text-sm
                       ${isSelected
                         ? 'bg-brand-purple border border-transparent text-white shadow-glow'
-                        : 'bg-brand-black-light border border-white/10 text-brand-gray-400 hover:border-brand-purple/50 hover:text-white'
+                        : 'bg-card border border-border text-muted-foreground hover:border-brand-purple/50 hover:text-brand-purple-light'
                       }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -490,7 +455,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
             <div key={selectedServiceType} className="animate-fadeInUp">
               {/* Service Type Description */}
               {serviceTypeInfo && (
-                <p className="text-xs text-brand-gray-400 text-center mb-3 font-rajdhani">
+                <p className="text-xs text-muted-foreground text-center mb-3 font-rajdhani">
                   {serviceTypeInfo.description}
                 </p>
               )}
@@ -505,7 +470,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                         <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
                           Você já possui um serviço ativo
                         </h3>
-                        <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
+                        <p className="text-xs md:text-sm text-muted-foreground font-rajdhani mb-3">
                           Finalize ou cancele o serviço atual antes de contratar um novo.
                         </p>
                         <Link
@@ -524,7 +489,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 {/* Coaching: hours selector */}
                 {selectedServiceType === 'COACHING' ? (
                   isLoadingRanges ? (
-                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5 animate-pulse">
+                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border animate-pulse">
                       <div className="flex flex-col items-center justify-center mb-8 gap-4">
                         <Skeleton className="h-5 w-48 mb-2 bg-white/5" />
                         <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
@@ -538,9 +503,9 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5">
+                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border">
                       <div className="flex flex-col items-center justify-center mb-8 gap-4">
-                        <h3 className="text-sm md:text-base font-bold text-white font-orbitron mb-2">
+                        <h3 className="text-sm md:text-base font-bold text-foreground font-orbitron mb-2">
                           QUANTIDADE DE HORAS
                         </h3>
                         <Input 
@@ -549,7 +514,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                           max={maxRating || 10} 
                           value={selectedHours || minRating || 1}
                           onChange={(e) => setSelectedHours(Number(e.target.value))}
-                          className="w-32 bg-brand-black-light border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
+                          className="w-32 bg-card border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
                         />
                       </div>
 
@@ -563,7 +528,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                           className="py-4 cursor-pointer"
                         />
                       </div>
-                      <div className="flex justify-between text-xs text-brand-gray-500 mt-2 font-rajdhani font-bold">
+                      <div className="flex justify-between text-xs text-muted-foreground mt-2 font-rajdhani font-bold">
                         <span>{minRating || 1}h</span>
                         <span>{maxRating || 10}h</span>
                       </div>
@@ -572,7 +537,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 ) : (
                   /* Rank Boost / Duo Boost: current and target rating */
                   isLoadingRanges ? (
-                    <div className="bg-black/20 p-4 md:p-6 rounded-lg border border-white/5 animate-pulse">
+                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border animate-pulse">
                       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                         <div className="flex flex-col items-center md:items-start w-full md:w-auto">
                           <Skeleton className="h-5 w-32 mb-2 bg-white/5" />
@@ -595,10 +560,10 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {/* Range Selection */}
-                      <div className="lg:col-span-2 bg-black/20 p-4 md:p-6 rounded-lg border border-white/5">
+                      <div className="lg:col-span-2 bg-muted/40 p-4 md:p-6 rounded-lg border border-border">
                         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                           <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-                            <h3 className="text-sm md:text-base font-bold text-white font-orbitron mb-2">
+                            <h3 className="text-sm md:text-base font-bold text-foreground font-orbitron mb-2">
                               PONTUAÇÃO ATUAL
                             </h3>
                             <Input 
@@ -608,12 +573,12 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                               step={maxRating > 1000 ? 100 : 1}
                               value={currentRating}
                               onChange={(e) => handleCurrentChange(Number(e.target.value))}
-                              className="w-32 bg-brand-black-light border-brand-purple/30 text-white text-center font-rajdhani font-bold text-lg"
+                              className="w-32 bg-card border-brand-purple/30 text-foreground text-center font-rajdhani font-bold text-lg"
                             />
                           </div>
                           
                           <div className="hidden md:flex items-center justify-center flex-1">
-                             <div className="h-px bg-white/10 w-full mx-4"></div>
+                             <div className="h-px bg-border w-full mx-4"></div>
                           </div>
 
                           <div className="flex flex-col items-center md:items-end w-full md:w-auto">
@@ -627,7 +592,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                               step={maxRating > 1000 ? 100 : 1}
                               value={targetRating}
                               onChange={(e) => handleTargetChange(Number(e.target.value))}
-                              className="w-32 bg-brand-black-light border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
+                              className="w-32 bg-card border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
                             />
                           </div>
                         </div>
@@ -645,7 +610,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                             className="py-4 cursor-pointer"
                           />
                         </div>
-                        <div className="flex justify-between text-xs text-brand-gray-500 mt-2 font-rajdhani font-bold">
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2 font-rajdhani font-bold">
                           <span>{minRating}</span>
                           <span>{maxRating}</span>
                         </div>
@@ -660,7 +625,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                   <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
                     <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
                       <span className="text-brand-purple-light">PREÇO</span>
-                      <span className="text-white"> ESTIMADO</span>
+                      <span className="text-foreground"> ESTIMADO</span>
                     </h3>
 
                     {isCalculating ? (
@@ -677,7 +642,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                         <div key={price} className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1 animate-in fade-in zoom-in-95 duration-500">
                           R$ {price.toFixed(2)}
                         </div>
-                        <p className="text-xs md:text-sm text-brand-gray-300 font-rajdhani mb-3">
+                        <p className="text-xs md:text-sm text-muted-foreground font-rajdhani mb-3">
                           {selectedServiceType === 'COACHING'
                             ? `${selectedHours} hora${selectedHours && selectedHours > 1 ? 's' : ''} de coaching`
                             : `${currentRating.toLocaleString('pt-BR')} → ${targetRating.toLocaleString('pt-BR')} pontos`}
@@ -689,7 +654,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                           <div>
                             <button
                               disabled={true}
-                              className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                              className="w-full bg-card text-muted-foreground font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
                             >
                               BOOST JÁ ATIVO NESTA MODALIDADE
                             </button>
@@ -701,7 +666,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                           <div>
                             <button
                               disabled={true}
-                              className="w-full bg-brand-black-light text-brand-gray-500 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
+                              className="w-full bg-card text-muted-foreground font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
                             >
                               VALOR ABAIXO DO MÍNIMO
                             </button>
@@ -734,7 +699,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                         )}
                       </div>
                     ) : (
-                      <div className="text-center text-xs md:text-sm text-brand-gray-500 font-rajdhani py-4">
+                      <div className="text-center text-xs md:text-sm text-muted-foreground font-rajdhani py-4">
                         {selectedServiceType === 'COACHING'
                           ? 'Selecione a quantidade de horas para ver o preço'
                           : 'Selecione as pontuações para ver o preço'}

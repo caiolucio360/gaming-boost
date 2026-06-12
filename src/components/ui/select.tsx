@@ -41,9 +41,9 @@ function SelectTrigger({
         "flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none",
         // Size variants with minimum touch targets
         "data-[size=default]:h-10 data-[size=default]:min-h-touch data-[size=sm]:h-9 data-[size=sm]:min-h-[36px]",
-        // Border and background - using design system tokens
-        "border-white/10 bg-brand-black-light",
-        "data-[placeholder]:text-brand-gray-500 [&_svg:not([class*='text-'])]:text-brand-gray-500",
+        // Border and background - theme tokens (light/dark aware)
+        "border-input bg-card",
+        "data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground",
         // Focus state
         "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30 focus-visible:ring-1",
         // Validation states
@@ -125,10 +125,10 @@ function SelectItem({
       className={cn(
         // Base styles with touch-friendly padding
         "relative flex w-full items-center gap-2 rounded-sm py-2.5 pr-8 pl-3 text-sm outline-hidden select-none min-h-[40px]",
-        // Colors using design system tokens
-        "text-white [&_svg:not([class*='text-'])]:text-brand-gray-500",
+        // Colors using theme tokens
+        "text-popover-foreground [&_svg:not([class*='text-'])]:text-muted-foreground",
         // Focus/hover states
-        "focus:bg-brand-black-light focus:text-white",
+        "focus:bg-muted focus:text-foreground",
         // Cursor
         "cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         // SVG handling

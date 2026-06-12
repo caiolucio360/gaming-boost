@@ -24,8 +24,8 @@ import {
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
-import { getAuthToken } from '@/lib/api-client'
-import { SkeletonProfileCard } from '@/components/common/skeletons'
+import { api } from '@/lib/api-client'
+import { SkeletonProfileForm } from '@/components/common/skeletons'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,24 +70,20 @@ export default function ProfilePage() {
 
   const fetchProfile = useCallback(async () => {
     await withLoading(async () => {
-      const response = await fetch('/api/user/profile')
-      if (response.ok) {
-        const data = await response.json()
+      try {
+        const data = await api.get<{ user: NonNullable<typeof profile> }>('/api/user/profile')
         setProfile(data.user)
         setName(data.user.name || '')
         setPhone(data.user.phone || '')
-      } else {
+      } catch {
         showError('Erro', 'Não foi possível carregar o perfil')
       }
 
       // Buscar chave PIX se for booster ou admin
       if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
         try {
-          const pixResponse = await fetch('/api/user/bank-account')
-          if (pixResponse.ok) {
-            const pixData = await pixResponse.json()
-            setPixKey(pixData.pixKey || '')
-          }
+          const pixData = await api.get<{ pixKey?: string }>('/api/user/bank-account')
+          setPixKey(pixData.pixKey || '')
         } catch (error) {
           console.error('Erro ao buscar chave PIX:', error)
         }
@@ -133,36 +129,11 @@ export default function ProfilePage() {
       }
 
       // Atualizar perfil
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erro ao atualizar perfil')
-      }
+      const data = await api.put<{ user: NonNullable<typeof profile> }>('/api/user/profile', body)
 
       // Atualizar chave PIX se for booster ou admin
       if (authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN')) {
-        const pixResponse = await fetch('/api/user/bank-account', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            pixKey,
-          }),
-        })
-
-        if (!pixResponse.ok) {
-          const pixData = await pixResponse.json()
-          throw new Error(pixData.message || 'Erro ao atualizar chave PIX')
-        }
+        await api.put('/api/user/bank-account', { pixKey })
       }
 
       showSuccess('Perfil atualizado com sucesso!')
@@ -190,23 +161,7 @@ export default function ProfilePage() {
     try {
       setSaving(true)
 
-      const token = getAuthToken()
-      if (!token) {
-        throw new Error('Sessão inválida')
-      }
-
-      const response = await fetch('/api/user/delete', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erro ao excluir conta')
-      }
+      await api.delete('/api/user/delete')
 
       // Logout and redirect
       logout()
@@ -229,7 +184,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <PageHeader
           highlight="MEU"
@@ -238,10 +193,10 @@ export default function ProfilePage() {
         />
 
         {loading ? (
-          <SkeletonProfileCard />
+          <SkeletonProfileForm />
         ) : !profile ? (
           <div className="text-center py-12">
-            <p className="text-brand-gray-500 font-rajdhani">
+            <p className="text-muted-foreground font-rajdhani">
               Erro ao carregar perfil
             </p>
           </div>
@@ -252,20 +207,20 @@ export default function ProfilePage() {
           {/* Informações da Conta */}
           <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20">
             <CardHeader className="relative z-10">
-              <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
+              <CardTitle className="text-foreground flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
                 <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
                   <UserIcon className="h-5 w-5 text-brand-purple-light group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 Informações da Conta
               </CardTitle>
-              <CardDescription className="text-brand-gray-500 group-hover:text-brand-gray-300 transition-colors duration-300">
+              <CardDescription className="text-muted-foreground group-hover:text-muted-foreground transition-colors duration-300">
                 Visualize e edite suas informações pessoais
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 relative z-10">
               {/* Nome */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-brand-gray-500 flex items-center gap-2">
+                <Label htmlFor="name" className="text-muted-foreground flex items-center gap-2">
                   <UserIcon className="h-4 w-4" />
                   Nome
                 </Label>
@@ -275,13 +230,13 @@ export default function ProfilePage() {
                   placeholder="Seu nome completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-brand-black/50 border-brand-purple/50 text-white"
+                  className="bg-background/50 border-brand-purple/50 text-foreground"
                 />
               </div>
 
               {/* Email (read-only) */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-brand-gray-500 flex items-center gap-2">
+                <Label htmlFor="email" className="text-muted-foreground flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Email
                 </Label>
@@ -290,14 +245,14 @@ export default function ProfilePage() {
                   type="email"
                   value={profile.email}
                   disabled
-                  className="bg-brand-black/30 border-brand-purple/30 text-brand-gray-500 cursor-not-allowed"
+                  className="bg-background/30 border-brand-purple/30 text-muted-foreground cursor-not-allowed"
                 />
-                <p className="text-xs text-brand-gray-500">O email não pode ser alterado</p>
+                <p className="text-xs text-muted-foreground">O email não pode ser alterado</p>
               </div>
 
               {/* Telefone */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-brand-gray-500 flex items-center gap-2">
+                <Label htmlFor="phone" className="text-muted-foreground flex items-center gap-2">
                   <Phone className="h-4 w-4" />
                   Telefone
                 </Label>
@@ -307,14 +262,14 @@ export default function ProfilePage() {
                   placeholder="(00) 00000-0000"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="bg-brand-black/50 border-brand-purple/50 text-white"
+                  className="bg-background/50 border-brand-purple/50 text-foreground"
                 />
               </div>
 
               {/* Chave PIX (apenas para BOOSTER e ADMIN) */}
               {authUser && (authUser.role === 'BOOSTER' || authUser.role === 'ADMIN') && (
                 <div className="space-y-2">
-                  <Label htmlFor="pixKey" className="text-brand-gray-500 flex items-center gap-2">
+                  <Label htmlFor="pixKey" className="text-muted-foreground flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />
                     Chave PIX
                   </Label>
@@ -324,9 +279,9 @@ export default function ProfilePage() {
                     placeholder="email@exemplo.com ou CPF/CNPJ ou telefone"
                     value={pixKey}
                     onChange={(e) => setPixKey(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white"
+                    className="bg-background/50 border-brand-purple/50 text-foreground"
                   />
-                  <p className="text-xs text-brand-gray-500">Chave PIX para recebimento de pagamentos</p>
+                  <p className="text-xs text-muted-foreground">Chave PIX para recebimento de pagamentos</p>
                 </div>
               )}
 
@@ -335,29 +290,29 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-brand-gray-500 mb-1">Função</p>
-                  <p className="text-white font-semibold capitalize">
+                  <p className="text-muted-foreground mb-1">Função</p>
+                  <p className="text-foreground font-semibold capitalize">
                     {profile.role === 'CLIENT' ? 'Cliente' : 
                      profile.role === 'BOOSTER' ? 'Booster' : 
                      'Administrador'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-brand-gray-500 mb-1">Conta criada em</p>
-                  <p className="text-white">{formatDate(profile.createdAt)}</p>
+                  <p className="text-muted-foreground mb-1">Conta criada em</p>
+                  <p className="text-foreground">{formatDate(profile.createdAt)}</p>
                 </div>
                 {profile._count && (
                   <>
                     {profile._count.orders !== undefined && (
                       <div>
-                        <p className="text-brand-gray-500 mb-1">Pedidos realizados</p>
-                        <p className="text-white font-semibold">{profile._count.orders}</p>
+                        <p className="text-muted-foreground mb-1">Pedidos realizados</p>
+                        <p className="text-foreground font-semibold">{profile._count.orders}</p>
                       </div>
                     )}
                     {profile._count.boosterOrders !== undefined && (
                       <div>
-                        <p className="text-brand-gray-500 mb-1">Trabalhos como booster</p>
-                        <p className="text-white font-semibold">{profile._count.boosterOrders}</p>
+                        <p className="text-muted-foreground mb-1">Trabalhos como booster</p>
+                        <p className="text-foreground font-semibold">{profile._count.boosterOrders}</p>
                       </div>
                     )}
                   </>
@@ -369,19 +324,19 @@ export default function ProfilePage() {
           {/* Alterar Senha */}
           <GlowCard className="hover:shadow-xl hover:shadow-brand-purple/20">
             <CardHeader className="relative z-10">
-              <CardTitle className="text-white flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
+              <CardTitle className="text-foreground flex items-center gap-2 group-hover:text-brand-purple-light transition-colors duration-300">
                 <div className="p-2 rounded-lg bg-brand-purple/20 group-hover:bg-brand-purple/30 transition-colors duration-300">
                   <Lock className="h-5 w-5 text-brand-purple-light group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 Alterar Senha
               </CardTitle>
-              <CardDescription className="text-brand-gray-500 group-hover:text-brand-gray-300 transition-colors duration-300">
+              <CardDescription className="text-muted-foreground group-hover:text-muted-foreground transition-colors duration-300">
                 Deixe em branco se não deseja alterar sua senha
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 relative z-10">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-brand-gray-500">
+                <Label htmlFor="currentPassword" className="text-muted-foreground">
                   Senha Atual
                 </Label>
                 <Input
@@ -390,12 +345,12 @@ export default function ProfilePage() {
                   placeholder="Digite sua senha atual"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="bg-brand-black/50 border-brand-purple/50 text-white"
+                  className="bg-background/50 border-brand-purple/50 text-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-brand-gray-500">
+                <Label htmlFor="newPassword" className="text-muted-foreground">
                   Nova Senha
                 </Label>
                 <Input
@@ -404,12 +359,12 @@ export default function ProfilePage() {
                   placeholder="Digite sua nova senha (mín. 6 caracteres)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-brand-black/50 border-brand-purple/50 text-white"
+                  className="bg-background/50 border-brand-purple/50 text-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-brand-gray-500">
+                <Label htmlFor="confirmPassword" className="text-muted-foreground">
                   Confirmar Nova Senha
                 </Label>
                 <Input
@@ -418,7 +373,7 @@ export default function ProfilePage() {
                   placeholder="Confirme sua nova senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-brand-black/50 border-brand-purple/50 text-white"
+                  className="bg-background/50 border-brand-purple/50 text-foreground"
                 />
               </div>
             </CardContent>
@@ -429,7 +384,7 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               onClick={() => router.back()}
-              className="border-2 border-brand-purple/50 text-white hover:border-white/50 transition-all duration-300"
+              className="border-2 border-brand-purple/50 text-foreground hover:border-white/50 transition-all duration-300"
             >
               Cancelar
             </Button>
@@ -459,15 +414,15 @@ export default function ProfilePage() {
                 </div>
                 Zona de Perigo
               </CardTitle>
-              <CardDescription className="text-brand-gray-500">
+              <CardDescription className="text-muted-foreground">
                 Ações irreversíveis para sua conta
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 relative z-10">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h4 className="text-white font-medium mb-1">Excluir Conta</h4>
-                  <p className="text-sm text-brand-gray-500 max-w-md">
+                  <h4 className="text-foreground font-medium mb-1">Excluir Conta</h4>
+                  <p className="text-sm text-muted-foreground max-w-md">
                     Ao excluir sua conta, seus dados pessoais serão anonimizados e você perderá acesso ao histórico. Esta ação não pode ser desfeita.
                   </p>
                 </div>
@@ -479,15 +434,15 @@ export default function ProfilePage() {
                       Excluir Minha Conta
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-brand-black border-brand-purple/20">
+                  <AlertDialogContent className="bg-background border-brand-purple/20">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-white font-orbitron">Tem certeza absoluta?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-brand-gray-400">
+                      <AlertDialogTitle className="text-foreground font-orbitron">Tem certeza absoluta?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">
                         Esta ação não pode ser desfeita. Isso irá anonimizar permanentemente seus dados pessoais e remover seu acesso à conta.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-transparent text-white border-brand-purple/50 hover:bg-brand-purple/10 hover:text-white">
+                      <AlertDialogCancel className="bg-transparent text-foreground border-brand-purple/50 hover:bg-brand-purple/10 hover:text-foreground">
                         Cancelar
                       </AlertDialogCancel>
                       <AlertDialogAction 

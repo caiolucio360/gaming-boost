@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
           email: true,
           name: true,
           role: true,
+          active: true,
           boosterCommissionPercentage: true,
           adminProfitShare: true,
           createdAt: true,

@@ -13,7 +13,7 @@ interface StatusConfig {
 const statusConfigs: Record<OrderStatus, StatusConfig & { tooltip: string }> = {
   PENDING: {
     label: 'Pendente',
-    color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
+    color: 'bg-yellow-500/20 text-foreground dark:text-yellow-300 border-yellow-500/50',
     icon: Clock,
     tooltip: 'Pedido aguardando pagamento',
   },
@@ -25,19 +25,19 @@ const statusConfigs: Record<OrderStatus, StatusConfig & { tooltip: string }> = {
   },
   IN_PROGRESS: {
     label: 'Em Progresso',
-    color: 'bg-blue-500/20 text-blue-300 border-blue-500/50',
+    color: 'bg-blue-500/20 text-foreground dark:text-blue-300 border-blue-500/50',
     icon: Loader2,
     tooltip: 'Pedido sendo executado no momento',
   },
   COMPLETED: {
     label: 'Concluído',
-    color: 'bg-green-500/20 text-green-300 border-green-500/50',
+    color: 'bg-green-500/20 text-foreground dark:text-green-300 border-green-500/50',
     icon: CheckCircle2,
     tooltip: 'Pedido finalizado com sucesso',
   },
   CANCELLED: {
     label: 'Cancelado',
-    color: 'bg-red-500/20 text-red-300 border-red-500/50',
+    color: 'bg-red-500/20 text-foreground dark:text-red-300 border-red-500/50',
     icon: XCircle,
     tooltip: 'Pedido foi cancelado',
   },
@@ -64,7 +64,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
               {config.label}
             </Badge>
           </TooltipTrigger>
-          <TooltipContent className="bg-black/90 border-brand-purple/50 text-white">
+          <TooltipContent className="bg-black/90 border-brand-purple/50 text-foreground">
             <p>{config.tooltip}</p>
           </TooltipContent>
         </Tooltip>
@@ -72,7 +72,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
 
       {status === 'PAID' && (
         <Badge
-          className="bg-orange-500/20 text-orange-300 border border-orange-500/50 font-rajdhani flex items-center gap-2 animate-pulse"
+          className="bg-orange-500/20 text-foreground dark:text-orange-300 border border-orange-500/50 font-rajdhani flex items-center gap-2 animate-pulse"
         >
           <Hourglass className="h-3 w-3" />
           Aguardando Booster

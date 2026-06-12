@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
+import { api } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -78,12 +79,9 @@ export default function BoosterPaymentsPage() {
       try {
         const status = commissionFilter === 'all' ? '' : commissionFilter
         const url = status ? `/api/booster/payments?status=${status}` : '/api/booster/payments'
-        const response = await fetch(url)
-        if (response.ok) {
-          const data = await response.json()
-          setCommissions(data.commissions || [])
-          setStats(data.stats || null)
-        }
+        const data = await api.get<{ commissions?: typeof commissions; stats?: typeof stats }>(url)
+        setCommissions(data.commissions || [])
+        setStats(data.stats || null)
       } catch (error) {
         console.error('Erro ao buscar pagamentos:', error)
       }
@@ -123,7 +121,7 @@ export default function BoosterPaymentsPage() {
         </div>
 
         <Tabs defaultValue="comissoes" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 bg-brand-black/30 border border-brand-purple/50 mb-6">
+          <TabsList className="grid w-full grid-cols-1 bg-background/30 border border-brand-purple/50 mb-6">
             <TabsTrigger value="comissoes" className="data-[state=active]:bg-brand-purple/20">
               <DollarSign className="h-4 w-4 mr-2" />Comissões
             </TabsTrigger>
@@ -134,8 +132,8 @@ export default function BoosterPaymentsPage() {
               <SkeletonStatsGrid count={5} />
             ) : stats ? (
               <StatsGrid columns={5} className="mb-6 lg:mb-8">
-                <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-green-300" />
-                <StatCard title="Pendente" value={formatPrice(stats.pendingEarnings)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-yellow-300" />
+                <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
+                <StatCard title="Pendente" value={formatPrice(stats.pendingEarnings)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-foreground dark:text-yellow-300" />
                 <StatCard title="Total de Comissões" value={stats.totalCommissions} description="Todas as comissões" icon={DollarSign} iconColor="text-brand-purple" />
                 <StatCard title="Pagas" value={stats.paidCommissions} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" />
                 <StatCard title="Pendentes" value={stats.pendingCommissions} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
@@ -143,7 +141,7 @@ export default function BoosterPaymentsPage() {
             ) : null}
 
             <Tabs value={commissionFilter} onValueChange={setCommissionFilter} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-brand-black/30 border border-brand-purple/50">
+              <TabsList className="grid w-full grid-cols-4 bg-background/30 border border-brand-purple/50">
                 <TabsTrigger value="all" className="data-[state=active]:bg-brand-purple/20">Todas</TabsTrigger>
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-yellow-500/20">Pendentes</TabsTrigger>
                 <TabsTrigger value="PAID" className="data-[state=active]:bg-green-500/20">Pagas</TabsTrigger>
@@ -161,14 +159,14 @@ export default function BoosterPaymentsPage() {
                 ) : (
                   <div className="grid gap-4 lg:gap-6">
                     {commissions.map((commission) => (
-                      <Card key={commission.id} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+                      <Card key={commission.id} className="bg-background/30 backdrop-blur-md border-brand-purple/50">
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white font-orbitron mb-2">
+                              <CardTitle className="text-foreground font-orbitron mb-2">
                                 {commission.order.gameMode || commission.order.serviceType}
                               </CardTitle>
-                              <CardDescription className="text-brand-gray-500 font-rajdhani">
+                              <CardDescription className="text-muted-foreground font-rajdhani">
                                 Pedido #{commission.order.id}
                               </CardDescription>
                             </div>
@@ -177,7 +175,7 @@ export default function BoosterPaymentsPage() {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <OrderInfoItem label="Valor da Comissão" value={<span className="text-lg font-bold text-green-300 font-orbitron">{formatPrice(commission.amount)} ({(commission.percentage * 100).toFixed(0)}%)</span>} />
+                            <OrderInfoItem label="Valor da Comissão" value={<span className="text-lg font-bold text-foreground dark:text-green-300 font-orbitron">{formatPrice(commission.amount)} ({(commission.percentage * 100).toFixed(0)}%)</span>} />
                             <OrderInfoItem label="Cliente" value={commission.order.user.name || commission.order.user.email} />
                             {commission.status === 'PAID' && commission.paidAt && <OrderInfoItem label="Data do Pagamento" value={formatDate(commission.paidAt)} />}
                             <OrderInfoItem label="Data da Comissão" value={formatDate(commission.createdAt)} />

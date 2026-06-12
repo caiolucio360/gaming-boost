@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { CartItem } from '@/types'
 import { showSuccess, showWarning, showLoading, updateToSuccess, updateToError } from '@/lib/toast'
-import { apiPost, ApiError } from '@/lib/api-client'
+import { api, ApiError } from '@/lib/api-client'
 import { ErrorCodes } from '@/lib/error-constants'
 import { formatPrice } from '@/lib/utils'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
@@ -76,7 +76,7 @@ export default function CartPage() {
             body.metadata = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata)
           }
 
-          const data = await apiPost<{ order: { id: number } }>('/api/orders', body)
+          const data = await api.post<{ order: { id: number } }>('/api/orders', body)
           
           if (data && data.order) {
             createdOrders.push(data.order.id)
@@ -150,27 +150,27 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white font-orbitron mb-2">
+          <h1 className="text-4xl font-bold text-foreground font-orbitron mb-2">
             <span className="text-brand-purple-light">CARRINHO</span>
-            <span className="text-white"> DE COMPRAS</span>
+            <span className="text-foreground"> DE COMPRAS</span>
           </h1>
-          <p className="text-brand-gray-300 font-rajdhani">
+          <p className="text-muted-foreground font-rajdhani">
             Revise seus serviços selecionados antes de finalizar
           </p>
         </div>
 
         {items.length === 0 && !isRedirecting ? (
-          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+          <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <ShoppingCart className="h-16 w-16 text-brand-gray-500 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white font-orbitron mb-2">
+                <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-foreground font-orbitron mb-2">
                   Carrinho vazio
                 </h3>
-                <p className="text-brand-gray-500 font-rajdhani mb-6">
+                <p className="text-muted-foreground font-rajdhani mb-6">
                   Seu carrinho está vazio. Adicione serviços para continuar.
                 </p>
                 <Button asChild className="bg-brand-purple text-white font-rajdhani">
@@ -180,7 +180,7 @@ export default function CartPage() {
             </CardContent>
           </Card>
         ) : isRedirecting ? (
-          <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+          <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <LoadingSpinner size="lg" text="Redirecionando para pagamento..." fullScreen={false} />
@@ -191,14 +191,14 @@ export default function CartPage() {
           <div className="space-y-6">
             <div className="space-y-4">
               {items.map((item: CartItem, index: number) => (
-                <Card key={index} className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 transition-colors">
+                <Card key={index} className="bg-background/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 transition-colors">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-white font-orbitron mb-2">
+                        <CardTitle className="text-foreground font-orbitron mb-2">
                           {item.serviceName}
                         </CardTitle>
-                        <CardDescription className="text-brand-gray-500 font-rajdhani">
+                        <CardDescription className="text-muted-foreground font-rajdhani">
                           {item.description || 'Serviço de boost profissional'}
                         </CardDescription>
                         {item.currentRank && item.targetRank && (
@@ -206,7 +206,7 @@ export default function CartPage() {
                             <Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50">
                               {item.currentRank} → {item.targetRank}
                             </Badge>
-                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/50">
+                            <Badge className="bg-blue-500/20 text-foreground dark:text-blue-300 border-blue-500/50">
                               {item.game}
                             </Badge>
                           </div>
@@ -225,11 +225,11 @@ export default function CartPage() {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">Duração estimada</p>
-                        <p className="text-sm text-white font-rajdhani">{item.duration || '1-3 dias'}</p>
+                        <p className="text-sm text-muted-foreground font-rajdhani mb-1">Duração estimada</p>
+                        <p className="text-sm text-foreground font-rajdhani">{item.duration || '1-3 dias'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-brand-gray-500 font-rajdhani mb-1">Preço</p>
+                        <p className="text-sm text-muted-foreground font-rajdhani mb-1">Preço</p>
                         <p className="text-xl font-bold text-brand-purple-light font-orbitron">
                           {formatPrice(item.price)}
                         </p>
@@ -241,19 +241,19 @@ export default function CartPage() {
             </div>
 
             {/* Resumo do pedido */}
-            <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 sticky top-24">
+            <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50 sticky top-24">
               <CardHeader>
-                <CardTitle className="text-white font-orbitron">
+                <CardTitle className="text-foreground font-orbitron">
                   <span className="text-brand-purple-light">RESUMO</span> DO PEDIDO
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-brand-gray-300 font-rajdhani">Total de itens</p>
-                  <p className="text-white font-rajdhani font-semibold">{items.length}</p>
+                  <p className="text-muted-foreground font-rajdhani">Total de itens</p>
+                  <p className="text-foreground font-rajdhani font-semibold">{items.length}</p>
                 </div>
                 <div className="flex items-center justify-between border-t border-brand-purple/30 pt-4">
-                  <p className="text-lg font-bold text-white font-orbitron">Total</p>
+                  <p className="text-lg font-bold text-foreground font-orbitron">Total</p>
                   <p className="text-2xl font-bold text-brand-purple-light font-orbitron">
                     {formatPrice(total)}
                   </p>
@@ -297,7 +297,7 @@ export default function CartPage() {
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
-                    <p className="text-xs text-center text-brand-gray-500 font-rajdhani">
+                    <p className="text-xs text-center text-muted-foreground font-rajdhani">
                       Seus itens serão salvos no carrinho
                     </p>
                   </div>

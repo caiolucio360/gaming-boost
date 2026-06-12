@@ -11,13 +11,13 @@ const buttonVariants = cva(
       variants: {
         variant: {
           // Primary: Main CTA button with brand purple
-          default: "bg-brand-purple text-white border border-transparent hover:bg-brand-purple-hover shadow-glow-sm hover:shadow-glow",
+          default: "bg-brand-purple text-white border border-transparent hover:bg-brand-purple-light shadow-glow-sm hover:shadow-glow",
           // Destructive: Danger/error actions
           destructive:
             "bg-brand-red text-white border border-transparent hover:border-white/50 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
           // Outline: Secondary actions
           outline:
-            "border border-white/10 bg-transparent hover:border-brand-purple hover:bg-brand-black-light dark:bg-transparent",
+            "border border-border bg-transparent hover:border-brand-purple hover:bg-muted dark:bg-transparent",
           // Secondary: Less prominent actions
           secondary:
             "bg-secondary text-secondary-foreground border border-transparent hover:border-secondary-foreground/50",
@@ -26,7 +26,7 @@ const buttonVariants = cva(
             "bg-brand-purple-dark text-white border border-transparent hover:bg-brand-purple shadow-glow hover:shadow-glow-lg font-bold",
           // Ghost: Minimal style for subtle actions
           ghost:
-            "border border-transparent hover:border-foreground/30 hover:bg-brand-black-light",
+            "border border-transparent hover:border-foreground/30 hover:bg-muted",
           // Link: Text-only button style
           link: "text-brand-purple underline-offset-4 hover:underline border-0",
         },

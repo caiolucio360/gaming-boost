@@ -84,14 +84,14 @@ const features = [
 
 export default function ComoFuncionaPage() {
   return (
-    <div className="min-h-screen bg-brand-black">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-3xl md:text-5xl font-bold text-white font-orbitron mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-foreground font-orbitron mb-4">
             <span className="text-brand-purple-light">COMO</span> FUNCIONA
           </h1>
-          <p className="text-lg text-brand-gray-300 font-rajdhani max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground font-rajdhani max-w-2xl mx-auto">
             Processo simples e seguro em 4 passos
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function ComoFuncionaPage() {
           {steps.map((step, index) => (
             <Card
               key={step.number}
-              className="relative bg-brand-black-light border-brand-purple/30 hover:border-brand-purple/60 hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300 overflow-hidden group"
+              className="relative bg-card border-brand-purple/30 hover:border-brand-purple/60 hover:shadow-lg hover:shadow-brand-purple/20 transition-all duration-300 overflow-hidden group"
             >
               <CardContent className="p-6">
                 {/* Step Number */}
@@ -115,10 +115,10 @@ export default function ComoFuncionaPage() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-lg font-bold text-white font-orbitron mb-2">
+                <h3 className="text-lg font-bold text-foreground font-orbitron mb-2">
                   {step.title}
                 </h3>
-                <p className="text-sm text-brand-gray-400 font-rajdhani leading-relaxed">
+                <p className="text-sm text-muted-foreground font-rajdhani leading-relaxed">
                   {step.description}
                 </p>
 
@@ -133,7 +133,7 @@ export default function ComoFuncionaPage() {
 
         {/* Features */}
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-white font-orbitron text-center mb-10">
+          <h2 className="text-2xl font-bold text-foreground font-orbitron text-center mb-10">
             POR QUE <span className="text-brand-purple-light">ESCOLHER</span> A FLAUTASBOOST
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
@@ -146,8 +146,8 @@ export default function ComoFuncionaPage() {
                   <feature.icon className="h-5 w-5 text-brand-purple-light" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white font-rajdhani mb-1">{feature.title}</h4>
-                  <p className="text-sm text-brand-gray-400 font-rajdhani leading-relaxed">{feature.description}</p>
+                  <h4 className="font-bold text-foreground font-rajdhani mb-1">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground font-rajdhani leading-relaxed">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -163,7 +163,7 @@ export default function ComoFuncionaPage() {
             <Zap className="h-5 w-5" />
             Começar Agora
           </Link>
-          <p className="text-sm text-brand-gray-500 font-rajdhani">
+          <p className="text-sm text-muted-foreground font-rajdhani">
             Dúvidas? Entre em contato pelo suporte.
           </p>
         </div>

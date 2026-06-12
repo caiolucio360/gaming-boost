@@ -15,15 +15,17 @@ import {
   SlidersHorizontal,
   CreditCard,
   Percent,
-  ExternalLink,
   Briefcase,
   DollarSign,
   User,
   Wallet,
+  Home,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { APP_VERSION } from '@/lib/version'
 import { NotificationBell } from '@/components/common/notification-bell'
+import { ThemeToggle } from '@/components/common/theme-toggle'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -51,13 +53,6 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: 'Pagamentos',   href: '/admin/payments',    icon: CreditCard },
   { label: 'Saques',       href: '/admin/withdraw',    icon: Wallet },
   { label: 'Comissões',    href: '/admin/commissions', icon: Percent },
-  {
-    separator: true,
-    label: 'Preview do Site',
-    href: '/games/cs2',
-    icon: ExternalLink,
-    external: true,
-  },
 ]
 
 const BOOSTER_NAV_ITEMS: NavItem[] = [
@@ -146,7 +141,7 @@ export function AppShell({ role, children }: AppShellProps) {
       <div className="flex flex-col h-full">
         {/* Header — same h-14 as top bar so logo aligns with bell */}
         <div className={cn(
-          'h-14 border-b border-white/10 flex items-center flex-shrink-0',
+          'h-14 border-b border-border flex items-center flex-shrink-0',
           collapsed ? 'justify-center relative' : 'px-3'
         )}>
           {/* Logo + badge */}
@@ -159,7 +154,7 @@ export function AppShell({ role, children }: AppShellProps) {
               ) : (
                 <span className="font-brush -skew-x-6 text-xl md:text-2xl tracking-widest">
                   <span className="text-brand-purple-light">FLAUTAS</span>
-                  <span className="text-white">BOOST</span>
+                  <span className="text-foreground">BOOST</span>
                 </span>
               )}
             </Link>
@@ -169,7 +164,7 @@ export function AppShell({ role, children }: AppShellProps) {
           <button
             onClick={toggleCollapse}
             className={cn(
-              'hidden lg:flex w-7 h-7 items-center justify-center text-brand-gray-500 hover:text-brand-purple-light transition-colors flex-shrink-0',
+              'hidden lg:flex w-7 h-7 items-center justify-center text-muted-foreground hover:text-brand-purple-light transition-colors flex-shrink-0',
               collapsed && 'absolute right-1.5 top-1/2 -translate-y-1/2'
             )}
             aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
@@ -186,7 +181,7 @@ export function AppShell({ role, children }: AppShellProps) {
               return (
                 <div key={item.href}>
                   {item.separator && (
-                    <div className="my-2 mx-3 border-t border-white/10" />
+                    <div className="my-2 mx-3 border-t border-border" />
                   )}
                   <Link
                     href={item.href}
@@ -196,14 +191,14 @@ export function AppShell({ role, children }: AppShellProps) {
                       'group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm font-medium font-rajdhani border-l-2',
                       active
                         ? 'bg-brand-purple/20 text-brand-purple-light border-brand-purple'
-                        : 'text-brand-gray-400 hover:text-brand-purple-light hover:bg-brand-purple/10 border-transparent',
+                        : 'text-muted-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 border-transparent',
                       collapsed && 'justify-center px-2'
                     )}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     {!collapsed && <span>{item.label}</span>}
                     {collapsed && (
-                      <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-brand-black-light border border-brand-purple/50 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
+                      <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-popover border border-border px-2 py-1 text-xs text-popover-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
                         {item.label}
                       </span>
                     )}
@@ -213,8 +208,27 @@ export function AppShell({ role, children }: AppShellProps) {
             })}
           </nav>
 
+          {/* Back to public site */}
+          <div className="border-t border-border p-2 flex-shrink-0">
+            <Link
+              href="/"
+              className={cn(
+                'group relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm font-medium font-rajdhani text-muted-foreground hover:text-brand-purple-light hover:bg-brand-purple/10',
+                collapsed && 'justify-center px-2'
+              )}
+            >
+              <Home className="h-5 w-5 flex-shrink-0" />
+              {!collapsed && <span>Voltar ao site</span>}
+              {collapsed && (
+                <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-popover border border-border px-2 py-1 text-xs text-popover-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50">
+                  Voltar ao site
+                </span>
+              )}
+            </Link>
+          </div>
+
           {/* User footer */}
-          <div className="border-t border-white/10 p-3 flex-shrink-0">
+          <div className="border-t border-border p-3 flex-shrink-0">
             {!collapsed && (
               <div className="flex items-center gap-3 mb-2 px-1">
                 <div className="w-8 h-8 rounded-full bg-brand-purple/30 flex items-center justify-center flex-shrink-0">
@@ -222,12 +236,12 @@ export function AppShell({ role, children }: AppShellProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <p className="text-sm text-white font-medium truncate">{user?.name || 'Usuário'}</p>
+                    <p className="text-sm text-foreground font-medium truncate">{user?.name || 'Usuário'}</p>
                     <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded font-rajdhani flex-shrink-0', roleBadgeClass)}>
                       {roleLabel}
                     </span>
                   </div>
-                  <p className="text-xs text-brand-gray-500 truncate">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 </div>
               </div>
             )}
@@ -238,17 +252,20 @@ export function AppShell({ role, children }: AppShellProps) {
                 </div>
               </div>
             )}
+            <p className="text-[10px] text-muted-foreground font-rajdhani text-center">
+              {collapsed ? APP_VERSION : `Versão ${APP_VERSION}`}
+            </p>
           </div>
       </div>
     )
   }
 
   return (
-    <div className="flex h-full bg-brand-black">
+    <div className="flex h-full bg-background">
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col flex-shrink-0 bg-brand-black-light border-r border-white/10 transition-all duration-300 overflow-hidden',
+          'hidden lg:flex flex-col flex-shrink-0 bg-card border-r border-border transition-all duration-300 overflow-hidden',
           collapsed ? 'w-20' : 'w-60'
         )}
       >
@@ -270,7 +287,7 @@ export function AppShell({ role, children }: AppShellProps) {
       {/* Mobile sidebar drawer */}
       <aside
         className={cn(
-          'lg:hidden fixed inset-y-0 left-0 z-50 w-60 bg-brand-black-light border-r border-white/10 flex flex-col transition-transform duration-300',
+          'lg:hidden fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transition-transform duration-300',
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -280,10 +297,10 @@ export function AppShell({ role, children }: AppShellProps) {
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Top bar — h-14 matches sidebar header for visual alignment */}
-        <header className="h-14 bg-brand-black-light border-b border-white/10 flex items-center gap-3 px-4 flex-shrink-0">
+        <header className="h-14 bg-card border-b border-border flex items-center gap-3 px-4 flex-shrink-0">
           {/* Mobile hamburger */}
           <button
-            className="lg:hidden text-brand-gray-400 hover:text-brand-purple-light transition-colors"
+            className="lg:hidden text-muted-foreground hover:text-brand-purple-light transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Abrir menu"
           >
@@ -295,23 +312,26 @@ export function AppShell({ role, children }: AppShellProps) {
             {buildBreadcrumbs(pathname).map((crumb, i, arr) => (
               <Fragment key={crumb.href}>
                 {i > 0 && (
-                  <ChevronRight className="h-3.5 w-3.5 text-brand-gray-500 flex-shrink-0" />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 )}
                 {i < arr.length - 1 ? (
                   <Link
                     href={crumb.href}
-                    className="text-brand-gray-400 hover:text-brand-purple-light transition-colors"
+                    className="text-muted-foreground hover:text-brand-purple-light transition-colors"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-white font-medium">{crumb.label}</span>
+                  <span className="text-foreground font-medium">{crumb.label}</span>
                 )}
               </Fragment>
             ))}
           </nav>
 
           <div className="flex-1" />
+
+          {/* Theme toggle */}
+          <ThemeToggle />
 
           {/* Notification bell */}
           <NotificationBell />
@@ -326,33 +346,41 @@ export function AppShell({ role, children }: AppShellProps) {
                 <span className="text-sm font-bold text-brand-purple-light">{userInitial}</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 bg-brand-black-light border-white/10">
+            <DropdownMenuContent align="end" className="w-52 bg-popover border-border">
               <DropdownMenuLabel className="pb-1">
-                <p className="text-sm text-white font-medium truncate">{user?.name || 'Usuário'}</p>
-                <p className="text-xs text-brand-gray-500 font-normal truncate">{user?.email}</p>
+                <p className="text-sm text-foreground font-medium truncate">{user?.name || 'Usuário'}</p>
+                <p className="text-xs text-muted-foreground font-normal truncate">{user?.email}</p>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => router.push('/')}
+                className="cursor-pointer text-popover-foreground"
+              >
+                <Home className="mr-2 h-4 w-4 text-current" />
+                Página inicial
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push('/profile')}
-                className="cursor-pointer text-brand-gray-300 hover:text-white focus:text-white"
+                className="cursor-pointer text-popover-foreground"
               >
-                <User className="mr-2 h-4 w-4" />
+                <User className="mr-2 h-4 w-4 text-current" />
                 Meu Perfil
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={logout}
                 className="cursor-pointer text-red-400 hover:text-red-300 focus:text-red-300"
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-2 h-4 w-4 text-current" />
                 Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto bg-brand-black">
+        {/* Page content — reserve the scrollbar gutter so centered (`container mx-auto`)
+            content doesn't shift horizontally when the scrollbar toggles between pages. */}
+        <main className="flex-1 overflow-auto bg-background [scrollbar-gutter:stable]">
           {children}
         </main>
       </div>

@@ -26,6 +26,7 @@ import {
   Maximize2,
   Minimize2,
 } from 'lucide-react'
+import { api } from '@/lib/api-client'
 import { showError } from '@/lib/toast'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatMessageTime } from '@/lib/utils'
@@ -76,7 +77,7 @@ function SteamCredentialsCard({
   if (isExpired) {
     return (
       <div className="rounded-2xl px-4 py-3 bg-brand-gray-800/50 border border-brand-gray-700/50">
-        <p className="text-sm text-brand-gray-500 italic">[Credenciais removidas após conclusão do pedido]</p>
+        <p className="text-sm text-muted-foreground italic">[Credenciais removidas após conclusão do pedido]</p>
       </div>
     )
   }
@@ -94,7 +95,7 @@ function SteamCredentialsCard({
           <Shield className="h-4 w-4 text-brand-purple-light" />
           <span className="text-xs font-semibold text-brand-purple-light">Credenciais Steam</span>
         </div>
-        <p className="text-sm text-brand-gray-500">{content}</p>
+        <p className="text-sm text-muted-foreground">{content}</p>
       </div>
     )
   }
@@ -113,13 +114,13 @@ function SteamCredentialsCard({
       </div>
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-brand-gray-500 mb-0.5">Usuário</p>
-          <p className="text-sm text-white font-mono">{username}</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Usuário</p>
+          <p className="text-sm text-foreground font-mono">{username}</p>
         </div>
         <div>
-          <p className="text-xs text-brand-gray-500 mb-0.5">Senha</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Senha</p>
           <div className="flex items-center gap-2">
-            <p className="text-sm text-white font-mono">
+            <p className="text-sm text-foreground font-mono">
               {revealed ? password : '••••••••'}
             </p>
             <button
@@ -182,16 +183,17 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
 
   const fetchChat = useCallback(async () => {
     try {
-      const response = await fetch(`/api/orders/${orderId}/chat`)
-      if (response.ok) {
-        const data = await response.json()
-        setChat(data.chat)
-        setChatEnabled(data.chatEnabled)
-        setDisabledReason(data.disabledReason)
-        setLastUpdate(new Date())
-        if (data.chat?.messages && onMessagesUpdate) {
-          onMessagesUpdate(data.chat.messages)
-        }
+      const data = await api.get<{
+        chat: typeof chat
+        chatEnabled: boolean
+        disabledReason: typeof disabledReason
+      }>(`/api/orders/${orderId}/chat`)
+      setChat(data.chat)
+      setChatEnabled(data.chatEnabled)
+      setDisabledReason(data.disabledReason)
+      setLastUpdate(new Date())
+      if (data.chat?.messages && onMessagesUpdate) {
+        onMessagesUpdate(data.chat.messages)
       }
     } catch (error) {
       console.error('Erro ao buscar chat:', error)
@@ -218,16 +220,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
 
     setSending(true)
     try {
-      const response = await fetch(`/api/orders/${orderId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: message }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erro ao enviar mensagem')
-      }
+      await api.post(`/api/orders/${orderId}/chat`, { content: message })
 
       setMessage('')
       await fetchChat()
@@ -244,19 +237,10 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
 
     setSending(true)
     try {
-      const response = await fetch(`/api/orders/${orderId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageType: 'STEAM_CREDENTIALS',
-          credentials: { username: credUsername, password: credPassword },
-        }),
+      await api.post(`/api/orders/${orderId}/chat`, {
+        messageType: 'STEAM_CREDENTIALS',
+        credentials: { username: credUsername, password: credPassword },
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erro ao enviar credenciais')
-      }
 
       setCredUsername('')
       setCredPassword('')
@@ -272,7 +256,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return <Badge className="bg-red-500/20 text-red-300 border-red-500/50 text-xs ml-2">Admin</Badge>
+        return <Badge className="bg-red-500/20 text-foreground dark:text-red-300 border-red-500/50 text-xs ml-2">Admin</Badge>
       case 'BOOSTER':
         return <Badge className="bg-brand-purple/20 text-brand-purple-light border-brand-purple/50 text-xs ml-2">Booster</Badge>
       default:
@@ -308,7 +292,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                 <div className="w-16 h-16 rounded-full bg-brand-purple/10 flex items-center justify-center mb-4">
                   <MessageCircle className="h-8 w-8 text-brand-purple-light" />
                 </div>
-                <p className="text-brand-gray-400 font-rajdhani">
+                <p className="text-muted-foreground font-rajdhani">
                   Nenhuma mensagem ainda
                 </p>
                 <p className="text-brand-gray-600 text-sm mt-1">
@@ -340,11 +324,11 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     <div className={`flex-1 max-w-[75%] ${isOwnMessage ? 'flex flex-col items-end' : ''}`}>
                       {showAvatar && (
                         <div className={`flex items-center gap-2 mb-1 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-                          <p className="text-sm font-semibold text-white flex items-center">
+                          <p className="text-sm font-semibold text-foreground flex items-center">
                             {msg.author.name || 'Usuário'}
                             {getRoleBadge(msg.author.role)}
                           </p>
-                          <p className="text-xs text-brand-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {formatMessageTime(msg.createdAt)}
                           </p>
                         </div>
@@ -393,7 +377,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                   <KeyRound className="h-5 w-5 text-yellow-400" />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-sm font-bold text-yellow-300 font-orbitron leading-tight">
+                  <p className="text-sm font-bold text-foreground dark:text-yellow-300 font-orbitron leading-tight">
                     Enviar Credenciais Steam
                   </p>
                   <p className="text-xs text-yellow-500/80 mt-0.5">
@@ -415,7 +399,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     value={credUsername}
                     onChange={(e) => setCredUsername(e.target.value)}
                     placeholder="Usuário Steam"
-                    className="bg-black/50 border-brand-purple/30 text-white placeholder:text-brand-gray-500 focus:border-brand-purple-light"
+                    className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                     disabled={sending}
                     autoComplete="off"
                   />
@@ -424,7 +408,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     value={credPassword}
                     onChange={(e) => setCredPassword(e.target.value)}
                     placeholder="Senha Steam"
-                    className="bg-black/50 border-brand-purple/30 text-white placeholder:text-brand-gray-500 focus:border-brand-purple-light"
+                    className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                     disabled={sending}
                     autoComplete="new-password"
                   />
@@ -434,7 +418,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     type="button"
                     variant="ghost"
                     onClick={() => { setCredentialMode(false); setCredUsername(''); setCredPassword('') }}
-                    className="text-brand-gray-400 hover:text-white"
+                    className="text-muted-foreground hover:text-foreground"
                     disabled={sending}
                   >
                     Cancelar
@@ -461,7 +445,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Digite sua mensagem..."
-                  className="bg-black/50 border-brand-purple/30 text-white placeholder:text-brand-gray-500 focus:border-brand-purple-light"
+                  className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                   disabled={sending}
                   maxLength={2000}
                 />
@@ -484,12 +468,12 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
           </div>
         ) : (
           <div className="flex items-center gap-3 bg-brand-gray-800/50 border border-brand-gray-700/50 rounded-lg p-4">
-            <AlertCircle className="h-5 w-5 text-brand-gray-400 flex-shrink-0" />
+            <AlertCircle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
             <div>
-              <p className="text-brand-gray-300 font-medium font-rajdhani">
+              <p className="text-muted-foreground font-medium font-rajdhani">
                 Chat desabilitado
               </p>
-              <p className="text-brand-gray-500 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {disabledReason || 'Chat disponível apenas para pedidos em andamento.'}
               </p>
             </div>
@@ -503,7 +487,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
     <div className="px-4 py-2 bg-brand-purple/5 border-b border-brand-purple/20 flex-shrink-0">
       <div className="flex items-start gap-2 text-xs">
         <Shield className="h-4 w-4 text-brand-purple-light flex-shrink-0 mt-0.5" />
-        <p className="text-brand-gray-400">
+        <p className="text-muted-foreground">
           Suas mensagens são criptografadas com AES-256-GCM. Compartilhe suas credenciais Steam com segurança apenas com o booster designado.
         </p>
       </div>
@@ -515,7 +499,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
       <Card className={`bg-gradient-to-br from-brand-gray-900/80 to-brand-gray-800/40 backdrop-blur-xl border border-brand-purple/30 h-[500px] flex flex-col ${className || ''}`}>
         <CardHeader className="border-b border-brand-purple/20 pb-4 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white font-orbitron flex items-center gap-2">
+            <CardTitle className="text-foreground font-orbitron flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-brand-purple-light" />
               Chat do Pedido
             </CardTitle>
@@ -524,14 +508,14 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                 <Lock className="h-3 w-3" />
                 <span>Criptografado</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-brand-gray-500">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <RefreshCw className="h-3 w-3" />
                 <span>{formatMessageTime(lastUpdate.toISOString())}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
-                className="p-1.5 rounded-md text-brand-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
                 title="Expandir chat"
               >
                 <Maximize2 className="h-4 w-4" />
@@ -549,7 +533,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
         <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-brand-gray-900/95 to-brand-gray-800/95 backdrop-blur-xl border border-brand-purple/30">
           <DialogHeader className="border-b border-brand-purple/20 px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-white font-orbitron flex items-center gap-2">
+              <DialogTitle className="text-foreground font-orbitron flex items-center gap-2">
                 <MessageCircle className="h-5 w-5 text-brand-purple-light" />
                 Chat do Pedido
               </DialogTitle>
@@ -561,7 +545,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                 <button
                   type="button"
                   onClick={() => setIsExpanded(false)}
-                  className="p-1.5 rounded-md text-brand-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                  className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
                   title="Minimizar chat"
                 >
                   <Minimize2 className="h-4 w-4" />

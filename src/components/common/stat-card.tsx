@@ -19,13 +19,13 @@ export function StatCard({
   description,
   icon: Icon,
   iconColor = 'text-brand-purple',
-  valueColor = 'text-white',
+  valueColor = 'text-foreground',
   className,
 }: StatCardProps) {
   return (
     <GlowCard className={`hover:shadow-xl hover:shadow-brand-purple/20 ${className || ''}`}>
       <CardHeader className="relative z-10 flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-rajdhani font-semibold text-brand-gray-400 group-hover:text-brand-gray-300 transition-colors duration-200">
+        <CardTitle className="text-sm font-rajdhani font-semibold text-muted-foreground group-hover:text-foreground transition-colors duration-200">
           {title}
         </CardTitle>
         <div className="p-2 rounded-lg bg-brand-purple/10 group-hover:bg-brand-purple/20 transition-colors duration-200">
@@ -37,7 +37,7 @@ export function StatCard({
           {value}
         </div>
         {description && (
-          <p className="text-xs text-brand-gray-400 font-rajdhani mt-1 group-hover:text-brand-gray-300 transition-colors duration-200">
+          <p className="text-xs text-muted-foreground font-rajdhani mt-1 group-hover:text-foreground transition-colors duration-200">
             {description}
           </p>
         )}

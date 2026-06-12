@@ -66,7 +66,52 @@ New routes should use `withApiHandler` (centralizes error handling/logging). It 
 
 ## Frontend (`src/app/**`, `src/components/**`)
 
-### 6. Auth/post-action redirects: `router.replace()`, not `push()`
+### 6. Never call `fetch` directly — use the `api` client (`@/lib/api-client`)
+
+All client-side requests to our own `/api/**` routes go through the **`api`** object from
+`@/lib/api-client`: **`api.get` / `api.post` / `api.put` / `api.patch` / `api.delete`**. It
+centralizes the `Authorization` header, JSON `Content-Type` (auto-skipped for `FormData`
+uploads), automatic 401 handling (token clear + redirect), and it **parses the JSON and throws
+`ApiError`** on a non-2xx response — so call sites just `try/await/catch`. Raw `fetch('/api/...')`
+in `src/app/**`, `src/components/**`, `src/hooks/**`, or `src/contexts/**` is **forbidden**.
+
+```ts
+import { api, ApiError } from '@/lib/api-client'
+
+// GET — returns the parsed body, throws on error
+const data = await api.get<{ orders: Order[] }>('/api/orders')
+
+// Mutations — pass the body object (no JSON.stringify, no headers)
+try {
+  await api.put(`/api/admin/users/${id}`, { active: true })
+  showSuccess('Usuário ativado!')
+} catch (e) {
+  showError('Erro', e instanceof ApiError ? e.message : 'Tente novamente.')
+}
+
+// FormData upload — pass the FormData; the client keeps the multipart boundary
+const { url } = await api.post<{ url: string }>('/api/upload/completion-proof', formData)
+
+// Public / auth-flow calls where a 401 is expected → skip the auth redirect
+await api.post('/api/auth/login', { email, password }, { requireAuth: false })
+```
+
+```ts
+// ❌ never
+const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+if (res.ok) { const data = await res.json() }
+```
+
+> Signatures: `api.get(url, options?)`, `api.delete(url, options?)`,
+> `api.post|put|patch(url, body?, options?)`. `options` extends `RequestInit` plus
+> `requireAuth?: boolean` (so `cache`, `signal`, etc. work too). The generic types the parsed
+> response (`api.get<T>`).
+
+**Exceptions** (not our JSON `/api` request/response cycle): `EventSource`/SSE streams
+(`/api/realtime`), and server-side code (route handlers, `src/services/**`, `src/lib/*` server
+utils) calling **external** providers (AbacatePay, Asaas, Resend, Leetify) — those keep `fetch`.
+
+### 7. Auth/post-action redirects: `router.replace()`, not `push()`
 
 Redirecting away from a protected page, or after login/verify/reset/payment success, must use `replace()` so the user can't navigate **back** into a stale/protected state.
 
@@ -75,7 +120,7 @@ router.replace('/login')      // ✅
 router.push('/login')         // ❌ for redirects
 ```
 
-### 7. Page-level loading: `useLoading`, not manual `useState`
+### 8. Page-level loading: `useLoading`, not manual `useState`
 
 ```ts
 import { useLoading } from '@/hooks/use-loading'
@@ -86,11 +131,11 @@ const fetchData = () => withLoading(async () => { /* ... */ })
 
 Don't manage page loading with `const [loading, setLoading] = useState(true)`.
 
-### 8. Read `data.message` from API responses, never `data.error`
+### 9. Read `data.message` from API responses, never `data.error`
 
 Mirrors rule 1. For codes, read `data.code` (or `ApiError.code`).
 
-### 9. No sub-components defined inside a component body
+### 10. No sub-components defined inside a component body
 
 Defining `const Foo = () => <.../>` inside another component remounts it every render. Hoist it to module scope, or use a JSX variable (`const foo = <.../>`).
 
@@ -98,7 +143,7 @@ Defining `const Foo = () => <.../>` inside another component remounts it every r
 
 ## Imports
 
-### 10. Prisma
+### 11. Prisma
 
 - **Runtime client** (the `PrismaClient` instance / queries): always `import { db } from '@/lib/db'` — never instantiate or import the client from `@/generated/prisma`.
 - **Type-only imports** of enums and `Prisma` namespace types (`OrderStatus`, `Role`, `PaymentStatus`, `Prisma.XxxWhereInput`) **from `@/generated/prisma/client` are acceptable** — they're erased at build time and don't pull the runtime client into the route. This is intentional and widespread; do **not** mass-refactor these.

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { Order } from '@/types'
-import { apiGet } from '@/lib/api-client'
+import { api } from '@/lib/api-client'
 import { useLoading } from '@/hooks/use-loading'
 import { CardContent } from '@/components/ui/card'
 import { GlowCard } from '@/components/common/glow-card'
@@ -26,7 +26,7 @@ import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
 import { OrderChat } from '@/components/order/order-chat'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
-import { showSuccess, showError, handleApiError } from '@/lib/toast'
+import { showSuccess, handleApiError } from '@/lib/toast'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
 import { OrderInfoItem } from '@/components/common/order-info-item'
@@ -42,37 +42,37 @@ const STATUS_FILTERS: { value: string; label: string; active: string; inactive: 
     value: '',
     label: 'Todos',
     active: 'bg-gradient-to-r from-brand-purple/20 to-brand-purple-dark/20 border-brand-purple-light text-brand-purple-light shadow-lg shadow-brand-purple/20',
-    inactive: 'bg-brand-black/50 border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10',
+    inactive: 'bg-background/50 border-brand-purple/30 text-muted-foreground hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10',
   },
   {
     value: 'PENDING',
     label: 'Pendentes',
-    active: 'bg-yellow-500/20 border-yellow-400 text-yellow-300',
-    inactive: 'bg-brand-black/50 border-yellow-500/30 text-brand-gray-500 hover:border-yellow-500/50 hover:text-yellow-300',
+    active: 'bg-yellow-500/20 border-yellow-400 text-foreground dark:text-yellow-300',
+    inactive: 'bg-background/50 border-yellow-500/30 text-muted-foreground hover:border-yellow-500/50 hover:text-yellow-300',
   },
   {
     value: 'PAID',
     label: 'Pagos',
     active: 'bg-cyan-500/20 border-cyan-400 text-cyan-300',
-    inactive: 'bg-brand-black/50 border-cyan-500/30 text-brand-gray-500 hover:border-cyan-500/50 hover:text-cyan-300',
+    inactive: 'bg-background/50 border-cyan-500/30 text-muted-foreground hover:border-cyan-500/50 hover:text-cyan-300',
   },
   {
     value: 'IN_PROGRESS',
     label: 'Em Progresso',
-    active: 'bg-blue-500/20 border-blue-400 text-blue-300',
-    inactive: 'bg-brand-black/50 border-blue-500/30 text-brand-gray-500 hover:border-blue-500/50 hover:text-blue-300',
+    active: 'bg-blue-500/20 border-blue-400 text-foreground dark:text-blue-300',
+    inactive: 'bg-background/50 border-blue-500/30 text-muted-foreground hover:border-blue-500/50 hover:text-blue-300',
   },
   {
     value: 'COMPLETED',
     label: 'Concluídos',
-    active: 'bg-green-500/20 border-green-400 text-green-300',
-    inactive: 'bg-brand-black/50 border-green-500/30 text-brand-gray-500 hover:border-green-500/50 hover:text-green-300',
+    active: 'bg-green-500/20 border-green-400 text-foreground dark:text-green-300',
+    inactive: 'bg-background/50 border-green-500/30 text-muted-foreground hover:border-green-500/50 hover:text-green-300',
   },
   {
     value: 'CANCELLED',
     label: 'Cancelados',
-    active: 'bg-red-500/20 border-red-400 text-red-300',
-    inactive: 'bg-brand-black/50 border-red-500/30 text-brand-gray-500 hover:border-red-500/50 hover:text-red-300',
+    active: 'bg-red-500/20 border-red-400 text-foreground dark:text-red-300',
+    inactive: 'bg-background/50 border-red-500/30 text-muted-foreground hover:border-red-500/50 hover:text-red-300',
   },
 ]
 
@@ -105,7 +105,7 @@ export default function DashboardPage() {
 
   const fetchOrders = useCallback(async (isRefresh = false) => {
     await withLoading(async () => {
-      const data = await apiGet<{ orders: Order[] }>('/api/orders')
+      const data = await api.get<{ orders: Order[] }>('/api/orders')
       setOrders(data.orders || [])
     }, isRefresh)
   }, [withLoading])
@@ -113,7 +113,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user && user.role === 'CLIENT') {
       fetchOrders()
-      apiGet<{ user: { currentDiscountPct?: number | null } }>('/api/auth/me')
+      api.get<{ user: { currentDiscountPct?: number | null } }>('/api/auth/me')
         .then((data) => setCurrentDiscountPct(data.user?.currentDiscountPct ?? 0))
         .catch(() => {})
     }
@@ -122,7 +122,7 @@ export default function DashboardPage() {
   // Função para atualizar apenas os dados sem mostrar banner de refreshing
   const updateOrdersSilently = async () => {
     try {
-      const data = await apiGet<{ orders: Order[] }>('/api/orders')
+      const data = await api.get<{ orders: Order[] }>('/api/orders')
       setOrders(data.orders || [])
     } catch (error) {
       console.error('Erro ao atualizar pedidos silenciosamente:', error)
@@ -193,27 +193,14 @@ export default function DashboardPage() {
 
     setIsCancelling(true)
     try {
-      const response = await fetch(`/api/orders/${orderToCancel}/cancel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reason: 'Cancelado pelo cliente via dashboard',
-        }),
+      const data = await api.post<{ message?: string }>(`/api/orders/${orderToCancel}/cancel`, {
+        reason: 'Cancelado pelo cliente via dashboard',
       })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        showSuccess(data.message || 'Pedido cancelado com sucesso!')
-        setCancelDialogOpen(false)
-        setOrderToCancel(null)
-        // Recarregar pedidos sem mostrar loading completo
-        fetchOrders(true)
-      } else {
-        showError('Erro ao cancelar pedido', data.message || 'Não foi possível cancelar o pedido')
-      }
+      showSuccess(data.message || 'Pedido cancelado com sucesso!')
+      setCancelDialogOpen(false)
+      setOrderToCancel(null)
+      // Recarregar pedidos sem mostrar loading completo
+      fetchOrders(true)
     } catch (error) {
       console.error('Erro ao cancelar pedido:', error)
       handleApiError(error, 'Erro ao cancelar pedido')
@@ -245,7 +232,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen bg-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           highlight="MEU"
@@ -281,7 +268,7 @@ export default function DashboardPage() {
                   type="button"
                   variant="outline"
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="w-32 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium bg-brand-black/50 border-brand-purple/30 text-brand-gray-500 hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10"
+                  className="w-32 h-auto min-h-0 px-3 py-1.5 font-rajdhani text-xs font-medium bg-background/50 border-brand-purple/30 text-muted-foreground hover:border-brand-purple/50 hover:text-brand-purple-light hover:bg-brand-purple/10"
                 >
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
@@ -413,7 +400,7 @@ export default function DashboardPage() {
                     </div>
 
                     {(order.status === 'PAID' && order.boosterId) && (
-                      <div className="mt-4 border-t border-white/10 pt-4">
+                      <div className="mt-4 border-t border-border pt-4">
                         <div className="mb-3 p-3 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
                           <p className="text-brand-purple-light text-sm font-rajdhani">
                             Seu booster está pronto! Envie suas credenciais Steam pelo chat para iniciar o boost.
@@ -423,7 +410,7 @@ export default function DashboardPage() {
                       </div>
                     )}
                     {order.status === 'IN_PROGRESS' && (
-                      <div className="mt-4 border-t border-white/10 pt-4">
+                      <div className="mt-4 border-t border-border pt-4">
                         <OrderChat orderId={order.id} />
                       </div>
                     )}
@@ -436,7 +423,7 @@ export default function DashboardPage() {
 
         {!loading && orders.length > 0 && (
           <div className="mt-4 text-center">
-            <p className="text-brand-gray-500 font-rajdhani">
+            <p className="text-muted-foreground font-rajdhani">
               Mostrando {filteredOrders.length} de {orders.length} pedido{orders.length !== 1 ? 's' : ''}
             </p>
           </div>

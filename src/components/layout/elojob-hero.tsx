@@ -6,7 +6,7 @@ import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-reac
 
 export function ElojobHero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-brand-black" aria-label="Hero - Seção principal">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background" aria-label="Hero - Seção principal">
       {/* Background Image */}
       <div className="absolute inset-0" aria-hidden="true">
         <div
@@ -83,14 +83,14 @@ export function ElojobHero() {
                   <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-brand-purple/0 via-brand-purple/20 to-brand-purple/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300 pointer-events-none" />
 
                   <div className="relative z-10 flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
-                    <div className="p-2.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10 group-hover:bg-brand-purple/20 group-hover:border-brand-purple/30 transition-all duration-300" aria-hidden="true">
+                    <div className="p-2.5 bg-white/10 backdrop-blur-sm rounded-lg border border-border group-hover:bg-brand-purple/20 group-hover:border-brand-purple/30 transition-all duration-300" aria-hidden="true">
                       <feature.icon className="h-5 w-5 md:h-6 md:w-6 text-brand-purple-light group-hover:text-white transition-colors duration-300" aria-hidden="true" />
                     </div>
                     <div className="text-center md:text-left">
                       <h3 className="text-sm md:text-base font-bold text-white/90 group-hover:text-white transition-colors duration-300 font-rajdhani">
                         {feature.title}
                       </h3>
-                      <p className="text-xs md:text-sm text-white/50 group-hover:text-white/70 transition-colors duration-300">
+                      <p className="text-xs md:text-sm text-white/60 group-hover:text-white/80 transition-colors duration-300">
                         {feature.desc}
                       </p>
                     </div>

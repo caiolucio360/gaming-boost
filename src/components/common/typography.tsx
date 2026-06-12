@@ -31,7 +31,7 @@ export function Heading({ level = 1, as, className, ...props }: HeadingProps) {
   const Tag = (as ?? `h${level}`) as 'h1'
   return (
     <Tag
-      className={cn('font-orbitron text-white', headingSizes[level], className)}
+      className={cn('font-orbitron text-foreground', headingSizes[level], className)}
       {...props}
     />
   )
@@ -40,10 +40,10 @@ export function Heading({ level = 1, as, className, ...props }: HeadingProps) {
 type TextColor = 'default' | 'muted' | 'subtle' | 'white'
 
 const textColors: Record<TextColor, string> = {
-  white: 'text-white',
-  default: 'text-brand-gray-300',
-  muted: 'text-brand-gray-400',
-  subtle: 'text-brand-gray-500',
+  white: 'text-foreground',
+  default: 'text-muted-foreground',
+  muted: 'text-muted-foreground',
+  subtle: 'text-muted-foreground',
 }
 
 interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {

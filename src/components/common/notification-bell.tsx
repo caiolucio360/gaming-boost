@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { NotificationItem, Notification } from './notification-item'
+import { api } from '@/lib/api-client'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -24,12 +25,9 @@ export function NotificationBell() {
   const fetchNotifications = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/notifications?limit=5')
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data.notifications)
-        setUnreadCount(data.unreadCount)
-      }
+      const data = await api.get<{ notifications: Notification[]; unreadCount: number }>('/api/notifications?limit=5')
+      setNotifications(data.notifications)
+      setUnreadCount(data.unreadCount)
     } catch (error) {
       console.error('Failed to fetch notifications', error)
     } finally {
@@ -73,11 +71,7 @@ export function NotificationBell() {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
       setUnreadCount(prev => Math.max(0, prev - 1))
 
-      await fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationIds: [id] })
-      })
+      await api.patch('/api/notifications', { notificationIds: [id] })
     } catch (error) {
       console.error('Failed to mark as read', error)
     }
@@ -89,11 +83,7 @@ export function NotificationBell() {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       setUnreadCount(0)
 
-      await fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markAllRead: true })
-      })
+      await api.patch('/api/notifications', { markAllRead: true })
     } catch (error) {
       console.error('Failed to mark all as read', error)
     }
@@ -105,7 +95,7 @@ export function NotificationBell() {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative text-white hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300">
+              <Button variant="ghost" size="icon" className="relative text-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300">
                 <div className={`relative ${unreadCount > 0 ? 'animate-bellPulse' : ''}`}>
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
@@ -123,12 +113,12 @@ export function NotificationBell() {
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent className="bg-black/90 border-brand-purple/50 text-white">
+          <TooltipContent className="bg-popover border-border text-popover-foreground">
             <p>{unreadCount > 0 ? `${unreadCount} notificação${unreadCount > 1 ? 'ões' : ''} não lida${unreadCount > 1 ? 's' : ''}` : 'Notificações'}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent className="w-80 p-0 bg-black/90 backdrop-blur-md border-brand-purple/50 shadow-lg" align="end">
+      <PopoverContent className="w-80 p-0 bg-popover border-border shadow-lg" align="end">
         <div className="flex items-center justify-between p-4 border-b border-brand-purple/20">
           <h4 className="font-semibold font-orbitron text-brand-purple-light">Notificações</h4>
           {unreadCount > 0 && (
