@@ -6,6 +6,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api-client'
 
 // Types
 interface Order {
@@ -49,35 +50,14 @@ export const orderKeys = {
  * Fetch orders for current user
  */
 async function fetchOrders(): Promise<OrdersResponse> {
-    const response = await fetch('/api/orders', {
-        credentials: 'include',
-    })
-
-    if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao buscar pedidos')
-    }
-
-    return response.json()
+    return api.get<OrdersResponse>('/api/orders')
 }
 
 /**
  * Create a new order
  */
 async function createOrder(input: CreateOrderInput): Promise<CreateOrderResponse> {
-    const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(input),
-    })
-
-    if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao criar pedido')
-    }
-
-    return response.json()
+    return api.post<CreateOrderResponse>('/api/orders', input)
 }
 
 /**

@@ -25,6 +25,7 @@ import { getEnabledGames } from '@/lib/games-config'
 import { getAuthToken } from '@/lib/api-client'
 
 import { NotificationBell } from '@/components/common/notification-bell'
+import { ThemeToggle } from '@/components/common/theme-toggle'
 
 export function ElojobHeader() {
   const { user, logout, loading: authLoading } = useAuth()
@@ -62,14 +63,15 @@ export function ElojobHeader() {
   }))
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-brand-black/80 backdrop-blur-md border-b border-brand-purple/20" role="banner">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border" role="banner">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-2 md:py-3 flex items-center justify-between">
         
         {/* Logo - Centered on mobile, left on desktop */}
         <Link href="/" className="flex items-center flex-shrink-0 mx-auto lg:mx-0">
           <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
             <span className="text-brand-purple-light">FLAUTAS</span>
-            <span className="text-white">BOOST</span>
+            <span className="text-foreground">BOOST</span>
+            {/* logo keeps the brand-purple accent; BOOST adapts to the theme */}
           </span>
         </Link>
 
@@ -77,7 +79,7 @@ export function ElojobHeader() {
         <nav className="hidden lg:flex items-center space-x-6">
           <Link
             href="/"
-            className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
+            className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
           >
             Início
           </Link>
@@ -86,7 +88,7 @@ export function ElojobHeader() {
           {gamesItems.length > 0 && gamesItems.length === 1 ? (
             <Link
               href={gamesItems[0].href}
-              className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
+              className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
             >
               {gamesItems[0].name}
             </Link>
@@ -95,18 +97,18 @@ export function ElojobHeader() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10 flex items-center data-[state=open]:bg-brand-purple/10"
+                  className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10 flex items-center data-[state=open]:bg-brand-purple/10"
                 >
                   Jogos
                   <ChevronDownIcon className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-brand-black-light backdrop-blur-md border-brand-purple/50 rounded-lg shadow-lg min-w-[12rem]">
+              <DropdownMenuContent className="bg-popover backdrop-blur-md border-border rounded-lg shadow-lg min-w-[12rem]">
                 {gamesItems.map((game) => (
                   <DropdownMenuItem key={game.href} asChild>
                     <Link
                       href={game.href}
-                      className="block text-white font-medium hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10 transition-colors duration-300 text-base tracking-wide py-3 px-4 rounded-lg cursor-pointer"
+                      className="block text-foreground font-medium hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10 transition-colors duration-300 text-base tracking-wide py-3 px-4 rounded-lg cursor-pointer"
                     >
                       {game.name}
                     </Link>
@@ -118,7 +120,7 @@ export function ElojobHeader() {
           
           <Link
             href="/how-it-works"
-            className="text-white font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
+            className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
           >
             Como Funciona
           </Link>
@@ -127,6 +129,7 @@ export function ElojobHeader() {
 
         {/* Auth Section - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-4">
+          <ThemeToggle />
           {(authLoading && hasToken) || (!authLoading && user) ? (
             <div className="flex items-center space-x-3">
               {/* Notification Bell */}
@@ -136,7 +139,7 @@ export function ElojobHeader() {
               {authLoading && hasToken && !user ? (
                 <Button
                   variant="ghost"
-                  className="text-white font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
+                  className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
                   disabled
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
@@ -152,20 +155,20 @@ export function ElojobHeader() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="relative text-white hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300 mr-2"
+                            className="relative text-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300 mr-2"
                             asChild
                           >
                             <Link href="/cart">
                               <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
                               {cartItemsCount > 0 && (
-                                <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-brand-black rounded-full">
+                                <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-background rounded-full">
                                   {cartItemsCount > 9 ? '9+' : cartItemsCount}
                                 </Badge>
                               )}
                             </Link>
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent className="bg-brand-black-light border-brand-purple/50 text-white">
+                        <TooltipContent className="bg-popover border-border text-popover-foreground">
                           <p>{cartItemsCount > 0 ? `Carrinho (${cartItemsCount} item${cartItemsCount > 1 ? 's' : ''})` : 'Carrinho'}</p>
                         </TooltipContent>
                       </Tooltip>
@@ -177,26 +180,26 @@ export function ElojobHeader() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="text-white font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base flex items-center data-[state=open]:bg-brand-purple/10"
+                        className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base flex items-center data-[state=open]:bg-brand-purple/10"
                       >
                         <UserIcon className="mr-2 h-4 w-4" />
                         Minha Conta
                         <ChevronDownIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-brand-black-light backdrop-blur-md border-brand-purple/50 rounded-lg shadow-lg min-w-[12rem]">
+                    <DropdownMenuContent align="end" className="bg-popover backdrop-blur-md border-border rounded-lg shadow-lg min-w-[12rem]">
                       
                       {/* ADMIN Options */}
                       {user && user.role === 'ADMIN' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href="/admin" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/admin" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <ShieldIcon className="mr-2 h-4 w-4" />
                               Admin
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/profile" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/profile" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <UserIcon className="mr-2 h-4 w-4" />
                               Perfil
                             </Link>
@@ -208,13 +211,13 @@ export function ElojobHeader() {
                       {user && user.role === 'CLIENT' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href="/dashboard" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/dashboard" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <PackageIcon className="mr-2 h-4 w-4" />
                               Meus Pedidos
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/profile" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/profile" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <UserIcon className="mr-2 h-4 w-4" />
                               Perfil
                             </Link>
@@ -226,13 +229,13 @@ export function ElojobHeader() {
                       {user && user.role === 'BOOSTER' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href="/booster" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/booster" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <PackageIcon className="mr-2 h-4 w-4" />
                               Meus Trabalhos
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/profile" className="w-full cursor-pointer text-white hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
+                            <Link href="/profile" className="w-full cursor-pointer text-foreground hover:text-brand-purple-light focus:text-brand-purple-light focus:bg-brand-purple/10">
                               <UserIcon className="mr-2 h-4 w-4" />
                               Perfil
                             </Link>
@@ -261,12 +264,12 @@ export function ElojobHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative text-white hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300"
+                  className="relative text-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300"
                   asChild
                 >
                   <Link href="/cart">
                     <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-brand-black rounded-full">
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-background rounded-full">
                       {cartItemsCount > 9 ? '9+' : cartItemsCount}
                     </Badge>
                   </Link>
@@ -275,15 +278,12 @@ export function ElojobHeader() {
 
               <Button
                 variant="ghost"
-                className="text-white font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
+                className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
                 asChild
               >
                 <Link href="/login">Entrar</Link>
               </Button>
-              <Button
-                className="bg-brand-purple hover:bg-brand-purple-light text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-glow hover:shadow-glow-hover text-base"
-                asChild
-              >
+              <Button className="px-6 text-base" asChild>
                 <Link href="/register">Cadastrar</Link>
               </Button>
             </div>

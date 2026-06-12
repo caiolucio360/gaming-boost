@@ -33,7 +33,7 @@ export function OrderCardShell({
               {title}
             </CardTitle>
             {description && (
-              <CardDescription className="group-hover:text-brand-gray-300 transition-colors duration-200">
+              <CardDescription className="group-hover:text-muted-foreground transition-colors duration-200">
                 {description}
               </CardDescription>
             )}

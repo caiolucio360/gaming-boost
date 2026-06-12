@@ -16,7 +16,7 @@ export function GlowCard({
   return (
     <Card
       className={cn(
-        'group relative overflow-hidden bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md',
+        'group relative overflow-hidden',
         'border-brand-purple/50 hover:border-brand-purple-light/80 transition-colors duration-200',
         className
       )}

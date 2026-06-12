@@ -7,14 +7,18 @@ import {
   OctagonX,
   TriangleAlert,
 } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const { resolvedTheme } = useTheme()
+  const theme: ToasterProps["theme"] = resolvedTheme === "light" ? "light" : "dark"
+
   return (
     <Sonner
-      theme="dark"
+      theme={theme}
       className="toaster group"
       icons={{
         success: <CircleCheck className="size-5 text-green-400" />,
@@ -26,21 +30,24 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         unstyled: true,
         classNames: {
+          // Base: layout + border width only. Each type sets its own background and
+          // border color below so the surface follows the active light/dark theme.
           toast:
             "w-full flex items-start gap-3 p-4 rounded-xl border shadow-2xl backdrop-blur-xl font-rajdhani",
-          title: "font-semibold text-[15px] text-white",
-          description: "text-sm text-brand-gray-400 mt-0.5",
+          title: "font-semibold text-[15px] text-foreground",
+          description: "text-sm text-muted-foreground mt-0.5",
           actionButton:
             "bg-brand-purple hover:bg-brand-purple-light text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors",
           cancelButton:
-            "bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors",
+            "bg-muted hover:bg-muted/80 text-foreground text-sm font-medium px-3 py-1.5 rounded-lg transition-colors",
           closeButton:
-            "absolute top-2 right-2 p-1 rounded-md text-brand-gray-500 hover:text-white hover:bg-white/10 transition-colors",
-          success: "bg-green-950/80 border-green-500/30",
-          error: "bg-red-950/80 border-red-500/30",
-          warning: "bg-yellow-950/80 border-yellow-500/30",
-          info: "bg-blue-950/80 border-blue-500/30",
-          loading: "bg-brand-black-light/90 border-brand-purple/30",
+            "absolute top-2 right-2 p-1 rounded-md bg-popover text-muted-foreground hover:text-foreground hover:bg-muted border-border transition-colors",
+          default: "bg-popover border-border",
+          success: "bg-green-500/15 border-green-500/40",
+          error: "bg-red-500/15 border-red-500/40",
+          warning: "bg-yellow-500/15 border-yellow-500/40",
+          info: "bg-blue-500/15 border-blue-500/40",
+          loading: "bg-popover border-brand-purple/40",
         },
       }}
       {...props}

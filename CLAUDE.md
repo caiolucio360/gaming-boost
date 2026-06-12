@@ -77,6 +77,12 @@ if (!validation.success) return createValidationErrorResponse(validation.error)
 ### Frontend
 
 ```typescript
+// API calls: NEVER raw fetch() to /api — use the `api` client (@/lib/api-client). It adds auth,
+// parses JSON, throws ApiError on non-2xx, and handles FormData. (Exceptions: SSE/EventSource, external APIs.)
+import { api, ApiError } from '@/lib/api-client'
+const data = await api.get<{ orders: Order[] }>('/api/orders')   // api.get/post/put/patch/delete
+try { await api.put(`/api/admin/users/${id}`, { active: true }) } catch (e) { /* e instanceof ApiError */ }
+
 // Auth redirects: always replace(), never push() — prevents back-navigation to protected pages
 router.replace('/login')
 
@@ -109,6 +115,8 @@ const { loading, withLoading } = useLoading({ initialLoading: true })
 - **`JSON.parse(*.metadata)`:** always wrap in try-catch returning `{}` — the field is free JSON and may be corrupted
 - **Stats queries:** dashboard routes (booster/payments, admin/payments, booster/orders) use `Promise.all` for 5 aggregate/count queries
 - **`UpdateOrderSchema`:** admin `PUT /api/admin/orders/[id]` validates body with this schema; booster re-approval rejected with 409 if `verificationStatus === 'VERIFIED'`
+- **System version:** single source = `package.json` `"version"` (injected via `next.config.js` → `NEXT_PUBLIC_APP_VERSION`, read by `src/lib/version.ts`; don't edit version.ts). **Bump it on every committed change** with `npm version <patch|minor|major> --no-git-tag-version` (semver per Conventional Commit type) — see `.claude/rules/git-flow.md`. Shown in the panel sidebar footer.
+- **No raw `fetch` on the client:** use `@/lib/api-client` → `api.get/post/put/patch/delete` — see `.claude/rules/code_patterns.md` rule 6.
 
 ## Removed Features (MVP scope — do not re-add)
 
@@ -118,7 +126,7 @@ Dispute system, review system, booster public profiles (`/booster/[id]`), commis
 
 **Tailwind v4** — `@config "../../tailwind.config.js"` directive in `globals.css` is mandatory.
 
-Styling is governed by `.claude/rules/design_system.md` (loaded every session): use brand palette classes only — never hex values, CSS token classes, or arbitrary Tailwind values. Titles use `font-orbitron`, body/UI uses `font-rajdhani` (both with the inline `style` fallback). Components: prefer shadcn/ui (`.claude/rules/components.md`).
+Styling is governed by `.claude/rules/design_system.md` (loaded every session). The app supports **light/dark mode** (`next-themes`, `.dark` class on `<html>`, shadcn CSS-variable tokens in `globals.css`): use **theme tokens** for neutral surfaces/text/borders (`bg-background`, `bg-card`, `bg-popover`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `border-input`) so both themes work; use the **brand-purple** palette for accents. Never hex values, arbitrary Tailwind values, raw `gray-*`, or fixed neutral classes (`bg-brand-black`, `bg-brand-black-light`, `border-white/10`, `text-brand-gray-300/400/500`) — the design-system guard fails the build on these. `text-white` is allowed only for text on a solid colored background. Titles use `font-orbitron`, body/UI uses `font-rajdhani` (no inline `style` fallback). Components: prefer shadcn/ui (`.claude/rules/components.md`).
 
 ## Environment Variables
 

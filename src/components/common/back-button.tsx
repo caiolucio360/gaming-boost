@@ -13,7 +13,7 @@ interface BackButtonProps {
 export function BackButton({ href, children = 'Voltar', className }: BackButtonProps) {
   return (
     <div className={cn('mb-6', className)}>
-      <Button variant="outline" asChild className="border-white/10 hover:border-brand-purple/50">
+      <Button variant="outline" asChild className="border-border hover:border-brand-purple/50">
         <Link href={href}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           {children}

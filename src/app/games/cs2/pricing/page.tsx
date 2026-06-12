@@ -29,14 +29,14 @@ export default async function CS2PricingPage({ searchParams }: Props) {
     : 'RANK_BOOST'
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontWeight: '800' }}>
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground font-orbitron mb-4" style={{ fontWeight: '800' }}>
             <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">PREÇOS</span>
-            <span className="text-white"> CS2</span>
+            <span className="text-foreground"> CS2</span>
           </h1>
-          <p className="text-xl text-brand-gray-300 font-rajdhani group-hover:text-brand-gray-200 transition-colors duration-300" style={{ fontWeight: '500' }}>
+          <p className="text-xl text-muted-foreground font-rajdhani" style={{ fontWeight: '500' }}>
             Calcule o preço do seu boost no Counter-Strike 2
           </p>
         </div>

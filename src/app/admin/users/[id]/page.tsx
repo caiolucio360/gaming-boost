@@ -17,9 +17,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Save, User, Crown, Shield, Loader2 } from 'lucide-react'
+import { Save, User, Crown, Shield, Loader2, UserCheck, CircleSlash } from 'lucide-react'
 import { BackButton } from '@/components/common/back-button'
+import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { api, ApiError } from '@/lib/api-client'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { UserDetailSkeleton } from '@/app/admin/users/[id]/_components/user-detail-skeleton'
 import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +31,7 @@ interface UserDetail {
   email: string
   name?: string | null
   role: 'CLIENT' | 'BOOSTER' | 'ADMIN'
+  active: boolean
   boosterCommissionPercentage?: number | null
   adminProfitShare?: number | null
   createdAt: string
@@ -36,9 +40,9 @@ interface UserDetail {
 }
 
 const ROLE_CONFIG = {
-  ADMIN:   { label: 'Admin',   color: 'bg-red-500/20 text-red-300 border-red-500/50',     icon: Crown  },
-  BOOSTER: { label: 'Booster', color: 'bg-blue-500/20 text-blue-300 border-blue-500/50',  icon: Shield },
-  CLIENT:  { label: 'Cliente', color: 'bg-green-500/20 text-green-300 border-green-500/50', icon: User  },
+  ADMIN:   { label: 'Admin',   color: 'bg-red-500/20 text-foreground dark:text-red-300 border-red-500/50',     icon: Crown  },
+  BOOSTER: { label: 'Booster', color: 'bg-blue-500/20 text-foreground dark:text-blue-300 border-blue-500/50',  icon: Shield },
+  CLIENT:  { label: 'Cliente', color: 'bg-green-500/20 text-foreground dark:text-green-300 border-green-500/50', icon: User  },
 }
 
 export default function AdminUserDetailPage() {
@@ -50,6 +54,7 @@ export default function AdminUserDetailPage() {
   const [userData, setUserData] = useState<UserDetail | null>(null)
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [saving, setSaving] = useState(false)
+  const [activateOpen, setActivateOpen] = useState(false)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
   // Form fields
@@ -71,9 +76,8 @@ export default function AdminUserDetailPage() {
 
   const fetchUser = async () => {
     await withLoading(async () => {
-      const res = await fetch(`/api/admin/users/${userId}`)
-      if (res.ok) {
-        const data = await res.json()
+      try {
+        const data = await api.get<{ user: UserDetail }>(`/api/admin/users/${userId}`)
         const u: UserDetail = data.user
         setUserData(u)
         setName(u.name || '')
@@ -85,7 +89,7 @@ export default function AdminUserDetailPage() {
             : '70'
         )
         setProfitShare(u.adminProfitShare != null ? u.adminProfitShare.toString() : '0')
-      } else {
+      } catch {
         showAlert('Erro', 'Usuário não encontrado', 'destructive')
         router.replace('/admin/users')
       }
@@ -123,32 +127,34 @@ export default function AdminUserDetailPage() {
         body.adminProfitShare = share
       }
 
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      if (res.ok) {
-        showAlert('Sucesso', 'Usuário atualizado com sucesso!')
-        fetchUser()
-        setPassword('')
-      } else {
-        const data = await res.json()
-        showAlert('Erro', data.message || 'Erro ao atualizar usuário', 'destructive')
-      }
-    } catch {
-      showAlert('Erro', 'Erro ao atualizar usuário', 'destructive')
+      await api.put(`/api/admin/users/${userId}`, body)
+      showAlert('Sucesso', 'Usuário atualizado com sucesso!')
+      fetchUser()
+      setPassword('')
+    } catch (e) {
+      showAlert('Erro', e instanceof ApiError ? e.message : 'Erro ao atualizar usuário', 'destructive')
     } finally {
       setSaving(false)
     }
   }
 
-  if (authLoading || loading) return <LoadingSpinner />
+  const handleActivate = async () => {
+    try {
+      await api.put(`/api/admin/users/${userId}`, { active: true })
+      setActivateOpen(false)
+      showAlert('Sucesso', 'Usuário ativado! Edição liberada.')
+      fetchUser()
+    } catch (e) {
+      showAlert('Erro', e instanceof ApiError ? e.message : 'Erro ao ativar usuário', 'destructive')
+    }
+  }
+
+  if (authLoading) return <LoadingSpinner />
   if (!authUser || authUser.role !== 'ADMIN') return null
 
   const roleInfo = userData ? ROLE_CONFIG[userData.role] : null
   const RoleIcon = roleInfo?.icon || User
+  const isInactive = !!userData && !userData.active
 
   return (
     <div className="max-w-2xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
@@ -161,7 +167,9 @@ export default function AdminUserDetailPage() {
         </Alert>
       )}
 
-      {userData && (
+      {loading ? (
+        <UserDetailSkeleton />
+      ) : userData && (
         <>
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
@@ -172,7 +180,7 @@ export default function AdminUserDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white font-orbitron">
+                <h1 className="text-xl font-bold text-foreground font-orbitron">
                   {userData.name || userData.email}
                 </h1>
                 {roleInfo && (
@@ -181,37 +189,69 @@ export default function AdminUserDetailPage() {
                     {roleInfo.label}
                   </Badge>
                 )}
+                {isInactive && (
+                  <Badge className="bg-amber-500/20 text-foreground dark:text-amber-300 border-amber-500/50 border font-rajdhani flex items-center gap-1">
+                    <CircleSlash className="h-3 w-3" />
+                    Inativo
+                  </Badge>
+                )}
               </div>
-              <p className="text-sm text-brand-gray-500 font-rajdhani">
+              <p className="text-sm text-muted-foreground font-rajdhani">
                 ID #{userData.id} · {userData._count.orders} pedidos · Desde {formatDate(userData.createdAt)}
               </p>
             </div>
           </div>
 
+          {/* Inactive notice — management is locked until the admin activates the account */}
+          {isInactive && (
+            <Alert className="mb-6 bg-amber-500/10 border-amber-500/50">
+              <AlertTitle className="text-amber-500 font-orbitron text-sm flex items-center gap-2">
+                <CircleSlash className="h-4 w-4" />
+                Conta não ativada
+              </AlertTitle>
+              <AlertDescription className="text-muted-foreground font-rajdhani text-sm">
+                Este usuário ainda não confirmou o e-mail, então a edição está bloqueada.
+                Ative manualmente para liberar o gerenciamento.
+                <div className="mt-3">
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-600/90 text-white font-rajdhani"
+                    onClick={() => setActivateOpen(true)}
+                  >
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    Ativar usuário
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Form */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-white font-orbitron text-lg">
+              <CardTitle className="text-foreground font-orbitron text-lg">
                 Editar Usuário
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Nome</Label>
+                  <Label className="text-muted-foreground font-rajdhani">Nome</Label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
+                    disabled={isInactive}
+                    className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="Nome completo"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Email</Label>
+                  <Label className="text-muted-foreground font-rajdhani">Email</Label>
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
+                    disabled={isInactive}
+                    className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="email@exemplo.com"
                   />
                 </div>
@@ -219,12 +259,12 @@ export default function AdminUserDetailPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Role</Label>
-                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
-                    <SelectTrigger className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani">
+                  <Label className="text-muted-foreground font-rajdhani">Role</Label>
+                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)} disabled={isInactive}>
+                    <SelectTrigger className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-brand-black border-brand-purple/50">
+                    <SelectContent className="bg-background border-brand-purple/50">
                       <SelectItem value="CLIENT">Cliente</SelectItem>
                       <SelectItem value="BOOSTER">Booster</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
@@ -232,12 +272,13 @@ export default function AdminUserDetailPage() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Nova Senha <span className="text-brand-gray-500">(opcional)</span></Label>
+                  <Label className="text-muted-foreground font-rajdhani">Nova Senha <span className="text-muted-foreground">(opcional)</span></Label>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
+                    disabled={isInactive}
+                    className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="Mínimo 6 caracteres"
                   />
                 </div>
@@ -245,7 +286,7 @@ export default function AdminUserDetailPage() {
 
               {role === 'BOOSTER' && (
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Comissão (%)</Label>
+                  <Label className="text-muted-foreground font-rajdhani">Comissão (%)</Label>
                   <Input
                     type="number"
                     min="0"
@@ -253,35 +294,35 @@ export default function AdminUserDetailPage() {
                     step="0.1"
                     value={commissionPct}
                     onChange={(e) => setCommissionPct(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
+                    disabled={isInactive}
+                    className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="70"
                   />
-                  <p className="text-xs text-brand-gray-500 font-rajdhani">Padrão global: 70%</p>
+                  <p className="text-xs text-muted-foreground font-rajdhani">Padrão global: 70%</p>
                 </div>
               )}
 
               {role === 'ADMIN' && (
                 <div className="space-y-1.5">
-                  <Label className="text-brand-gray-300 font-rajdhani">Profit Share</Label>
+                  <Label className="text-muted-foreground font-rajdhani">Profit Share</Label>
                   <Input
                     type="number"
                     min="0"
                     step="0.1"
                     value={profitShare}
                     onChange={(e) => setProfitShare(e.target.value)}
-                    className="bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani"
+                    disabled={isInactive}
+                    className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="1.0"
                   />
-                  <p className="text-xs text-brand-gray-500 font-rajdhani">Peso relativo na divisão de lucro. 1.0 = divisão igualitária.</p>
+                  <p className="text-xs text-muted-foreground font-rajdhani">Peso relativo na divisão de lucro. 1.0 = divisão igualitária.</p>
                 </div>
               )}
 
               <div className="pt-2 flex justify-end">
                 <Button
                   onClick={handleSave}
-                  disabled={saving}
-                  className="bg-brand-purple hover:bg-brand-purple-light text-white font-rajdhani border border-transparent hover:border-white/20"
-                  style={{ fontWeight: '600' }}
+                  disabled={saving || isInactive}
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -293,6 +334,17 @@ export default function AdminUserDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          <ConfirmDialog
+            open={activateOpen}
+            onOpenChange={setActivateOpen}
+            title="Ativar usuário"
+            description={`Ativar manualmente ${userData.email}? A conta ainda não confirmou o e-mail. Ao ativar, você libera a edição e o gerenciamento.`}
+            confirmLabel="Ativar"
+            cancelLabel="Cancelar"
+            variant="success"
+            onConfirm={handleActivate}
+          />
         </>
       )}
     </div>

@@ -58,7 +58,7 @@ export function LoadingSpinner({
         <div className={cn('absolute inset-0 rounded-full border-2 border-brand-purple/20 animate-pulse', sizeClasses[size])} aria-hidden="true" />
       </div>
       {text ? (
-        <span className="text-sm text-brand-gray-400 font-rajdhani animate-pulse">
+        <span className="text-sm text-muted-foreground font-rajdhani animate-pulse">
           {text}
         </span>
       ) : (
@@ -69,7 +69,7 @@ export function LoadingSpinner({
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-brand-gray-900 to-black">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="relative">
           {spinner}
           {/* Efeito de brilho pulsante */}

@@ -14,10 +14,10 @@ function Card({ className, interactive = false, ...props }: CardProps) {
       className={cn(
         // Layout
         "flex flex-col gap-6 rounded-xl py-6 shadow-sm",
-        // Surface and text using design system tokens
-        "bg-brand-black-light text-white",
+        // Surface and text using theme tokens (light/dark aware)
+        "bg-card text-card-foreground",
         // Border with hover effect
-        "border border-white/10",
+        "border border-border",
         // Micro-interactions: subtle lift and glow on hover
         interactive
           ? "card-interactive hover:border-brand-purple/50"
@@ -46,7 +46,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold font-orbitron text-white", className)}
+      className={cn("leading-none font-semibold font-orbitron text-card-foreground", className)}
       {...props}
     />
   )
@@ -56,7 +56,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-brand-gray-300 text-sm font-rajdhani", className)}
+      className={cn("text-muted-foreground text-sm font-rajdhani", className)}
       {...props}
     />
   )

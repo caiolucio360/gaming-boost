@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { api } from '@/lib/api-client'
 import Link from 'next/link'
 
 const verifySchema = z.object({
@@ -61,22 +62,7 @@ function VerifyContent() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          code: data.code,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Erro ao verificar código')
-      }
+      await api.post('/api/auth/verify', { email, code: data.code }, { requireAuth: false })
 
       setSuccessMessage('Conta verificada com sucesso! Redirecionando...')
       
@@ -111,17 +97,7 @@ function VerifyContent() {
     }
 
     try {
-      const response = await fetch('/api/auth/resend-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao reenviar código')
-      }
+      await api.post('/api/auth/resend-code', { email }, { requireAuth: false })
 
       setSuccessMessage('Novo código enviado com sucesso!')
       setLastResend(now)
@@ -134,15 +110,15 @@ function VerifyContent() {
   }
 
   return (
-    <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
+    <div className="w-full max-w-md bg-card/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-6">
       <div className="text-center mb-6">
         <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1">
-          <span className="text-white">VERIFICAR</span>
+          <span className="text-foreground">VERIFICAR</span>
           <span className="text-brand-purple-light"> CONTA</span>
         </h1>
-        <p className="text-sm text-brand-gray-300 font-rajdhani">
+        <p className="text-sm text-muted-foreground font-rajdhani">
           Digite o código de 6 dígitos enviado para <br />
-          <span className="text-white font-medium">{email}</span>
+          <span className="text-foreground font-medium">{email}</span>
         </p>
       </div>
 
@@ -169,13 +145,13 @@ function VerifyContent() {
             name="code"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-white font-rajdhani text-sm">Código de Verificação</FormLabel>
+                <FormLabel className="text-foreground font-rajdhani text-sm">Código de Verificação</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
                     maxLength={6}
                     placeholder="000000"
-                    className="h-12 text-center text-lg tracking-[0.5em] font-bold bg-brand-black-light border-white/10 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-white placeholder:text-brand-gray-500"
+                    className="h-12 text-center text-lg tracking-[0.5em] font-bold bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                     {...field}
                     onChange={(e) => {
                        // Allow only numbers
@@ -203,7 +179,7 @@ function VerifyContent() {
               variant="link"
               onClick={handleResend}
               disabled={countdown > 0}
-              className="text-sm font-rajdhani text-brand-gray-400 hover:text-white no-underline hover:no-underline"
+              className="text-sm font-rajdhani text-muted-foreground hover:text-foreground no-underline hover:no-underline"
             >
               {countdown > 0 ? `Reenviar código em ${countdown}s` : 'Não recebeu? Reenviar código'}
             </Button>
@@ -222,7 +198,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
+    <div className="min-h-screen bg-background flex items-start justify-center px-4 pt-28 pb-8">
       <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
          <VerifyContent />
       </Suspense>

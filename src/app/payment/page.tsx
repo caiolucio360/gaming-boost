@@ -6,6 +6,7 @@ import { PaymentForm } from '@/components/payment/payment-form'
 import { PixPaymentDisplay } from '@/components/payment/pix-payment-display'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { api } from '@/lib/api-client'
 import Link from 'next/link'
 import { ArrowLeft, Home } from 'lucide-react'
 
@@ -39,12 +40,9 @@ function PaymentContent() {
     let active = true
     ;(async () => {
       try {
-        const res = await fetch(`/api/payment/pix?orderId=${orderId}`)
-        if (res.ok) {
-          const data = await res.json()
-          if (active && data.payment) {
-            setPayment(data.payment)
-          }
+        const data = await api.get<{ payment?: PaymentData }>(`/api/payment/pix?orderId=${orderId}`)
+        if (active && data.payment) {
+          setPayment(data.payment)
         }
       } catch {
         // Ignore — fall back to the generation form
@@ -59,8 +57,8 @@ function PaymentContent() {
 
   if (!orderId || !total) {
     return (
-      <div className="min-h-screen bg-brand-black flex items-center justify-center p-4">
-        <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-6 py-4 rounded-lg text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="bg-red-500/20 border border-red-500/50 text-foreground dark:text-red-300 px-6 py-4 rounded-lg text-center">
           <p className="font-rajdhani mb-4">Informações de pagamento inválidas</p>
           <Link href="/dashboard" className="text-brand-purple-light hover:text-brand-purple-light transition-colors inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
@@ -95,18 +93,18 @@ function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="bg-brand-black/50 backdrop-blur-md border-b border-brand-purple/20 p-4">
+      <header className="bg-background/50 backdrop-blur-md border-b border-brand-purple/20 p-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <Link href="/dashboard" className="text-brand-gray-500 hover:text-white transition-colors flex items-center gap-2">
+          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             <span className="font-rajdhani hidden sm:inline">Voltar</span>
           </Link>
-          <h1 className="text-lg font-bold text-white font-orbitron">
+          <h1 className="text-lg font-bold text-foreground font-orbitron">
             Pedido #{orderId}
           </h1>
-          <Link href="/" className="text-brand-gray-500 hover:text-white transition-colors">
+          <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
             <Home className="w-5 h-5" />
           </Link>
         </div>
@@ -117,7 +115,7 @@ function PaymentContent() {
         <div className="w-full max-w-lg">
           {/* Checking for an existing active PIX before showing the form */}
           {initializing && (
-            <div className="flex items-center justify-center gap-3 text-white font-rajdhani py-12">
+            <div className="flex items-center justify-center gap-3 text-foreground font-rajdhani py-12">
               <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
               Verificando pagamento...
             </div>
@@ -127,12 +125,12 @@ function PaymentContent() {
             <>
           {/* Show error if any */}
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-6 font-rajdhani">
+            <div className="bg-red-500/20 border border-red-500/50 text-foreground dark:text-red-300 px-4 py-3 rounded-lg mb-6 font-rajdhani">
               {error}
               <Button
                 variant="ghost"
                 size="sm"
-                className="ml-4 text-red-300 hover:text-white"
+                className="ml-4 text-foreground dark:text-red-300 hover:text-foreground"
                 onClick={() => setError(null)}
               >
                 Tentar novamente
@@ -168,7 +166,7 @@ function PaymentContent() {
               <div className="flex gap-4 mt-6">
                 <Button
                   variant="outline"
-                  className="flex-1 border-brand-gray-500/50 text-brand-gray-500 hover:text-white hover:bg-brand-gray-500/10"
+                  className="flex-1 border-brand-gray-500/50 text-muted-foreground hover:text-foreground hover:bg-brand-gray-500/10"
                   onClick={() => router.push('/dashboard')}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />

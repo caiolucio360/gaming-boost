@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
+import { api } from '@/lib/api-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -62,10 +63,11 @@ export default function AdminOrdersPage() {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
 
-      const response = await fetch(`/api/admin/orders?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
+      try {
+        const data = await api.get<{ orders: typeof orders }>(`/api/admin/orders?${params.toString()}`)
         setOrders(data.orders || [])
+      } catch {
+        // silencioso — mantém o comportamento anterior (lista vazia em erro)
       }
     })
   }, [withLoading, filterStatus])
@@ -91,16 +93,15 @@ export default function AdminOrdersPage() {
       highlight="GERENCIAR"
       title="PEDIDOS"
       description="Visualize e gerencie todos os pedidos da plataforma"
-      backHref="/admin"
     >
         {/* Filtro */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani">
+              <SelectTrigger className="w-full md:w-52 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
-              <SelectContent className="bg-brand-black border-brand-purple/50">
+              <SelectContent className="bg-background border-brand-purple/50">
                 <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="PENDING">Pendentes</SelectItem>
                 <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
@@ -152,7 +153,7 @@ export default function AdminOrdersPage() {
                       {order.payments && order.payments.length > 0 && (
                         <div className="pt-2 border-t border-brand-purple/20">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-brand-gray-500">Status do Pagamento:</span>
+                            <span className="text-muted-foreground">Status do Pagamento:</span>
                             <PaymentStatusBadge status={order.payments.some(p => p.status === 'PAID') ? 'PAID' : 'PENDING'} />
                           </div>
                         </div>
@@ -180,7 +181,7 @@ export default function AdminOrdersPage() {
         )}
 
         <div className="mt-4 text-center">
-          <p className="text-brand-gray-500 font-rajdhani">
+          <p className="text-muted-foreground font-rajdhani">
             Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         </div>

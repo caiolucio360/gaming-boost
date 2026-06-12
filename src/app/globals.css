@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
+/* next-themes toggles a `.dark` class on <html>; make the `dark:` variant follow it
+   (Tailwind v4 defaults the variant to prefers-color-scheme without this). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     /* =============================================
@@ -17,7 +21,10 @@
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Near-black secondary text in light mode: the slate-gray default (38%) read as a washed-out
+       gray on white surfaces. Dropped to ~18% so secondary/placeholder text stays clearly legible
+       while keeping a hair of hierarchy below the ~5% foreground. Dark mode keeps its lighter value. */
+    --muted-foreground: 215 22% 18%;
     --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
@@ -34,9 +41,11 @@
        ============================================= */
     --background: 0 0% 4%;
     --foreground: 210 40% 98%;
-    --card: 0 0% 4%;
+    /* Cards/popovers sit one step above the page (≈#1A1A1A, brand-black-light) so
+       elevated surfaces keep their contrast in dark mode. */
+    --card: 0 0% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 0 0% 4%;
+    --popover: 0 0% 10%;
     --popover-foreground: 210 40% 98%;
     --primary: 262 83% 58%;
     --primary-foreground: 210 40% 98%;
@@ -150,6 +159,42 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================
+   THEME SWITCH — left-to-right "wave" reveal
+   Driven by document.startViewTransition() in ThemeToggle. The old theme stays as a
+   static snapshot underneath while the new theme is revealed by a circular front that
+   grows from the left edge, sweeping rightward like a wave.
+   ============================================= */
+@keyframes theme-wave {
+  from {
+    clip-path: circle(0% at 0% 50%);
+  }
+  to {
+    clip-path: circle(150% at 0% 50%);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-wave 0.6s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root) {
+    animation: none;
   }
 }
 

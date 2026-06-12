@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { api, ApiError } from '@/lib/api-client'
 import { Wallet, RefreshCw, Clock, CheckCircle2, XCircle, Lock } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { showSuccess, showError } from '@/lib/toast'
@@ -65,18 +67,18 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await fetch(apiBasePath)
-      const data = await res.json()
-      if (res.ok) {
-        setWithdrawals(data.withdrawals || [])
-        setAvailableBalance(data.availableBalance || 0)
-        setLockedBalance(data.lockedBalance || 0)
-        setLockedCommissions(data.lockedCommissions || [])
-      } else {
-        showError(data.message || 'Erro ao carregar saques')
-      }
-    } catch {
-      showError('Erro ao carregar saques')
+      const data = await api.get<{
+        withdrawals?: typeof withdrawals
+        availableBalance?: number
+        lockedBalance?: number
+        lockedCommissions?: typeof lockedCommissions
+      }>(apiBasePath)
+      setWithdrawals(data.withdrawals || [])
+      setAvailableBalance(data.availableBalance || 0)
+      setLockedBalance(data.lockedBalance || 0)
+      setLockedCommissions(data.lockedCommissions || [])
+    } catch (e) {
+      showError(e instanceof ApiError ? e.message : 'Erro ao carregar saques')
     } finally {
       setLoading(false)
     }
@@ -97,23 +99,14 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
 
     try {
       setIsSubmitting(true)
-      const res = await fetch(apiBasePath, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountInCents, pixKeyType, pixKey }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        showSuccess('Saque solicitado com sucesso!')
-        setAmount('')
-        setPixKey('')
-        setPixKeyType('')
-        fetchData()
-      } else {
-        showError(data.message || 'Erro ao solicitar saque')
-      }
-    } catch {
-      showError('Erro ao processar solicitação')
+      await api.post(apiBasePath, { amount: amountInCents, pixKeyType, pixKey })
+      showSuccess('Saque solicitado com sucesso!')
+      setAmount('')
+      setPixKey('')
+      setPixKeyType('')
+      fetchData()
+    } catch (e) {
+      showError(e instanceof ApiError ? e.message : 'Erro ao processar solicitação')
     } finally {
       setIsSubmitting(false)
     }
@@ -129,8 +122,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
               <div className="flex items-center gap-3">
                 <Wallet className="w-8 h-8 text-brand-purple-light" />
                 <div>
-                  <p className="text-brand-gray-400 text-sm font-rajdhani">Saldo Disponível</p>
-                  <p className="text-2xl font-bold text-white font-orbitron">
+                  <p className="text-muted-foreground text-sm font-rajdhani">Saldo Disponível</p>
+                  <p className="text-2xl font-bold text-foreground font-orbitron">
                     {loading ? '...' : formatPrice(availableBalance / 100)}
                   </p>
                 </div>
@@ -148,8 +141,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
               <div className="flex items-center gap-3">
                 <Lock className="w-8 h-8 text-yellow-400" />
                 <div>
-                  <p className="text-brand-gray-400 text-sm font-rajdhani">Saldo Bloqueado</p>
-                  <p className="text-2xl font-bold text-yellow-300 font-orbitron">
+                  <p className="text-muted-foreground text-sm font-rajdhani">Saldo Bloqueado</p>
+                  <p className="text-2xl font-bold text-foreground dark:text-yellow-300 font-orbitron">
                     {formatPrice(lockedBalance / 100)}
                   </p>
                   <p className="text-xs text-yellow-500 font-rajdhani mt-1">Aguardando período de espera</p>
@@ -164,10 +157,10 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {lockedCommissions.length > 0 && (
         <Card className="border-yellow-500/30">
           <CardHeader>
-            <CardTitle className="text-yellow-300 font-orbitron text-lg flex items-center gap-2">
+            <CardTitle className="text-foreground dark:text-yellow-300 font-orbitron text-lg flex items-center gap-2">
               <Clock className="w-5 h-5" />Comissões em Período de Espera
             </CardTitle>
-            <CardDescription className="text-brand-gray-400 font-rajdhani">
+            <CardDescription className="text-muted-foreground font-rajdhani">
               Estas comissões serão liberadas para saque nas datas abaixo
             </CardDescription>
           </CardHeader>
@@ -181,16 +174,16 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 return (
                   <div key={commission.id} className="flex items-center justify-between p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/20">
                     <div>
-                      <p className="text-white font-bold font-orbitron">{formatPrice(commission.amount)}</p>
-                      <p className="text-brand-gray-400 text-xs font-rajdhani">Pedido #{commission.orderId}</p>
+                      <p className="text-foreground font-bold font-orbitron">{formatPrice(commission.amount)}</p>
+                      <p className="text-muted-foreground text-xs font-rajdhani">Pedido #{commission.orderId}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-yellow-300 text-sm font-medium">
+                      <p className="text-foreground dark:text-yellow-300 text-sm font-medium">
                         {diffDays === 0
                           ? (diffHours <= 1 ? 'Libera em breve' : `Libera em ${diffHours}h`)
                           : diffDays === 1 ? 'Libera amanhã' : `Libera em ${diffDays} dias`}
                       </p>
-                      <p className="text-brand-gray-500 text-xs font-rajdhani">{formatDate(commission.availableForWithdrawalAt)}</p>
+                      <p className="text-muted-foreground text-xs font-rajdhani">{formatDate(commission.availableForWithdrawalAt)}</p>
                     </div>
                   </div>
                 )
@@ -203,26 +196,26 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {/* Withdrawal form */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-white font-orbitron text-lg">Novo Saque</CardTitle>
-          <CardDescription className="text-brand-gray-400 font-rajdhani">Valor mínimo: R$ 3,50</CardDescription>
+          <CardTitle className="text-foreground font-orbitron text-lg">Novo Saque</CardTitle>
+          <CardDescription className="text-muted-foreground font-rajdhani">Valor mínimo: R$ 3,50</CardDescription>
         </CardHeader>
         <CardContent>
           {hasPendingWithdrawal ? (
             <Alert className="bg-yellow-500/10 border-yellow-500/30">
-              <AlertDescription className="text-yellow-300">
+              <AlertDescription className="text-foreground dark:text-yellow-300">
                 Você já tem um saque pendente. Aguarde a conclusão para solicitar outro.
               </AlertDescription>
             </Alert>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-white">Valor (R$)</Label>
-                <Input type="number" step="0.01" min="3.50" max={availableBalance / 100} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="bg-brand-black/50 border-brand-purple/50 text-white" required />
+                <Label className="text-foreground">Valor (R$)</Label>
+                <Input type="number" step="0.01" min="3.50" max={availableBalance / 100} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="bg-background/50 border-brand-purple/50 text-foreground" required />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Tipo de Chave PIX</Label>
+                <Label className="text-foreground">Tipo de Chave PIX</Label>
                 <Select value={pixKeyType} onValueChange={setPixKeyType}>
-                  <SelectTrigger className="bg-brand-black/50 border-brand-purple/50 text-white">
+                  <SelectTrigger className="bg-background/50 border-brand-purple/50 text-foreground">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -235,8 +228,8 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Chave PIX</Label>
-                <Input type="text" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Digite sua chave PIX" className="bg-brand-black/50 border-brand-purple/50 text-white" required />
+                <Label className="text-foreground">Chave PIX</Label>
+                <Input type="text" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Digite sua chave PIX" className="bg-background/50 border-brand-purple/50 text-foreground" required />
               </div>
               <Button type="submit" className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-bold" disabled={isSubmitting || availableBalance < 350}>
                 {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Processando...</> : 'Solicitar Saque'}
@@ -249,23 +242,35 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
       {/* Withdrawal history */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-white font-orbitron text-lg">Histórico de Saques</CardTitle>
+          <CardTitle className="text-foreground font-orbitron text-lg">Histórico de Saques</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-brand-gray-400 gap-3">
-              <RefreshCw className="w-5 h-5 animate-spin" />Carregando...
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border"
+                >
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+              ))}
             </div>
           ) : withdrawals.length === 0 ? (
-            <p className="text-brand-gray-400 text-center py-8 font-rajdhani">Nenhum saque realizado ainda.</p>
+            <p className="text-muted-foreground text-center py-8 font-rajdhani">Nenhum saque realizado ainda.</p>
           ) : (
             <div className="space-y-4">
               {withdrawals.map((w) => (
-                <div key={w.id} className="flex items-center justify-between p-4 bg-brand-black/30 rounded-lg border border-white/10">
+                <div key={w.id} className="flex items-center justify-between p-4 bg-background/30 rounded-lg border border-border">
                   <div>
-                    <p className="text-white font-bold">{formatPrice(w.amount / 100)}</p>
-                    <p className="text-brand-gray-400 text-sm font-rajdhani">{w.pixKeyType}: {w.pixKey.substring(0, 10)}...</p>
-                    <p className="text-brand-gray-500 text-xs font-rajdhani">{formatDate(w.createdAt)}</p>
+                    <p className="text-foreground font-bold">{formatPrice(w.amount / 100)}</p>
+                    <p className="text-muted-foreground text-sm font-rajdhani">{w.pixKeyType}: {w.pixKey.substring(0, 10)}...</p>
+                    <p className="text-muted-foreground text-xs font-rajdhani">{formatDate(w.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     {getStatusBadge(w.status)}

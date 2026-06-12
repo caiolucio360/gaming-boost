@@ -28,8 +28,6 @@ export default function AdminWithdrawPage() {
       highlight="ADMIN"
       title="SAQUES"
       description={`Olá, ${user.name || user.email}! Gerencie seus saques e saldo disponível.`}
-      backHref="/admin/payments"
-      backLabel="Voltar para Pagamentos"
     >
       <WithdrawContent apiBasePath="/api/admin/withdraw" />
     </AdminPageShell>

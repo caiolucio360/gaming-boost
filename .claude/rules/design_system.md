@@ -2,7 +2,19 @@
 
 **Single source of truth for all styling decisions.**
 
-> **Golden Rule:** NEVER use hexadecimal values (`#7C3AED`), CSS token classes (`bg-surface-card`, `text-primary`, `bg-action-primary`), or arbitrary Tailwind values. ALWAYS use brand palette classes.
+> **Golden Rule:** NEVER use hexadecimal values (`#7C3AED`), arbitrary Tailwind values, raw
+> `gray-*`, or fixed neutral classes that can't theme-switch (`bg-brand-black`,
+> `bg-brand-black-light`, `border-white/10`, `text-brand-gray-300/400/500`). For neutral
+> surfaces, text and borders use the **theme tokens** below (light/dark aware); for accents use
+> the **brand-purple** palette. Legacy CSS token classes (`bg-surface-card`, `text-primary`,
+> `bg-action-primary`) remain forbidden.
+
+> **Light & dark theme:** the app supports light/dark via `next-themes` (`.dark` class on
+> `<html>`) over shadcn CSS-variable tokens (`globals.css`). Neutral colors **must** use the
+> semantic tokens so both themes work — never the fixed brand-black/white-alpha/brand-gray
+> classes. The `src/components/ui/**` primitives and shared `common/` components already use
+> tokens; build on them. `text-white` is allowed **only** for text sitting on a solid colored
+> background (e.g. a `bg-brand-purple` button, a colored badge/avatar).
 
 > **Reuse first:** before writing UI markup, check `src/components/common/` (e.g. `PageHeader`,
 > `StatCard`, `StatusBadge`, `EmptyState`, `DashboardCard`, `ConfirmDialog`, `OrderCard`) and the
@@ -14,13 +26,28 @@
 
 ## Colors
 
-### Backgrounds
+### Theme tokens (neutrals — use these, they adapt to light/dark)
 
-| Class | Hex | Use |
-|-------|-----|-----|
-| `bg-brand-black` | `#0A0A0A` | Page backgrounds, body |
-| `bg-brand-black-light` | `#1A1A1A` | Cards, sidebars, elevated surfaces, modals |
-| `bg-brand-black/50` | `#0A0A0A` 50% | Subtle overlay backgrounds |
+| Token class | Use |
+|-------------|-----|
+| `bg-background` / `text-foreground` | Page background + primary text |
+| `bg-card` / `text-card-foreground` | Cards, sidebars, elevated surfaces, inputs |
+| `bg-popover` / `text-popover-foreground` | Dropdowns, tooltips, select/menu content |
+| `bg-muted` / `text-muted-foreground` | Subtle panels, tab strips; secondary/muted text & placeholders |
+| `bg-secondary` / `text-secondary-foreground` | Secondary button surface |
+| `border-border` | Default card/separator border |
+| `border-input` | Form-field border |
+
+> Dark values map to the old palette (`bg-card`/`bg-popover` ≈ `#1A1A1A`, `bg-background` ≈
+> `#0A0A0A`), so dark mode looks the same; light values come from the shadcn `:root` tokens.
+
+### Backgrounds (legacy — do NOT use for surfaces; they don't theme-switch)
+
+| Class | Replaced by |
+|-------|-------------|
+| ~~`bg-brand-black`~~ | `bg-background` |
+| ~~`bg-brand-black-light`~~ | `bg-card` (or `bg-muted` for subtle panels) |
+| ~~`bg-black/20`, `bg-black/30`~~ | `bg-muted/40`, `bg-muted/60` |
 
 ### Purple (Brand)
 
@@ -34,12 +61,13 @@
 
 ### Text
 
-| Class | Hex | Use |
-|-------|-----|-----|
-| `text-white` | `#FFFFFF` | Primary text, headings |
-| `text-brand-gray-300` | `#D1D5DB` | Secondary text, descriptions |
-| `text-brand-gray-400` | `#9CA3AF` | Muted text |
-| `text-brand-gray-500` | `#6B7280` | Placeholders, disabled text |
+| Class | Use |
+|-------|-----|
+| `text-foreground` | Primary text, headings |
+| `text-muted-foreground` | Secondary text, descriptions, muted/placeholder/disabled |
+| `text-white` | **Only** text on a solid colored bg (purple/red/green button, colored badge/avatar) |
+
+> ~~`text-brand-gray-300/400/500`~~ no longer used for body text → `text-muted-foreground`.
 
 ### Status (use standard Tailwind)
 
@@ -62,8 +90,8 @@
 
 | Class | Use |
 |-------|-----|
-| `border-white/10` | Default card/input border |
-| `border-white/5` | Very subtle separator |
+| `border-border` | Default card/separator border (replaces ~~`border-white/10`~~ / ~~`border-white/5`~~) |
+| `border-input` | Form-field border |
 | `border-brand-purple` | Focus state, active state |
 | `border-brand-purple/50` | Hover state on cards |
 | `border-brand-purple/20` | Subtle purple border |
@@ -82,7 +110,7 @@
 from `@/components/common/typography` for standalone headings/paragraphs — they apply the
 brand font once. The shadcn `CardTitle`, `DialogTitle`, `AlertDialogTitle`, and `AlertTitle`
 **already carry `font-orbitron`**, and `CardDescription`/`DialogDescription` already carry
-`font-rajdhani text-brand-gray-300` — don't re-add those classes on them.
+`font-rajdhani text-muted-foreground` — don't re-add those classes on them.
 
 **Never add an inline `style={{ fontFamily: ... }}` fallback.** Fonts are loaded by
 `next/font` in `src/app/layout.tsx` (with `display:'swap'` + `preload`) and exposed via the
@@ -110,7 +138,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 **Glassmorphism variant** — add the glass classes via `className`:
 ```tsx
-<Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50">
+<Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
   <CardContent>Content</CardContent>
 </Card>
 ```
@@ -203,7 +231,7 @@ that matches the content it replaces, so layout doesn't shift:
 `SkeletonStatsGrid` (pass `count`/`columns` to mirror the real `StatsGrid`), `SkeletonOrdersList`,
 `SkeletonTable`, `SkeletonProfileCard`, `SkeletonForm`, etc.
 
-Skeleton surfaces use the **flat default `Card`** (brand-black-light + `white/10`) and the
+Skeleton surfaces use the **flat default `Card`** (`bg-card` + `border-border`) and the
 shimmer `Skeleton` primitive — never the old purple-glass surface.
 
 ---
@@ -236,27 +264,21 @@ These patterns are removed and must never be reintroduced:
 
 | ❌ Don't use | ✅ Use instead |
 |-------------|---------------|
-| `bg-surface-page` | `bg-brand-black` |
-| `bg-surface-card` | `bg-brand-black-light` |
-| `bg-surface-elevated` | `bg-brand-black-light` |
-| `bg-surface-subtle` | `bg-brand-black/50` |
-| `text-primary` | `text-white` |
-| `text-secondary` | `text-brand-gray-300` |
-| `text-muted` | `text-brand-gray-500` |
+| `bg-brand-black` (page/surface) | `bg-background` |
+| `bg-brand-black-light` | `bg-card` (or `bg-muted` for subtle panels) |
+| `bg-black/20` / `bg-black/30` | `bg-muted/40` / `bg-muted/60` |
+| `text-white` (as body text) | `text-foreground` (keep `text-white` only on a solid colored bg) |
+| `text-brand-gray-300` / `-400` / `-500` | `text-muted-foreground` |
+| `border-white/10` / `border-white/5` | `border-border` |
+| `bg-surface-*` / `text-primary` / `text-secondary` / `text-muted` | the matching theme token |
+| `bg-action-primary` | `bg-brand-purple` (or the `Button` `default` variant) |
+| `bg-action-danger` | `bg-brand-red` (or `Button` `destructive`) |
 | `text-brand` | `text-brand-purple` |
-| `text-on-brand` | `text-white` |
-| `bg-action-primary` | `bg-brand-purple` |
-| `hover:bg-action-primary-hover` | `hover:bg-brand-purple-light` |
-| `bg-action-danger` | `bg-brand-red` |
-| `bg-action-strong` | `bg-brand-purple-dark` |
-| `border-border-default` | `border-white/10` |
-| `border-border-brand` | `border-brand-purple` |
 | `#7C3AED` (hardcoded hex) | `brand-purple` |
-| `bg-[var(--surface-card)]` | `bg-brand-black-light` |
-| `text-gray-300` / `-400` / `-500` | `text-brand-gray-300` / `-400` / `-500` |
-| `bg-gray-800` / `bg-gray-900` | `bg-brand-black-light` |
-| `border-gray-700` | `border-white/10` |
-| `text-muted-foreground` (shadcn token) | `text-brand-gray-300` |
+| `bg-[var(--surface-card)]` | `bg-card` |
+| `text-gray-300` / `-400` / `-500` | `text-muted-foreground` |
+| `bg-gray-800` / `bg-gray-900` | `bg-card` / `bg-muted` |
+| `border-gray-700` | `border-border` |
 | inline `style={{ fontFamily: 'Orbitron…' }}` | `font-orbitron` class alone |
 
 > **Grays:** `brand.gray.*` has the **same hex** as Tailwind `gray.*`, so the rename is
@@ -265,8 +287,10 @@ These patterns are removed and must never be reintroduced:
 
 > **Enforcement:** `npm run lint` runs `next lint` **and** the design-system guard
 > (`scripts/check-design-system.mjs`, also `npm run lint:ds`). The guard fails the build on raw
-> `gray-*`, the legacy token classes above, inline `fontFamily` fallbacks, and hex in
-> `className`. Vendored `src/components/ui/**` and the documented exception files are skipped.
+> `gray-*`, the legacy token classes above, the **fixed neutral classes that don't theme-switch**
+> (`bg-brand-black`, `bg-brand-black-light`, `border-white/5|10`, `text-brand-gray-300|400|500`,
+> `bg-black/20|30`), inline `fontFamily` fallbacks, and hex in `className`. Vendored
+> `src/components/ui/**` and the documented exception files are skipped.
 
 ---
 
@@ -298,4 +322,6 @@ The Golden Rule (no hex, no arbitrary values) applies to **Tailwind-rendered JSX
 
 4. **Unit-less arbitrary values with no token equivalent** — viewport/percentage/`calc` sizing such as `h-[85vh]` (dialog height), `max-w-[75%]` (chat bubble), `h-[calc(100%-140px)]`, and micro-badge sizes (`text-[10px]`, `min-w-[18px]` for notification counts). Prefer a token when one exists (`w-[200px]` → `w-52`); keep the arbitrary value only when no token fits, and keep it rare.
 
-> **Tables:** the shadcn `table.tsx` primitive was migrated off default shadcn tokens (`text-muted-foreground`, `bg-muted`, uncolored `border-b`) onto the brand palette (`text-brand-gray-400`, `bg-brand-purple/5`, `border-white/10`). Keep new tables on the brand palette — don't reintroduce the default tokens.
+> **Tables:** the shadcn `table.tsx` primitive uses theme tokens (`text-muted-foreground`,
+> `border-border`, `bg-muted` footer) plus a brand-purple row hover (`hover:bg-brand-purple/5`).
+> Keep new tables on the tokens + brand-purple accent — don't hardcode neutral brand classes.

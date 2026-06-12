@@ -33,12 +33,20 @@ const checks = [
   {
     name: 'raw-gray',
     re: /\b(text|bg|border|from|via|to|ring|divide|placeholder|fill|stroke|decoration|accent|caret|outline)-gray-\d/,
-    msg: 'raw Tailwind gray-* class — use brand-gray-* / bg-brand-black-light',
+    msg: 'raw Tailwind gray-* class — use text-muted-foreground / bg-muted / brand-gray-*',
   },
   {
     name: 'legacy-token',
     re: /\b(bg-surface-|bg-action-|border-border-|text-on-brand)|\btext-(primary|secondary|muted)(?![\w-])|bg-\[var\(--/,
-    msg: 'forbidden CSS token class — use the brand palette',
+    msg: 'forbidden CSS token class — use the theme tokens / brand palette',
+  },
+  {
+    // Theme regression guard: these fixed neutral classes don't adapt to light/dark.
+    // Use semantic tokens so themes work. (text-white is still allowed for text on a
+    // solid colored background; brand-purple accents are fine.)
+    name: 'non-theme-neutral',
+    re: /\bbg-brand-black-light\b|\bbg-brand-black(?![\w-])|\bborder-white\/(?:5|10)\b|\btext-brand-gray-(?:300|400|500)\b|\bbg-black\/(?:20|30)\b/,
+    msg: 'fixed neutral class won’t theme-switch — use bg-card/bg-background/bg-muted, border-border, or text-muted-foreground',
   },
   {
     name: 'inline-font',

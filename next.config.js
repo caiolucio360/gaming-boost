@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 
+// Fonte única da versão do app: package.json → exposta ao client como NEXT_PUBLIC_APP_VERSION
+// (lida em src/lib/version.ts). Bumpar só o package.json mantém tudo em sincronia.
+const pkg = require('./package.json')
+
 // Content-Security-Policy — baseline funcional para Next.js App Router.
 // script/style usam 'unsafe-inline' porque o Next injeta bootstrap inline e o
 // Tailwind/framer-motion injetam estilos inline. 'unsafe-eval' so e necessario em
@@ -37,6 +41,9 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',

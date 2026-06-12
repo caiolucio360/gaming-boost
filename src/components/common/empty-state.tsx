@@ -28,10 +28,10 @@ export function EmptyState({
           <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 mb-4">
             <Icon className="h-16 w-16 text-brand-purple-light group-hover:text-brand-purple-lighter transition-colors duration-300" />
           </div>
-          <h3 className="text-xl font-bold text-white font-orbitron mb-2 group-hover:text-brand-purple-lighter transition-colors duration-300">
+          <h3 className="text-xl font-bold text-foreground font-orbitron mb-2 group-hover:text-brand-purple-lighter transition-colors duration-300">
             {title}
           </h3>
-          <p className="text-brand-gray-400 font-rajdhani mb-6 group-hover:text-brand-gray-300 transition-colors duration-300">
+          <p className="text-muted-foreground font-rajdhani mb-6 group-hover:text-foreground transition-colors duration-300">
             {description}
           </p>
           {actionLabel && (actionHref ? (

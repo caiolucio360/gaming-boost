@@ -34,6 +34,7 @@ export async function GET(
         email: true,
         name: true,
         role: true,
+        active: true,
         boosterCommissionPercentage: true,
         createdAt: true,
         updatedAt: true,
@@ -120,6 +121,18 @@ export async function PUT(
       updateData.password = await bcrypt.hash(password, 10)
     }
 
+    // Ativação manual pelo admin (libera edição/promoção etc. para contas não verificadas)
+    const { active } = body
+    if (active !== undefined) {
+      if (typeof active !== 'boolean') {
+        return NextResponse.json(
+          { message: 'Campo "active" deve ser booleano' },
+          { status: HttpStatus.BAD_REQUEST }
+        )
+      }
+      updateData.active = active
+    }
+
     // Permitir atualizar comissão do booster (apenas para usuários com role BOOSTER)
     if (boosterCommissionPercentage !== undefined) {
       // Validar se é um número entre 0 e 1
@@ -175,6 +188,7 @@ export async function PUT(
         email: true,
         name: true,
         role: true,
+        active: true,
         boosterCommissionPercentage: true,
         createdAt: true,
         updatedAt: true,

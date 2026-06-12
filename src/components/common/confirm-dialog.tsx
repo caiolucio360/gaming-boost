@@ -55,19 +55,19 @@ export function ConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
-      <AlertDialogContent className="bg-black/90 border-brand-purple/50">
+      <AlertDialogContent className="bg-popover border-brand-purple/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white font-orbitron">
+          <AlertDialogTitle className="text-foreground font-orbitron">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-brand-gray-300 font-rajdhani">
+          <AlertDialogDescription className="text-muted-foreground font-rajdhani">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={loading}
-            className="border-brand-purple/50 text-white hover:border-white/50 font-rajdhani"
+            className="border-brand-purple/50 text-foreground hover:border-white/50 font-rajdhani"
           >
             {cancelLabel}
           </AlertDialogCancel>

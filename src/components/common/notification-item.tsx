@@ -99,10 +99,10 @@ function getIconColor(type: NotificationType) {
   switch (type) {
     case 'ORDER_UPDATE': return "bg-brand-purple/20 text-brand-purple-light border border-brand-purple/30"
     case 'PAYMENT': return "bg-brand-purple-light/20 text-brand-purple-lighter border border-brand-purple-light/30"
-    case 'SYSTEM': return "bg-brand-gray-800/50 text-brand-gray-400 border border-brand-gray-700"
+    case 'SYSTEM': return "bg-brand-gray-800/50 text-muted-foreground border border-brand-gray-700"
     case 'CHAT': return "bg-brand-purple-lighter/20 text-brand-purple-lighter border border-brand-purple-lighter/30"
     case 'BOOSTER_ASSIGNED': return "bg-brand-purple-dark/30 text-brand-purple border border-brand-purple-dark/50"
     case 'COMMISSION': return "bg-brand-red/20 text-brand-red-light border border-brand-red/30"
-    default: return "bg-brand-gray-800/50 text-brand-gray-400 border border-brand-gray-700"
+    default: return "bg-brand-gray-800/50 text-muted-foreground border border-brand-gray-700"
   }
 }

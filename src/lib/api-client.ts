@@ -1,6 +1,13 @@
 /**
- * Cliente API para fazer requisições autenticadas
- * Gerencia automaticamente o token JWT do localStorage
+ * Cliente HTTP do app — use SEMPRE `api.get/post/put/patch/delete` para falar com `/api/**`.
+ * Nunca chame `fetch` direto no client (ver `.claude/rules/code_patterns.md` regra 6).
+ *
+ * O client:
+ * - injeta o header Authorization (token do localStorage) automaticamente;
+ * - usa `Content-Type: application/json` por padrão (e o ignora para uploads `FormData`);
+ * - em 401 com `requireAuth`, limpa o token e redireciona para `/login`;
+ * - faz `JSON.parse` da resposta e **lança `ApiError`** em status não-2xx — os call sites
+ *   só precisam de `try/await/catch`.
  */
 
 import { ErrorMessages } from '@/lib/error-constants'
@@ -24,51 +31,49 @@ function throwApiError(errorData: { message?: string; code?: string }, status: n
   )
 }
 
-/**
- * Obtém o token do localStorage
- */
+// ============================================
+// Token Management
+// ============================================
+
+const TOKEN_KEY = 'auth_token'
+
 function getToken(): string | null {
-  if (typeof window === 'undefined') {
-    return null
-  }
-  return localStorage.getItem('auth_token')
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(TOKEN_KEY)
 }
 
-/**
- * Salva o token no localStorage
- */
 export function saveToken(token: string): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('auth_token', token)
+    localStorage.setItem(TOKEN_KEY, token)
   }
 }
 
-/**
- * Remove o token do localStorage
- */
 export function removeToken(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth_token')
+    localStorage.removeItem(TOKEN_KEY)
   }
 }
 
-/**
- * Obtém o token atual
- */
 export function getAuthToken(): string | null {
   return getToken()
 }
 
+// ============================================
+// Core request
+// ============================================
+
 /**
- * Interface para opções de requisição
+ * Opções de requisição. Estende `RequestInit`, então `cache`, `signal`, `headers`, etc.
+ * funcionam normalmente. `requireAuth: false` desliga o header de auth e o redirect em 401
+ * (use em rotas públicas / fluxo de login onde um 401 é esperado).
  */
-interface RequestOptions extends RequestInit {
-  requireAuth?: boolean // Se true, adiciona o token automaticamente
+export interface RequestOptions extends RequestInit {
+  requireAuth?: boolean
 }
 
 /**
- * Faz uma requisição autenticada
- * Adiciona automaticamente o header Authorization com o token
+ * Faz uma requisição autenticada e retorna o `Response` cru.
+ * Use os métodos de `api` no lugar disso, salvo necessidade de streaming/headers especiais.
  */
 export async function authenticatedFetch(
   url: string,
@@ -76,13 +81,15 @@ export async function authenticatedFetch(
 ): Promise<Response> {
   const { requireAuth = true, headers = {}, ...restOptions } = options
 
-  // Preparar headers
+  // FormData (uploads) must keep the browser-generated multipart Content-Type/boundary,
+  // so we only default to JSON when the body isn't FormData.
+  const isFormData = typeof FormData !== 'undefined' && restOptions.body instanceof FormData
+
   const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(headers as Record<string, string>),
   }
 
-  // Adicionar token se necessário
   if (requireAuth) {
     const token = getToken()
     if (token) {
@@ -90,21 +97,17 @@ export async function authenticatedFetch(
     }
   }
 
-  // Fazer a requisição
   const response = await fetch(url, {
     ...restOptions,
     headers: requestHeaders,
   })
 
-  // Se receber 401, o token pode estar expirado
+  // 401 → token expirado/ausente: limpa e manda para o login (exceto nas próprias telas de auth).
   if (response.status === 401 && requireAuth) {
-    // Remover token inválido
     removeToken()
-    // Redirecionar para login apenas se não estiver já na página de login/register
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname
       const isAuthPage = currentPath === '/login' || currentPath === '/register'
-      
       if (!isAuthPage) {
         window.location.href = '/login'
       }
@@ -114,35 +117,24 @@ export async function authenticatedFetch(
   return response
 }
 
-/**
- * Helper para fazer requisições GET autenticadas
- */
-export async function apiGet<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
-  const response = await authenticatedFetch(url, {
-    ...options,
-    method: 'GET',
-  })
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
-    throwApiError(errorData, response.status)
-  }
-
-  return response.json()
-}
-
-/**
- * Helper para fazer requisições POST autenticadas
- */
-export async function apiPost<T = unknown>(
+async function request<T = unknown>(
+  method: HttpMethod,
   url: string,
   data?: unknown,
-  options?: RequestOptions
+  options: RequestOptions = {}
 ): Promise<T> {
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
   const response = await authenticatedFetch(url, {
     ...options,
-    method: 'POST',
-    body: data ? JSON.stringify(data) : undefined,
+    method,
+    body:
+      data === undefined
+        ? options.body
+        : isFormData
+          ? (data as FormData)
+          : JSON.stringify(data),
   })
 
   if (!response.ok) {
@@ -153,42 +145,23 @@ export async function apiPost<T = unknown>(
   return response.json()
 }
 
-/**
- * Helper para fazer requisições PUT autenticadas
- */
-export async function apiPut<T = unknown>(
-  url: string,
-  data?: unknown,
-  options?: RequestOptions
-): Promise<T> {
-  const response = await authenticatedFetch(url, {
-    ...options,
-    method: 'PUT',
-    body: data ? JSON.stringify(data) : undefined,
-  })
+// ============================================
+// API — use `api.get / api.post / api.put / api.patch / api.delete`
+// ============================================
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
-    throwApiError(errorData, response.status)
-  }
+export const api = {
+  get: <T = unknown>(url: string, options?: RequestOptions) =>
+    request<T>('GET', url, undefined, options),
 
-  return response.json()
+  post: <T = unknown>(url: string, data?: unknown, options?: RequestOptions) =>
+    request<T>('POST', url, data, options),
+
+  put: <T = unknown>(url: string, data?: unknown, options?: RequestOptions) =>
+    request<T>('PUT', url, data, options),
+
+  patch: <T = unknown>(url: string, data?: unknown, options?: RequestOptions) =>
+    request<T>('PATCH', url, data, options),
+
+  delete: <T = unknown>(url: string, options?: RequestOptions) =>
+    request<T>('DELETE', url, undefined, options),
 }
-
-/**
- * Helper para fazer requisições DELETE autenticadas
- */
-export async function apiDelete<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
-  const response = await authenticatedFetch(url, {
-    ...options,
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: ErrorMessages.CLIENT_REQUEST_ERROR }))
-    throwApiError(errorData, response.status)
-  }
-
-  return response.json()
-}
-

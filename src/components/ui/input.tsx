@@ -11,9 +11,9 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         // Base styles with mobile touch target (min-h-touch = 44px)
         "flex h-10 min-h-touch w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
         // Background and text
-        "bg-brand-black-light text-white placeholder:text-brand-gray-500",
+        "bg-card text-foreground placeholder:text-muted-foreground",
         // Border
-        "border-white/10",
+        "border-input",
         // Focus state - uses design system brand color
         "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30 focus-visible:ring-1",
         // Selection

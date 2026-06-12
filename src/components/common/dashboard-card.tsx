@@ -53,16 +53,16 @@ export function DashboardCard({ title, description, children, className, status 
   const colors = status ? statusBorderColors[status] || defaultColors : defaultColors
 
   return (
-    <Card className={`group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md ${colors.border} ${colors.hover} hover:shadow-xl ${colors.shadow} transition-colors duration-200 overflow-hidden ${className || ''}`}>
+    <Card className={`group relative bg-card ${colors.border} ${colors.hover} hover:shadow-xl ${colors.shadow} transition-colors duration-200 overflow-hidden ${className || ''}`}>
       {/* Efeito de brilho sutil no hover */}
       <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none`} style={{ willChange: 'opacity' }} />
       
       <CardHeader className="relative z-10">
-        <CardTitle className="text-white font-orbitron group-hover:text-brand-purple-lighter transition-colors duration-200">
+        <CardTitle className="text-foreground font-orbitron group-hover:text-brand-purple-lighter transition-colors duration-200">
           {title}
         </CardTitle>
         {description && (
-          <CardDescription className="text-brand-gray-400 font-rajdhani group-hover:text-brand-gray-300 transition-colors duration-200">
+          <CardDescription className="text-muted-foreground font-rajdhani group-hover:text-muted-foreground transition-colors duration-200">
             {description}
           </CardDescription>
         )}

@@ -19,7 +19,13 @@ jest.mock('@/hooks/use-loading', () => ({
 }))
 
 jest.mock('@/lib/api-client', () => ({
-  apiGet: jest.fn().mockResolvedValue({ data: { orders: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } } }),
+  api: {
+    get: jest.fn().mockResolvedValue({ orders: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } }),
+    post: jest.fn().mockResolvedValue({}),
+    put: jest.fn().mockResolvedValue({}),
+    patch: jest.fn().mockResolvedValue({}),
+    delete: jest.fn().mockResolvedValue({}),
+  },
   getAuthToken: jest.fn().mockReturnValue('mock-token'),
 }))
 

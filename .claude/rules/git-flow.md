@@ -57,3 +57,19 @@ gh pr create --base main --head dev --title "release: <versão/escopo>"
 - **Sempre verificar e resolver conflitos de branch.** Ao abrir um PR, conferir o estado de merge (`gh pr view <n> --json mergeable,mergeStateStatus`). Se estiver `CONFLICTING`, trazer a branch base para a branch de trabalho (`git merge main`/`git merge dev`), resolver os conflitos mantendo a intenção de ambos os lados, e dar push — deixando o PR `MERGEABLE` antes de entregá-lo. Nunca deixar um PR com conflito pendente para o dono resolver.
 - Mensagens de commit e títulos de PR seguem **Conventional Commits** (`feat:`, `fix:`, `chore:`, `refactor:`, `style:`, `test:`, `docs:`).
 - **Mensagens de commit e PRs (título e corpo) são sempre escritos em inglês.**
+
+## Versionamento
+
+**Fonte única da verdade: `package.json` → `"version"`.** O valor é injetado em build via
+`next.config.js` (`env.NEXT_PUBLIC_APP_VERSION`) e lido por `src/lib/version.ts` (`APP_VERSION`),
+exibido no rodapé da sidebar do painel. **Não edite `version.ts`** — só o `package.json`.
+
+- **Sempre que algo for alterado e commitado, suba a versão** no mesmo commit, de preferência
+  com `npm version <patch|minor|major> --no-git-tag-version` (atualiza só o `package.json`).
+- Use **semver** (`MAJOR.MINOR.PATCH`), alinhado ao tipo do Conventional Commit:
+  - `fix:` / `chore:` / `style:` / `refactor:` / `docs:` / `test:` → **patch**.
+  - `feat:` → **minor**.
+  - Mudança incompatível (`feat!:` / `BREAKING CHANGE`) → **major**.
+- Um commit = um bump. Não acumular várias mudanças sem subir a versão.
+- A base atual (`0.92.69`) foi derivada do histórico (92 `feat` → minor, 69 `fix` → patch,
+  0 breaking → major 0). Daqui pra frente, incremente a partir dela.

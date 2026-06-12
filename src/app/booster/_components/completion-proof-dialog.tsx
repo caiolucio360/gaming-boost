@@ -51,7 +51,7 @@ export function CompletionProofDialog({
         onOpenChange(next)
       }}
     >
-      <DialogContent className="bg-brand-black-light border-brand-purple/50 max-w-md">
+      <DialogContent className="bg-card border-brand-purple/50 max-w-md">
         <DialogHeader>
           <DialogTitle>Comprovante de Conclusão</DialogTitle>
           <DialogDescription>
@@ -74,9 +74,9 @@ export function CompletionProofDialog({
                 variant="ghost"
                 size="icon"
                 onClick={reset}
-                className="absolute top-2 right-2 h-auto w-auto min-h-0 min-w-0 p-1 rounded-full bg-brand-black/70 border-transparent hover:bg-red-600/80"
+                className="absolute top-2 right-2 h-auto w-auto min-h-0 min-w-0 p-1 rounded-full bg-background/70 border-transparent hover:bg-red-600/80"
               >
-                <X className="h-4 w-4 text-white" />
+                <X className="h-4 w-4 text-foreground" />
               </Button>
             </div>
           ) : (
@@ -87,10 +87,10 @@ export function CompletionProofDialog({
               className="w-full h-auto flex-col border-2 border-dashed border-brand-purple/40 hover:border-brand-purple/80 rounded-lg p-8 gap-3 bg-brand-purple/5 hover:bg-brand-purple/10"
             >
               <ImageIcon className="h-10 w-10 text-brand-purple-light/60" />
-              <span className="text-brand-gray-400 font-rajdhani text-sm">
+              <span className="text-muted-foreground font-rajdhani text-sm">
                 Clique para selecionar o print
               </span>
-              <span className="text-brand-gray-500 font-rajdhani text-xs">
+              <span className="text-muted-foreground font-rajdhani text-xs">
                 JPG, PNG ou WebP — máx. 5 MB
               </span>
             </Button>
@@ -108,7 +108,7 @@ export function CompletionProofDialog({
           <Button
             variant="outline"
             onClick={() => { reset(); onOpenChange(false) }}
-            className="border-brand-purple/40 text-brand-gray-300 hover:bg-brand-purple/10"
+            className="border-brand-purple/40 text-muted-foreground hover:bg-brand-purple/10"
             disabled={submitting}
           >
             Cancelar

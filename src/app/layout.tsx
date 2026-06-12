@@ -1,7 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Orbitron, Rajdhani, Knewave } from 'next/font/google'
 import './globals.css'
 import { ConditionalShell } from '@/components/layout/conditional-shell'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { AuthProviderWrapper } from '@/components/providers/auth-provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
@@ -34,6 +35,19 @@ const rajdhani = Rajdhani({
 })
 
 import { generateMetadata } from '@/lib/seo'
+
+// Next 15 exige `viewport`/`themeColor` num export separado (não dentro de `metadata`).
+// themeColor segue o tema claro/escuro (combina com a barra do navegador no mobile).
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
+}
 
 export const metadata: Metadata = generateMetadata({
   title: 'FlautasBoost - Serviços de Boost para Jogos',
@@ -73,19 +87,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body className={`${orbitron.variable} ${rajdhani.variable} ${knewave.variable} font-rajdhani text-white bg-black`}>
-        <QueryProvider>
-          <AuthProviderWrapper>
-            <ToastProvider />
-            <SkipLink />
-            <LiveRegion message="" id="live-region" />
-            <ConditionalShell>
-              {children}
-            </ConditionalShell>
-          </AuthProviderWrapper>
-        </QueryProvider>
-        <AnalyticsProvider />
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={`${orbitron.variable} ${rajdhani.variable} ${knewave.variable} font-rajdhani bg-background text-foreground`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <QueryProvider>
+            <AuthProviderWrapper>
+              <ToastProvider />
+              <SkipLink />
+              <LiveRegion message="" id="live-region" />
+              <ConditionalShell>
+                {children}
+              </ConditionalShell>
+            </AuthProviderWrapper>
+          </QueryProvider>
+          <AnalyticsProvider />
+        </ThemeProvider>
       </body>
     </html>
   )

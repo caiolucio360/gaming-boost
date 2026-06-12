@@ -3,6 +3,7 @@
 import React, { createContext, useContext } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { User } from '@/types'
+import { api, ApiError } from '@/lib/api-client'
 import { ErrorCodes, ErrorMessages } from '@/lib/error-constants'
 
 interface AuthContextType {
@@ -32,27 +33,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     // Pré-validar credenciais via API para obter códigos de erro estruturados
-    const preValidation = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-
-    if (!preValidation.ok) {
-      const errorData = await preValidation.json()
-
-      if (errorData.code === ErrorCodes.USER_NOT_VERIFIED) {
+    try {
+      await api.post('/api/auth/login', { email, password }, { requireAuth: false })
+    } catch (err) {
+      if (err instanceof ApiError && err.code === ErrorCodes.USER_NOT_VERIFIED) {
         // Enviar novo código de verificação e redirecionar para ativação
-        fetch('/api/auth/resend-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        }).catch(() => {})
+        api.post('/api/auth/resend-code', { email }, { requireAuth: false }).catch(() => {})
         window.location.href = `/verify?email=${encodeURIComponent(email)}`
         return
       }
-
-      throw new Error(errorData.message || ErrorMessages.AUTH_CREDENTIALS_INVALID)
+      throw new Error(err instanceof ApiError ? err.message : ErrorMessages.AUTH_CREDENTIALS_INVALID)
     }
 
     // Credenciais válidas e conta ativa — criar sessão via NextAuth
@@ -108,17 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (name: string, email: string, password: string) => {
     // Criar conta via API
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Erro ao criar conta')
+    try {
+      await api.post('/api/auth/register', { name, email, password }, { requireAuth: false })
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : 'Erro ao criar conta')
     }
 
     // Registro agora redireciona para verificação, não faz login automático imediato
