@@ -18,6 +18,15 @@ interface PaymentResult {
   status: string
 }
 
+interface PaymentResult {
+  id: number
+  pixCode: string
+  qrCode: string
+  total: number
+  expiresAt: string
+  status: string
+}
+
 interface PaymentFormProps {
   orderId: number
   orderTotal: number
