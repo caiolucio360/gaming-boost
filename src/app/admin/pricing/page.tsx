@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
+import { api, ApiError } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,16 +23,15 @@ import {
   Plus,
   Trash2,
   Edit,
-  ArrowLeft,
   Save,
   X,
   AlertTriangle,
   Calculator,
   RefreshCw,
 } from 'lucide-react'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
+import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { showSuccess, showError } from '@/lib/toast'
-import Link from 'next/link'
 import {
   Select,
   SelectContent,
@@ -75,120 +75,104 @@ interface Gap {
 }
 
 /**
- * Skeleton específico para a página de configuração de preços
+ * Loading silhouette for /admin/pricing content — the page header is rendered by
+ * AdminPageShell, so the skeleton covers only the filters + form/table/right column.
  */
 function PricingPageSkeleton() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header skeleton */}
-        <div className="mb-6">
-          <Skeleton className="h-10 w-64 mb-2 bg-brand-black-light" />
-          <Skeleton className="h-5 w-96 max-w-full bg-brand-black-light" />
-        </div>
-
-        {/* Back button skeleton */}
-        <div className="mb-6">
-          <Skeleton className="h-10 w-40 bg-brand-black-light" />
-        </div>
-
-        {/* Filters card skeleton */}
-        <Card className="mb-6 bg-brand-black-light border-white/10">
-          <CardHeader className="pb-4">
-            <Skeleton className="h-6 w-20 bg-white/5" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-12 bg-white/5" />
-                <Skeleton className="h-10 w-full bg-white/5" />
+    <>
+      {/* Filters card */}
+      <Card className="mb-6">
+        <CardHeader className="pb-4">
+          <Skeleton className="h-6 w-20" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full rounded-md" />
               </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24 bg-white/5" />
-                <Skeleton className="h-10 w-full bg-white/5" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-28 bg-white/5" />
-                <Skeleton className="h-10 w-full bg-white/5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column skeletons */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Form card skeleton */}
-            <Card className="bg-brand-black-light border-white/10">
-              <CardHeader className="pb-4">
-                <Skeleton className="h-6 w-48 bg-white/5" />
-                <Skeleton className="h-4 w-72 max-w-full bg-white/5" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24 bg-white/5" />
-                    <Skeleton className="h-10 w-full bg-white/5" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24 bg-white/5" />
-                    <Skeleton className="h-10 w-full bg-white/5" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-20 bg-white/5" />
-                    <Skeleton className="h-10 w-full bg-white/5" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-16 bg-white/5" />
-                    <Skeleton className="h-10 w-full bg-white/5" />
-                  </div>
-                </div>
-                <Skeleton className="h-10 w-24 bg-white/5" />
-              </CardContent>
-            </Card>
-
-            {/* Table card skeleton */}
-            <Card className="bg-brand-black-light border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-52 bg-white/5" />
-                  <Skeleton className="h-4 w-64 max-w-full bg-white/5" />
-                </div>
-                <Skeleton className="h-9 w-9 bg-white/5" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <Skeleton key={i} className="h-14 w-full bg-white/5" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            ))}
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Right column skeleton */}
-          <div className="lg:col-span-1">
-            <Card className="bg-brand-black-light border-white/10">
-              <CardHeader className="pb-4">
-                <Skeleton className="h-6 w-40 bg-white/5" />
-                <Skeleton className="h-4 w-56 max-w-full bg-white/5" />
-              </CardHeader>
-              <CardContent className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Form card */}
+          <Card>
+            <CardHeader className="pb-4">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-72 max-w-full" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-28 bg-white/5" />
-                  <Skeleton className="h-10 w-full bg-white/5" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full rounded-md" />
                 </div>
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-32 bg-white/5" />
-                  <Skeleton className="h-10 w-full bg-white/5" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full rounded-md" />
                 </div>
-                <Skeleton className="h-10 w-full bg-white/5" />
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+              </div>
+              <Skeleton className="h-10 w-24 rounded-md" />
+            </CardContent>
+          </Card>
+
+          {/* Table card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-52" />
+                <Skeleton className="h-4 w-64 max-w-full" />
+              </div>
+              <Skeleton className="h-9 w-9 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full rounded-md" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-    </div>
+
+        {/* Right column */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader className="pb-4">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-56 max-w-full" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
+              <Skeleton className="h-10 w-full rounded-md" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -279,16 +263,11 @@ export default function PricingConfigPage() {
         if (selectedMode) params.append('gameMode', selectedMode)
         if (selectedServiceType) params.append('serviceType', selectedServiceType)
 
-        const response = await fetch(`/api/admin/pricing?${params}`)
-        if (response.ok) {
-          const data = await response.json()
-          setConfigs(data.data)
-        } else {
-          showError('Erro', 'Não foi possível carregar as configurações')
-        }
+        const data = await api.get<{ data: typeof configs }>(`/api/admin/pricing?${params}`)
+        setConfigs(data.data)
       } catch (error) {
         console.error('Erro ao buscar configurações:', error)
-        showError('Erro', 'Erro ao buscar configurações')
+        showError('Erro', error instanceof ApiError ? error.message : 'Não foi possível carregar as configurações')
       }
     })
   }
@@ -314,51 +293,37 @@ export default function PricingConfigPage() {
         enabled: true,
       }
 
-      const url = editingId
-        ? `/api/admin/pricing/${editingId}`
-        : '/api/admin/pricing'
-      const method = editingId ? 'PUT' : 'POST'
+      const data = editingId
+        ? await api.put<{ data?: { id?: number } }>(`/api/admin/pricing/${editingId}`, body)
+        : await api.post<{ data?: { id?: number } }>('/api/admin/pricing', body)
+      const wasEditing = !!editingId
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        const wasEditing = !!editingId
-
-        if (wasEditing) {
-          // Update existing config in state
-          setConfigs(prev => prev.map(c =>
-            c.id === editingId ? { ...c, ...body, updatedAt: new Date().toISOString() } : c
-          ))
-          setNewlyAddedId(editingId)
-        } else {
-          // Add new config to state with animation
-          const newConfig: PricingConfig = {
-            ...body,
-            id: data.data?.id || Date.now(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-          setConfigs(prev => [...prev, newConfig])
-          setNewlyAddedId(newConfig.id)
-        }
-
-        showSuccess('Sucesso', wasEditing ? 'Configuração atualizada' : 'Configuração criada')
-        resetForm()
-
-        // Clear highlight after animation
-        setTimeout(() => setNewlyAddedId(null), 2000)
+      if (wasEditing) {
+        // Update existing config in state
+        setConfigs(prev => prev.map(c =>
+          c.id === editingId ? { ...c, ...body, updatedAt: new Date().toISOString() } : c
+        ))
+        setNewlyAddedId(editingId)
       } else {
-        const error = await response.json()
-        showError('Erro', error.error || 'Erro ao salvar configuração')
+        // Add new config to state with animation
+        const newConfig: PricingConfig = {
+          ...body,
+          id: data.data?.id || Date.now(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        setConfigs(prev => [...prev, newConfig])
+        setNewlyAddedId(newConfig.id)
       }
+
+      showSuccess('Sucesso', wasEditing ? 'Configuração atualizada' : 'Configuração criada')
+      resetForm()
+
+      // Clear highlight after animation
+      setTimeout(() => setNewlyAddedId(null), 2000)
     } catch (error) {
       console.error('Erro ao salvar:', error)
-      showError('Erro', 'Erro ao salvar configuração')
+      showError('Erro', error instanceof ApiError ? error.message : 'Erro ao salvar configuração')
     } finally {
       setIsSaving(false)
     }
@@ -385,26 +350,17 @@ export default function PricingConfigPage() {
     setDeletingId(idToDelete) // Start animation
 
     try {
-      const response = await fetch(`/api/admin/pricing/${idToDelete}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        // Wait for animation to complete before removing from state
-        setTimeout(() => {
-          setConfigs(prev => prev.filter(c => c.id !== idToDelete))
-          setDeletingId(null)
-          showSuccess('Sucesso', 'Configuração deletada')
-        }, 400) // Match animation duration
-      } else {
+      await api.delete(`/api/admin/pricing/${idToDelete}`)
+      // Wait for animation to complete before removing from state
+      setTimeout(() => {
+        setConfigs(prev => prev.filter(c => c.id !== idToDelete))
         setDeletingId(null)
-        const error = await response.json()
-        showError('Erro', error.error || 'Erro ao deletar configuração')
-      }
+        showSuccess('Sucesso', 'Configuração deletada')
+      }, 400) // Match animation duration
     } catch (error) {
       setDeletingId(null)
       console.error('Erro ao deletar:', error)
-      showError('Erro', 'Erro ao deletar configuração')
+      showError('Erro', error instanceof ApiError ? error.message : 'Erro ao deletar configuração')
     }
   }
 
@@ -416,25 +372,13 @@ export default function PricingConfigPage() {
     ))
 
     try {
-      const response = await fetch(`/api/admin/pricing/${config.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !config.enabled }),
-      })
-
-      if (response.ok) {
-        showSuccess('Sucesso', config.enabled ? 'Faixa desativada' : 'Faixa ativada')
-      } else {
-        // Revert on error
-        setConfigs(previousConfigs)
-        const error = await response.json()
-        showError('Erro', error.error || 'Erro ao alterar status')
-      }
+      await api.patch(`/api/admin/pricing/${config.id}`, { enabled: !config.enabled })
+      showSuccess('Sucesso', config.enabled ? 'Faixa desativada' : 'Faixa ativada')
     } catch (error) {
       // Revert on error
       setConfigs(previousConfigs)
       console.error('Erro ao alterar status:', error)
-      showError('Erro', 'Erro ao alterar status')
+      showError('Erro', error instanceof ApiError ? error.message : 'Erro ao alterar status')
     }
   }
 
@@ -478,23 +422,11 @@ export default function PricingConfigPage() {
         }
       }
 
-      const response = await fetch('/api/pricing/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setCalcResult(data.data.price)
-      } else {
-        const error = await response.json()
-        showError('Erro', error.error || 'Erro ao calcular preço')
-        setCalcResult(null)
-      }
+      const data = await api.post<{ data: { price: number } }>('/api/pricing/calculate', body)
+      setCalcResult(data.data.price)
     } catch (error) {
       console.error('Erro ao calcular:', error)
-      showError('Erro', 'Erro ao calcular preço')
+      showError('Erro', error instanceof ApiError ? error.message : 'Erro ao calcular preço')
       setCalcResult(null)
     } finally {
       setIsCalculating(false)
@@ -519,8 +451,8 @@ export default function PricingConfigPage() {
     return `Nível ${config.rangeStart} - ${config.rangeEnd}`
   }
 
-  if (authLoading || loading) {
-    return <PricingPageSkeleton />
+  if (authLoading) {
+    return <LoadingSpinner />
   }
 
   if (!user || user.role !== 'ADMIN') {
@@ -528,31 +460,24 @@ export default function PricingConfigPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <PageHeader
-          highlight="GERENCIAR"
-          title="PREÇOS"
-          description="Gerencie os preços de boost por faixas de rating ou níveis"
-        />
-
-        <div className="mb-6">
-          <Button variant="outline" asChild className="border-white/10 hover:border-brand-purple/50">
-            <Link href="/admin">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar ao Dashboard
-            </Link>
-          </Button>
-        </div>
-
+    <AdminPageShell
+      highlight="GERENCIAR"
+      title="PREÇOS"
+      description="Gerencie os preços de boost por faixas de rating ou níveis"
+    >
+      {loading ? (
+        <PricingPageSkeleton />
+      ) : (
+        <>
         {/* Filtros */}
-        <Card className="mb-6 bg-brand-black-light border-white/10">
+        <Card className="mb-6 bg-card border-border">
           <CardHeader className="pb-4">
-            <CardTitle className="text-white font-orbitron text-lg">Filtros</CardTitle>
+            <CardTitle className="text-foreground font-orbitron text-lg">Filtros</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="text-brand-gray-300">Jogo</Label>
+                <Label className="text-muted-foreground">Jogo</Label>
                 <Select value={selectedGame} onValueChange={setSelectedGame}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -563,7 +488,7 @@ export default function PricingConfigPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-brand-gray-300">Modo de Jogo</Label>
+                <Label className="text-muted-foreground">Modo de Jogo</Label>
                 <Select value={selectedMode} onValueChange={(value) => {
                   setSelectedMode(value)
                   setCalcCurrent('')
@@ -579,7 +504,7 @@ export default function PricingConfigPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-brand-gray-300">Tipo de Serviço</Label>
+                <Label className="text-muted-foreground">Tipo de Serviço</Label>
                 <Select value={selectedServiceType} onValueChange={(value) => {
                   setSelectedServiceType(value)
                   setCalcCurrent('')
@@ -630,10 +555,10 @@ export default function PricingConfigPage() {
             {/* Formulário */}
             <Card
               id="pricing-form"
-              className={`bg-brand-black-light transition-all duration-300 ${
+              className={`bg-card transition-all duration-300 ${
                 isEditing
                   ? 'border-brand-purple/50 ring-1 ring-brand-purple/20 shadow-lg shadow-brand-purple/10'
-                  : 'border-white/10'
+                  : 'border-border'
               }`}
             >
               <CardHeader className="pb-4">
@@ -641,19 +566,19 @@ export default function PricingConfigPage() {
                   <div className={`p-2 rounded-lg transition-colors ${
                     isEditing
                       ? 'bg-brand-purple/20 border border-brand-purple/30'
-                      : 'bg-white/5 border border-white/10'
+                      : 'bg-white/5 border border-border'
                   }`}>
                     {isEditing ? (
                       <Edit className="h-5 w-5 text-brand-purple" />
                     ) : (
-                      <Plus className="h-5 w-5 text-brand-gray-400" />
+                      <Plus className="h-5 w-5 text-muted-foreground" />
                     )}
                   </div>
                   <div>
-                    <CardTitle className="text-white font-orbitron text-lg">
+                    <CardTitle className="text-foreground font-orbitron text-lg">
                       {isEditing ? 'Editar' : 'Nova'} Configuração de Preço
                     </CardTitle>
-                    <CardDescription className="text-brand-gray-400">
+                    <CardDescription className="text-muted-foreground">
                       {selectedServiceType === 'COACHING'
                         ? 'Configure o preço por hora para diferentes faixas de horas'
                         : selectedMode === 'PREMIER'
@@ -668,7 +593,7 @@ export default function PricingConfigPage() {
                   {/* Range inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="rangeStart" className="text-brand-gray-300 flex items-center gap-2">
+                      <Label htmlFor="rangeStart" className="text-muted-foreground flex items-center gap-2">
                         {selectedServiceType === 'COACHING' ? 'Horas mínimas' : selectedMode === 'PREMIER' ? 'Rating Inicial' : 'Nível Inicial'}
                         {rangeStart && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
@@ -685,11 +610,11 @@ export default function PricingConfigPage() {
                         placeholder={selectedServiceType === 'COACHING' ? '1' : selectedMode === 'PREMIER' ? '0' : '1'}
                         required
                         disabled={isSaving}
-                        className="bg-brand-black border-white/10 focus:border-brand-purple transition-all"
+                        className="bg-background border-border focus:border-brand-purple transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="rangeEnd" className="text-brand-gray-300 flex items-center gap-2">
+                      <Label htmlFor="rangeEnd" className="text-muted-foreground flex items-center gap-2">
                         {selectedServiceType === 'COACHING' ? 'Horas máximas' : selectedMode === 'PREMIER' ? 'Rating Final' : 'Nível Final'}
                         {rangeEnd && selectedServiceType !== 'COACHING' && (
                           <span className="text-xs text-brand-purple">
@@ -706,7 +631,7 @@ export default function PricingConfigPage() {
                         placeholder={selectedServiceType === 'COACHING' ? '10' : selectedMode === 'PREMIER' ? '4999' : '10'}
                         required
                         disabled={isSaving}
-                        className="bg-brand-black border-white/10 focus:border-brand-purple transition-all"
+                        className="bg-background border-border focus:border-brand-purple transition-all"
                       />
                     </div>
                   </div>
@@ -714,11 +639,11 @@ export default function PricingConfigPage() {
                   {/* Price input */}
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="price" className="text-brand-gray-300">
+                      <Label htmlFor="price" className="text-muted-foreground">
                         {selectedServiceType === 'COACHING' ? 'Preço por hora (R$)' : 'Preço (R$)'}
                       </Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gray-500 text-sm">R$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">R$</span>
                         <Input
                           id="price"
                           type="number"
@@ -728,7 +653,7 @@ export default function PricingConfigPage() {
                           placeholder="25.00"
                           required
                           disabled={isSaving}
-                          className="bg-brand-black border-white/10 focus:border-brand-purple pl-10 transition-all"
+                          className="bg-background border-border focus:border-brand-purple pl-10 transition-all"
                         />
                       </div>
                     </div>
@@ -736,9 +661,9 @@ export default function PricingConfigPage() {
 
                   {/* Preview */}
                   {(rangeStart && rangeEnd && price) && (
-                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                      <p className="text-xs text-brand-gray-400 mb-1">Preview</p>
-                      <p className="text-sm text-white">
+                    <div className="p-3 rounded-lg bg-white/5 border border-border">
+                      <p className="text-xs text-muted-foreground mb-1">Preview</p>
+                      <p className="text-sm text-foreground">
                         {selectedServiceType === 'COACHING'
                           ? `${rangeStart}h - ${rangeEnd}h`
                           : selectedMode === 'PREMIER'
@@ -748,7 +673,7 @@ export default function PricingConfigPage() {
                         <span className="text-brand-purple-light font-semibold">
                           R$ {parseFloat(price || '0').toFixed(2)}
                         </span>
-                        <span className="text-brand-gray-500 text-xs ml-1">
+                        <span className="text-muted-foreground text-xs ml-1">
                           / {selectedServiceType === 'COACHING' ? '1 hora' : selectedMode === 'PREMIER' ? '100 pontos' : '1 nível'}
                         </span>
                       </p>
@@ -761,9 +686,7 @@ export default function PricingConfigPage() {
                       type="submit"
                       disabled={isSaving}
                       className={`transition-all duration-200 ${
-                        isEditing
-                          ? 'bg-brand-purple hover:bg-brand-purple-light'
-                          : 'bg-green-600 hover:bg-green-500'
+                        isEditing ? '' : 'bg-green-600 hover:bg-green-500'
                       } ${isSaving ? 'opacity-80' : 'hover:scale-105'}`}
                     >
                       {isSaving ? (
@@ -789,7 +712,7 @@ export default function PricingConfigPage() {
                         variant="outline"
                         onClick={resetForm}
                         disabled={isSaving}
-                        className="border-white/10 hover:bg-white/5 hover:border-white/20 transition-all"
+                        className="border-border hover:bg-white/5 hover:border-white/20 transition-all"
                       >
                         <X className="mr-2 h-4 w-4" />
                         Cancelar
@@ -801,11 +724,11 @@ export default function PricingConfigPage() {
             </Card>
 
             {/* Tabela de Configurações */}
-            <Card className="bg-brand-black-light border-white/10">
+            <Card className="bg-card border-border">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
-                  <CardTitle className="text-white font-orbitron text-lg">Configurações Cadastradas</CardTitle>
-                  <CardDescription className="text-brand-gray-400">
+                  <CardTitle className="text-foreground font-orbitron text-lg">Configurações Cadastradas</CardTitle>
+                  <CardDescription className="text-muted-foreground">
                     {selectedServiceType === 'COACHING'
                       ? 'Faixas de horas e preços configurados'
                       : selectedMode === 'PREMIER'
@@ -813,24 +736,24 @@ export default function PricingConfigPage() {
                         : 'Faixas de níveis e preços configurados'}
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={fetchConfigs} className="border-white/10 hover:border-brand-purple/50">
+                <Button variant="outline" size="sm" onClick={fetchConfigs} className="border-border hover:border-brand-purple/50">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </CardHeader>
               <CardContent>
                 {configs.length === 0 ? (
-                  <div className="text-center text-brand-gray-400 py-8 bg-brand-black/30 rounded-lg border border-white/5">
+                  <div className="text-center text-muted-foreground py-8 bg-background/30 rounded-lg border border-border">
                     Nenhuma configuração encontrada para este modo de jogo.
                   </div>
                 ) : (
-                  <div className="rounded-md border border-white/10 overflow-hidden">
+                  <div className="rounded-md border border-border overflow-hidden">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-white/10 hover:bg-transparent">
-                          <TableHead className="text-brand-gray-300">Faixa</TableHead>
-                          <TableHead className="text-brand-gray-300">Preço</TableHead>
-                          <TableHead className="text-brand-gray-300 text-center">Ativo</TableHead>
-                          <TableHead className="text-brand-gray-300 text-right">Ações</TableHead>
+                        <TableRow className="border-border hover:bg-transparent">
+                          <TableHead className="text-muted-foreground">Faixa</TableHead>
+                          <TableHead className="text-muted-foreground">Preço</TableHead>
+                          <TableHead className="text-muted-foreground text-center">Ativo</TableHead>
+                          <TableHead className="text-muted-foreground text-right">Ações</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -839,7 +762,7 @@ export default function PricingConfigPage() {
                           .map((config) => (
                             <TableRow
                               key={config.id}
-                              className={`border-white/10 transition-all duration-300 ${
+                              className={`border-border transition-all duration-300 ${
                                 deletingId === config.id
                                   ? 'animate-row-delete opacity-0 scale-95 bg-red-500/10'
                                   : newlyAddedId === config.id
@@ -851,7 +774,7 @@ export default function PricingConfigPage() {
                                         : 'hover:bg-white/5'
                               }`}
                             >
-                              <TableCell className="font-medium text-white">
+                              <TableCell className="font-medium text-foreground">
                                 {formatRangeDisplay(config)}
                               </TableCell>
                               <TableCell>
@@ -872,7 +795,7 @@ export default function PricingConfigPage() {
                                     size="sm"
                                     onClick={() => handleEdit(config)}
                                     disabled={deletingId === config.id}
-                                    className="border-white/10 hover:border-brand-purple/50 hover:bg-brand-purple/10 hover:scale-110 h-8 w-8 p-0 transition-all duration-200"
+                                    className="border-border hover:border-brand-purple/50 hover:bg-brand-purple/10 hover:scale-110 h-8 w-8 p-0 transition-all duration-200"
                                   >
                                     <Edit className="h-3.5 w-3.5" />
                                   </Button>
@@ -881,7 +804,7 @@ export default function PricingConfigPage() {
                                     size="sm"
                                     onClick={() => setDeleteId(config.id)}
                                     disabled={deletingId === config.id}
-                                    className="border-white/10 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 hover:scale-110 h-8 w-8 p-0 transition-all duration-200"
+                                    className="border-border hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 hover:scale-110 h-8 w-8 p-0 transition-all duration-200"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
@@ -899,19 +822,19 @@ export default function PricingConfigPage() {
 
           {/* Right Column: Calculator Preview */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4 bg-brand-black-light border-white/10">
+            <Card className="sticky top-4 bg-card border-border">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-white font-orbitron text-lg">
+                <CardTitle className="flex items-center gap-2 text-foreground font-orbitron text-lg">
                   <Calculator className="h-5 w-5 text-brand-purple" />
                   Preview do Calculador
                 </CardTitle>
-                <CardDescription className="text-brand-gray-400">
+                <CardDescription className="text-muted-foreground">
                   Teste o cálculo de preço com as configurações atuais
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="calcCurrent" className="text-brand-gray-300">
+                  <Label htmlFor="calcCurrent" className="text-muted-foreground">
                     {selectedServiceType === 'COACHING' ? 'Número de horas' : selectedMode === 'PREMIER' ? 'Rating Atual (K)' : 'Nível Atual'}
                   </Label>
                   <Input
@@ -920,12 +843,12 @@ export default function PricingConfigPage() {
                     value={calcCurrent}
                     onChange={(e) => setCalcCurrent(e.target.value)}
                     placeholder={selectedServiceType === 'COACHING' ? '3' : selectedMode === 'PREMIER' ? '10' : '5'}
-                    className="bg-brand-black border-white/10 focus:border-brand-purple"
+                    className="bg-background border-border focus:border-brand-purple"
                   />
                 </div>
                 {selectedServiceType !== 'COACHING' && (
                   <div className="space-y-2">
-                    <Label htmlFor="calcTarget" className="text-brand-gray-300">
+                    <Label htmlFor="calcTarget" className="text-muted-foreground">
                       {selectedMode === 'PREMIER' ? 'Rating Desejado (K)' : 'Nível Desejado'}
                     </Label>
                     <Input
@@ -934,12 +857,12 @@ export default function PricingConfigPage() {
                       value={calcTarget}
                       onChange={(e) => setCalcTarget(e.target.value)}
                       placeholder={selectedMode === 'PREMIER' ? '15' : '10'}
-                      className="bg-brand-black border-white/10 focus:border-brand-purple"
+                      className="bg-background border-border focus:border-brand-purple"
                     />
                   </div>
                 )}
                 <Button
-                  className="w-full bg-brand-purple hover:bg-brand-purple-light"
+                  className="w-full"
                   onClick={handleCalculatePreview}
                   disabled={isCalculating || !calcCurrent || (selectedServiceType !== 'COACHING' && !calcTarget)}
                 >
@@ -958,11 +881,11 @@ export default function PricingConfigPage() {
 
                 {calcResult !== null && (
                   <div className="mt-4 p-4 bg-brand-purple/10 border border-brand-purple/30 rounded-lg text-center">
-                    <p className="text-sm text-brand-gray-400 mb-1">Preço Calculado</p>
+                    <p className="text-sm text-muted-foreground mb-1">Preço Calculado</p>
                     <p className="text-3xl font-bold text-brand-purple-light font-orbitron">
                       R$ {calcResult.toFixed(2)}
                     </p>
-                    <p className="text-xs text-brand-gray-400 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       {selectedServiceType === 'COACHING'
                         ? `${calcCurrent}h de coaching`
                         : selectedMode === 'PREMIER'
@@ -978,17 +901,17 @@ export default function PricingConfigPage() {
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent className="bg-brand-black-light border-red-500/20 shadow-2xl shadow-red-500/10">
+          <AlertDialogContent className="bg-card border-red-500/20 shadow-2xl shadow-red-500/10">
             <AlertDialogHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-full bg-red-500/10 border border-red-500/30">
                   <Trash2 className="h-5 w-5 text-red-400" />
                 </div>
-                <AlertDialogTitle className="text-white font-orbitron text-lg">
+                <AlertDialogTitle className="text-foreground font-orbitron text-lg">
                   Confirmar Exclusão
                 </AlertDialogTitle>
               </div>
-              <AlertDialogDescription className="text-brand-gray-400 leading-relaxed">
+              <AlertDialogDescription className="text-muted-foreground leading-relaxed">
                 Tem certeza que deseja excluir esta configuração de preço? Esta ação não pode ser desfeita.
                 <span className="block mt-2 text-yellow-400/80 text-sm">
                   💡 Dica: Considere desativar a faixa ao invés de deletá-la para manter histórico.
@@ -996,7 +919,7 @@ export default function PricingConfigPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4">
-              <AlertDialogCancel className="border-white/10 hover:bg-white/5 hover:border-white/20 transition-all">
+              <AlertDialogCancel className="border-border hover:bg-white/5 hover:border-white/20 transition-all">
                 Cancelar
               </AlertDialogCancel>
               <AlertDialogAction
@@ -1009,6 +932,8 @@ export default function PricingConfigPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-    </div>
+        </>
+      )}
+    </AdminPageShell>
   )
 }

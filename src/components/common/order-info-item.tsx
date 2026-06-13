@@ -9,13 +9,13 @@ interface OrderInfoItemProps {
 /**
  * Item de informação reutilizável para cards de pedidos
  */
-export function OrderInfoItem({ label, value, valueClassName = 'text-white' }: OrderInfoItemProps) {
+export function OrderInfoItem({ label, value, valueClassName = 'text-foreground' }: OrderInfoItemProps) {
   return (
     <div>
-      <p className="text-sm text-brand-gray-400 font-rajdhani mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+      <p className="text-sm text-muted-foreground font-rajdhani mb-1">
         {label}
       </p>
-      <p className={`text-sm font-rajdhani ${valueClassName}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+      <p className={`text-sm font-rajdhani ${valueClassName}`}>
         {value}
       </p>
     </div>

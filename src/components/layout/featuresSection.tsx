@@ -53,7 +53,7 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section className="py-20 bg-black text-white" aria-labelledby="features-heading">
+    <section className="py-20 bg-background text-foreground" aria-labelledby="features-heading">
       <div className="container mx-auto px-6">
         <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-center mb-14">
           Por que escolher a <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-dark bg-clip-text text-transparent">FlautasBoost</span>?
@@ -66,8 +66,8 @@ export default function FeaturesSection() {
               key={i}
               className={cn(
                 "group relative flex flex-col items-center justify-center p-8 text-center transition-colors duration-200 overflow-hidden",
-                "bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-gray-800/60 border-brand-purple-dark/50 hover:border-brand-purple-light/80",
-                "shadow-lg hover:shadow-2xl hover:shadow-brand-purple/30 backdrop-blur-sm"
+                "bg-card border-brand-purple-dark/50 hover:border-brand-purple-light/80",
+                "shadow-lg hover:shadow-2xl hover:shadow-brand-purple/30"
               )}
               style={{ transformOrigin: 'center center' }}
             >
@@ -80,10 +80,10 @@ export default function FeaturesSection() {
                     className={cn("w-12 h-12", feature.iconColor)}
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-brand-purple-lighter transition-colors duration-300">
+                <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-brand-purple-lighter transition-colors duration-300">
                   {feature.title}
                 </h3>
-                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
+                <p className="text-muted-foreground text-sm group-hover:text-muted-foreground transition-colors duration-300">
                   {feature.subtitle}
                 </p>
               </CardContent>

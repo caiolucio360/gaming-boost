@@ -17,7 +17,7 @@ function Checkbox({
         // Touch target wrapper - visual is 18px but touch area extends with relative positioning
         "peer relative",
         // Visual checkbox styling
-        "border-white/10 dark:bg-input/30",
+        "border-input dark:bg-input/30",
         "data-[state=checked]:bg-brand-purple data-[state=checked]:text-white data-[state=checked]:border-brand-purple",
         "focus-visible:border-brand-purple focus-visible:ring-brand-purple/30",
         "aria-invalid:ring-brand-red/20 dark:aria-invalid:ring-brand-red/40 aria-invalid:border-brand-red",

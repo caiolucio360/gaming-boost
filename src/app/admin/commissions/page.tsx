@@ -11,11 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { ArrowLeft, Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { CommissionsSkeleton } from '@/app/admin/commissions/_components/commissions-skeleton'
+import { Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
 import { showSuccess, showError } from '@/lib/toast'
+import { api, ApiError } from '@/lib/api-client'
 import { formatPrice } from '@/lib/utils'
 
 interface CommissionConfig {
@@ -75,21 +76,23 @@ export default function AdminCommissionsPage() {
   }, [user, withLoading])
 
   const fetchConfig = async () => {
-    const response = await fetch('/api/admin/commission-config')
-    if (response.ok) {
-      const data = await response.json()
+    try {
+      const data = await api.get<{ config: NonNullable<typeof config> }>('/api/admin/commission-config')
       setConfig(data.config)
       setDevAdminInput(String(Math.round(data.config.devAdminPercentage * 100)))
       setBoosterInput(String(Math.round(data.config.boosterPercentage * 100)))
       setWaitingDaysInput(String(data.config.withdrawalWaitingDays ?? 7))
+    } catch {
+      // silencioso
     }
   }
 
   const fetchBoosters = async () => {
-    const response = await fetch('/api/admin/users?role=BOOSTER&limit=100')
-    if (response.ok) {
-      const data = await response.json()
+    try {
+      const data = await api.get<{ users: typeof boosters }>('/api/admin/users?role=BOOSTER&limit=100')
       setBoosters(data.users || [])
+    } catch {
+      // silencioso
     }
   }
 
@@ -124,24 +127,19 @@ export default function AdminCommissionsPage() {
 
     setSaving(true)
     try {
-      const response = await fetch('/api/admin/commission-config', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          boosterPercentage: booster / 100,
-          devAdminPercentage: dev / 100,
-          withdrawalWaitingDays: days,
-        }),
+      const data = await api.put<{ config: NonNullable<typeof config> }>('/api/admin/commission-config', {
+        boosterPercentage: booster / 100,
+        devAdminPercentage: dev / 100,
+        withdrawalWaitingDays: days,
       })
-      const data = await response.json()
-      if (response.ok) {
-        setConfig(data.config)
-        showSuccess('Configuração salva com sucesso!')
+      setConfig(data.config)
+      showSuccess('Configuração salva com sucesso!')
+    } catch (e) {
+      if (e instanceof ApiError) {
+        setConfigAlert({ title: 'Erro', description: e.message || 'Erro ao salvar', variant: 'destructive' })
       } else {
-        setConfigAlert({ title: 'Erro', description: data.message || 'Erro ao salvar', variant: 'destructive' })
+        showError('Erro de conexão')
       }
-    } catch {
-      showError('Erro de conexão')
     } finally {
       setSaving(false)
     }
@@ -170,23 +168,14 @@ export default function AdminCommissionsPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${boosterId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ boosterCommissionPercentage: percentage }),
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setBoosters(prev => prev.map(b =>
-          b.id === boosterId ? { ...b, boosterCommissionPercentage: percentage } : b
-        ))
-        setEditingId(null)
-        showSuccess(percentage === null ? 'Override removido — usando padrão global' : 'Porcentagem atualizada')
-      } else {
-        showError(data.message || 'Erro ao atualizar')
-      }
-    } catch {
-      showError('Erro de conexão')
+      await api.patch(`/api/admin/users/${boosterId}`, { boosterCommissionPercentage: percentage })
+      setBoosters(prev => prev.map(b =>
+        b.id === boosterId ? { ...b, boosterCommissionPercentage: percentage } : b
+      ))
+      setEditingId(null)
+      showSuccess(percentage === null ? 'Override removido — usando padrão global' : 'Porcentagem atualizada')
+    } catch (e) {
+      showError(e instanceof ApiError ? e.message : 'Erro de conexão')
     } finally {
       setSavingBooster(null)
     }
@@ -204,34 +193,23 @@ export default function AdminCommissionsPage() {
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-6">
-          <Link href="/admin">
-            <Button variant="ghost" className="text-brand-purple-light hover:text-brand-purple-light mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <PageHeader
-          highlight="COMISSÕES"
-          title="GERENCIAR"
-          description="Configure as porcentagens de comissão. Mudanças afetam apenas pedidos futuros."
-        />
-
+    <AdminPageShell
+      highlight="COMISSÕES"
+      title="GERENCIAR"
+      description="Configure as porcentagens de comissão. Mudanças afetam apenas pedidos futuros."
+    >
         {loading ? (
-          <LoadingSpinner />
+          <CommissionsSkeleton />
         ) : (
           <div className="space-y-8">
 
             {/* ── Block 1: Global Config ──────────────────────────────────── */}
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-foreground font-orbitron text-lg">
                   Configuração Global
                 </CardTitle>
-                <CardDescription className="text-brand-gray-500 font-rajdhani">
+                <CardDescription className="text-muted-foreground font-rajdhani">
                   {canEdit ? 'Define os padrões para todos os boosters sem override individual.' : 'Visualização somente leitura.'}
                 </CardDescription>
               </CardHeader>
@@ -239,7 +217,7 @@ export default function AdminCommissionsPage() {
                 <div className={`grid grid-cols-1 gap-4 ${isDevAdmin ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
                   {isDevAdmin && (
                     <div className="space-y-2">
-                      <Label className="text-brand-gray-300 font-rajdhani">% Dev-Admin (off-the-top)</Label>
+                      <Label className="text-muted-foreground font-rajdhani">% Dev-Admin (off-the-top)</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
@@ -248,15 +226,15 @@ export default function AdminCommissionsPage() {
                           value={devAdminInput}
                           onChange={e => setDevAdminInput(e.target.value)}
                           disabled={!canEdit}
-                          className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
+                          className="bg-card border-brand-purple/20 focus:border-brand-purple text-foreground"
                         />
-                        <Percent className="h-4 w-4 text-brand-gray-500 flex-shrink-0" />
+                        <Percent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       </div>
                     </div>
                   )}
 
                   <div className="space-y-2">
-                    <Label className="text-brand-gray-300 font-rajdhani">% Booster padrão</Label>
+                    <Label className="text-muted-foreground font-rajdhani">% Booster padrão</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
@@ -265,29 +243,29 @@ export default function AdminCommissionsPage() {
                         value={boosterInput}
                         onChange={e => setBoosterInput(e.target.value)}
                         disabled={!canEdit}
-                        className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
+                        className="bg-card border-brand-purple/20 focus:border-brand-purple text-foreground"
                       />
-                      <Percent className="h-4 w-4 text-brand-gray-500 flex-shrink-0" />
+                      <Percent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-brand-gray-300 font-rajdhani">% Admin (automático)</Label>
+                    <Label className="text-muted-foreground font-rajdhani">% Admin (automático)</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
                         value={isNaN(adminPct) ? '' : adminPct.toFixed(0)}
                         disabled
-                        className="bg-brand-black/30 border-brand-purple/20 text-brand-gray-500 cursor-not-allowed"
+                        className="bg-background/30 border-brand-purple/20 text-muted-foreground cursor-not-allowed"
                       />
-                      <Percent className="h-4 w-4 text-brand-gray-500 flex-shrink-0" />
+                      <Percent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     </div>
-                    <p className="text-xs text-brand-gray-500">= 100% − % Booster</p>
+                    <p className="text-xs text-muted-foreground">= 100% − % Booster</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 max-w-xs">
-                  <Label className="text-brand-gray-300 font-rajdhani flex items-center gap-1">
+                  <Label className="text-muted-foreground font-rajdhani flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     Dias para saque do booster
                   </Label>
@@ -299,36 +277,36 @@ export default function AdminCommissionsPage() {
                       value={waitingDaysInput}
                       onChange={e => setWaitingDaysInput(e.target.value)}
                       disabled={!canEdit}
-                      className="bg-brand-black-light border-brand-purple/20 focus:border-brand-purple text-white"
+                      className="bg-card border-brand-purple/20 focus:border-brand-purple text-foreground"
                     />
-                    <span className="text-brand-gray-500 text-sm font-rajdhani flex-shrink-0">dias</span>
+                    <span className="text-muted-foreground text-sm font-rajdhani flex-shrink-0">dias</span>
                   </div>
-                  <p className="text-xs text-brand-gray-500">Após conclusão do pedido. 0 = saque imediato.</p>
+                  <p className="text-xs text-muted-foreground">Após conclusão do pedido. 0 = saque imediato.</p>
                 </div>
 
                 {/* Live preview */}
-                <div className="rounded-lg bg-brand-black/30 border border-brand-purple/20 p-4">
-                  <p className="text-brand-gray-300 font-rajdhani text-sm mb-3">
+                <div className="rounded-lg bg-background/30 border border-brand-purple/20 p-4">
+                  <p className="text-muted-foreground font-rajdhani text-sm mb-3">
                     Simulação em {formatPrice(PREVIEW_AMOUNT)}:
                   </p>
                   <div className={`grid gap-3 text-center ${isDevAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
                     {isDevAdmin && (
                       <div>
-                        <p className="text-xs text-brand-gray-500 font-rajdhani">Dev-Admin</p>
-                        <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <p className="text-xs text-muted-foreground font-rajdhani">Dev-Admin</p>
+                        <p className="text-foreground font-orbitron font-bold">
                           {formatPrice(previewDev)}
                         </p>
                       </div>
                     )}
                     <div>
-                      <p className="text-xs text-brand-gray-500 font-rajdhani">Booster</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-xs text-muted-foreground font-rajdhani">Booster</p>
+                      <p className="text-foreground font-orbitron font-bold">
                         {formatPrice(previewBooster)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-brand-gray-500 font-rajdhani">Admin</p>
-                      <p className="text-white font-orbitron font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                      <p className="text-xs text-muted-foreground font-rajdhani">Admin</p>
+                      <p className="text-foreground font-orbitron font-bold">
                         {formatPrice(previewAdmin)}
                       </p>
                     </div>
@@ -346,7 +324,6 @@ export default function AdminCommissionsPage() {
                   <Button
                     onClick={handleSaveConfig}
                     disabled={saving}
-                    className="bg-brand-purple hover:bg-brand-purple-light text-white"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {saving ? 'Salvando...' : 'Salvar Configuração'}
@@ -356,18 +333,18 @@ export default function AdminCommissionsPage() {
             </Card>
 
             {/* ── Block 2: Booster Table ──────────────────────────────────── */}
-            <Card className="bg-brand-black-light border-brand-purple/20">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                <CardTitle className="text-foreground font-orbitron text-lg">
                   Boosters
                 </CardTitle>
-                <CardDescription className="text-brand-gray-500 font-rajdhani">
+                <CardDescription className="text-muted-foreground font-rajdhani">
                   Overrides individuais. Deixe em branco para usar o padrão global.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {boosters.length === 0 ? (
-                  <p className="text-brand-gray-500 font-rajdhani text-center py-8">Nenhum booster ativo encontrado.</p>
+                  <p className="text-muted-foreground font-rajdhani text-center py-8">Nenhum booster ativo encontrado.</p>
                 ) : (
                   <div className="space-y-3">
                     {boosters.map(booster => {
@@ -379,7 +356,7 @@ export default function AdminCommissionsPage() {
                       return (
                         <div
                           key={booster.id}
-                          className="flex items-center gap-4 p-3 rounded-lg border border-brand-purple/20 bg-brand-black/30 hover:border-brand-purple transition-colors"
+                          className="flex items-center gap-4 p-3 rounded-lg border border-brand-purple/20 bg-background/30 hover:border-brand-purple transition-colors"
                         >
                           <Avatar className="h-9 w-9 flex-shrink-0">
                             <AvatarImage src={booster.image || ''} />
@@ -389,10 +366,10 @@ export default function AdminCommissionsPage() {
                           </Avatar>
 
                           <div className="flex-1 min-w-0">
-                            <p className="text-white font-rajdhani font-medium truncate">
+                            <p className="text-foreground font-rajdhani font-medium truncate">
                               {booster.name || booster.email}
                             </p>
-                            <p className="text-brand-gray-500 text-xs font-rajdhani truncate">{booster.email}</p>
+                            <p className="text-muted-foreground text-xs font-rajdhani truncate">{booster.email}</p>
                           </div>
 
                           <div className="flex items-center gap-3 flex-shrink-0">
@@ -405,14 +382,14 @@ export default function AdminCommissionsPage() {
                                   placeholder={`padrão (${Math.round((config?.boosterPercentage ?? 0.25) * 100)}%)`}
                                   value={editValue}
                                   onChange={e => setEditValue(e.target.value)}
-                                  className="w-28 bg-brand-black-light border-brand-purple text-white h-8 text-sm"
+                                  className="w-28 bg-card border-brand-purple text-foreground h-8 text-sm"
                                   autoFocus
                                 />
                                 <Button
                                   size="sm"
                                   onClick={() => saveBoosterOverride(booster.id)}
                                   disabled={savingBooster === booster.id}
-                                  className="bg-brand-purple hover:bg-brand-purple-light text-white h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0"
                                 >
                                   <Check className="h-3 w-3" />
                                 </Button>
@@ -420,7 +397,7 @@ export default function AdminCommissionsPage() {
                                   size="sm"
                                   variant="ghost"
                                   onClick={cancelEdit}
-                                  className="text-brand-gray-500 hover:text-white h-8 w-8 p-0"
+                                  className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -429,7 +406,7 @@ export default function AdminCommissionsPage() {
                               <>
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
-                                    <span className="text-white font-orbitron text-sm font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                    <span className="text-foreground font-orbitron text-sm font-bold">
                                       {Math.round(pct * 100)}%
                                     </span>
                                     {hasOverride && (
@@ -438,14 +415,14 @@ export default function AdminCommissionsPage() {
                                       </Badge>
                                     )}
                                   </div>
-                                  <p className="text-brand-gray-500 text-xs font-rajdhani">admin: {adminResultante}%</p>
+                                  <p className="text-muted-foreground text-xs font-rajdhani">admin: {adminResultante}%</p>
                                 </div>
                                 {canEdit && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => startEdit(booster)}
-                                    className="text-brand-gray-500 hover:text-white h-8 w-8 p-0"
+                                    className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                                   >
                                     <Pencil className="h-3 w-3" />
                                   </Button>
@@ -462,6 +439,6 @@ export default function AdminCommissionsPage() {
             </Card>
           </div>
         )}
-    </div>
+    </AdminPageShell>
   )
 }

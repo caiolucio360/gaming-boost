@@ -32,29 +32,29 @@ export default function GamesSection() {
     }))
   
     return (
-      <section className="py-20 bg-black" aria-labelledby="games-heading">
+      <section className="py-20 bg-background" aria-labelledby="games-heading">
         <div className="container mx-auto px-6">
-          <h2 id="games-heading" className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
+          <h2 id="games-heading" className="text-3xl md:text-4xl font-bold text-center mb-14 text-foreground">
             Jogos Disponíveis
           </h2>
   
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {games.map((game, i) => (
               <Link key={i} href={game.href} className="group" aria-label={`Ver serviços de ${game.name} - ${game.description}`}>
-                <Card className="overflow-hidden border-brand-purple-dark/50 bg-gray-900 hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 transition-all duration-300 group-hover:scale-105">
+                <Card className="overflow-hidden border-brand-purple-dark/50 bg-card hover:shadow-lg hover:shadow-brand-purple/20 hover:scale-105 transition-all duration-300 group-hover:scale-105">
                   <div
                     className={cn(
                       "h-48 flex items-center justify-center bg-gradient-to-br",
                       game.gradient
                     )}
                   >
-                    <game.icon className="h-20 w-20 text-white" aria-hidden="true" />
+                    <game.icon className="h-20 w-20 text-foreground" aria-hidden="true" />
                   </div>
                   <CardHeader className="text-center">
-                    <CardTitle className="text-xl font-bold text-white">
+                    <CardTitle className="text-xl font-bold text-foreground">
                       {game.name}
                     </CardTitle>
-                    <p className="text-gray-400">{game.description}</p>
+                    <p className="text-muted-foreground">{game.description}</p>
                   </CardHeader>
                 </Card>
               </Link>

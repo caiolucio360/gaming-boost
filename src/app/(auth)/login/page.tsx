@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
-import { Spinner } from '@/components/common/loading-spinner'
+import { Spinner, LoadingSpinner } from '@/components/common/loading-spinner'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -59,13 +59,13 @@ function LoginContent() {
   }
 
   return (
-    <div className="w-full max-w-md bg-brand-black-light/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-8">
+    <div className="w-full max-w-md bg-card/30 backdrop-blur-md border border-brand-purple/50 rounded-lg p-4 sm:p-8">
       <div className="text-center mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <h1 className="text-xl sm:text-3xl font-bold font-orbitron mb-1 sm:mb-2">
           <span className="text-brand-purple-light">ENTRAR</span>
-          <span className="text-white"> NA CONTA</span>
+          <span className="text-foreground"> NA CONTA</span>
         </h1>
-        <p className="text-sm text-brand-gray-300 font-rajdhani">
+        <p className="text-sm text-muted-foreground font-rajdhani">
           Entre na sua conta para acessar nossos serviços
         </p>
       </div>
@@ -93,14 +93,14 @@ function LoginContent() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white font-rajdhani text-sm">
+                <FormLabel className="text-foreground font-rajdhani text-sm">
                   Email
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="seu@email.com"
-                    className="h-10 bg-brand-black-light border-white/10 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-white placeholder:text-brand-gray-500"
+                    className="h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                     {...field}
                   />
                 </FormControl>
@@ -114,7 +114,7 @@ function LoginContent() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white font-rajdhani text-sm">
+                <FormLabel className="text-foreground font-rajdhani text-sm">
                   Senha
                 </FormLabel>
                 <FormControl>
@@ -122,14 +122,14 @@ function LoginContent() {
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Sua senha"
-                      className="pr-10 h-10 bg-brand-black-light border-white/10 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-white placeholder:text-brand-gray-500"
+                      className="pr-10 h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 text-brand-gray-500 hover:text-brand-gray-300 hover:bg-transparent"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-muted-foreground hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
@@ -155,7 +155,6 @@ function LoginContent() {
             disabled={isLoading}
             size="lg"
             className="w-full font-bold font-rajdhani"
-            style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             {isLoading ? (
               <>
@@ -168,7 +167,7 @@ function LoginContent() {
           </Button>
 
           <div className="text-center text-xs">
-            <span className="text-brand-gray-500 font-rajdhani">Não tem uma conta? </span>
+            <span className="text-muted-foreground font-rajdhani">Não tem uma conta? </span>
             <Link href="/register" className="text-brand-purple hover:text-brand-purple-light transition-colors font-rajdhani font-medium">
               Cadastre-se
             </Link>
@@ -181,8 +180,8 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-brand-black flex items-start justify-center px-4 pt-28 pb-8">
-      <Suspense fallback={<div className="text-white">Carregando...</div>}>
+    <div className="min-h-screen bg-background flex items-start justify-center px-4 pt-28 pb-8">
+      <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
          <LoginContent />
       </Suspense>
     </div>

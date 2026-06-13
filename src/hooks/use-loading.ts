@@ -21,7 +21,7 @@ interface UseLoadingReturn {
  * const { loading, refreshing, withLoading } = useLoading()
  * 
  * const fetchData = () => withLoading(async () => {
- *   const data = await apiGet('/api/data')
+ *   const data = await api.get('/api/data')
  *   return data
  * })
  */

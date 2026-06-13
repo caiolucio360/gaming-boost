@@ -38,7 +38,20 @@ export function generateMetadata({
     authors: [{ name: 'FlautasBoost' }],
     creator: 'FlautasBoost',
     publisher: 'FlautasBoost',
-    robots: noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    robots: noindex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1,
+          },
+        },
+    formatDetection: { email: false, address: false, telephone: false },
     openGraph: {
       type,
       locale: 'pt_BR',

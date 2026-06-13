@@ -48,12 +48,11 @@ export function RetentionProgress({
     : null
 
   return (
-    <div className="bg-brand-black-light border border-brand-purple/20 rounded-xl p-5 space-y-4">
+    <div className="bg-card border border-brand-purple/20 rounded-xl p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3
-          className="text-white text-sm font-bold tracking-wide font-orbitron"
-          style={{ fontFamily: 'Orbitron, sans-serif' }}
+          className="text-foreground text-sm font-bold tracking-wide font-orbitron"
         >
           PROGRESSÃO
         </h3>
@@ -67,20 +66,18 @@ export function RetentionProgress({
       {/* Rating display */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-xs text-brand-gray-500 mb-0.5">Rating atual</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Rating atual</p>
           <p
-            className="text-2xl font-bold text-white font-orbitron"
-            style={{ fontFamily: 'Orbitron, sans-serif' }}
+            className="text-2xl font-bold text-foreground font-orbitron"
           >
             {formatRating(currentRating, gameMode)}
           </p>
         </div>
         {!atMax && nextMilestone && (
           <div className="text-right">
-            <p className="text-xs text-brand-gray-500 mb-0.5">Próximo marco</p>
+            <p className="text-xs text-muted-foreground mb-0.5">Próximo marco</p>
             <p
               className="text-lg font-bold text-brand-purple-light font-orbitron"
-              style={{ fontFamily: 'Orbitron, sans-serif' }}
             >
               {formatRating(nextMilestone, gameMode)}
             </p>
@@ -94,7 +91,7 @@ export function RetentionProgress({
       {/* Progress bar */}
       {!atMax && (
         <div>
-          <div className="flex justify-between text-xs text-brand-gray-500 mb-1.5">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
             <span>{progressPct}% concluído</span>
             {nextMilestone && (
               <span>Faltam {formatRating(nextMilestone - currentRating, gameMode)}</span>
@@ -110,19 +107,19 @@ export function RetentionProgress({
       )}
 
       {/* Timeline */}
-      <div className="space-y-2 pt-2 border-t border-white/5">
-        <p className="text-xs text-brand-gray-500 font-semibold uppercase tracking-wider">
+      <div className="space-y-2 pt-2 border-t border-border">
+        <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
           Histórico
         </p>
         {orders.slice(-4).map((order) => (
           <div key={order.id} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-purple-light flex-shrink-0" />
-              <span className="text-brand-gray-300">
+              <span className="text-muted-foreground">
                 {formatRating(order.targetRating ?? 0, gameMode)}
               </span>
             </div>
-            <span className="text-brand-gray-500 text-xs">
+            <span className="text-muted-foreground text-xs">
               {new Date(order.completedAt).toLocaleDateString('pt-BR')}
             </span>
           </div>
@@ -130,7 +127,7 @@ export function RetentionProgress({
         {!atMax && (
           <div className="flex items-center gap-2 text-sm opacity-40">
             <div className="w-1.5 h-1.5 rounded-full border border-brand-purple-light flex-shrink-0" />
-            <span className="text-brand-gray-500">Próximo</span>
+            <span className="text-muted-foreground">Próximo</span>
           </div>
         )}
       </div>

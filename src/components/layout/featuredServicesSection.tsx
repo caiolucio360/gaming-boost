@@ -24,9 +24,9 @@ export default function FeaturedServicesSection() {
   ]
 
   return (
-    <section id="services" className="py-20 bg-black" aria-labelledby="featured-services-heading">
+    <section id="services" className="py-20 bg-background" aria-labelledby="featured-services-heading">
       <div className="container mx-auto px-6">
-        <h2 id="featured-services-heading" className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
+        <h2 id="featured-services-heading" className="text-3xl md:text-4xl font-bold text-center mb-14 text-foreground">
           <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-dark bg-clip-text text-transparent">
             Serviços em Destaque
           </span>
@@ -38,7 +38,7 @@ export default function FeaturedServicesSection() {
             return (
               <Card
                 key={index}
-                className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 transition-colors duration-200 overflow-hidden"
+                className="group relative bg-card border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-2xl hover:shadow-brand-purple/30 transition-colors duration-200 overflow-hidden"
                 style={{ transformOrigin: 'center center' }}
               >
                 {/* Efeito de brilho no hover */}
@@ -51,13 +51,13 @@ export default function FeaturedServicesSection() {
                     <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 group-hover:from-brand-purple/30 group-hover:to-brand-purple-dark/30 transition-all duration-300 mb-4">
                       <IconComponent className="h-12 w-12 text-brand-purple-light group-hover:text-brand-purple-light transition-colors duration-300" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white font-orbitron mb-3 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+                    <h3 className="text-2xl font-bold text-foreground font-orbitron mb-3 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                       {service.title}
                       {!service.available && (
                         <span className="text-sm text-brand-purple-light font-semibold ml-2">(em breve)</span>
                       )}
                     </h3>
-                    <p className="text-brand-gray-300 font-rajdhani mb-6 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                    <p className="text-muted-foreground font-rajdhani mb-6 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                       {service.description}
                     </p>
                     {service.available ? (

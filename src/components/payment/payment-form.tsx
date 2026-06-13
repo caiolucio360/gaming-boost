@@ -7,6 +7,16 @@ import { ButtonLoading } from '@/components/common/button-loading'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { validateCPF, validatePhone, formatTaxId, formatPhone, maskCPF, maskPhone } from '@/lib/brazilian'
+import { api } from '@/lib/api-client'
+
+interface PaymentResult {
+  id: number
+  pixCode: string
+  qrCode: string
+  total: number
+  expiresAt: string
+  status: string
+}
 
 interface PaymentResult {
   id: number
@@ -79,24 +89,11 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
       const formattedPhone = formatPhone(phone)   // +5511999999999
       const formattedTaxId = formatTaxId(taxId)   // 12345678900
 
-      const response = await fetch('/api/payment/pix', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId,
-          phone: formattedPhone,
-          taxId: formattedTaxId,
-        }),
+      const data = await api.post<{ payment: Parameters<typeof onSuccess>[0] }>('/api/payment/pix', {
+        orderId,
+        phone: formattedPhone,
+        taxId: formattedTaxId,
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        // Sempre usar data.message (amigável) — nunca data.error (código/técnico)
-        throw new Error(data.message || 'Erro ao gerar pagamento')
-      }
 
       onSuccess(data.payment)
     } catch (error) {
@@ -107,19 +104,19 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
   }
 
   return (
-    <Card className="bg-black/30 backdrop-blur-md border-brand-purple/50">
+    <Card className="bg-muted/60 backdrop-blur-md border-brand-purple/50">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-white font-orbitron">
+        <CardTitle className="text-2xl font-bold text-foreground font-orbitron">
           Pagamento via <span className="text-brand-purple-light">PIX</span>
         </CardTitle>
-        <CardDescription className="text-gray-400 font-rajdhani">
-          Total: <span className="text-white font-bold">R$ {orderTotal.toFixed(2)}</span>
+        <CardDescription className="text-muted-foreground font-rajdhani">
+          Total: <span className="text-foreground font-bold">R$ {orderTotal.toFixed(2)}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-white font-rajdhani">
+            <Label htmlFor="phone" className="text-foreground font-rajdhani">
               Telefone (com DDD)
             </Label>
             <Input
@@ -130,18 +127,18 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="(11) 99999-9999"
               required
               maxLength={15}
-              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-black/50 border-brand-purple/50 text-foreground placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.phone && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.phone}</p>
             )}
-            <p className="text-gray-500 text-xs font-rajdhani">
+            <p className="text-muted-foreground text-xs font-rajdhani">
               Necessário para confirmar o pagamento PIX
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="taxId" className="text-white font-rajdhani">
+            <Label htmlFor="taxId" className="text-foreground font-rajdhani">
               CPF
             </Label>
             <Input
@@ -152,18 +149,18 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="000.000.000-00"
               required
               maxLength={14}
-              className="bg-black/50 border-brand-purple/50 text-white placeholder-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-black/50 border-brand-purple/50 text-foreground placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.taxId && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.taxId}</p>
             )}
-            <p className="text-gray-500 text-xs font-rajdhani">
+            <p className="text-muted-foreground text-xs font-rajdhani">
               Requerido pela operadora de pagamento
             </p>
           </div>
 
           <Alert className="bg-brand-purple/10 border-brand-purple/30">
-            <AlertDescription className="text-gray-300 text-sm font-rajdhani">
+            <AlertDescription className="text-muted-foreground text-sm font-rajdhani">
               ℹ️ Seus dados são usados apenas para processar o pagamento e não serão armazenados.
             </AlertDescription>
           </Alert>

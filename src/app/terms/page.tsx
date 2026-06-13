@@ -37,54 +37,54 @@ export default function TermsPage() {
           }),
         }}
       />
-      <div className="min-h-screen bg-brand-black">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-white font-orbitron mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '800' }}>
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground font-orbitron mb-4" style={{ fontWeight: '800' }}>
               <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">TERMOS</span>
-              <span className="text-white"> DE USO</span>
+              <span className="text-foreground"> DE USO</span>
             </h1>
-            <p className="text-xl text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '500' }}>
+            <p className="text-xl text-foreground font-rajdhani group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '500' }}>
               Conheça nossos termos e condições de uso
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <Card className="group relative bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
+            <Card className="group relative bg-card border-brand-purple/50 hover:border-brand-purple-light/80 hover:shadow-xl hover:shadow-brand-purple/20 transition-colors duration-200 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/0 via-brand-purple/5 to-brand-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out pointer-events-none" style={{ willChange: 'opacity' }} />
               <CardContent className="p-8 space-y-8 relative z-10">
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">1.</span> Aceitação dos Termos
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Ao acessar e utilizar a plataforma FlautasBoost, você concorda em cumprir e estar vinculado a estes Termos de Uso.
                   Se você não concordar com qualquer parte destes termos, não deve utilizar nossos serviços. O uso continuado da
                   plataforma constitui aceitação de quaisquer modificações futuras destes termos.
                 </p>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">2.</span> Definições
                 </h2>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  <li><strong className="text-white">Cliente:</strong> Usuário que contrata serviços de boost</li>
-                  <li><strong className="text-white">Booster:</strong> Profissional que executa os serviços de boost</li>
-                  <li><strong className="text-white">Plataforma:</strong> Sistema FlautasBoost e todos os seus componentes</li>
-                  <li><strong className="text-white">Serviço:</strong> Qualquer serviço de boost oferecido pela plataforma</li>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
+                  <li><strong className="text-foreground">Cliente:</strong> Usuário que contrata serviços de boost</li>
+                  <li><strong className="text-foreground">Booster:</strong> Profissional que executa os serviços de boost</li>
+                  <li><strong className="text-foreground">Plataforma:</strong> Sistema FlautasBoost e todos os seus componentes</li>
+                  <li><strong className="text-foreground">Serviço:</strong> Qualquer serviço de boost oferecido pela plataforma</li>
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">3.</span> Descrição dos Serviços
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   A FlautasBoost é uma plataforma que conecta jogadores a profissionais qualificados para serviços de boost em jogos competitivos:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Boost de rank em Counter-Strike 2 (Premier e Gamers Club)</li>
                   <li>Sistema de pagamento via PIX (AbacatePay)</li>
                   <li>Chat criptografado entre cliente e booster durante o serviço</li>
@@ -96,14 +96,14 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">4.</span> Cadastro e Conta de Usuário
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Para utilizar nossos serviços, você deve:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Ter pelo menos 18 anos de idade</li>
                   <li>Fornecer informações verdadeiras, precisas e atualizadas</li>
                   <li>Manter a confidencialidade de suas credenciais de acesso</li>
@@ -112,26 +112,26 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">5.</span> Pagamentos e Reembolsos
                 </h2>
-                <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
-                  <p><strong className="text-white">5.1 Pagamentos:</strong> Todos os pagamentos são processados via PIX através da AbacatePay. Os preços são dinâmicos e configuráveis pela administração.</p>
-                  <p><strong className="text-white">5.2 Reembolsos Automáticos:</strong> Pedidos não aceitos por boosters dentro do prazo configurado (padrão: 24 horas) serão automaticamente reembolsados.</p>
-                  <p><strong className="text-white">5.3 Reembolsos Manuais:</strong> Reembolsos podem ser solicitados em casos de não cumprimento do serviço, mediante análise da administração.</p>
-                  <p><strong className="text-white">5.4 Prazo de Reembolso:</strong> Reembolsos aprovados são processados em até 5 dias úteis.</p>
+                <div className="space-y-3 text-foreground font-rajdhani group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
+                  <p><strong className="text-foreground">5.1 Pagamentos:</strong> Todos os pagamentos são processados via PIX através da AbacatePay. Os preços são dinâmicos e configuráveis pela administração.</p>
+                  <p><strong className="text-foreground">5.2 Reembolsos Automáticos:</strong> Pedidos não aceitos por boosters dentro do prazo configurado (padrão: 24 horas) serão automaticamente reembolsados.</p>
+                  <p><strong className="text-foreground">5.3 Reembolsos Manuais:</strong> Reembolsos podem ser solicitados em casos de não cumprimento do serviço, mediante análise da administração.</p>
+                  <p><strong className="text-foreground">5.4 Prazo de Reembolso:</strong> Reembolsos aprovados são processados em até 5 dias úteis.</p>
                 </div>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">6.</span> Responsabilidades do Cliente
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   O cliente é responsável por:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Fornecer credenciais Steam corretas e funcionais através do chat criptografado da plataforma</li>
                   <li>Não acessar a conta durante o serviço de boost</li>
                   <li>Não alterar a senha ou configurações de segurança durante o serviço</li>
@@ -141,14 +141,14 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">7.</span> Responsabilidades do Booster
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   O booster é responsável por:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Executar o serviço conforme acordado</li>
                   <li>Manter total confidencialidade das credenciais Steam do cliente (nunca compartilhar com terceiros)</li>
                   <li>Não utilizar cheats, hacks ou qualquer software proibido</li>
@@ -158,11 +158,11 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">8.</span> Sistema de Comissões
                 </h2>
-                <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <div className="space-y-3 text-foreground font-rajdhani group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <p>As comissões são calculadas e distribuídas da seguinte forma:</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Percentuais são definidos pela administração e podem ser personalizados por booster</li>
@@ -173,25 +173,25 @@ export default function TermsPage() {
                 </div>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">9.</span> Resolução de Conflitos
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Em caso de conflitos entre cliente e booster, entre em contato com nossa equipe de suporte via Discord.
                   A administração atua como mediadora e suas decisões são finais e vinculantes. Ambas as partes comprometem-se
                   a cooperar durante o processo de mediação.
                 </p>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">10.</span> Privacidade e Segurança
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   A proteção de seus dados é nossa prioridade:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Credenciais de jogo são criptografadas com AES-256-GCM</li>
                   <li>Nunca compartilhamos informações com terceiros não autorizados</li>
                   <li>Conforme LGPD (Lei Geral de Proteção de Dados)</li>
@@ -199,11 +199,11 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">11.</span> Limitação de Responsabilidade
                 </h2>
-                <div className="space-y-3 text-gray-300 font-rajdhani group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <div className="space-y-3 text-foreground font-rajdhani group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <p>A FlautasBoost não se responsabiliza por:</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Suspensões ou banimentos aplicados pelas desenvolvedoras dos jogos</li>
@@ -216,14 +216,14 @@ export default function TermsPage() {
                 </div>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">12.</span> Proibições e Conduta
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed mb-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed mb-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   É estritamente proibido:
                 </p>
-                <ul className="list-disc list-inside text-gray-300 font-rajdhani space-y-2 ml-4 group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <ul className="list-disc list-inside text-foreground font-rajdhani space-y-2 ml-4 group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   <li>Utilizar a plataforma para fraudes ou atividades ilícitas</li>
                   <li>Compartilhar contas ou credenciais da plataforma</li>
                   <li>Tentar burlar sistemas de segurança ou rate limiting</li>
@@ -232,49 +232,49 @@ export default function TermsPage() {
                 </ul>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">13.</span> Suspensão e Encerramento
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos, sem aviso prévio e sem
                   reembolso de serviços já pagos. Você pode solicitar o encerramento de sua conta a qualquer momento através
                   do suporte, respeitando pedidos em andamento.
                 </p>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">14.</span> Modificações dos Termos
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Reservamo-nos o direito de modificar estes termos a qualquer momento. Alterações significativas serão
                   notificadas por email ou através da plataforma. O uso continuado após modificações constitui aceitação
                   dos novos termos. Recomendamos revisar periodicamente esta página.
                 </p>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">15.</span> Lei Aplicável
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Estes termos são regidos pelas leis da República Federativa do Brasil. Quaisquer disputas serão resolvidas
                   no foro da comarca do domicílio do consumidor, conforme previsto no Código de Defesa do Consumidor.
                 </p>
               </section>
 
-              <section className="p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-white font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: '700' }}>
+              <section className="p-4 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-foreground font-orbitron mb-4 group-hover:text-brand-purple-lighter transition-colors duration-300" style={{ fontWeight: '700' }}>
                   <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">16.</span> Contato
                 </h2>
-                <p className="text-gray-300 font-rajdhani leading-relaxed group-hover:text-gray-200 transition-colors duration-300" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-foreground font-rajdhani leading-relaxed group-hover:text-foreground transition-colors duration-300" style={{ fontWeight: '400' }}>
                   Para dúvidas, sugestões ou questões sobre estes termos, entre em contato conosco pelo suporte da plataforma.
                 </p>
               </section>
 
               <div className="border-t border-brand-purple/30 pt-8 mt-8">
-                <p className="text-sm text-gray-400 font-rajdhani text-center" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: '400' }}>
+                <p className="text-sm text-foreground font-rajdhani text-center" style={{ fontWeight: '400' }}>
                   Última atualização: Abril de 2026
                 </p>
               </div>

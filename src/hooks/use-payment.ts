@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orderKeys } from './use-orders'
+import { api } from '@/lib/api-client'
 
 // Types
 interface CreatePixInput {
@@ -35,19 +36,7 @@ interface CreatePixResponse {
  * Create PIX payment
  */
 async function createPixPayment(input: CreatePixInput): Promise<CreatePixResponse> {
-    const response = await fetch('/api/payment/pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(input),
-    })
-
-    if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao gerar PIX')
-    }
-
-    return response.json()
+    return api.post<CreatePixResponse>('/api/payment/pix', input)
 }
 
 /**

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { CartItem } from '@/types'
+import { api, ApiError } from '@/lib/api-client'
 
 interface ProcessCartResult {
   /** Se algum pedido foi criado */
@@ -110,21 +111,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body.metadata = JSON.stringify(item.metadata)
       }
 
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Erro ao criar order para item:', item, errorData)
-        return { success: false, error: errorData.message || 'Erro ao criar pedido' }
-      }
-
-      const data = await response.json()
+      const data = await api.post<{ order?: { id?: number } }>('/api/orders', body)
       const orderId = data.order?.id
 
       // Limpar carrinho após processar com sucesso
@@ -137,6 +124,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Erro ao processar item do carrinho:', error)
+      if (error instanceof ApiError) {
+        return { success: false, error: error.message || 'Erro ao criar pedido' }
+      }
       return { success: false, error: 'Erro de conexão. Tente novamente.' }
     }
   }, [items, clearCart])

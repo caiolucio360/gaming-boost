@@ -8,6 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
+        // Bloqueia áreas autenticadas/privadas e a API. NÃO bloquear `/_next/` —
+        // os crawlers precisam do CSS/JS crítico de renderização para indexar (mobile-first).
         disallow: [
           '/api/',
           '/admin/',
@@ -16,10 +18,12 @@ export default function robots(): MetadataRoute.Robots {
           '/cart/',
           '/payment/',
           '/profile/',
+          '/notifications',
           '/login',
           '/register',
-          '/_next/',
-          '/_vercel/',
+          '/verify',
+          '/forgot-password',
+          '/reset-password',
         ],
       },
     ],

@@ -4,19 +4,20 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { api } from '@/lib/api-client'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   ShoppingCart,
-  ArrowLeft,
   Edit,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { PageHeader } from '@/components/common/page-header'
+import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { StatusBadge, OrderStatus } from '@/components/common/status-badge'
+import { OrderStatus } from '@/components/common/status-badge'
+import { OrderCardShell } from '@/components/common/order-card-shell'
+import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
@@ -62,10 +63,11 @@ export default function AdminOrdersPage() {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
 
-      const response = await fetch(`/api/admin/orders?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
+      try {
+        const data = await api.get<{ orders: typeof orders }>(`/api/admin/orders?${params.toString()}`)
         setOrders(data.orders || [])
+      } catch {
+        // silencioso — mantém o comportamento anterior (lista vazia em erro)
       }
     })
   }, [withLoading, filterStatus])
@@ -87,27 +89,19 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="mb-8">
-          <Link href="/admin" className="inline-flex items-center text-brand-purple-light hover:text-brand-purple-light font-rajdhani mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar ao Dashboard
-          </Link>
-          <PageHeader
-            highlight="GERENCIAR"
-            title="PEDIDOS"
-            description="Visualize e gerencie todos os pedidos da plataforma"
-          />
-        </div>
-
+    <AdminPageShell
+      highlight="GERENCIAR"
+      title="PEDIDOS"
+      description="Visualize e gerencie todos os pedidos da plataforma"
+    >
         {/* Filtro */}
-        <Card className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 mb-6">
+        <Card className="mb-6">
           <CardContent className="pt-6">
             <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-full md:w-52 bg-brand-black/50 border-brand-purple/50 text-white font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <SelectTrigger className="w-full md:w-52 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
-              <SelectContent className="bg-brand-black border-brand-purple/50">
+              <SelectContent className="bg-background border-brand-purple/50">
                 <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="PENDING">Pendentes</SelectItem>
                 <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
@@ -131,29 +125,18 @@ export default function AdminOrdersPage() {
           <div className="grid gap-6">
             {orders.map((order) => {
               return (
-                <Card
+                <OrderCardShell
                   key={order.id}
-                  className="bg-brand-black/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-colors"
+                  title={order.service.name}
+                  description={`${order.user.name || order.user.email} • ${order.service.game}`}
+                  status={order.status as OrderStatus}
+                  glow={false}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-white font-orbitron mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                          {order.service.name}
-                        </CardTitle>
-                        <CardDescription className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                          {order.user.name || order.user.email} • {order.service.game}
-                        </CardDescription>
-                      </div>
-                      <StatusBadge status={order.status as OrderStatus} />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         <OrderInfoItem
                           label="Valor Total"
-                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>}
+                          value={<span className="text-lg font-bold text-brand-purple-light font-orbitron">{formatPrice(order.total)}</span>}
                         />
                         <OrderInfoItem label="Data da Solicitação" value={formatDate(order.createdAt)} />
                         <OrderInfoItem label="Tipo de Serviço" value={order.service.type} />
@@ -170,16 +153,8 @@ export default function AdminOrdersPage() {
                       {order.payments && order.payments.length > 0 && (
                         <div className="pt-2 border-t border-brand-purple/20">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-brand-gray-500">Status do Pagamento:</span>
-                            {order.payments.some(p => p.status === 'PAID') ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/50">
-                                Pago
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50">
-                                Pendente
-                              </Badge>
-                            )}
+                            <span className="text-muted-foreground">Status do Pagamento:</span>
+                            <PaymentStatusBadge status={order.payments.some(p => p.status === 'PAID') ? 'PAID' : 'PENDING'} />
                           </div>
                         </div>
                       )}
@@ -191,7 +166,6 @@ export default function AdminOrdersPage() {
                           variant="outline"
                           size="sm"
                           className="border-brand-purple/50 text-brand-purple-light hover:bg-brand-purple/10 font-rajdhani"
-                          style={{ fontFamily: 'Rajdhani, sans-serif' }}
                         >
                           <Link href={`/admin/orders/${order.id}`}>
                             <Edit className="h-4 w-4 mr-2" />
@@ -200,19 +174,18 @@ export default function AdminOrdersPage() {
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </OrderCardShell>
               )
             })}
           </div>
         )}
 
         <div className="mt-4 text-center">
-          <p className="text-brand-gray-500 font-rajdhani" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <p className="text-muted-foreground font-rajdhani">
             Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         </div>
-    </div>
+    </AdminPageShell>
   )
 }
 

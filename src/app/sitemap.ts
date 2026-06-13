@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
+      images: [`${baseUrl}/flautas/flautasboost-empilhada.png`],
     },
     {
       url: `${baseUrl}/games/cs2`,
