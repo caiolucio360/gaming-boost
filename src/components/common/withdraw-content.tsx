@@ -124,7 +124,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 <div>
                   <p className="text-muted-foreground text-sm font-rajdhani">Saldo Disponível</p>
                   <p className="text-2xl font-bold text-foreground font-orbitron">
-                    {loading ? '...' : formatPrice(availableBalance / 100)}
+                    {loading ? '…' : formatPrice(availableBalance / 100)}
                   </p>
                 </div>
               </div>
