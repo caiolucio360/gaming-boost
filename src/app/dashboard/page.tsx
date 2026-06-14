@@ -26,6 +26,7 @@ import { EmptyState } from '@/components/common/empty-state'
 import { DashboardCard } from '@/components/common/dashboard-card'
 import { OrderChat } from '@/components/order/order-chat'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { showSuccess, handleApiError } from '@/lib/toast'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
@@ -296,9 +297,8 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {loading ? (
-          <SkeletonOrdersList count={3} />
-        ) : orders.length === 0 ? (
+        <LoadingSwap loading={loading} skeleton={<SkeletonOrdersList count={3} />}>
+          {orders.length === 0 ? (
           <EmptyState
             icon={Package}
             title="Nenhuma solicitação encontrada"
@@ -420,7 +420,8 @@ export default function DashboardPage() {
               )
             })}
           </div>
-        )}
+          )}
+        </LoadingSwap>
 
         {!loading && orders.length > 0 && (
           <div className="mt-4 text-center">
