@@ -1,3 +1,8 @@
+---
+name: git-flow
+description: FlautasBoost git workflow — permanent main/dev branches, short-lived feat|fix|chore|refactor|style|test branches, Conventional Commits written in English, squash-merge PRs, mandatory version bump per commit (npm version), and resolving PR conflicts before handoff. Use when branching, committing, opening/merging PRs, bumping the version, or whenever a PR shows conflicts.
+---
+
 # Git Flow
 
 Este repositório usa **dois branches permanentes**: `main` e `dev`. Nenhum outro branch é permanente.

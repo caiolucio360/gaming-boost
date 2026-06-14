@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -69,14 +69,7 @@ export default function AdminCommissionsPage() {
   }, [user, authLoading, router])
 
   // ─── Fetch ─────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!user) return
-    withLoading(async () => {
-      await Promise.all([fetchConfig(), fetchBoosters()])
-    })
-  }, [user, withLoading])
-
-  const fetchConfig = async () => {
+  const fetchConfig = useCallback(async () => {
     try {
       const data = await api.get<{ config: NonNullable<typeof config> }>('/api/admin/commission-config')
       setConfig(data.config)
@@ -86,16 +79,23 @@ export default function AdminCommissionsPage() {
     } catch {
       // silencioso
     }
-  }
+  }, [])
 
-  const fetchBoosters = async () => {
+  const fetchBoosters = useCallback(async () => {
     try {
       const data = await api.get<{ users: typeof boosters }>('/api/admin/users?role=BOOSTER&limit=100')
       setBoosters(data.users || [])
     } catch {
       // silencioso
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+    withLoading(async () => {
+      await Promise.all([fetchConfig(), fetchBoosters()])
+    })
+  }, [user, withLoading, fetchConfig, fetchBoosters])
 
   // ─── Derived preview values ────────────────────────────────────────────────
   const devPct = parseFloat(devAdminInput) || 0
