@@ -53,6 +53,33 @@ npm run test:coverage    # Coverage report
 
 Full API + frontend conventions live in **`.claude/rules/code_patterns.md`** (loaded every session — follow it directly). It covers: `message` (never `error`) response shape + `code`/`detail` keys, `HttpStatus` constants, `verifyAuth`/`verifyAdmin`, `validateBody` + Zod, `withApiHandler` (and the `api-errors` transitive-Prisma caveat), the mandatory `@/lib/api-client` (`api.get/post/...`, no raw `fetch`), `router.replace()` for redirects, the `useLoading` hook, reading `data.message`, and the no-nested-sub-components rule.
 
+## Skills — invoke proactively
+
+Project skills live in `.claude/skills/`. Only each skill's one-line `description` is indexed in context; the full body loads **only when you invoke it** with the Skill tool. **Don't wait to be told to "use skill X"** — when the task matches a trigger below, invoke the skill **before** starting the work (match on intent, not exact keywords). It's the cheap, expected path; skipping a clearly-matching skill is a miss.
+
+- **`git-flow`** — branching, committing, opening/merging PRs, bumping the version, or any PR conflict.
+- **`tdd`** — writing tests, or implementing a feature test-first.
+- **`frontend-design`** — building/styling any web UI, page, or component (distinctive, non-generic look).
+- **`nextjs-shadcn`** — building Next.js UIs/pages/components with shadcn + Tailwind.
+- **`shadcn`** — adding/searching/fixing shadcn components (anything touching `components.json`).
+- **`web-design-guidelines`** — reviewing/auditing UI for accessibility, UX, or design compliance.
+- **`next-best-practices`** — writing/reviewing App Router code (RSC boundaries, hydration, data, metadata, bundling).
+- **`react-best-practices`** — React/Next performance (waterfalls, re-renders, bundle size, Server Components).
+- **`cache-components`** — `'use cache'`, PPR, `cacheLife`/`cacheTag`/`revalidateTag`.
+- **`nextjs-seo`** — SEO work: metadata, OG images, sitemap/robots, JSON-LD, Core Web Vitals.
+- **`api-security`** — designing/reviewing API routes (BOLA, mass assignment, excessive exposure, SSRF).
+- **`auth-hardening`** — auth/login, password policy, MFA, session vs JWT, lockout.
+- **`nextjs-security`** — Next.js security review (middleware bypass, `NEXT_PUBLIC` leak, CSP, `next/image` SSRF).
+- **`file-upload-security`** — any user file-upload endpoint.
+- **`secret-hygiene`** — a leaked/committed secret, or credential rotation.
+- **`dependency-supply-chain`** — adding a dependency or auditing the supply chain.
+- **`postgres-hardening`** — Postgres roles/RLS/pg_hba/TLS/backup review.
+- **`codebase-audit`** — auditing unfamiliar code or reviewing AI-generated code before shipping.
+- **`chrome-devtools`** — live browser debugging (DOM, console, network, performance profiling).
+- **`go`** — quick smoke test of recent UI in a real browser ("make sure it works").
+- **`handoff`** — context is full / user says "handoff" / "/clear and continue".
+- **`skill-creator`** — creating, modifying, or optimizing a skill.
+
 ## Critical Gotchas
 
 - **Prisma Client:** import from `@/lib/db`, not `@/generated/prisma`
@@ -70,7 +97,7 @@ Full API + frontend conventions live in **`.claude/rules/code_patterns.md`** (lo
 - **`JSON.parse(*.metadata)`:** always wrap in try-catch returning `{}` — the field is free JSON and may be corrupted
 - **Stats queries:** dashboard routes (booster/payments, admin/payments, booster/orders) use `Promise.all` for 5 aggregate/count queries
 - **`UpdateOrderSchema`:** admin `PUT /api/admin/orders/[id]` validates body with this schema; booster re-approval rejected with 409 if `verificationStatus === 'VERIFIED'`
-- **System version:** single source = `package.json` `"version"` (injected via `next.config.js` → `NEXT_PUBLIC_APP_VERSION`, read by `src/lib/version.ts`; don't edit version.ts). **Bump it on every committed change** with `npm version <patch|minor|major> --no-git-tag-version` (semver per Conventional Commit type) — see `.claude/docs/git-flow.md`. Shown in the panel sidebar footer.
+- **System version:** single source = `package.json` `"version"` (injected via `next.config.js` → `NEXT_PUBLIC_APP_VERSION`, read by `src/lib/version.ts`; don't edit version.ts). **Bump it on every committed change** with `npm version <patch|minor|major> --no-git-tag-version` (semver per Conventional Commit type) — see the **`git-flow`** skill. Shown in the panel sidebar footer.
 - **No raw `fetch` on the client:** use `@/lib/api-client` → `api.get/post/put/patch/delete` — see `.claude/rules/code_patterns.md` rule 6.
 
 ## Removed Features (MVP scope — do not re-add)

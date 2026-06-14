@@ -1,3 +1,8 @@
+---
+name: tdd
+description: Test-driven development workflow for FlautasBoost — write a failing test first (Red), implement the minimum to pass (Green), refactor, then verify with npm test + npm run build. Use when adding tests, implementing a feature test-first, or when the user asks for TDD / test coverage.
+---
+
 # TDD (Test-Driven Development) Workflow
 
 ## Steps
