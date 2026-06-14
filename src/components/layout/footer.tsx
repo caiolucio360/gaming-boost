@@ -1,147 +1,107 @@
-'use client'
-
+import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Card, CardContent } from '@/components/ui/card'
+import { TrustpilotBadge } from '@/components/trustpilot/trustpilot-badge'
+
+const NAV_GROUPS = [
+  {
+    title: 'Jogos',
+    links: [{ href: '/games/cs2', label: 'Counter-Strike 2' }],
+  },
+  {
+    title: 'Serviços',
+    links: [
+      { href: '/games/cs2/pricing', label: 'Boost de Rank' },
+      { href: '/games/cs2/pricing?service=COACHING', label: 'Coaching' },
+    ],
+  },
+  {
+    title: 'Suporte',
+    links: [
+      { href: '/terms', label: 'Termos de Uso' },
+      { href: '/privacy', label: 'Política de Privacidade' },
+    ],
+  },
+] as const
+
+function FooterLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="text-sm text-muted-foreground hover:text-brand-purple transition-colors"
+    >
+      {children}
+    </Link>
+  )
+}
 
 export function Footer() {
   return (
-    <footer className="relative bg-background text-foreground py-8 md:py-12 z-0" role="contentinfo" aria-label="Rodapé do site">
-      <TooltipProvider delayDuration={200}>
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 xl:px-12">
-          <Separator className="mb-8 md:mb-12 bg-brand-purple" />
+    <footer
+      className="relative bg-background text-foreground"
+      role="contentinfo"
+      aria-label="Rodapé do site"
+    >
+      {/* Hairline de gradiente roxo — substitui o separador grosso por um detalhe sutil */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-brand-purple to-transparent" />
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {/* Seção: Sobre */}
-            <Card className="col-span-2 md:col-span-1 bg-transparent border-0 shadow-none p-0">
-              <CardContent className="p-0">
-                <div className="mb-3 md:mb-4">
-                  <Link href="/" className="flex items-center">
-                    <span className="font-brush -skew-x-6 text-2xl md:text-3xl tracking-widest">
-                      <span className="text-brand-purple-light">FLAUTAS</span>
-                      <span className="text-foreground">BOOST</span>
-                    </span>
-                  </Link>
-                </div>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Sua plataforma confiável para serviços de boost em jogos competitivos.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Seção: Jogos */}
-            <Card className="bg-transparent border-0 shadow-none p-0">
-              <CardContent className="p-0">
-                <h3 className="font-semibold mb-3 md:mb-4 text-brand-purple text-sm md:text-base">Jogos</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href="/games/cs2" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors">
-                          Counter-Strike 2
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Serviços de boost para CS2</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Seção: Serviços */}
-            <Card className="bg-transparent border-0 shadow-none p-0">
-              <CardContent className="p-0">
-                <h3 className="font-semibold mb-3 md:mb-4 text-brand-purple text-sm md:text-base">Serviços</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href="/games/cs2/pricing" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors">
-                          Boost de Rank
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Subimos seu rank de forma segura e profissional</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href="/games/cs2/pricing?service=COACHING" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors">
-                          Coaching
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Melhore seu gameplay com coaches profissionais</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Seção: Suporte */}
-            <Card className="col-span-2 md:col-span-1 bg-transparent border-0 shadow-none p-0">
-              <CardContent className="p-0">
-                <h3 className="font-semibold mb-3 md:mb-4 text-brand-purple text-sm md:text-base">Suporte</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href="/terms" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors">
-                          Termos de Uso
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Leia nossos termos e condições</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href="/privacy" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors">
-                          Política de Privacidade
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Como protegemos seus dados</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                  <li>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <a href="https://discord.gg/AqhGaTd3r" target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm text-muted-foreground hover:text-brand-purple transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
-                          </svg>
-                          Discord
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-brand-purple/50 text-foreground">
-                        <p>Entre no nosso servidor do Discord</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Separator className="mt-6 md:mt-8 bg-brand-purple" />
-
-          <div className="pt-6 md:pt-8 text-center">
-            <p className="text-xs md:text-sm text-muted-foreground">
-              © 2025 FlautasBoost. Todos os direitos reservados.
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-10">
+        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          {/* Marca + social */}
+          <div className="max-w-xs">
+            <Link href="/" className="inline-flex items-center">
+              <span className="font-brush -skew-x-6 text-2xl tracking-widest">
+                <span className="text-brand-purple-light">FLAUTAS</span>
+                <span className="text-foreground">BOOST</span>
+              </span>
+            </Link>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              Sua plataforma confiável para serviços de boost em jogos competitivos.
             </p>
+            <div className="mt-4 flex items-center gap-3">
+              <a
+                href="https://discord.gg/AqhGaTd3r"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Discord"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-brand-purple hover:border-brand-purple/50 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+                </svg>
+              </a>
+              <TrustpilotBadge size="sm" />
+            </div>
           </div>
+
+          {/* Navegação compacta */}
+          <nav className="grid grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-2.5">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground font-rajdhani">
+                  {group.title}
+                </h3>
+                <ul className="space-y-2">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      <FooterLink href={link.href}>{link.label}</FooterLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
-      </TooltipProvider>
+
+        {/* Barra inferior */}
+        <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground">
+            © 2025 FlautasBoost. Todos os direitos reservados.
+          </p>
+          <p className="text-xs text-muted-foreground font-rajdhani tracking-wide">
+            Feito para gamers competitivos
+          </p>
+        </div>
+      </div>
     </footer>
   )
 }

@@ -633,7 +633,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                         <div className="inline-flex items-center gap-3 text-brand-purple-light">
                           <Spinner size="md" />
                           <span className="text-sm md:text-base font-rajdhani font-semibold">
-                            Calculando preço...
+                            Calculando preço…
                           </span>
                         </div>
                       </div>
@@ -687,7 +687,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                             {isLoading ? (
                               <>
                                 <Spinner size="md" />
-                                Processando...
+                                Processando…
                               </>
                             ) : (
                               <>

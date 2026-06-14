@@ -85,7 +85,7 @@ function ResetPasswordForm() {
               <Lock className="h-6 w-6 text-brand-purple animate-spin" />
             </div>
             <CardTitle className="text-xl text-foreground font-orbitron">
-              Carregando...
+              Carregando…
             </CardTitle>
           </CardHeader>
         </Card>
@@ -181,6 +181,7 @@ function ResetPasswordForm() {
                   <FormControl>
                     <Input
                       type="password"
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       className="h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -201,6 +202,7 @@ function ResetPasswordForm() {
                   <FormControl>
                     <Input
                       type="password"
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       className="h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -221,7 +223,7 @@ function ResetPasswordForm() {
               {isLoading ? (
                 <>
                   <Spinner size="md" />
-                  Redefinindo...
+                  Redefinindo…
                 </>
               ) : (
                 'Redefinir Senha'

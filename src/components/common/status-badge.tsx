@@ -64,7 +64,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
               {config.label}
             </Badge>
           </TooltipTrigger>
-          <TooltipContent className="bg-black/90 border-brand-purple/50 text-foreground">
+          <TooltipContent className="bg-popover border-brand-purple/50 text-popover-foreground">
             <p>{config.tooltip}</p>
           </TooltipContent>
         </Tooltip>

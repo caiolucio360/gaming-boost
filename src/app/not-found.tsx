@@ -46,7 +46,7 @@ export default function NotFound() {
             {/* Links Rápidos */}
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
               <Link href="/games/cs2">
-                <div className="bg-black/50 border border-brand-purple/30 rounded-lg p-4 hover:border-brand-purple-light transition-all duration-300 hover:shadow-lg hover:shadow-brand-purple/20">
+                <div className="bg-muted/50 border border-brand-purple/30 rounded-lg p-4 hover:border-brand-purple-light transition-all duration-300 hover:shadow-lg hover:shadow-brand-purple/20">
                   <h3 className="text-foreground font-bold font-orbitron mb-2" style={{ fontWeight: '700' }}>
                     <span className="text-brand-purple-light">COUNTER-STRIKE 2</span>
                   </h3>

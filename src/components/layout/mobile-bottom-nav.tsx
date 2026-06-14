@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Home, Gamepad2, Package, Bell, User, ShieldCheck, ShoppingCart } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
@@ -19,7 +19,8 @@ export function MobileBottomNav() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { items } = useCart()
-  
+  const reduceMotion = useReducedMotion()
+
   const cartItemsCount = items.length
 
   // Define navigation items based on user role
@@ -100,9 +101,9 @@ export function MobileBottomNav() {
               left: `calc(${(activeIndex / navItems.length) * 100}% + 8px)`,
               width: `calc(${100 / navItems.length}% - 16px)`,
             }}
-            transition={{ 
-              type: 'spring', 
-              stiffness: 380, 
+            transition={reduceMotion ? { duration: 0 } : {
+              type: 'spring',
+              stiffness: 380,
               damping: 30,
               mass: 0.8
             }}
@@ -119,21 +120,23 @@ export function MobileBottomNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "relative flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-300",
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    // Barra é sempre escura (bg-black/80) → texto branco em ambos os temas,
+                    // senão fica preto-sobre-preto no modo claro.
+                    "relative flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-colors duration-300",
+                    isActive ? "text-white" : "text-white/60 hover:text-white"
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {/* Icon container with scale animation */}
                   <motion.div
                     className="relative"
-                    animate={{ 
-                      scale: isActive ? 1.15 : 1,
+                    animate={{
+                      scale: isActive && !reduceMotion ? 1.15 : 1,
                     }}
-                    transition={{ 
-                      type: 'spring', 
-                      stiffness: 400, 
-                      damping: 25 
+                    transition={reduceMotion ? { duration: 0 } : {
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 25
                     }}
                   >
                     {/* Glow effect for active icon */}

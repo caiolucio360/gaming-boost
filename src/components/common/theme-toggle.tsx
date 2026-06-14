@@ -47,11 +47,11 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => applyTheme('light')}>
-          <Sun className="mr-2 h-4 w-4" />
+          <Sun className="mr-2 h-4 w-4 text-current" />
           Claro
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => applyTheme('dark')}>
-          <Moon className="mr-2 h-4 w-4" />
+          <Moon className="mr-2 h-4 w-4 text-current" />
           Escuro
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => applyTheme('system')}>

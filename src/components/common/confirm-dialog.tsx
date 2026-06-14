@@ -74,7 +74,7 @@ export function ConfirmDialog({
           <ButtonLoading
             onClick={handleConfirm}
             loading={loading}
-            loadingText="Processando..."
+            loadingText="Processando…"
             className={confirmButtonClass}
             style={{ fontWeight: '600' }}
           >

@@ -102,7 +102,7 @@ export default function CartPage() {
           updateToSuccess(
             toastId,
             `${createdOrders.length} ${createdOrders.length === 1 ? 'pedido criado' : 'pedidos criados'} com sucesso!`,
-            'Redirecionando para pagamento...'
+            'Redirecionando para pagamento…'
           )
         } else {
           updateToSuccess(
@@ -110,7 +110,7 @@ export default function CartPage() {
             `${createdOrders.length} de ${items.length} pedidos criados`,
             failedItems.length > 0 
               ? `Não foi possível criar: ${failedItems.join(', ')}`
-              : 'Redirecionando para pagamento...'
+              : 'Redirecionando para pagamento…'
           )
         }
         
@@ -183,7 +183,7 @@ export default function CartPage() {
           <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <LoadingSpinner size="lg" text="Redirecionando para pagamento..." fullScreen={false} />
+                <LoadingSpinner size="lg" text="Redirecionando para pagamento…" fullScreen={false} />
               </div>
             </CardContent>
           </Card>
@@ -269,7 +269,7 @@ export default function CartPage() {
                       {isProcessing ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processando...
+                          Processando…
                         </>
                       ) : (
                         <>

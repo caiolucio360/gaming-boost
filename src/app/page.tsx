@@ -1,6 +1,7 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { ElojobHero } from "@/components/layout/elojob-hero"
+import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Início - FlautasBoost',
@@ -76,6 +77,9 @@ export default function HomePage() {
     },
   }
 
+  // Only emitted when real Trustpilot rating values are configured (no fake data).
+  const aggregateRatingSchema = getTrustpilotAggregateRating(siteUrl)
+
   return (
     <>
       <script
@@ -96,6 +100,14 @@ export default function HomePage() {
           __html: JSON.stringify(serviceSchema),
         }}
       />
+      {aggregateRatingSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(aggregateRatingSchema),
+          }}
+        />
+      )}
       <div className="min-h-screen">
         <ElojobHero />
       </div>

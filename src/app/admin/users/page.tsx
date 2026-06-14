@@ -209,7 +209,7 @@ export default function AdminUsersPage() {
           <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
             <p className="text-sm text-brand-purple-light font-rajdhani text-center">
               <Loader2 className="h-4 w-4 inline-block mr-2 animate-spin" />
-              Atualizando...
+              Atualizando…
             </p>
           </div>
         )}
@@ -222,7 +222,7 @@ export default function AdminUsersPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Buscar por email ou nome..."
+                    placeholder="Buscar por email ou nome…"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"

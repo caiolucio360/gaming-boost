@@ -11,20 +11,24 @@
        SHADCN/UI COMPATIBILITY TOKENS
        ============================================= */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Preto puro (neutro) no modo claro. O valor antigo (222 84% 4.9%) tinha tom azulado
+       que, mesmo escuro, lia como "não totalmente preto". Sem saturação fica preto de verdade. */
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 0%;
     --primary: 262 83% 58%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Preto neutro (sem tom azulado) para texto de botão secundário. */
+    --secondary-foreground: 0 0% 11%;
     --muted: 210 40% 96%;
-    /* Near-black secondary text in light mode: the slate-gray default (38%) read as a washed-out
-       gray on white surfaces. Dropped to ~18% so secondary/placeholder text stays clearly legible
-       while keeping a hair of hierarchy below the ~5% foreground. Dark mode keeps its lighter value. */
-    --muted-foreground: 215 22% 18%;
+    /* Texto secundário (subtítulos, descrições, legendas, placeholders) em PRETO no modo
+       claro — não cinza. Sem saturação (tom neutro) + bem escuro: lê como preto suave,
+       mantendo só uma leve hierarquia abaixo do foreground (#000). Tema escuro mantém o
+       valor mais claro no bloco .dark. */
+    --muted-foreground: 0 0% 13%;
     --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;

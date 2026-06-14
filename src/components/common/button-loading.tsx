@@ -17,7 +17,7 @@ interface ButtonLoadingProps extends Omit<ButtonProps, 'children'> {
  * Botão com estado de loading integrado
  * 
  * @example
- * <ButtonLoading loading={isSubmitting} loadingText="Salvando...">
+ * <ButtonLoading loading={isSubmitting} loadingText="Salvando…">
  *   Salvar
  * </ButtonLoading>
  */

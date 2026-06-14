@@ -383,6 +383,7 @@ export default function DashboardPage() {
                           <img
                             src={order.completionProofUrl}
                             alt="Comprovante de conclusão"
+                            loading="lazy"
                             className="w-full max-w-xs rounded-md border border-green-500/20 object-cover"
                           />
                           <a

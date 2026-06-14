@@ -1,22 +1,22 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon, ShieldIcon, ZapIcon, HeadphonesIcon } from "lucide-react"
 
 export function ElojobHero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background" aria-label="Hero - Seção principal">
-      {/* Background Image */}
+      {/* Background Image — next/image com priority gera preload e otimização (melhora o LCP) */}
       <div className="absolute inset-0" aria-hidden="true">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(/principal.png)',
-            backgroundPosition: 'center',
-            backgroundSize: 'cover'
-          }}
-          aria-hidden="true"
+        <Image
+          src="/principal.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
         />
         {/* Overlay para melhorar legibilidade do texto */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" aria-hidden="true" />
@@ -34,7 +34,7 @@ export function ElojobHero() {
                 <span className="text-white">BOOST</span>
               </h1>
             </div>
-            <h2 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight tracking-wide px-4 font-orbitron max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight tracking-wide px-4 font-orbitron max-w-4xl mx-auto text-balance">
               <span className="text-white drop-shadow-2xl">
                 Jogue, suba e evolua ao lado de quem viveu o CS2 de verdade, experiência com um ex jogador profissional.
               </span>

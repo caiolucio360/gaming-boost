@@ -117,7 +117,7 @@ function PaymentContent() {
           {initializing && (
             <div className="flex items-center justify-center gap-3 text-foreground font-rajdhani py-12">
               <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
-              Verificando pagamento...
+              Verificando pagamento…
             </div>
           )}
 

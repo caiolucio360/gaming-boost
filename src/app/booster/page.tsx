@@ -523,7 +523,7 @@ export default function BoosterDashboardPage() {
                                   title={!hasCredentialsMap[order.id] ? 'Aguardando credenciais Steam do cliente' : undefined}
                                 >
                                   {startingOrderId === order.id ? (
-                                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Iniciando...</>
+                                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Iniciando…</>
                                   ) : (
                                     'Iniciar Boost'
                                   )}
@@ -562,7 +562,7 @@ export default function BoosterDashboardPage() {
               onOpenChange={setCompleteDialogOpen}
               onConfirm={handleCompleteOrder}
               submitting={isUploading || isCompleting}
-              submittingLabel={isUploading ? 'Enviando print...' : 'Concluindo...'}
+              submittingLabel={isUploading ? 'Enviando print…' : 'Concluindo…'}
             />
           </div>
         )}

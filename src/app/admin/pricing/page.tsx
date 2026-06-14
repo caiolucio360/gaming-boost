@@ -692,7 +692,7 @@ export default function PricingConfigPage() {
                       {isSaving ? (
                         <>
                           <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                          {isEditing ? 'Salvando...' : 'Criando...'}
+                          {isEditing ? 'Salvando…' : 'Criando…'}
                         </>
                       ) : isEditing ? (
                         <>
@@ -869,7 +869,7 @@ export default function PricingConfigPage() {
                   {isCalculating ? (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Calculando...
+                      Calculando…
                     </>
                   ) : (
                     <>

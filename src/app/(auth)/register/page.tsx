@@ -87,6 +87,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input
                       type="text"
+                      autoComplete="name"
                       placeholder="Seu nome"
                       className="h-9 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -106,6 +107,8 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input
                       type="email"
+                      autoComplete="email"
+                      spellCheck={false}
                       placeholder="seu@email.com"
                       className="h-9 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -126,6 +129,7 @@ export default function RegisterPage() {
                     <div className="relative">
                       <Input
                         type={showPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
                         placeholder="Sua senha"
                         className="pr-10 h-9 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                         {...field}
@@ -134,10 +138,12 @@ export default function RegisterPage() {
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground hover:bg-transparent h-7 w-7"
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                        aria-pressed={showPassword}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent h-7 w-7"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOffIcon className="h-3.5 w-3.5" /> : <EyeIcon className="h-3.5 w-3.5" />}
+                        {showPassword ? <EyeOffIcon className="h-3.5 w-3.5" aria-hidden="true" /> : <EyeIcon className="h-3.5 w-3.5" aria-hidden="true" />}
                       </Button>
                     </div>
                   </FormControl>
@@ -180,7 +186,7 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Spinner size="md" />
-                  Criando...
+                  Criando…
                 </>
               ) : (
                 'CRIAR CONTA'

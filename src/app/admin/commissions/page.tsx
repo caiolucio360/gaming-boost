@@ -326,7 +326,7 @@ export default function AdminCommissionsPage() {
                     disabled={saving}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? 'Salvando...' : 'Salvar Configuração'}
+                    {saving ? 'Salvando…' : 'Salvar Configuração'}
                   </Button>
                 )}
               </CardContent>

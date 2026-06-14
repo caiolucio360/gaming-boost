@@ -394,7 +394,7 @@ export default function ProfilePage() {
               className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
-                <>Salvando...</>
+                <>Salvando…</>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
