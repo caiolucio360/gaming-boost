@@ -107,11 +107,8 @@ export default function AdminPaymentsPage() {
           </Link>
         </div>
 
-        {revenueLoading && !revenueStats ? (
-          <div className="mb-6 lg:mb-8">
-            <SkeletonStatsGrid count={5} />
-          </div>
-        ) : revenueStats ? (
+        <LoadingSwap loading={revenueLoading && !revenueStats} skeleton={<div className="mb-6 lg:mb-8"><SkeletonStatsGrid count={5} /></div>}>
+          {revenueStats ? (
           <StatsGrid columns={5} className="mb-6 lg:mb-8">
             <StatCard title="Total Recebido" value={formatPrice(revenueStats.totalRevenue)} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
             <StatCard title="Pendente" value={formatPrice(revenueStats.pendingRevenue)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-foreground dark:text-yellow-300" />
@@ -120,6 +117,7 @@ export default function AdminPaymentsPage() {
             <StatCard title="Pendentes" value={revenueStats.pendingRevenues} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
           </StatsGrid>
         ) : null}
+        </LoadingSwap>
 
         <Tabs value={revenueFilter} onValueChange={setRevenueFilter} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-card border border-border">

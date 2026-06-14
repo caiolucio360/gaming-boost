@@ -129,11 +129,8 @@ export default function BoosterPaymentsPage() {
           </TabsList>
 
           <TabsContent value="comissoes">
-            {commissionsLoading && !stats ? (
-              <div className="mb-6 lg:mb-8">
-                <SkeletonStatsGrid count={5} />
-              </div>
-            ) : stats ? (
+            <LoadingSwap loading={commissionsLoading && !stats} skeleton={<div className="mb-6 lg:mb-8"><SkeletonStatsGrid count={5} /></div>}>
+              {stats ? (
               <StatsGrid columns={5} className="mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
                 <StatCard title="Pendente" value={formatPrice(stats.pendingEarnings)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-foreground dark:text-yellow-300" />
@@ -142,6 +139,7 @@ export default function BoosterPaymentsPage() {
                 <StatCard title="Pendentes" value={stats.pendingCommissions} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
               </StatsGrid>
             ) : null}
+            </LoadingSwap>
 
             <Tabs value={commissionFilter} onValueChange={setCommissionFilter} className="w-full">
               <TabsList className="grid w-full grid-cols-4 bg-background/30 border border-brand-purple/50">
