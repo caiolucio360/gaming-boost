@@ -42,12 +42,6 @@ export default async function CS2PricingPage({ searchParams }: Props) {
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-purple/40 bg-brand-purple/10 px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand-purple-light" />
-            <span className="font-rajdhani text-sm font-bold uppercase tracking-wider text-brand-purple-light">
-              Counter-Strike 2 · Premier
-            </span>
-          </div>
           <h1 className="mb-4 font-orbitron text-4xl font-extrabold leading-tight text-foreground sm:text-5xl lg:text-6xl">
             <span className="bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
               CALCULE

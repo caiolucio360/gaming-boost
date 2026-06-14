@@ -12,7 +12,7 @@ import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, ServiceType } from '@/lib/games-config'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Sword, Users, Zap, Clock, ArrowRight, ShieldCheck, Headset, Gauge } from 'lucide-react'
+import { AlertCircle, Sword, Users, Zap, Clock, ArrowRight, ShieldCheck, Headset } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
@@ -400,7 +400,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
           value={selectedServiceType ?? 'RANK_BOOST'}
           onValueChange={(v) => handleServiceTypeChange(v as ServiceType)}
         >
-          <TabsList className="grid h-auto w-full grid-cols-3 gap-1.5 rounded-2xl border border-border bg-muted/60 p-1.5">
+          <TabsList className="grid h-auto w-full grid-cols-3 gap-1.5 rounded-2xl border border-border bg-muted p-1.5">
             {SERVICE_ORDER.map((type) => {
               const Icon = SERVICE_ICONS[type] ?? Sword
               const label = gameConfig.serviceTypeInfo?.[type]?.displayName || type
@@ -417,11 +417,6 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
             })}
           </TabsList>
         </Tabs>
-        {serviceTypeInfo && (
-          <p className="mt-3 text-center font-rajdhani text-sm text-muted-foreground">
-            {serviceTypeInfo.description}
-          </p>
-        )}
       </div>
 
       {/* ── Configurador: configuração (esq.) + resumo fixo (dir.) ──────────── */}
@@ -589,6 +584,17 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
               {/* acento superior em gradiente roxo */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-brand-purple to-transparent" />
               <CardContent className="space-y-5 p-6">
+                {serviceTypeInfo && (
+                  <div>
+                    <h3 className="font-orbitron text-base font-bold text-foreground">
+                      {serviceTypeInfo.displayName}
+                    </h3>
+                    <p className="mt-1 font-rajdhani text-sm text-muted-foreground">
+                      {serviceTypeInfo.description}
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <p className="font-rajdhani text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Preço estimado
@@ -624,12 +630,6 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                 <div className="h-px bg-border" />
 
                 <ul className="space-y-2.5 font-rajdhani text-sm text-muted-foreground">
-                  {!isCoaching && (
-                    <li className="flex items-center gap-2.5">
-                      <Gauge className="h-4 w-4 flex-shrink-0 text-brand-purple-light" />
-                      Entrega estimada: 2–5 dias
-                    </li>
-                  )}
                   <li className="flex items-center gap-2.5">
                     <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-purple-light" />
                     Pagamento 100% seguro via PIX
