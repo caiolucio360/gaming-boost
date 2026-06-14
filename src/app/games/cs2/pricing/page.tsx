@@ -29,15 +29,33 @@ export default async function CS2PricingPage({ searchParams }: Props) {
     : 'RANK_BOOST'
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground font-orbitron mb-4" style={{ fontWeight: '800' }}>
-            <span className="bg-gradient-to-r from-brand-purple-light to-brand-purple-light bg-clip-text text-transparent">PREÇOS</span>
-            <span className="text-foreground"> CS2</span>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Brilho atmosférico de fundo — profundidade sutil atrás do configurador */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-0 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/3 rounded-full bg-brand-purple/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-purple/60 to-transparent"
+      />
+
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-purple/40 bg-brand-purple/10 px-4 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-purple-light" />
+            <span className="font-rajdhani text-sm font-bold uppercase tracking-wider text-brand-purple-light">
+              Counter-Strike 2 · Premier
+            </span>
+          </div>
+          <h1 className="mb-4 font-orbitron text-4xl font-extrabold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+            <span className="bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
+              CALCULE
+            </span>{' '}
+            SEU BOOST
           </h1>
-          <p className="text-xl text-muted-foreground font-rajdhani" style={{ fontWeight: '500' }}>
-            Calcule o preço do seu boost no Counter-Strike 2
+          <p className="mx-auto max-w-2xl font-rajdhani text-lg font-medium text-muted-foreground sm:text-xl">
+            Monte seu serviço, veja o preço na hora e contrate em segundos.
           </p>
         </div>
 

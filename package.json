@@ -1,6 +1,6 @@
 {
   "name": "gaming-boost",
-  "version": "0.97.15",
+  "version": "0.97.16",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
