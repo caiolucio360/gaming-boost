@@ -21,7 +21,7 @@ import { StatsGrid } from '@/components/common/stats-grid'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { SkeletonRevenueList, SkeletonStatsGrid } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -129,7 +129,9 @@ export default function BoosterPaymentsPage() {
 
           <TabsContent value="comissoes">
             {commissionsLoading && !stats ? (
-              <SkeletonStatsGrid count={5} />
+              <div className="mb-6 lg:mb-8">
+                <SkeletonStatsGrid count={5} />
+              </div>
             ) : stats ? (
               <StatsGrid columns={5} className="mb-6 lg:mb-8">
                 <StatCard title="Total Recebido" value={formatPrice(stats.totalEarnings)} description="Comissões pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
@@ -149,7 +151,7 @@ export default function BoosterPaymentsPage() {
               </TabsList>
               <TabsContent value={commissionFilter} className="mt-6">
                 {commissionsLoading ? (
-                  <SkeletonOrdersList count={3} />
+                  <SkeletonRevenueList count={3} />
                 ) : commissions.length === 0 ? (
                   <EmptyState
                     title="Nenhuma comissão encontrada"

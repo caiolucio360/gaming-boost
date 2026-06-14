@@ -31,26 +31,75 @@ export function SkeletonOrderCard({ className, index = 0 }: { className?: string
       className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-12 w-12 rounded-lg" />
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-32" />
-              <div className="flex gap-2">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-20 rounded-full" />
-              </div>
+      {/* Header: título + descrição + status badge (espelha OrderCardShell/DashboardCard) */}
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-44" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <Skeleton className="h-7 w-24 rounded-full" />
+        </div>
+      </CardHeader>
+      {/* Content: grid de infos (3 col) + linha de ações */}
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-5 w-28" />
             </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Skeleton className="h-6 w-24" />
-            <SkeletonButton size="sm" />
-          </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <SkeletonButton />
+          <SkeletonButton />
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+// Revenue card skeleton — mirrors the revenue/payment Card on /admin/payments and
+// /booster/payments: header (title + description + status badge) and a 3-column grid
+// of label/value info items. Keeps layout aligned with the real content (no shift).
+export function SkeletonRevenueCard({ className, index = 0 }: { className?: string; index?: number }) {
+  return (
+    <Card
+      className={cn("animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-5 w-28" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// List of revenue cards with stagger — mirrors the `grid gap-4 lg:gap-6` wrapper.
+export function SkeletonRevenueList({ count = 3 }: { count?: number }) {
+  return (
+    <div className="grid gap-4 lg:gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonRevenueCard key={i} index={i} />
+      ))}
+    </div>
   )
 }
 

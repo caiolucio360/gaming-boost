@@ -20,7 +20,7 @@ import { StatsGrid } from '@/components/common/stats-grid'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { SkeletonRevenueList, SkeletonStatsGrid } from '@/components/common/skeletons'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -107,7 +107,9 @@ export default function AdminPaymentsPage() {
         </div>
 
         {revenueLoading && !revenueStats ? (
-          <SkeletonStatsGrid count={5} />
+          <div className="mb-6 lg:mb-8">
+            <SkeletonStatsGrid count={5} />
+          </div>
         ) : revenueStats ? (
           <StatsGrid columns={5} className="mb-6 lg:mb-8">
             <StatCard title="Total Recebido" value={formatPrice(revenueStats.totalRevenue)} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
@@ -127,7 +129,7 @@ export default function AdminPaymentsPage() {
           </TabsList>
           <TabsContent value={revenueFilter} className="mt-6">
             {revenueLoading ? (
-              <SkeletonOrdersList count={3} />
+              <SkeletonRevenueList count={3} />
             ) : revenues.length === 0 ? (
               <EmptyState
                 title="Nenhuma receita encontrada"
