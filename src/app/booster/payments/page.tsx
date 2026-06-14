@@ -22,6 +22,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonRevenueList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -150,9 +151,8 @@ export default function BoosterPaymentsPage() {
                 <TabsTrigger value="CANCELLED" className="data-[state=active]:bg-red-500/20">Canceladas</TabsTrigger>
               </TabsList>
               <TabsContent value={commissionFilter} className="mt-6">
-                {commissionsLoading ? (
-                  <SkeletonRevenueList count={3} />
-                ) : commissions.length === 0 ? (
+                <LoadingSwap loading={commissionsLoading} skeleton={<SkeletonRevenueList count={3} />}>
+                  {commissions.length === 0 ? (
                   <EmptyState
                     title="Nenhuma comissão encontrada"
                     description={`Não há comissões ${commissionFilter === 'all' ? '' : commissionFilter === 'PENDING' ? 'pendentes' : commissionFilter === 'PAID' ? 'pagas' : 'canceladas'}.`}
@@ -187,7 +187,8 @@ export default function BoosterPaymentsPage() {
                       </Card>
                     ))}
                   </div>
-                )}
+                  )}
+                </LoadingSwap>
               </TabsContent>
             </Tabs>
           </TabsContent>

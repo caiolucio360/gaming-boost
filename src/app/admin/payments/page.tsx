@@ -21,6 +21,7 @@ import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonRevenueList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -128,9 +129,8 @@ export default function AdminPaymentsPage() {
             <TabsTrigger value="CANCELLED" className="data-[state=active]:bg-red-500/20">Canceladas</TabsTrigger>
           </TabsList>
           <TabsContent value={revenueFilter} className="mt-6">
-            {revenueLoading ? (
-              <SkeletonRevenueList count={3} />
-            ) : revenues.length === 0 ? (
+            <LoadingSwap loading={revenueLoading} skeleton={<SkeletonRevenueList count={3} />}>
+              {revenues.length === 0 ? (
               <EmptyState
                 title="Nenhuma receita encontrada"
                 description={`Não há receitas ${revenueFilter === 'all' ? '' : revenueFilter === 'PENDING' ? 'pendentes' : revenueFilter === 'PAID' ? 'pagas' : 'canceladas'}.`}
@@ -167,7 +167,8 @@ export default function AdminPaymentsPage() {
                   </Card>
                 ))}
               </div>
-            )}
+              )}
+            </LoadingSwap>
           </TabsContent>
         </Tabs>
     </AdminPageShell>
