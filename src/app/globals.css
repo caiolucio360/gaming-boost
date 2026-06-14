@@ -61,8 +61,10 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 10%;
-    --input: 0 0% 10%;
+    /* Borders/inputs sit a step ABOVE the elevated surfaces (card/muted/popover are
+       all 10% in dark) so outlines stay visible instead of blending into the fill. */
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 262 83% 58%;
   }
 }
