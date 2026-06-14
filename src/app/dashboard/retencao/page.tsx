@@ -13,6 +13,7 @@ import { ArrowLeft, Gift, Star, Zap, Trophy } from 'lucide-react'
 import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { RetencaoSkeleton } from '@/app/dashboard/retencao/_components/retencao-skeleton'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { RetentionProgress } from '@/components/common/retention-progress'
 import { formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -86,9 +87,7 @@ export default function RetencaoPage() {
         description="Quanto mais você impulsiona, mais você economiza. Veja seu progresso e descontos disponíveis."
       />
 
-      {loading ? (
-        <RetencaoSkeleton />
-      ) : (
+      <LoadingSwap loading={loading} skeleton={<RetencaoSkeleton />}>
         <>
       {/* Discount badge */}
       <div className="mb-6">
@@ -250,7 +249,7 @@ export default function RetencaoPage() {
         </Card>
       )}
         </>
-      )}
+      </LoadingSwap>
     </div>
   )
 }

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import {
   Table,
   TableBody,
@@ -465,9 +466,7 @@ export default function PricingConfigPage() {
       title="PREÇOS"
       description="Gerencie os preços de boost por faixas de rating ou níveis"
     >
-      {loading ? (
-        <PricingPageSkeleton />
-      ) : (
+      <LoadingSwap loading={loading} skeleton={<PricingPageSkeleton />}>
         <>
         {/* Filtros */}
         <Card className="mb-6 bg-card border-border">
@@ -933,7 +932,7 @@ export default function PricingConfigPage() {
           </AlertDialogContent>
         </AlertDialog>
         </>
-      )}
+      </LoadingSwap>
     </AdminPageShell>
   )
 }
