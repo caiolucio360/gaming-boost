@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { TrustpilotBadge } from '@/components/trustpilot/trustpilot-badge'
+import { APP_VERSION } from '@/lib/version'
 
 const NAV_GROUPS = [
   {
@@ -97,9 +98,11 @@ export function Footer() {
           <p className="text-xs text-muted-foreground">
             © 2026 FlautasBoost. Todos os direitos reservados.
           </p>
-          <p className="text-xs text-muted-foreground font-rajdhani tracking-wide">
-            Feito de gamers para gamers
-          </p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground font-rajdhani tracking-wide">
+            <span>Feito de gamers para gamers</span>
+            <span aria-hidden="true" className="text-border">·</span>
+            <span className="tabular-nums">v{APP_VERSION}</span>
+          </div>
         </div>
       </div>
     </footer>
