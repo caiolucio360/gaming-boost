@@ -95,10 +95,10 @@ export function Footer() {
         {/* Barra inferior */}
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
-            © 2025 FlautasBoost. Todos os direitos reservados.
+            © 2026 FlautasBoost. Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground font-rajdhani tracking-wide">
-            Feito para gamers competitivos
+            Feito de gamers para gamers
           </p>
         </div>
       </div>
