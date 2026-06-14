@@ -31,7 +31,7 @@ export function Heading({ level = 1, as, className, ...props }: HeadingProps) {
   const Tag = (as ?? `h${level}`) as 'h1'
   return (
     <Tag
-      className={cn('font-orbitron text-foreground', headingSizes[level], className)}
+      className={cn('font-orbitron text-foreground text-balance', headingSizes[level], className)}
       {...props}
     />
   )
@@ -56,7 +56,7 @@ export function Text({ as = 'p', color = 'default', className, ...props }: TextP
   const Tag = as as 'p'
   return (
     <Tag
-      className={cn('font-rajdhani', textColors[color], className)}
+      className={cn('font-rajdhani text-pretty', textColors[color], className)}
       {...props}
     />
   )

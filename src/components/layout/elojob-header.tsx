@@ -143,7 +143,7 @@ export function ElojobHeader() {
                   disabled
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
-                  Carregando...
+                  Carregando…
                 </Button>
               ) : (
                 <>
@@ -158,8 +158,8 @@ export function ElojobHeader() {
                             className="relative text-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300 mr-2"
                             asChild
                           >
-                            <Link href="/cart">
-                              <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
+                            <Link href="/cart" aria-label={cartItemsCount > 0 ? `Carrinho, ${cartItemsCount} ${cartItemsCount > 1 ? 'itens' : 'item'}` : 'Carrinho'}>
+                              <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} aria-hidden="true" />
                               {cartItemsCount > 0 && (
                                 <Badge className="absolute -top-1 -right-1 h-5 w-5 min-w-[20px] flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-background rounded-full">
                                   {cartItemsCount > 9 ? '9+' : cartItemsCount}
@@ -267,8 +267,8 @@ export function ElojobHeader() {
                   className="relative text-foreground hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300"
                   asChild
                 >
-                  <Link href="/cart">
-                    <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} />
+                  <Link href="/cart" aria-label={`Carrinho, ${cartItemsCount} ${cartItemsCount > 1 ? 'itens' : 'item'}`}>
+                    <ShoppingCartIcon className={`h-5 w-5 ${cartItemsCount > 0 ? 'animate-cartShake' : ''}`} aria-hidden="true" />
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-brand-purple text-white text-xs font-bold border-2 border-background rounded-full">
                       {cartItemsCount > 9 ? '9+' : cartItemsCount}
                     </Badge>

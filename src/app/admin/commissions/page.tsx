@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { CommissionsSkeleton } from '@/app/admin/commissions/_components/commissions-skeleton'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { Save, Pencil, X, Check, Percent, Clock } from 'lucide-react'
 import { showSuccess, showError } from '@/lib/toast'
 import { api, ApiError } from '@/lib/api-client'
@@ -198,9 +199,7 @@ export default function AdminCommissionsPage() {
       title="GERENCIAR"
       description="Configure as porcentagens de comissão. Mudanças afetam apenas pedidos futuros."
     >
-        {loading ? (
-          <CommissionsSkeleton />
-        ) : (
+        <LoadingSwap loading={loading} skeleton={<CommissionsSkeleton />}>
           <div className="space-y-8">
 
             {/* ── Block 1: Global Config ──────────────────────────────────── */}
@@ -326,7 +325,7 @@ export default function AdminCommissionsPage() {
                     disabled={saving}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? 'Salvando...' : 'Salvar Configuração'}
+                    {saving ? 'Salvando…' : 'Salvar Configuração'}
                   </Button>
                 )}
               </CardContent>
@@ -438,7 +437,7 @@ export default function AdminCommissionsPage() {
               </CardContent>
             </Card>
           </div>
-        )}
+        </LoadingSwap>
     </AdminPageShell>
   )
 }

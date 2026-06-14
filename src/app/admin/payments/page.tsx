@@ -20,7 +20,8 @@ import { StatsGrid } from '@/components/common/stats-grid'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
-import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { SkeletonRevenueList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -106,9 +107,8 @@ export default function AdminPaymentsPage() {
           </Link>
         </div>
 
-        {revenueLoading && !revenueStats ? (
-          <SkeletonStatsGrid count={5} />
-        ) : revenueStats ? (
+        <LoadingSwap loading={revenueLoading && !revenueStats} skeleton={<div className="mb-6 lg:mb-8"><SkeletonStatsGrid count={5} /></div>}>
+          {revenueStats ? (
           <StatsGrid columns={5} className="mb-6 lg:mb-8">
             <StatCard title="Total Recebido" value={formatPrice(revenueStats.totalRevenue)} description="Receitas pagas" icon={CheckCircle2} iconColor="text-green-500" valueColor="text-foreground dark:text-green-300" />
             <StatCard title="Pendente" value={formatPrice(revenueStats.pendingRevenue)} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" valueColor="text-foreground dark:text-yellow-300" />
@@ -117,6 +117,7 @@ export default function AdminPaymentsPage() {
             <StatCard title="Pendentes" value={revenueStats.pendingRevenues} description="Aguardando pagamento" icon={Clock} iconColor="text-yellow-500" />
           </StatsGrid>
         ) : null}
+        </LoadingSwap>
 
         <Tabs value={revenueFilter} onValueChange={setRevenueFilter} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-card border border-border">
@@ -126,9 +127,8 @@ export default function AdminPaymentsPage() {
             <TabsTrigger value="CANCELLED" className="data-[state=active]:bg-red-500/20">Canceladas</TabsTrigger>
           </TabsList>
           <TabsContent value={revenueFilter} className="mt-6">
-            {revenueLoading ? (
-              <SkeletonOrdersList count={3} />
-            ) : revenues.length === 0 ? (
+            <LoadingSwap loading={revenueLoading} skeleton={<SkeletonRevenueList count={3} />}>
+              {revenues.length === 0 ? (
               <EmptyState
                 title="Nenhuma receita encontrada"
                 description={`Não há receitas ${revenueFilter === 'all' ? '' : revenueFilter === 'PENDING' ? 'pendentes' : revenueFilter === 'PAID' ? 'pagas' : 'canceladas'}.`}
@@ -165,7 +165,8 @@ export default function AdminPaymentsPage() {
                   </Card>
                 ))}
               </div>
-            )}
+              )}
+            </LoadingSwap>
           </TabsContent>
         </Tabs>
     </AdminPageShell>

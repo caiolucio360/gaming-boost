@@ -51,52 +51,7 @@ npm run test:coverage    # Coverage report
 
 ## Key Patterns
 
-> Full conventions live in `.claude/rules/code_patterns.md` (API + frontend) and `.claude/rules/design_system.md` (styling, incl. the email/Recharts hex **exceptions**). The summary below is the quick reference.
-
-### API Routes
-
-```typescript
-// Always "message", never "error" key in error responses
-return Response.json({ message: 'description' }, { status: 400 })
-
-// Auth middleware
-import { verifyAuth, verifyAdmin, createAuthErrorResponseFromResult } from '@/lib/auth-middleware'
-const authResult = await verifyAuth(request)
-if (!authResult.authenticated) return createAuthErrorResponseFromResult(authResult)
-
-// Error handling — use createApiErrorResponse for catch blocks
-import { createApiErrorResponse, ErrorMessages } from '@/lib/api-errors'
-return createApiErrorResponse(error, ErrorMessages.ORDER_CREATE_FAILED, 'POST /api/orders')
-
-// Input validation
-import { validateBody, createValidationErrorResponse } from '@/lib/validate'
-const validation = validateBody(body, schema)
-if (!validation.success) return createValidationErrorResponse(validation.error)
-```
-
-### Frontend
-
-```typescript
-// API calls: NEVER raw fetch() to /api — use the `api` client (@/lib/api-client). It adds auth,
-// parses JSON, throws ApiError on non-2xx, and handles FormData. (Exceptions: SSE/EventSource, external APIs.)
-import { api, ApiError } from '@/lib/api-client'
-const data = await api.get<{ orders: Order[] }>('/api/orders')   // api.get/post/put/patch/delete
-try { await api.put(`/api/admin/users/${id}`, { active: true }) } catch (e) { /* e instanceof ApiError */ }
-
-// Auth redirects: always replace(), never push() — prevents back-navigation to protected pages
-router.replace('/login')
-
-// Page-level loading: always useLoading hook, never manual useState(true/false)
-const { loading, withLoading } = useLoading({ initialLoading: true })
-
-// Frontend reads data.message from API — never data.error
-```
-
-```tsx
-// React remounting gotcha: never define sub-components inside another component body
-// BAD:  const Foo = () => <div>...</div>  (inside parent component — remounts every render)
-// GOOD: const foo = <div>...</div>        (JSX variable, not a component)
-```
+Full API + frontend conventions live in **`.claude/rules/code_patterns.md`** (loaded every session — follow it directly). It covers: `message` (never `error`) response shape + `code`/`detail` keys, `HttpStatus` constants, `verifyAuth`/`verifyAdmin`, `validateBody` + Zod, `withApiHandler` (and the `api-errors` transitive-Prisma caveat), the mandatory `@/lib/api-client` (`api.get/post/...`, no raw `fetch`), `router.replace()` for redirects, the `useLoading` hook, reading `data.message`, and the no-nested-sub-components rule.
 
 ## Critical Gotchas
 
@@ -115,7 +70,7 @@ const { loading, withLoading } = useLoading({ initialLoading: true })
 - **`JSON.parse(*.metadata)`:** always wrap in try-catch returning `{}` — the field is free JSON and may be corrupted
 - **Stats queries:** dashboard routes (booster/payments, admin/payments, booster/orders) use `Promise.all` for 5 aggregate/count queries
 - **`UpdateOrderSchema`:** admin `PUT /api/admin/orders/[id]` validates body with this schema; booster re-approval rejected with 409 if `verificationStatus === 'VERIFIED'`
-- **System version:** single source = `package.json` `"version"` (injected via `next.config.js` → `NEXT_PUBLIC_APP_VERSION`, read by `src/lib/version.ts`; don't edit version.ts). **Bump it on every committed change** with `npm version <patch|minor|major> --no-git-tag-version` (semver per Conventional Commit type) — see `.claude/rules/git-flow.md`. Shown in the panel sidebar footer.
+- **System version:** single source = `package.json` `"version"` (injected via `next.config.js` → `NEXT_PUBLIC_APP_VERSION`, read by `src/lib/version.ts`; don't edit version.ts). **Bump it on every committed change** with `npm version <patch|minor|major> --no-git-tag-version` (semver per Conventional Commit type) — see `.claude/docs/git-flow.md`. Shown in the panel sidebar footer.
 - **No raw `fetch` on the client:** use `@/lib/api-client` → `api.get/post/put/patch/delete` — see `.claude/rules/code_patterns.md` rule 6.
 
 ## Removed Features (MVP scope — do not re-add)
@@ -126,7 +81,7 @@ Dispute system, review system, booster public profiles (`/booster/[id]`), commis
 
 **Tailwind v4** — `@config "../../tailwind.config.js"` directive in `globals.css` is mandatory.
 
-Styling is governed by `.claude/rules/design_system.md` (loaded every session). The app supports **light/dark mode** (`next-themes`, `.dark` class on `<html>`, shadcn CSS-variable tokens in `globals.css`): use **theme tokens** for neutral surfaces/text/borders (`bg-background`, `bg-card`, `bg-popover`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `border-input`) so both themes work; use the **brand-purple** palette for accents. Never hex values, arbitrary Tailwind values, raw `gray-*`, or fixed neutral classes (`bg-brand-black`, `bg-brand-black-light`, `border-white/10`, `text-brand-gray-300/400/500`) — the design-system guard fails the build on these. `text-white` is allowed only for text on a solid colored background. Titles use `font-orbitron`, body/UI uses `font-rajdhani` (no inline `style` fallback). Components: prefer shadcn/ui (`.claude/rules/components.md`).
+All styling is governed by **`.claude/rules/design_system.md`** (loaded every session — follow it directly): light/dark theme tokens for neutrals, the brand-purple palette for accents, `font-orbitron`/`font-rajdhani`, the build-failing design-system guard (no hex/arbitrary/raw-`gray-*`/fixed-neutral classes), and the email/Recharts hex exceptions. Prefer shadcn/ui components (`.claude/rules/components.md`) and reuse `src/components/common/`.
 
 ## Environment Variables
 

@@ -43,7 +43,7 @@ const sizeClasses = {
  * 
  * @example
  * <LoadingSpinner size="md" fullScreen />
- * <LoadingSpinner size="sm" text="Carregando..." />
+ * <LoadingSpinner size="sm" text="Carregando…" />
  */
 export function LoadingSpinner({ 
   size = 'md', 
@@ -62,7 +62,7 @@ export function LoadingSpinner({
           {text}
         </span>
       ) : (
-        <span className="sr-only">Carregando...</span>
+        <span className="sr-only">Carregando…</span>
       )}
     </div>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton, SkeletonAvatar, SkeletonButton } from '@/components/ui/skeleton'
+import { Skeleton, SkeletonButton } from '@/components/ui/skeleton'
 import { StatsGrid } from '@/components/common/stats-grid'
 import { cn } from '@/lib/utils'
 
@@ -31,26 +31,114 @@ export function SkeletonOrderCard({ className, index = 0 }: { className?: string
       className={cn("animate-fadeInUp opacity-0", className)}
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-12 w-12 rounded-lg" />
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-32" />
-              <div className="flex gap-2">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-20 rounded-full" />
-              </div>
-            </div>
+      {/* Header: título + descrição + status badge (espelha OrderCardShell/DashboardCard) */}
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-44" />
+            <Skeleton className="h-4 w-56" />
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-7 w-24 rounded-full" />
+        </div>
+      </CardHeader>
+      {/* Content: grid de infos (3 col) + linha de ações */}
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-5 w-28" />
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <SkeletonButton />
+          <SkeletonButton />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Revenue card skeleton — mirrors the revenue/payment Card on /admin/payments and
+// /booster/payments: header (title + description + status badge) and a 3-column grid
+// of label/value info items. Keeps layout aligned with the real content (no shift).
+export function SkeletonRevenueCard({ className, index = 0 }: { className?: string; index?: number }) {
+  return (
+    <Card
+      className={cn("animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-5 w-28" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// List of revenue cards with stagger — mirrors the `grid gap-4 lg:gap-6` wrapper.
+export function SkeletonRevenueList({ count = 3 }: { count?: number }) {
+  return (
+    <div className="grid gap-4 lg:gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonRevenueCard key={i} index={i} />
+      ))}
+    </div>
+  )
+}
+
+// User card skeleton — mirrors the user Card on /admin/users: left text block
+// (name + role badge, email, meta line) and a right-side action button row.
+export function SkeletonUserCard({ className, index = 0 }: { className?: string; index?: number }) {
+  return (
+    <Card
+      className={cn("animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 70}ms` }}
+    >
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-56" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <SkeletonButton size="sm" />
             <SkeletonButton size="sm" />
           </div>
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+// List of user cards with stagger — mirrors the `grid gap-4` wrapper on /admin/users.
+export function SkeletonUserList({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonUserCard key={i} index={i} />
+      ))}
+    </div>
   )
 }
 
@@ -98,39 +186,8 @@ export function SkeletonTable({
   )
 }
 
-// Profile card skeleton
-export function SkeletonProfileCard({ className }: { className?: string }) {
-  return (
-    <Card className={className}>
-      <CardContent className="p-6">
-        <div className="flex items-center gap-4">
-          <SkeletonAvatar size="lg" />
-          <div className="space-y-2 flex-1">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-4 w-48" />
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-16 rounded-full" />
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-5 w-24" />
-          </div>
-          <div className="space-y-1">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-5 w-20" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 // Profile page skeleton — mirrors the "Informações da Conta" + "Alterar Senha" form cards and
-// the save/cancel button row on /profile. (The avatar-style SkeletonProfileCard above doesn't
-// match that layout; use this on the profile page.)
+// the save/cancel button row on /profile.
 export function SkeletonProfileForm() {
   const fieldRows = (n: number) =>
     Array.from({ length: n }).map((_, i) => (
@@ -181,143 +238,6 @@ export function SkeletonProfileForm() {
       <div className="flex justify-end gap-4">
         <SkeletonButton />
         <SkeletonButton />
-      </div>
-    </div>
-  )
-}
-
-// Payment/PIX card skeleton
-export function SkeletonPaymentCard({ className }: { className?: string }) {
-  return (
-    <Card className={className}>
-      <CardHeader className="text-center pb-2">
-        <Skeleton className="h-7 w-48 mx-auto" />
-        <Skeleton className="h-5 w-32 mx-auto mt-2" />
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Status badge */}
-        <div className="flex justify-center">
-          <Skeleton className="h-10 w-48 rounded-lg" />
-        </div>
-        {/* Timer */}
-        <div className="flex justify-center">
-          <Skeleton className="h-5 w-32" />
-        </div>
-        {/* QR Code */}
-        <div className="flex justify-center">
-          <Skeleton className="w-48 h-48 md:w-64 md:h-64 rounded-xl" />
-        </div>
-        {/* Copy code section */}
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-40 mx-auto" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <SkeletonButton size="lg" className="w-full" />
-        </div>
-        {/* Verify button */}
-        <SkeletonButton size="default" className="w-full" />
-      </CardContent>
-    </Card>
-  )
-}
-
-// Calculator/service card skeleton
-export function SkeletonCalculatorCard({ className }: { className?: string }) {
-  return (
-    <Card className={className}>
-      <CardHeader className="text-center">
-        <Skeleton className="h-8 w-56 mx-auto" />
-        <Skeleton className="h-4 w-72 mx-auto mt-2" />
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Tabs */}
-        <div className="flex gap-2 justify-center">
-          <Skeleton className="h-10 w-32 rounded-lg" />
-          <Skeleton className="h-10 w-32 rounded-lg" />
-        </div>
-        {/* Sliders/inputs */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-        </div>
-        {/* Price display */}
-        <div className="bg-card rounded-lg p-4 space-y-2">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        {/* CTA Button */}
-        <SkeletonButton size="lg" className="w-full" />
-      </CardContent>
-    </Card>
-  )
-}
-
-// Form skeleton
-export function SkeletonForm({
-  fields = 3,
-  className,
-}: {
-  fields?: number
-  className?: string
-}) {
-  return (
-    <div className={cn("space-y-4", className)}>
-      {Array.from({ length: fields }).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full rounded-md" />
-        </div>
-      ))}
-      <SkeletonButton size="lg" className="w-full mt-6" />
-    </div>
-  )
-}
-
-// Dashboard page skeleton
-export function SkeletonDashboard() {
-  return (
-    <div className="space-y-6">
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-      </div>
-      {/* Orders section */}
-      <div className="space-y-4">
-        <Skeleton className="h-7 w-32" />
-        <SkeletonOrderCard />
-        <SkeletonOrderCard />
-        <SkeletonOrderCard />
-      </div>
-    </div>
-  )
-}
-
-// Admin dashboard skeleton
-export function SkeletonAdminDashboard() {
-  return (
-    <div className="space-y-6">
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-        <SkeletonStatsCard />
-      </div>
-      {/* Table section */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-7 w-40" />
-          <SkeletonButton />
-        </div>
-        <SkeletonTable rows={5} columns={5} />
       </div>
     </div>
   )
@@ -442,22 +362,6 @@ export function SkeletonOrdersList({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonOrderCard key={i} index={i} />
       ))}
-    </div>
-  )
-}
-
-// Full page skeleton (stats grid + orders list)
-export function SkeletonPage() {
-  return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <SkeletonStatsGrid count={4} />
-        <SkeletonOrdersList count={3} />
-      </div>
     </div>
   )
 }

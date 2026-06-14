@@ -399,7 +399,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     value={credUsername}
                     onChange={(e) => setCredUsername(e.target.value)}
                     placeholder="Usuário Steam"
-                    className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
+                    className="bg-background/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                     disabled={sending}
                     autoComplete="off"
                   />
@@ -408,7 +408,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                     value={credPassword}
                     onChange={(e) => setCredPassword(e.target.value)}
                     placeholder="Senha Steam"
-                    className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
+                    className="bg-background/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                     disabled={sending}
                     autoComplete="new-password"
                   />
@@ -444,7 +444,7 @@ export function OrderChat({ orderId, className, onMessagesUpdate }: OrderChatPro
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Digite sua mensagem..."
+                  placeholder="Digite sua mensagem…"
                   className="bg-black/50 border-brand-purple/30 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light"
                   disabled={sending}
                   maxLength={2000}

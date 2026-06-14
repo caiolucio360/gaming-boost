@@ -29,11 +29,11 @@ export function StatCard({
           {title}
         </CardTitle>
         <div className="p-2 rounded-lg bg-brand-purple/10 group-hover:bg-brand-purple/20 transition-colors duration-200">
-          <Icon className={`h-4 w-4 ${iconColor}`} />
+          <Icon className={`h-4 w-4 ${iconColor} transition-transform duration-200 group-hover:scale-110`} aria-hidden="true" />
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
-        <div className={`text-2xl font-bold ${valueColor} font-orbitron`}>
+        <div className={`text-2xl font-bold ${valueColor} font-orbitron tabular-nums`}>
           {value}
         </div>
         {description && (

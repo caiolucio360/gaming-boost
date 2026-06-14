@@ -20,6 +20,7 @@ import { OrderCardShell } from '@/components/common/order-card-shell'
 import { PaymentStatusBadge } from '@/components/common/payment-status-badge'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { OrderInfoItem } from '@/components/common/order-info-item'
 import { formatPrice, formatDate } from '@/lib/utils'
 
@@ -113,9 +114,8 @@ export default function AdminOrdersPage() {
         </Card>
 
         {/* Lista de Pedidos */}
-        {loading ? (
-          <SkeletonOrdersList count={5} />
-        ) : orders.length === 0 ? (
+        <LoadingSwap loading={loading} skeleton={<SkeletonOrdersList count={5} />}>
+          {orders.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}
             title="Nenhum pedido encontrado"
@@ -178,7 +178,8 @@ export default function AdminOrdersPage() {
               )
             })}
           </div>
-        )}
+          )}
+        </LoadingSwap>
 
         <div className="mt-4 text-center">
           <p className="text-muted-foreground font-rajdhani">

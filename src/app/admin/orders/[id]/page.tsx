@@ -526,6 +526,7 @@ export default function AdminOrderDetailPage() {
                 <img
                   src={order.completionProofUrl}
                   alt="Comprovante de conclusão"
+                  loading="lazy"
                   className="w-full max-w-lg rounded-lg border border-green-500/30 object-cover"
                 />
                 <a

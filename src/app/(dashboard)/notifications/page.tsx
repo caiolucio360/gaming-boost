@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useLoading } from '@/hooks/use-loading'
 import { SkeletonList } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { api } from '@/lib/api-client'
 import { Loader2, CheckCheck } from 'lucide-react'
 
@@ -78,9 +79,8 @@ export default function NotificationsPage() {
       </div>
 
       <div className="space-y-4">
-        {loading && notifications.length === 0 ? (
-          <SkeletonList items={6} />
-        ) : notifications.length === 0 ? (
+        <LoadingSwap loading={loading && notifications.length === 0} skeleton={<SkeletonList items={6} />}>
+          {notifications.length === 0 ? (
           <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50 hover:border-brand-purple-light transition-all hover-glow">
             <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <p className="font-rajdhani">Você não tem notificações.</p>
@@ -95,7 +95,8 @@ export default function NotificationsPage() {
               />
             </Card>
           ))
-        )}
+          )}
+        </LoadingSwap>
 
         {loading && notifications.length > 0 && (
           <div className="flex justify-center py-4">

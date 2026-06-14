@@ -111,6 +111,8 @@ export default function ForgotPasswordPage() {
                   <FormControl>
                     <Input
                       type="email"
+                      autoComplete="email"
+                      spellCheck={false}
                       placeholder="seu@email.com"
                       className="h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -130,7 +132,7 @@ export default function ForgotPasswordPage() {
               {isLoading ? (
                 <>
                   <Spinner size="md" />
-                  Enviando...
+                  Enviando…
                 </>
               ) : (
                 'Enviar Instruções'

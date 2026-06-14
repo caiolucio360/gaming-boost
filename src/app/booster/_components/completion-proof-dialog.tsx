@@ -12,7 +12,7 @@ interface CompletionProofDialogProps {
   onConfirm: (file: File) => void
   /** True while the upload/completion request is in flight. */
   submitting: boolean
-  /** Label shown on the submit button while submitting (e.g. "Enviando print..."). */
+  /** Label shown on the submit button while submitting (e.g. "Enviando print…"). */
   submittingLabel?: string
 }
 
@@ -22,7 +22,7 @@ export function CompletionProofDialog({
   onOpenChange,
   onConfirm,
   submitting,
-  submittingLabel = 'Enviando...',
+  submittingLabel = 'Enviando…',
 }: CompletionProofDialogProps) {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)

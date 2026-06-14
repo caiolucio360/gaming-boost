@@ -21,6 +21,7 @@ import { api, ApiError } from '@/lib/api-client'
 import { ErrorCodes } from '@/lib/error-constants'
 import { formatPrice } from '@/lib/utils'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { LoadingSwap } from '@/components/common/loading-swap'
 
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth()
@@ -102,7 +103,7 @@ export default function CartPage() {
           updateToSuccess(
             toastId,
             `${createdOrders.length} ${createdOrders.length === 1 ? 'pedido criado' : 'pedidos criados'} com sucesso!`,
-            'Redirecionando para pagamento...'
+            'Redirecionando para pagamento…'
           )
         } else {
           updateToSuccess(
@@ -110,7 +111,7 @@ export default function CartPage() {
             `${createdOrders.length} de ${items.length} pedidos criados`,
             failedItems.length > 0 
               ? `Não foi possível criar: ${failedItems.join(', ')}`
-              : 'Redirecionando para pagamento...'
+              : 'Redirecionando para pagamento…'
           )
         }
         
@@ -145,10 +146,6 @@ export default function CartPage() {
     showSuccess('Item removido', `${item.serviceName || 'Item'} foi removido do carrinho`)
   }
 
-  if (authLoading) {
-    return <LoadingSpinner />
-  }
-
   return (
     <div className="min-h-screen bg-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
@@ -162,6 +159,10 @@ export default function CartPage() {
           </p>
         </div>
 
+        <LoadingSwap
+          loading={authLoading}
+          skeleton={<LoadingSpinner fullScreen={false} className="py-20" />}
+        >
         {items.length === 0 && !isRedirecting ? (
           <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
@@ -183,7 +184,7 @@ export default function CartPage() {
           <Card className="bg-background/30 backdrop-blur-md border-brand-purple/50">
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <LoadingSpinner size="lg" text="Redirecionando para pagamento..." fullScreen={false} />
+                <LoadingSpinner size="lg" text="Redirecionando para pagamento…" fullScreen={false} />
               </div>
             </CardContent>
           </Card>
@@ -269,7 +270,7 @@ export default function CartPage() {
                       {isProcessing ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processando...
+                          Processando…
                         </>
                       ) : (
                         <>
@@ -306,6 +307,7 @@ export default function CartPage() {
             </Card>
           </div>
         )}
+        </LoadingSwap>
       </div>
     </div>
   )

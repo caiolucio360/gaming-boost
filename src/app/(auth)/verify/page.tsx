@@ -64,7 +64,7 @@ function VerifyContent() {
     try {
       await api.post('/api/auth/verify', { email, code: data.code }, { requireAuth: false })
 
-      setSuccessMessage('Conta verificada com sucesso! Redirecionando...')
+      setSuccessMessage('Conta verificada com sucesso! Redirecionando…')
       
       // Attempt to auto-login if token provided (implemented in context usually, but here verify returns token directly)
       // Since context uses NextAuth (signIn), we might need to just redirect to login page OR use the token to fake a session?
@@ -149,6 +149,9 @@ function VerifyContent() {
                 <FormControl>
                   <Input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    spellCheck={false}
                     maxLength={6}
                     placeholder="000000"
                     className="h-12 text-center text-lg tracking-[0.5em] font-bold bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
@@ -170,7 +173,7 @@ function VerifyContent() {
             disabled={isLoading}
             className="w-full bg-brand-purple hover:bg-brand-purple-light text-white font-bold py-3 rounded-lg transition-all shadow-glow hover:shadow-glow-hover font-rajdhani"
           >
-            {isLoading ? 'Verificando...' : 'VERIFICAR'}
+            {isLoading ? 'Verificando…' : 'VERIFICAR'}
           </Button>
 
           <div className="text-center pt-2">

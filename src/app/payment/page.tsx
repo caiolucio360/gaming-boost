@@ -6,6 +6,7 @@ import { PaymentForm } from '@/components/payment/payment-form'
 import { PixPaymentDisplay } from '@/components/payment/pix-payment-display'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { api } from '@/lib/api-client'
 import Link from 'next/link'
 import { ArrowLeft, Home } from 'lucide-react'
@@ -113,16 +114,17 @@ function PaymentContent() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-lg">
-          {/* Checking for an existing active PIX before showing the form */}
-          {initializing && (
-            <div className="flex items-center justify-center gap-3 text-foreground font-rajdhani py-12">
-              <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
-              Verificando pagamento...
-            </div>
-          )}
-
-          {!initializing && (
-            <>
+          {/* Checking for an existing active PIX before showing the form — crossfade
+              from the "verificando" spinner to the form/QR once resolved. */}
+          <LoadingSwap
+            loading={initializing}
+            skeleton={
+              <div className="flex items-center justify-center gap-3 text-foreground font-rajdhani py-12">
+                <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+                Verificando pagamento…
+              </div>
+            }
+          >
           {/* Show error if any */}
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 text-foreground dark:text-red-300 px-4 py-3 rounded-lg mb-6 font-rajdhani">
@@ -183,8 +185,7 @@ function PaymentContent() {
               </div>
             </div>
           )}
-            </>
-          )}
+          </LoadingSwap>
         </div>
       </div>
     </div>

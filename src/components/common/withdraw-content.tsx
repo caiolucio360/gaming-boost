@@ -124,7 +124,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 <div>
                   <p className="text-muted-foreground text-sm font-rajdhani">Saldo Disponível</p>
                   <p className="text-2xl font-bold text-foreground font-orbitron">
-                    {loading ? '...' : formatPrice(availableBalance / 100)}
+                    {loading ? '…' : formatPrice(availableBalance / 100)}
                   </p>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export function WithdrawContent({ apiBasePath }: WithdrawContentProps) {
                 <Input type="text" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Digite sua chave PIX" className="bg-background/50 border-brand-purple/50 text-foreground" required />
               </div>
               <Button type="submit" className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-bold" disabled={isSubmitting || availableBalance < 350}>
-                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Processando...</> : 'Solicitar Saque'}
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Processando…</> : 'Solicitar Saque'}
               </Button>
             </form>
           )}

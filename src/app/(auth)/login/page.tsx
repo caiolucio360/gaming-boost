@@ -99,6 +99,8 @@ function LoginContent() {
                 <FormControl>
                   <Input
                     type="email"
+                    autoComplete="email"
+                    spellCheck={false}
                     placeholder="seu@email.com"
                     className="h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                     {...field}
@@ -121,6 +123,7 @@ function LoginContent() {
                   <div className="relative">
                     <Input
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       placeholder="Sua senha"
                       className="pr-10 h-10 bg-card border-border focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-foreground placeholder:text-muted-foreground"
                       {...field}
@@ -129,10 +132,12 @@ function LoginContent() {
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-muted-foreground hover:bg-transparent"
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      aria-pressed={showPassword}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                      {showPassword ? <EyeOffIcon className="h-4 w-4" aria-hidden="true" /> : <EyeIcon className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </FormControl>
@@ -159,7 +164,7 @@ function LoginContent() {
             {isLoading ? (
               <>
                 <Spinner size="md" />
-                Entrando...
+                Entrando…
               </>
             ) : (
               'ENTRAR'

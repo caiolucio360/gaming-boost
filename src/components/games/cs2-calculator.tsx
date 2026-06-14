@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { CartItem } from '@/types'
 import { handleServiceHire } from '@/lib/cart-utils'
 import { getGameConfig, GameId, ServiceType } from '@/lib/games-config'
 import { showError } from '@/lib/toast'
-import { AlertCircle, Sword, Users, Zap, Clock } from 'lucide-react'
+import { AlertCircle, Sword, Users, Zap, Clock, ArrowRight, ShieldCheck, Headset } from 'lucide-react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/common/loading-spinner'
@@ -34,6 +37,14 @@ const gameMode = 'PREMIER'
 // abaixo de R$ 5,00, então bloqueamos a contratação ainda na calculadora.
 const MIN_ORDER_PRICE = 5
 
+const SERVICE_ICONS: Partial<Record<ServiceType, typeof Sword>> = {
+  RANK_BOOST: Sword,
+  DUO_BOOST: Users,
+  COACHING: Clock,
+}
+
+const SERVICE_ORDER: ServiceType[] = ['RANK_BOOST', 'DUO_BOOST', 'COACHING']
+
 export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
@@ -51,6 +62,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   const { user } = useAuth()
   const { addItem } = useCart()
   const router = useRouter()
+  const reduceMotion = useReducedMotion()
 
   const gameConfig = getGameConfig(gameId)
   const modeConfig = gameConfig?.modes?.[gameMode]
@@ -75,7 +87,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
             const hours = data.data?.hours
             const min = data.data?.min
             const max = data.data?.max
-            
+
             if (min !== undefined) setMinRating(min)
             if (max !== undefined) setMaxRating(max)
 
@@ -94,7 +106,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
             const max = data.data?.max
             if (min !== undefined) setMinRating(min)
             if (max !== undefined) setMaxRating(max)
-            
+
             if (points && points.length > 0) {
               setDynamicPoints(points)
               if (currentRating === 0 && targetRating === 1000) {
@@ -359,359 +371,323 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRating, targetRating, selectedHours, selectedServiceType, gameId, gameMode])
 
-  const getServiceIcon = (type: ServiceType) => {
-    if (type === 'RANK_BOOST') return Sword
-    if (type === 'DUO_BOOST') return Users
-    return Clock
-  }
-
   if (!gameConfig || !modeConfig) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <Card className="bg-card border border-border">
+      <div className="mx-auto max-w-4xl">
+        <Card className="border border-border">
           <CardContent className="p-6">
-            <p className="text-foreground text-center">Configuração do jogo não encontrada.</p>
+            <p className="text-center text-foreground">Configuração do jogo não encontrada.</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
+  const isCoaching = selectedServiceType === 'COACHING'
+  const priceSubline = price > 0
+    ? (isCoaching
+        ? `${selectedHours} hora${selectedHours && selectedHours > 1 ? 's' : ''} de coaching`
+        : `${currentRating.toLocaleString('pt-BR')} → ${targetRating.toLocaleString('pt-BR')} pontos`)
+    : (isCoaching
+        ? 'Selecione as horas para ver o preço'
+        : 'Selecione o intervalo para ver o preço')
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card className="bg-card border border-border hover:border-brand-purple/50 transition-colors">
-        <CardHeader className="py-3 pb-2">
-          <CardTitle className="text-lg md:text-2xl font-bold font-orbitron text-center">
-            <span className="text-brand-purple-light">{gameConfig.displayName}</span>
-            <span className="text-foreground"> CALCULATOR</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Service Type Selection — Phase A (full cards) or Phase B (compact bar) */}
-          {selectedServiceType === null ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {([
-                {
-                  type: 'RANK_BOOST' as ServiceType,
-                  Icon: Sword,
-                  title: 'Boost',
-                  description: 'Nosso booster joga por você e sobe seu rank profissionalmente.',
-                },
-                {
-                  type: 'DUO_BOOST' as ServiceType,
-                  Icon: Users,
-                  title: 'Duo Boost',
-                  description: 'Você joga ao lado de um booster profissional para subir juntos.',
-                },
-                {
-                  type: 'COACHING' as ServiceType,
-                  Icon: Clock,
-                  title: 'Coaching',
-                  description: 'Aulas com um profissional para melhorar suas habilidades.',
-                },
-              ] as const).map(({ type, Icon, title, description }) => (
-                <button
+    <div className="mx-auto max-w-6xl">
+      {/* ── Barra de seleção do tipo de serviço (segmented control) ─────────── */}
+      <div className="mb-8">
+        <Tabs
+          value={selectedServiceType ?? 'RANK_BOOST'}
+          onValueChange={(v) => handleServiceTypeChange(v as ServiceType)}
+        >
+          <TabsList className="grid h-auto w-full grid-cols-3 gap-1.5 rounded-2xl border border-border bg-muted p-1.5">
+            {SERVICE_ORDER.map((type) => {
+              const Icon = SERVICE_ICONS[type] ?? Sword
+              const label = gameConfig.serviceTypeInfo?.[type]?.displayName || type
+              return (
+                <TabsTrigger
                   key={type}
-                  onClick={() => handleServiceTypeChange(type)}
-                  className="bg-card border border-brand-purple/30 rounded-xl p-6 cursor-pointer
-                    hover:border-brand-purple hover:shadow-glow transition-all duration-300
-                    flex flex-col items-center text-center"
+                  value={type}
+                  className="h-auto flex-col gap-1.5 rounded-xl py-3 font-rajdhani font-bold data-[state=active]:border-transparent data-[state=active]:bg-brand-purple data-[state=active]:text-white data-[state=active]:shadow-glow"
                 >
-                  <Icon className="h-10 w-10 text-brand-purple-light mb-3" />
-                  <h3 className="text-lg font-bold text-foreground font-orbitron mb-2">
-                    {title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-rajdhani">
-                    {description}
-                  </p>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2 mb-4 justify-center">
-              {(['RANK_BOOST', 'DUO_BOOST', 'COACHING'] as ServiceType[]).map((type) => {
-                const info = gameConfig.serviceTypeInfo?.[type]
-                const isSelected = selectedServiceType === type
-                const Icon = getServiceIcon(type)
-                return (
-                  <button
-                    key={type}
-                    onClick={() => handleServiceTypeChange(type)}
-                    className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 font-rajdhani font-bold text-sm
-                      ${isSelected
-                        ? 'bg-brand-purple border border-transparent text-white shadow-glow'
-                        : 'bg-card border border-border text-muted-foreground hover:border-brand-purple/50 hover:text-brand-purple-light'
-                      }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {info?.displayName || type}
-                  </button>
-                )
-              })}
-            </div>
-          )}
+                  <Icon className="h-5 w-5" />
+                  <span className="text-xs sm:text-sm">{label}</span>
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </Tabs>
+      </div>
 
-          {selectedServiceType !== null && (
-            <div key={selectedServiceType} className="animate-fadeInUp">
-              {/* Service Type Description */}
-              {serviceTypeInfo && (
-                <p className="text-xs text-muted-foreground text-center mb-3 font-rajdhani">
-                  {serviceTypeInfo.description}
-                </p>
-              )}
+      {/* ── Configurador: configuração (esq.) + resumo fixo (dir.) ──────────── */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Coluna de configuração */}
+        <div className="lg:col-span-3">
+          <motion.div
+            key={selectedServiceType}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="space-y-5"
+          >
+            {/* Aviso de pedido ativo */}
+            {user && hasActiveOrderInMode && (
+              <Card className="border-yellow-500/50 bg-yellow-500/10">
+                <CardContent className="flex items-start gap-3 p-4">
+                  <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-500" />
+                  <div className="flex-1">
+                    <h3 className="font-rajdhani font-bold text-foreground dark:text-yellow-300">
+                      Você já possui um serviço ativo
+                    </h3>
+                    <p className="mt-1 font-rajdhani text-sm text-muted-foreground">
+                      Finalize ou cancele o serviço atual antes de contratar um novo.
+                    </p>
+                    <Button asChild size="sm" className="mt-3 bg-yellow-500 text-black hover:bg-yellow-400">
+                      <Link href="/dashboard">Ver meus pedidos</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Warning for Active Orders */}
-              {user && hasActiveOrderInMode && (
-                <Card className="bg-amber-500/20 border border-amber-500/70 mb-6 animate-pulse">
-                  <CardContent className="p-4 md:p-5">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h3 className="text-sm md:text-base font-bold text-amber-500 font-rajdhani mb-2">
-                          Você já possui um serviço ativo
-                        </h3>
-                        <p className="text-xs md:text-sm text-muted-foreground font-rajdhani mb-3">
-                          Finalize ou cancele o serviço atual antes de contratar um novo.
-                        </p>
-                        <Link
-                          href="/dashboard"
-                          className="inline-block bg-amber-500 hover:bg-amber-500/80 text-black font-bold py-2 px-4 rounded-lg transition-colors text-xs md:text-sm font-rajdhani"
-                        >
-                          Ver Meus Pedidos
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <div className="space-y-4">
-                {/* Coaching: hours selector */}
-                {selectedServiceType === 'COACHING' ? (
+            {/* Painel de configuração */}
+            <Card className="border-border">
+              <CardContent className="p-5 sm:p-6">
+                {isCoaching ? (
                   isLoadingRanges ? (
-                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border animate-pulse">
-                      <div className="flex flex-col items-center justify-center mb-8 gap-4">
-                        <Skeleton className="h-5 w-48 mb-2 bg-white/5" />
-                        <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
-                      </div>
-                      <div className="px-2">
-                        <Skeleton className="h-2 w-full bg-white/10 rounded-full my-4" />
-                      </div>
-                      <div className="flex justify-between mt-2">
-                        <Skeleton className="h-3 w-6 bg-white/5" />
-                        <Skeleton className="h-3 w-8 bg-white/5" />
+                    <div>
+                      <Skeleton className="mb-5 h-4 w-40" />
+                      <Skeleton className="mx-auto h-14 w-48 rounded-md" />
+                      <Skeleton className="mt-8 h-2 w-full rounded-full" />
+                      <div className="mt-3 flex justify-between">
+                        <Skeleton className="h-3 w-8" />
+                        <Skeleton className="h-3 w-10" />
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border">
-                      <div className="flex flex-col items-center justify-center mb-8 gap-4">
-                        <h3 className="text-sm md:text-base font-bold text-foreground font-orbitron mb-2">
-                          QUANTIDADE DE HORAS
-                        </h3>
-                        <Input 
-                          type="number" 
-                          min={minRating || 1} 
-                          max={maxRating || 10} 
+                    <div>
+                      <h3 className="mb-5 font-orbitron text-sm font-bold uppercase tracking-wide text-foreground">
+                        Horas de coaching
+                      </h3>
+                      <div className="mx-auto w-48">
+                        <Input
+                          type="number"
+                          min={minRating || 1}
+                          max={maxRating || 10}
                           value={selectedHours || minRating || 1}
                           onChange={(e) => setSelectedHours(Number(e.target.value))}
-                          className="w-32 bg-card border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
+                          className="h-14 border-brand-purple text-center font-orbitron text-2xl font-bold text-brand-purple-light"
                         />
                       </div>
-
-                      <div className="px-2">
+                      <div className="mt-8 px-1">
                         <Slider
                           min={minRating || 1}
                           max={maxRating || 10}
                           step={1}
                           value={[selectedHours || minRating || 1]}
                           onValueChange={(val) => setSelectedHours(val[0])}
-                          className="py-4 cursor-pointer"
+                          className="cursor-pointer py-2"
                         />
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground mt-2 font-rajdhani font-bold">
-                        <span>{minRating || 1}h</span>
-                        <span>{maxRating || 10}h</span>
+                        <div className="mt-3 flex justify-between font-rajdhani text-xs font-medium text-muted-foreground">
+                          <span>{minRating || 1}h</span>
+                          <span>{maxRating || 10}h</span>
+                        </div>
                       </div>
                     </div>
                   )
                 ) : (
-                  /* Rank Boost / Duo Boost: current and target rating */
                   isLoadingRanges ? (
-                    <div className="bg-muted/40 p-4 md:p-6 rounded-lg border border-border animate-pulse">
-                      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                        <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-                          <Skeleton className="h-5 w-32 mb-2 bg-white/5" />
-                          <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
+                    <div>
+                      <Skeleton className="mb-5 h-4 w-44" />
+                      <div className="flex items-end gap-4">
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="mx-auto h-3 w-16" />
+                          <Skeleton className="h-12 w-full rounded-md" />
                         </div>
-                        <Skeleton className="h-6 w-6 rounded-full bg-white/5 hidden md:block" />
-                        <div className="flex flex-col items-center md:items-end w-full md:w-auto">
-                          <Skeleton className="h-5 w-32 mb-2 bg-white/5" />
-                          <Skeleton className="h-10 w-32 bg-white/5 rounded-md" />
+                        <Skeleton className="mb-3 h-5 w-5 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="mx-auto h-3 w-16" />
+                          <Skeleton className="h-12 w-full rounded-md" />
                         </div>
                       </div>
-                      <div className="px-2">
-                        <Skeleton className="h-2 w-full bg-white/10 rounded-full my-4" />
-                      </div>
-                      <div className="flex justify-between mt-2">
-                        <Skeleton className="h-3 w-10 bg-white/5" />
-                        <Skeleton className="h-3 w-12 bg-white/5" />
+                      <Skeleton className="mt-8 h-2 w-full rounded-full" />
+                      <div className="mt-3 flex justify-between">
+                        <Skeleton className="h-3 w-10" />
+                        <Skeleton className="h-3 w-12" />
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {/* Range Selection */}
-                      <div className="lg:col-span-2 bg-muted/40 p-4 md:p-6 rounded-lg border border-border">
-                        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                          <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-                            <h3 className="text-sm md:text-base font-bold text-foreground font-orbitron mb-2">
-                              PONTUAÇÃO ATUAL
-                            </h3>
-                            <Input 
-                              type="number" 
-                              min={minRating} 
-                              max={targetRating - 1} 
-                              step={maxRating > 1000 ? 100 : 1}
-                              value={currentRating}
-                              onChange={(e) => handleCurrentChange(Number(e.target.value))}
-                              className="w-32 bg-card border-brand-purple/30 text-foreground text-center font-rajdhani font-bold text-lg"
-                            />
-                          </div>
-                          
-                          <div className="hidden md:flex items-center justify-center flex-1">
-                             <div className="h-px bg-border w-full mx-4"></div>
-                          </div>
-
-                          <div className="flex flex-col items-center md:items-end w-full md:w-auto">
-                            <h3 className="text-sm md:text-base font-bold text-brand-purple-light font-orbitron mb-2">
-                              PONTUAÇÃO DESEJADA
-                            </h3>
-                            <Input 
-                              type="number" 
-                              min={currentRating + 1} 
-                              max={maxRating} 
-                              step={maxRating > 1000 ? 100 : 1}
-                              value={targetRating}
-                              onChange={(e) => handleTargetChange(Number(e.target.value))}
-                              className="w-32 bg-card border-brand-purple text-brand-purple-light text-center font-rajdhani font-bold text-lg"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="px-2">
-                          <Slider
+                    <div>
+                      <h3 className="mb-5 font-orbitron text-sm font-bold uppercase tracking-wide text-foreground">
+                        Intervalo de pontuação
+                      </h3>
+                      <div className="flex items-end gap-3 sm:gap-4">
+                        <div className="flex-1">
+                          <label className="mb-2 block text-center font-rajdhani text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            Atual
+                          </label>
+                          <Input
+                            type="number"
                             min={minRating}
-                            max={maxRating}
+                            max={targetRating - 1}
                             step={maxRating > 1000 ? 100 : 1}
-                            value={[currentRating, targetRating]}
-                            onValueChange={(val) => {
-                              setCurrentRating(val[0])
-                              setTargetRating(val[1])
-                            }}
-                            className="py-4 cursor-pointer"
+                            value={currentRating}
+                            onChange={(e) => handleCurrentChange(Number(e.target.value))}
+                            className="h-12 text-center font-orbitron text-base font-bold sm:text-lg"
                           />
                         </div>
-                        <div className="flex justify-between text-xs text-muted-foreground mt-2 font-rajdhani font-bold">
-                          <span>{minRating}</span>
-                          <span>{maxRating}</span>
+                        <ArrowRight className="mb-3 h-5 w-5 flex-shrink-0 text-brand-purple-light" />
+                        <div className="flex-1">
+                          <label className="mb-2 block text-center font-rajdhani text-xs font-bold uppercase tracking-wider text-brand-purple-light">
+                            Desejado
+                          </label>
+                          <Input
+                            type="number"
+                            min={currentRating + 1}
+                            max={maxRating}
+                            step={maxRating > 1000 ? 100 : 1}
+                            value={targetRating}
+                            onChange={(e) => handleTargetChange(Number(e.target.value))}
+                            className="h-12 border-brand-purple text-center font-orbitron text-base font-bold text-brand-purple-light sm:text-lg"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-8 px-1">
+                        <Slider
+                          min={minRating}
+                          max={maxRating}
+                          step={maxRating > 1000 ? 100 : 1}
+                          value={[currentRating, targetRating]}
+                          onValueChange={(val) => {
+                            setCurrentRating(val[0])
+                            setTargetRating(val[1])
+                          }}
+                          className="cursor-pointer py-2"
+                        />
+                        <div className="mt-3 flex justify-between font-rajdhani text-xs font-medium text-muted-foreground">
+                          <span>{minRating.toLocaleString('pt-BR')}</span>
+                          <span>{maxRating.toLocaleString('pt-BR')}</span>
                         </div>
                       </div>
                     </div>
                   )
                 )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
-                {/* Price Result Block */}
-                <div className="grid grid-cols-1 gap-4">
-                  {/* Price Result */}
-                  <div className="bg-brand-purple/10 border border-brand-purple/30 rounded-xl p-3 md:p-4">
-                    <h3 className="text-lg md:text-xl font-bold font-orbitron mb-2">
-                      <span className="text-brand-purple-light">PREÇO</span>
-                      <span className="text-foreground"> ESTIMADO</span>
+        {/* Coluna de resumo (checkout) */}
+        <div className="lg:col-span-2">
+          <div className="lg:sticky lg:top-24">
+            <Card className="relative overflow-hidden border-brand-purple/40">
+              {/* acento superior em gradiente roxo */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-brand-purple to-transparent" />
+              <CardContent className="space-y-5 p-6">
+                {serviceTypeInfo && (
+                  <div>
+                    <h3 className="font-orbitron text-base font-bold text-foreground">
+                      {serviceTypeInfo.displayName}
                     </h3>
+                    <p className="mt-1 font-rajdhani text-sm text-muted-foreground">
+                      {serviceTypeInfo.description}
+                    </p>
+                  </div>
+                )}
 
+                <div>
+                  <p className="font-rajdhani text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Preço estimado
+                  </p>
+                  <div className="mt-1 flex min-h-12 items-center">
                     {isCalculating ? (
-                      <div className="text-center py-2">
-                        <div className="inline-flex items-center gap-3 text-brand-purple-light">
-                          <Spinner size="md" />
-                          <span className="text-sm md:text-base font-rajdhani font-semibold">
-                            Calculando preço...
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-3 text-brand-purple-light">
+                        <Spinner size="md" />
+                        <span className="font-rajdhani text-sm font-semibold">Calculando…</span>
                       </div>
                     ) : price > 0 ? (
-                      <div className="text-center transition-all duration-300 ease-in-out">
-                        <div key={price} className="text-2xl md:text-4xl font-bold text-brand-purple-light font-orbitron mb-1 animate-in fade-in zoom-in-95 duration-500">
-                          R$ {price.toFixed(2)}
-                        </div>
-                        <p className="text-xs md:text-sm text-muted-foreground font-rajdhani mb-3">
-                          {selectedServiceType === 'COACHING'
-                            ? `${selectedHours} hora${selectedHours && selectedHours > 1 ? 's' : ''} de coaching`
-                            : `${currentRating.toLocaleString('pt-BR')} → ${targetRating.toLocaleString('pt-BR')} pontos`}
-                          {selectedServiceType === 'DUO_BOOST' && (
-                            <span className="text-brand-purple-light ml-1">(Duo Boost)</span>
-                          )}
-                        </p>
-                        {user && hasActiveOrderInMode ? (
-                          <div>
-                            <button
-                              disabled={true}
-                              className="w-full bg-card text-muted-foreground font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
-                            >
-                              BOOST JÁ ATIVO NESTA MODALIDADE
-                            </button>
-                            <p className="text-xs text-amber-500 font-rajdhani">
-                              Finalize seu pedido atual para contratar um novo
-                            </p>
-                          </div>
-                        ) : isBelowMinimum ? (
-                          <div>
-                            <button
-                              disabled={true}
-                              className="w-full bg-card text-muted-foreground font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg opacity-50 cursor-not-allowed text-sm md:text-base mb-2 font-rajdhani"
-                            >
-                              VALOR ABAIXO DO MÍNIMO
-                            </button>
-                            <p className="text-xs text-amber-500 font-rajdhani">
-                              O valor mínimo por pedido é R$ {MIN_ORDER_PRICE.toFixed(2)}. Aumente o intervalo
-                              {selectedServiceType === 'COACHING' ? ' de horas' : ' de pontuação'} para continuar.
-                            </p>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={handleHire}
-                            disabled={isLoading}
-                            className="w-full bg-brand-purple-dark hover:bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all
-                              shadow-glow hover:shadow-glow-hover
-                              disabled:opacity-50 disabled:cursor-not-allowed
-                              font-rajdhani text-sm md:text-base flex items-center justify-center gap-2"
-                          >
-                            {isLoading ? (
-                              <>
-                                <Spinner size="md" />
-                                Processando...
-                              </>
-                            ) : (
-                              <>
-                                <Zap className="h-5 w-5" />
-                                CONTRATAR AGORA
-                              </>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      <motion.div
+                        key={price}
+                        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                        className="font-orbitron text-4xl font-bold tabular-nums text-brand-purple-light sm:text-5xl"
+                      >
+                        R$ {price.toFixed(2)}
+                      </motion.div>
                     ) : (
-                      <div className="text-center text-xs md:text-sm text-muted-foreground font-rajdhani py-4">
-                        {selectedServiceType === 'COACHING'
-                          ? 'Selecione a quantidade de horas para ver o preço'
-                          : 'Selecione as pontuações para ver o preço'}
-                      </div>
+                      <div className="font-orbitron text-4xl font-bold text-muted-foreground sm:text-5xl">—</div>
                     )}
                   </div>
+                  <p className="mt-2 font-rajdhani text-sm text-muted-foreground">
+                    {priceSubline}
+                    {price > 0 && selectedServiceType === 'DUO_BOOST' && (
+                      <span className="ml-1 text-brand-purple-light">· Duo</span>
+                    )}
+                  </p>
                 </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+                <div className="h-px bg-border" />
+
+                <ul className="space-y-2.5 font-rajdhani text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2.5">
+                    <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-purple-light" />
+                    Pagamento 100% seguro via PIX
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Headset className="h-4 w-4 flex-shrink-0 text-brand-purple-light" />
+                    Acompanhamento pelo painel
+                  </li>
+                </ul>
+
+                {user && hasActiveOrderInMode ? (
+                  <div className="space-y-2">
+                    <Button disabled size="lg" variant="secondary" className="w-full">
+                      Boost já ativo nesta modalidade
+                    </Button>
+                    <p className="font-rajdhani text-xs text-yellow-600 dark:text-yellow-500">
+                      Finalize seu pedido atual para contratar um novo.
+                    </p>
+                  </div>
+                ) : isBelowMinimum ? (
+                  <div className="space-y-2">
+                    <Button disabled size="lg" variant="secondary" className="w-full">
+                      Valor abaixo do mínimo
+                    </Button>
+                    <p className="font-rajdhani text-xs text-yellow-600 dark:text-yellow-500">
+                      O mínimo por pedido é R$ {MIN_ORDER_PRICE.toFixed(2)}. Aumente o intervalo
+                      {isCoaching ? ' de horas' : ' de pontuação'} para continuar.
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleHire}
+                    disabled={isLoading || price <= 0}
+                    size="lg"
+                    className="w-full text-base"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Spinner size="md" />
+                        Processando…
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-5 w-5" />
+                        Contratar agora
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                <p className="text-center font-rajdhani text-xs text-muted-foreground">
+                  Sem assinatura · Pague apenas pelo serviço
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

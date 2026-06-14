@@ -26,6 +26,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { formatDate } from '@/lib/utils'
 import { api } from '@/lib/api-client'
 import { SkeletonProfileForm } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -192,9 +193,8 @@ export default function ProfilePage() {
           description="Gerencie suas informações pessoais e configurações da conta"
         />
 
-        {loading ? (
-          <SkeletonProfileForm />
-        ) : !profile ? (
+        <LoadingSwap loading={loading} skeleton={<SkeletonProfileForm />}>
+          {!profile ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground font-rajdhani">
               Erro ao carregar perfil
@@ -394,7 +394,7 @@ export default function ProfilePage() {
               className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white shadow-lg border border-transparent hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
-                <>Salvando...</>
+                <>Salvando…</>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
@@ -459,7 +459,8 @@ export default function ProfilePage() {
           </Card>
 
           </>
-        )}
+          )}
+        </LoadingSwap>
       </div>
     </div>
   )

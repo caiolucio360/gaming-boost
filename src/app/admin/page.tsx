@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/common/empty-state'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { SkeletonStatsGrid, SkeletonAdminCharts } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { api } from '@/lib/api-client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import {
@@ -126,12 +127,8 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Stat cards */}
-      {loading && !stats ? (
-        <div className="space-y-6">
-          <SkeletonStatsGrid count={4} />
-          <SkeletonAdminCharts />
-        </div>
-      ) : stats ? (
+      <LoadingSwap loading={loading && !stats} skeleton={<div className="space-y-6"><SkeletonStatsGrid count={4} /><SkeletonAdminCharts /></div>}>
+        {stats ? (
         <>
           <StatsGrid columns={4} className="mb-6">
             <StatCard title="Total de Usuários" value={stats.users.total}
@@ -338,6 +335,7 @@ export default function AdminDashboardPage() {
           </Card>
         </>
       ) : null}
+      </LoadingSwap>
     </AdminPageShell>
   )
 }

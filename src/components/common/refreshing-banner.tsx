@@ -9,7 +9,7 @@ interface RefreshingBannerProps {
 /**
  * Banner de atualização que aparece durante refresh
  */
-export function RefreshingBanner({ message = 'Atualizando...' }: RefreshingBannerProps) {
+export function RefreshingBanner({ message = 'Atualizando…' }: RefreshingBannerProps) {
   return (
     <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
       <p className="text-sm text-brand-purple-light font-rajdhani text-center">

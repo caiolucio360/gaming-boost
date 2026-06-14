@@ -154,5 +154,5 @@ Defining `const Foo = () => <.../>` inside another component remounts it every r
 
 - Styling/brand rules → `design_system.md`
 - Component usage (shadcn) → `components.md`
-- Git workflow → `git-flow.md`
+- Git workflow → `../docs/git-flow.md`
 - Architecture, gotchas, env vars → root `CLAUDE.md`

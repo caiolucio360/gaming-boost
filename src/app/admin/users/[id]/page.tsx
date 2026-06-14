@@ -23,6 +23,7 @@ import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { api, ApiError } from '@/lib/api-client'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { UserDetailSkeleton } from '@/app/admin/users/[id]/_components/user-detail-skeleton'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -167,9 +168,8 @@ export default function AdminUserDetailPage() {
         </Alert>
       )}
 
-      {loading ? (
-        <UserDetailSkeleton />
-      ) : userData && (
+      <LoadingSwap loading={loading} skeleton={<UserDetailSkeleton />}>
+        {userData && (
         <>
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
@@ -347,6 +347,7 @@ export default function AdminUserDetailPage() {
           />
         </>
       )}
+      </LoadingSwap>
     </div>
   )
 }

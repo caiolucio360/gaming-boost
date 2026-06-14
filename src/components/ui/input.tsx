@@ -9,7 +9,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       data-slot="input"
       className={cn(
         // Base styles with mobile touch target (min-h-touch = 44px)
-        "flex h-10 min-h-touch w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
+        "flex h-10 min-h-touch w-full min-w-0 rounded-md border px-3 py-2 text-base shadow-xs transition-[color,box-shadow,border-color] outline-none md:text-sm",
         // Background and text
         "bg-card text-foreground placeholder:text-muted-foreground",
         // Border

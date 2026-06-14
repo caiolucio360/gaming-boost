@@ -25,7 +25,7 @@ export function EmptyState({
     <GlowCard>
       <CardContent className="pt-6 relative z-10">
         <div className="text-center py-12">
-          <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 mb-4">
+          <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-purple-dark/20 mb-4 transition-transform duration-300 group-hover:scale-105">
             <Icon className="h-16 w-16 text-brand-purple-light group-hover:text-brand-purple-lighter transition-colors duration-300" />
           </div>
           <h3 className="text-xl font-bold text-foreground font-orbitron mb-2 group-hover:text-brand-purple-lighter transition-colors duration-300">

@@ -33,7 +33,8 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
-import { SkeletonTable } from '@/components/common/skeletons'
+import { SkeletonUserList } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { formatDate } from '@/lib/utils'
@@ -209,7 +210,7 @@ export default function AdminUsersPage() {
           <div className="mb-4 p-2 bg-brand-purple/10 border border-brand-purple/30 rounded-lg">
             <p className="text-sm text-brand-purple-light font-rajdhani text-center">
               <Loader2 className="h-4 w-4 inline-block mr-2 animate-spin" />
-              Atualizando...
+              Atualizando…
             </p>
           </div>
         )}
@@ -222,7 +223,7 @@ export default function AdminUsersPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Buscar por email ou nome..."
+                    placeholder="Buscar por email ou nome…"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
@@ -253,9 +254,8 @@ export default function AdminUsersPage() {
         </Card>
 
         {/* Lista de Usuários */}
-        {loading ? (
-          <SkeletonTable rows={8} columns={5} />
-        ) : users.length === 0 ? (
+        <LoadingSwap loading={loading} skeleton={<SkeletonUserList count={8} />}>
+          {users.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -449,7 +449,8 @@ export default function AdminUsersPage() {
               )
             })}
           </div>
-        )}
+          )}
+        </LoadingSwap>
 
         <div className="mt-4 text-center">
           <p className="text-muted-foreground font-rajdhani">

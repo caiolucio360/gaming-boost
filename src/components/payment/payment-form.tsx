@@ -127,7 +127,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="(11) 99999-9999"
               required
               maxLength={15}
-              className="bg-black/50 border-brand-purple/50 text-foreground placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-background/50 border-brand-purple/50 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.phone && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.phone}</p>
@@ -149,7 +149,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
               placeholder="000.000.000-00"
               required
               maxLength={14}
-              className="bg-black/50 border-brand-purple/50 text-foreground placeholder-brand-gray-400 focus:border-brand-purple-light focus:ring-brand-purple-light"
+              className="bg-background/50 border-brand-purple/50 text-foreground placeholder:text-muted-foreground focus:border-brand-purple-light focus:ring-brand-purple-light"
             />
             {errors.taxId && (
               <p className="text-red-400 text-sm font-rajdhani">{errors.taxId}</p>
@@ -168,7 +168,7 @@ export function PaymentForm({ orderId, orderTotal, onSuccess, onError }: Payment
           <ButtonLoading
             type="submit"
             loading={isLoading}
-            loadingText="Gerando PIX..."
+            loadingText="Gerando PIX…"
             className="w-full bg-brand-purple text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 border border-transparent hover:border-white/50 font-rajdhani"
           >
             GERAR CÓDIGO PIX

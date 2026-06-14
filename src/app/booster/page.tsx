@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/common/page-header'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList, SkeletonStatsGrid } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { ActionButton } from '@/components/common/action-button'
 import { RefreshingBanner } from '@/components/common/refreshing-banner'
@@ -339,9 +340,8 @@ export default function BoosterDashboardPage() {
         )}
 
         {/* Cards de Estatísticas e Navegação */}
-        {loading && !stats ? (
-          <SkeletonStatsGrid count={4} />
-        ) : stats ? (
+        <LoadingSwap loading={loading && !stats} skeleton={<div className="mb-6 lg:mb-8"><SkeletonStatsGrid count={4} /></div>}>
+          {stats ? (
           <StatsGrid columns={4} className="mb-6 lg:mb-8">
             <StatCard
               title="Disponíveis"
@@ -375,7 +375,8 @@ export default function BoosterDashboardPage() {
               valueColor="text-foreground dark:text-yellow-300"
             />
           </StatsGrid>
-        ) : null}
+          ) : null}
+        </LoadingSwap>
 
         {/* Tabs de navegação */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
@@ -416,9 +417,8 @@ export default function BoosterDashboardPage() {
         {activeTab === 'available' && (
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
-            {loading && !refreshing ? (
-              <SkeletonOrdersList count={3} />
-            ) : orders.length === 0 ? (
+            <LoadingSwap loading={loading && !refreshing} skeleton={<SkeletonOrdersList count={3} />}>
+              {orders.length === 0 ? (
               <EmptyState
                 icon={Package}
                 title="Nenhum pedido disponível"
@@ -465,7 +465,8 @@ export default function BoosterDashboardPage() {
                   )
                 })}
               </div>
-            )}
+              )}
+            </LoadingSwap>
           </div>
         )}
 
@@ -473,9 +474,8 @@ export default function BoosterDashboardPage() {
         {activeTab === 'assigned' && (
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
-            {loading && !refreshing ? (
-              <SkeletonOrdersList count={3} />
-            ) : orders.length === 0 ? (
+            <LoadingSwap loading={loading && !refreshing} skeleton={<SkeletonOrdersList count={3} />}>
+              {orders.length === 0 ? (
               <EmptyState
                 icon={Loader2}
                 title="Nenhum pedido em andamento"
@@ -523,7 +523,7 @@ export default function BoosterDashboardPage() {
                                   title={!hasCredentialsMap[order.id] ? 'Aguardando credenciais Steam do cliente' : undefined}
                                 >
                                   {startingOrderId === order.id ? (
-                                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Iniciando...</>
+                                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Iniciando…</>
                                   ) : (
                                     'Iniciar Boost'
                                   )}
@@ -554,7 +554,8 @@ export default function BoosterDashboardPage() {
                   )
                 })}
               </div>
-            )}
+              )}
+            </LoadingSwap>
 
             {/* Single completion proof dialog — outside the map to avoid shared state issues */}
             <CompletionProofDialog
@@ -562,7 +563,7 @@ export default function BoosterDashboardPage() {
               onOpenChange={setCompleteDialogOpen}
               onConfirm={handleCompleteOrder}
               submitting={isUploading || isCompleting}
-              submittingLabel={isUploading ? 'Enviando print...' : 'Concluindo...'}
+              submittingLabel={isUploading ? 'Enviando print…' : 'Concluindo…'}
             />
           </div>
         )}
@@ -571,9 +572,8 @@ export default function BoosterDashboardPage() {
         {activeTab === 'completed' && (
           <div className="mt-6">
             {refreshing && <RefreshingBanner />}
-            {loading && !refreshing ? (
-              <SkeletonOrdersList count={3} />
-            ) : orders.length === 0 ? (
+            <LoadingSwap loading={loading && !refreshing} skeleton={<SkeletonOrdersList count={3} />}>
+              {orders.length === 0 ? (
               <EmptyState
                 icon={CheckCircle2}
                 title="Nenhum pedido concluído"
@@ -599,7 +599,8 @@ export default function BoosterDashboardPage() {
                   )
                 })}
               </div>
-            )}
+              )}
+            </LoadingSwap>
           </div>
         )}
     </div>
