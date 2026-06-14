@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -15,6 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { showSuccess, showError } from '@/lib/toast'
 import { api, ApiError } from '@/lib/api-client'
 import {
@@ -39,7 +45,6 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
-import { ActionButton } from '@/components/common/action-button'
 import {
   Dialog,
   DialogContent,
@@ -92,21 +97,12 @@ export default function AdminUsersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading, router])
 
-  useEffect(() => {
-    if (user && user.role === 'ADMIN' && !authLoading && !loading) {
-      fetchUsers(true)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterRole])
-
   const fetchUsers = async (isRefresh = false) => {
     try {
       await withLoading(async () => {
-        const params = new URLSearchParams()
-        if (filterRole) params.append('role', filterRole)
-        if (searchTerm) params.append('search', searchTerm)
-
-        const data = await api.get<{ users: AdminUser[] }>(`/api/admin/users?${params.toString()}`)
+        // Carrega a lista completa de uma vez; a filtragem (role + busca) é feita
+        // no cliente sobre estes dados — não dispara novas requisições.
+        const data = await api.get<{ users: AdminUser[] }>('/api/admin/users?limit=100')
         setUsers(data.users || [])
       }, isRefresh)
     } catch (error) {
@@ -115,10 +111,17 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    fetchUsers(true)
-  }
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    return users.filter((u) => {
+      if (filterRole && u.role !== filterRole) return false
+      if (!term) return true
+      return (
+        u.email.toLowerCase().includes(term) ||
+        (u.name?.toLowerCase().includes(term) ?? false)
+      )
+    })
+  }, [users, searchTerm, filterRole])
 
   const handleDeleteClick = (userId: number, userEmail: string) => {
     setUserToDelete({ id: userId, email: userEmail })
@@ -161,7 +164,7 @@ export default function AdminUsersPage() {
     if (!userToActivate) return
     try {
       await api.put(`/api/admin/users/${userToActivate.id}`, { active: true })
-      showSuccess('Usuário ativado! Gerenciamento liberado.')
+      showSuccess('E-mail confirmado! Gerenciamento liberado.')
       setUserToActivate(null)
       fetchUsers(true)
     } catch (error) {
@@ -217,7 +220,7 @@ export default function AdminUsersPage() {
         {/* Filtros e Busca */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -230,8 +233,8 @@ export default function AdminUsersPage() {
                   />
                 </div>
               </div>
-              <Select 
-                value={filterRole || undefined} 
+              <Select
+                value={filterRole || undefined}
                 onValueChange={(value) => {
                   setFilterRole(value === 'all' ? '' : value)
                 }}
@@ -246,16 +249,13 @@ export default function AdminUsersPage() {
                   <SelectItem value="ADMIN">Admins</SelectItem>
                 </SelectContent>
               </Select>
-              <Button type="submit">
-                Buscar
-              </Button>
-            </form>
+            </div>
           </CardContent>
         </Card>
 
         {/* Lista de Usuários */}
         <LoadingSwap loading={loading} skeleton={<SkeletonUserList count={8} />}>
-          {users.length === 0 ? (
+          {filteredUsers.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -271,7 +271,7 @@ export default function AdminUsersPage() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {users.map((adminUser) => {
+            {filteredUsers.map((adminUser) => {
               const roleInfo = getRoleBadge(adminUser.role)
               const RoleIcon = roleInfo.icon
 
@@ -294,10 +294,19 @@ export default function AdminUsersPage() {
                             {roleInfo.label}
                           </Badge>
                           {!adminUser.active && (
-                            <Badge className="bg-amber-500/20 text-foreground dark:text-amber-300 border-amber-500/50 border font-rajdhani flex items-center gap-1">
-                              <CircleSlash className="h-3 w-3" />
-                              Inativo
-                            </Badge>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge className="bg-amber-500/20 text-foreground dark:text-amber-300 border-amber-500/50 border font-rajdhani flex items-center gap-1 cursor-help">
+                                    <CircleSlash className="h-3 w-3" />
+                                    E-mail não confirmado
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs font-rajdhani">
+                                  O usuário ainda não confirmou o e-mail com o código de verificação, então a conta segue inativa.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground font-rajdhani mb-1">
@@ -334,7 +343,7 @@ export default function AdminUsersPage() {
                             onClick={() => setUserToActivate(adminUser)}
                           >
                             <UserCheck className="h-4 w-4 mr-2" />
-                            Ativar usuário
+                            Confirmar e-mail
                           </Button>
                         ) : (
                           <>
@@ -424,12 +433,15 @@ export default function AdminUsersPage() {
                         )}
                         {adminUser.id !== user.id && (
                           <>
-                            <ActionButton
-                              variant="danger"
+                            <Button
+                              variant="outline"
                               size="sm"
+                              className="border-red-500/50 text-foreground dark:text-red-300 hover:bg-red-500/10 font-rajdhani"
                               onClick={() => handleDeleteClick(adminUser.id, adminUser.email)}
-                              icon={Trash2}
-                            />
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Deletar
+                            </Button>
                             <ConfirmDialog
                               open={deleteDialogOpen && userToDelete?.id === adminUser.id}
                               onOpenChange={setDeleteDialogOpen}
@@ -454,7 +466,9 @@ export default function AdminUsersPage() {
 
         <div className="mt-4 text-center">
           <p className="text-muted-foreground font-rajdhani">
-            Total: {users.length} usuário{users.length !== 1 ? 's' : ''}
+            {filteredUsers.length === users.length
+              ? `Total: ${users.length} usuário${users.length !== 1 ? 's' : ''}`
+              : `Exibindo ${filteredUsers.length} de ${users.length} usuário${users.length !== 1 ? 's' : ''}`}
           </p>
         </div>
 
@@ -473,13 +487,13 @@ export default function AdminUsersPage() {
         onConfirm={handleRoleChange}
       />
 
-      {/* Dialog de ativação manual de usuário inativo */}
+      {/* Dialog de confirmação manual de e-mail de usuário não confirmado */}
       <ConfirmDialog
         open={userToActivate !== null}
         onOpenChange={(open) => { if (!open) setUserToActivate(null) }}
-        title="Ativar usuário"
-        description={`Ativar manualmente ${userToActivate?.email}? A conta ainda não confirmou o e-mail. Ao ativar, você libera a edição, promoção a booster e demais ações de gerenciamento.`}
-        confirmLabel="Ativar"
+        title="Confirmar e-mail"
+        description={`Confirmar manualmente o e-mail de ${userToActivate?.email}? A conta ainda não confirmou o e-mail. Ao confirmar, você ativa a conta e libera a edição, promoção a booster e demais ações de gerenciamento.`}
+        confirmLabel="Confirmar"
         cancelLabel="Cancelar"
         variant="success"
         onConfirm={handleActivate}
