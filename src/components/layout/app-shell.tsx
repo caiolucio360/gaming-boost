@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { PageTransition } from '@/components/layout/page-transition'
 import { APP_VERSION } from '@/lib/version'
 import { NotificationBell } from '@/components/common/notification-bell'
 import { ThemeToggle } from '@/components/common/theme-toggle'
@@ -381,7 +382,7 @@ export function AppShell({ role, children }: AppShellProps) {
         {/* Page content — reserve the scrollbar gutter so centered (`container mx-auto`)
             content doesn't shift horizontally when the scrollbar toggles between pages. */}
         <main className="flex-1 overflow-auto bg-background [scrollbar-gutter:stable]">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </div>

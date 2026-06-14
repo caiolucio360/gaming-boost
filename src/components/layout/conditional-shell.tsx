@@ -6,6 +6,7 @@ import { ElojobHeader } from '@/components/layout/elojob-header'
 import { Footer } from '@/components/layout/footer'
 import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageTransition } from '@/components/layout/page-transition'
 
 // Admin and booster-scoped routes always get the app shell.
 const APP_ROUTES = ['/admin', '/booster']
@@ -63,7 +64,7 @@ export function ConditionalShell({ children }: { children: React.ReactNode }) {
         className="flex-1 pt-16 pb-24 lg:pb-0"
         aria-label="Conteúdo principal"
       >
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <Footer />
       <MobileBottomNav />
