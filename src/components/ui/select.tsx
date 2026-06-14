@@ -38,7 +38,7 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         // Base styles with touch-friendly sizing
-        "flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none",
+        "flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow,border-color] outline-none",
         // Size variants with minimum touch targets
         "data-[size=default]:h-10 data-[size=default]:min-h-touch data-[size=sm]:h-9 data-[size=sm]:min-h-[36px]",
         // Border and background - theme tokens (light/dark aware)

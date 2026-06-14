@@ -124,6 +124,29 @@
     outline-offset: 2px;
   }
 
+  /* Baseline suave para elementos interativos: garante transição consistente de
+     hover/focus/estado mesmo em elementos sem classe `transition-*` (evita saltos
+     instantâneos em links, botões e itens de menu/select). Utilitários Tailwind
+     `transition-*` continuam sobrescrevendo onde definidos; o bloco de
+     prefers-reduced-motion abaixo neutraliza tudo. Só propriedades baratas
+     (sem layout) para não travar. */
+  a,
+  button,
+  summary,
+  label[for],
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemradio"],
+  [role="tab"] {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .sr-only {
     position: absolute;
     width: 1px;
