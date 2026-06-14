@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { SkeletonTable } from '@/components/common/skeletons'
+import { LoadingSwap } from '@/components/common/loading-swap'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { formatDate } from '@/lib/utils'
@@ -253,9 +254,8 @@ export default function AdminUsersPage() {
         </Card>
 
         {/* Lista de Usuários */}
-        {loading ? (
-          <SkeletonTable rows={8} columns={5} />
-        ) : users.length === 0 ? (
+        <LoadingSwap loading={loading} skeleton={<SkeletonTable rows={8} columns={5} />}>
+          {users.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -449,7 +449,8 @@ export default function AdminUsersPage() {
               )
             })}
           </div>
-        )}
+          )}
+        </LoadingSwap>
 
         <div className="mt-4 text-center">
           <p className="text-muted-foreground font-rajdhani">
