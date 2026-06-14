@@ -33,7 +33,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
-import { SkeletonTable } from '@/components/common/skeletons'
+import { SkeletonUserList } from '@/components/common/skeletons'
 import { LoadingSwap } from '@/components/common/loading-swap'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
         </Card>
 
         {/* Lista de Usuários */}
-        <LoadingSwap loading={loading} skeleton={<SkeletonTable rows={8} columns={5} />}>
+        <LoadingSwap loading={loading} skeleton={<SkeletonUserList count={8} />}>
           {users.length === 0 ? (
           <Card>
             <CardContent className="pt-6">

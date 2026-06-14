@@ -103,6 +103,45 @@ export function SkeletonRevenueList({ count = 3 }: { count?: number }) {
   )
 }
 
+// User card skeleton — mirrors the user Card on /admin/users: left text block
+// (name + role badge, email, meta line) and a right-side action button row.
+export function SkeletonUserCard({ className, index = 0 }: { className?: string; index?: number }) {
+  return (
+    <Card
+      className={cn("animate-fadeInUp opacity-0", className)}
+      style={{ animationDelay: `${index * 70}ms` }}
+    >
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-56" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <SkeletonButton size="sm" />
+            <SkeletonButton size="sm" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// List of user cards with stagger — mirrors the `grid gap-4` wrapper on /admin/users.
+export function SkeletonUserList({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <SkeletonUserCard key={i} index={i} />
+      ))}
+    </div>
+  )
+}
+
 // Table skeleton (for admin tables)
 export function SkeletonTable({
   rows = 5,
