@@ -143,7 +143,7 @@ export default function AdminUserDetailPage() {
     try {
       await api.put(`/api/admin/users/${userId}`, { active: true })
       setActivateOpen(false)
-      showAlert('Sucesso', 'Usuário ativado! Edição liberada.')
+      showAlert('Sucesso', 'E-mail confirmado! Edição liberada.')
       fetchUser()
     } catch (e) {
       showAlert('Erro', e instanceof ApiError ? e.message : 'Erro ao ativar usuário', 'destructive')
@@ -192,7 +192,7 @@ export default function AdminUserDetailPage() {
                 {isInactive && (
                   <Badge className="bg-amber-500/20 text-foreground dark:text-amber-300 border-amber-500/50 border font-rajdhani flex items-center gap-1">
                     <CircleSlash className="h-3 w-3" />
-                    Inativo
+                    E-mail não confirmado
                   </Badge>
                 )}
               </div>
@@ -207,7 +207,7 @@ export default function AdminUserDetailPage() {
             <Alert className="mb-6 bg-amber-500/10 border-amber-500/50">
               <AlertTitle className="text-amber-500 font-orbitron text-sm flex items-center gap-2">
                 <CircleSlash className="h-4 w-4" />
-                Conta não ativada
+                E-mail não confirmado
               </AlertTitle>
               <AlertDescription className="text-muted-foreground font-rajdhani text-sm">
                 Este usuário ainda não confirmou o e-mail, então a edição está bloqueada.
@@ -219,7 +219,7 @@ export default function AdminUserDetailPage() {
                     onClick={() => setActivateOpen(true)}
                   >
                     <UserCheck className="h-4 w-4 mr-2" />
-                    Ativar usuário
+                    Confirmar e-mail
                   </Button>
                 </div>
               </AlertDescription>
@@ -338,9 +338,9 @@ export default function AdminUserDetailPage() {
           <ConfirmDialog
             open={activateOpen}
             onOpenChange={setActivateOpen}
-            title="Ativar usuário"
-            description={`Ativar manualmente ${userData.email}? A conta ainda não confirmou o e-mail. Ao ativar, você libera a edição e o gerenciamento.`}
-            confirmLabel="Ativar"
+            title="Confirmar e-mail"
+            description={`Confirmar manualmente o e-mail de ${userData.email}? A conta ainda não confirmou o e-mail. Ao confirmar, você ativa a conta e libera a edição e o gerenciamento.`}
+            confirmLabel="Confirmar"
             cancelLabel="Cancelar"
             variant="success"
             onConfirm={handleActivate}
