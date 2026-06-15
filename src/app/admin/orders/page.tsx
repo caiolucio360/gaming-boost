@@ -22,7 +22,10 @@ import { EmptyState } from '@/components/common/empty-state'
 import { SkeletonOrdersList } from '@/components/common/skeletons'
 import { LoadingSwap } from '@/components/common/loading-swap'
 import { OrderInfoItem } from '@/components/common/order-info-item'
+import { PaginationControls } from '@/components/common/pagination-controls'
 import { formatPrice, formatDate } from '@/lib/utils'
+
+const PAGE_SIZE = 20
 
 interface Order {
   id: number
@@ -58,20 +61,25 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
 
   const fetchOrders = useCallback(async () => {
     await withLoading(async () => {
       const params = new URLSearchParams()
       if (filterStatus) params.append('status', filterStatus)
+      params.append('limit', String(PAGE_SIZE))
+      params.append('offset', String((page - 1) * PAGE_SIZE))
 
       try {
-        const data = await api.get<{ orders: typeof orders }>(`/api/admin/orders?${params.toString()}`)
+        const data = await api.get<{ orders: Order[]; total: number }>(`/api/admin/orders?${params.toString()}`)
         setOrders(data.orders || [])
+        setTotal(data.total ?? 0)
       } catch {
         // silencioso — mantém o comportamento anterior (lista vazia em erro)
       }
     })
-  }, [withLoading, filterStatus])
+  }, [withLoading, filterStatus, page])
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
@@ -98,7 +106,7 @@ export default function AdminOrdersPage() {
         {/* Filtro */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <Select value={filterStatus || undefined} onValueChange={(value) => setFilterStatus(value === 'all' ? '' : value)}>
+            <Select value={filterStatus || undefined} onValueChange={(value) => { setFilterStatus(value === 'all' ? '' : value); setPage(1) }}>
               <SelectTrigger className="w-full md:w-52 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
@@ -181,11 +189,13 @@ export default function AdminOrdersPage() {
           )}
         </LoadingSwap>
 
-        <div className="mt-4 text-center">
-          <p className="text-muted-foreground font-rajdhani">
-            Total: {orders.length} pedido{orders.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+        <PaginationControls
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          itemLabel="pedido"
+        />
     </AdminPageShell>
   )
 }
