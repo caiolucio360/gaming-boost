@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion, useReducedMotion, type Variants } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ArrowRightIcon, StarIcon, ShieldCheckIcon, ZapIcon, ChevronDownIcon } from "lucide-react"
+import { ArrowRightIcon, ShieldCheckIcon, ZapIcon, ChevronDownIcon } from "lucide-react"
 
 const EASE = [0.4, 0, 0.2, 1] as const
 
@@ -19,7 +19,8 @@ const item: Variants = {
 }
 
 const TRUST = [
-  { icon: StarIcon, label: '4.9 de avaliação' },
+  // Rating item hidden until we have real review data:
+  // { icon: StarIcon, label: '4.9 de avaliação' },
   { icon: ShieldCheckIcon, label: 'Conta protegida' },
   { icon: ZapIcon, label: 'PIX instantâneo' },
 ] as const
