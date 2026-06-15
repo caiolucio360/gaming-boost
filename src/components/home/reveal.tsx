@@ -1,6 +1,6 @@
 'use client'
 
-import type { ElementType, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
 
 /**
@@ -21,16 +21,13 @@ interface RevealProps {
   delay?: number
   /** Slide distance in px (default 24). */
   y?: number
-  /** Render a different tag than `div`. */
-  as?: ElementType
 }
 
-export function Reveal({ children, className, delay = 0, y = 24, as = 'div' }: RevealProps) {
+export function Reveal({ children, className, delay = 0, y = 24 }: RevealProps) {
   const reduceMotion = useReducedMotion()
-  const MotionTag = motion(as as 'div')
 
   return (
-    <MotionTag
+    <motion.div
       initial={reduceMotion ? false : { opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '0px 0px -10% 0px' }}
@@ -38,7 +35,7 @@ export function Reveal({ children, className, delay = 0, y = 24, as = 'div' }: R
       className={className}
     >
       {children}
-    </MotionTag>
+    </motion.div>
   )
 }
 
@@ -50,16 +47,14 @@ const staggerContainer: Variants = {
 interface RevealStaggerProps {
   children: ReactNode
   className?: string
-  as?: ElementType
 }
 
 /** Wrap a list; each `RevealItem` child animates in sequence as it scrolls into view. */
-export function RevealStagger({ children, className, as = 'div' }: RevealStaggerProps) {
+export function RevealStagger({ children, className }: RevealStaggerProps) {
   const reduceMotion = useReducedMotion()
-  const MotionTag = motion(as as 'div')
 
   return (
-    <MotionTag
+    <motion.div
       initial={reduceMotion ? false : 'hidden'}
       whileInView="show"
       viewport={{ once: true, margin: '0px 0px -10% 0px' }}
@@ -67,7 +62,7 @@ export function RevealStagger({ children, className, as = 'div' }: RevealStagger
       className={className}
     >
       {children}
-    </MotionTag>
+    </motion.div>
   )
 }
 
@@ -79,15 +74,13 @@ const itemVariants: Variants = {
 interface RevealItemProps {
   children: ReactNode
   className?: string
-  as?: ElementType
 }
 
 /** A single staggered child — must sit inside a `RevealStagger`. */
-export function RevealItem({ children, className, as = 'div' }: RevealItemProps) {
-  const MotionTag = motion(as as 'div')
+export function RevealItem({ children, className }: RevealItemProps) {
   return (
-    <MotionTag variants={itemVariants} className={className}>
+    <motion.div variants={itemVariants} className={className}>
       {children}
-    </MotionTag>
+    </motion.div>
   )
 }

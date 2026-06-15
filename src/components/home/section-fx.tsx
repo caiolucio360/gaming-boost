@@ -79,8 +79,10 @@ export function Parallax({
   const y = useTransform(scrollYProgress, [0, 1], [distance, -distance])
 
   return (
-    <div ref={ref} className={className}>
-      <motion.div style={reduceMotion ? undefined : { y }}>{children}</motion.div>
+    <div ref={ref} className={cn('relative', className)}>
+      <motion.div className="relative h-full w-full" style={reduceMotion ? undefined : { y }}>
+        {children}
+      </motion.div>
     </div>
   )
 }
