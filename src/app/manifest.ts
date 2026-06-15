@@ -22,10 +22,22 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: 'any',
       },
       {
-        src: '/flautas/flautasboost-icone-app.png',
+        src: '/icon-192.png',
         type: 'image/png',
-        sizes: 'any',
+        sizes: '192x192',
         purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        type: 'image/png',
+        sizes: '512x512',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        type: 'image/png',
+        sizes: '512x512',
+        purpose: 'maskable',
       },
     ],
   }
