@@ -2,7 +2,8 @@
 
 import { CrosshairIcon, QrCodeIcon, UserCheckIcon, ActivityIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
-import { Reveal, RevealStagger, RevealItem } from '@/components/home/reveal'
+import { RevealStagger, RevealItem } from '@/components/home/reveal'
+import { SectionHeading } from '@/components/home/section-heading'
 
 const STEPS = [
   {
@@ -35,20 +36,12 @@ export function HowItWorks() {
       className="relative scroll-mt-20 bg-background py-20 md:py-28"
     >
       <div className="container mx-auto px-4">
-        <Reveal className="mx-auto mb-14 max-w-2xl text-center md:mb-20">
-          <Text
-            as="span"
-            className="mb-3 inline-block font-orbitron text-sm font-bold uppercase tracking-[0.25em] text-brand-purple-light"
-          >
-            Simples assim
-          </Text>
-          <Heading id="como-funciona-title" level={1} className="text-3xl md:text-5xl">
-            Como funciona
-          </Heading>
-          <Text className="mt-4 text-base md:text-lg">
-            Do carrinho ao rank em quatro passos. Sem burocracia, sem espera.
-          </Text>
-        </Reveal>
+        <SectionHeading
+          eyebrow="Simples assim"
+          title="Como funciona"
+          subtitle="Do carrinho ao rank em quatro passos. Sem burocracia, sem espera."
+          titleId="como-funciona-title"
+        />
 
         <RevealStagger className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
           {/* Connecting line behind the cards on desktop */}
@@ -63,7 +56,7 @@ export function HowItWorks() {
               className="group relative flex flex-col items-center rounded-2xl border border-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
             >
               {/* Step number badge */}
-              <span className="absolute -top-3 right-4 font-orbitron text-5xl font-bold leading-none text-brand-purple/10 transition-colors duration-300 group-hover:text-brand-purple/25">
+              <span className="absolute right-4 top-3 font-orbitron text-4xl font-bold leading-none text-brand-purple/10 transition-colors duration-300 group-hover:text-brand-purple/25">
                 {String(index + 1).padStart(2, '0')}
               </span>
 
