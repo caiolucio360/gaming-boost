@@ -1,6 +1,13 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { ElojobHero } from "@/components/layout/elojob-hero"
+import { SocialProof } from "@/components/home/social-proof"
+import { WhyUs } from "@/components/home/why-us"
+import { HowItWorks } from "@/components/home/how-it-works"
+import { Services } from "@/components/home/services"
+import { Testimonials } from "@/components/home/testimonials"
+import { Faq } from "@/components/home/faq"
+import { FinalCta } from "@/components/home/final-cta"
 import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
 
 export const metadata: Metadata = generateMetadata({
@@ -109,7 +116,20 @@ export default function HomePage() {
         />
       )}
       <div className="min-h-screen">
+        {/*
+          Home — long, scroll-driven page. Each section reveals on scroll
+          (see `@/components/home/reveal`). Social-proof stats and testimonials
+          still use clearly-marked TODO placeholder data until wired to real
+          sources (Trustpilot / DB) — see the components' header comments.
+        */}
         <ElojobHero />
+        <SocialProof />
+        <WhyUs />
+        <HowItWorks />
+        <Services />
+        <Testimonials />
+        <Faq />
+        <FinalCta />
       </div>
     </>
   )
