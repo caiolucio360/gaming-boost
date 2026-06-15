@@ -25,8 +25,8 @@ const STEPS = [
   },
   {
     icon: ActivityIcon,
-    title: 'Acompanhe ao vivo',
-    desc: 'Veja o progresso, converse com o booster e receba seu rank no painel, em tempo real.',
+    title: 'Acompanhe pelo painel',
+    desc: 'Acompanhe o status do pedido, converse com o booster e receba seu rank — tudo pelo painel.',
   },
 ] as const
 

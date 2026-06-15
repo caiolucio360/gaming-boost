@@ -22,7 +22,7 @@ const FAQS = [
   },
   {
     q: 'Quanto tempo leva para concluir?',
-    a: 'Depende do serviço e da faixa de rating escolhida. Você acompanha o progresso em tempo real pelo painel e pode falar com o booster pelo chat a qualquer momento.',
+    a: 'Depende do serviço e da faixa de rating escolhida. Você acompanha o status do pedido pelo painel e pode falar com o booster pelo chat a qualquer momento.',
   },
   {
     q: 'Preciso passar minha senha?',
@@ -30,7 +30,7 @@ const FAQS = [
   },
   {
     q: 'Posso acompanhar o andamento do pedido?',
-    a: 'Sim. No painel você vê cada partida, o status do pedido e conversa diretamente com o booster responsável.',
+    a: 'Sim. No painel você acompanha o status do pedido e conversa diretamente com o booster responsável.',
   },
   {
     q: 'E se algo der errado?',

@@ -18,7 +18,7 @@ const DIFFERENTIALS = [
   {
     icon: EyeIcon,
     title: 'Transparência total',
-    desc: 'Acompanhe cada partida no painel em tempo real e fale direto com o booster pelo chat. Você sempre sabe onde seu pedido está.',
+    desc: 'Acompanhe o status do seu pedido no painel e fale direto com o booster pelo chat. Você sempre sabe em que etapa seu pedido está.',
   },
 ] as const
 
