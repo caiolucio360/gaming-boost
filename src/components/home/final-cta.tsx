@@ -23,15 +23,16 @@ export function FinalCta() {
 
             {/* Inner card */}
             <div className="relative overflow-hidden rounded-[calc(1.5rem-1px)] bg-gradient-brand px-6 py-16 text-center md:px-12 md:py-20">
-              {/* Photo texture with subtle parallax — scaled up so the shift never reveals edges */}
+              {/* Photo texture with subtle parallax — scaled up so the shift never reveals edges.
+                  Image: free Unsplash esports photo, downloaded to /public (cta-rank.jpg). */}
               <Parallax distance={30} className="pointer-events-none absolute inset-0">
                 <Image
-                  src="/principal.png"
+                  src="/cta-rank.jpg"
                   alt=""
                   fill
                   sizes="100vw"
                   aria-hidden="true"
-                  className="scale-110 object-cover object-center opacity-20 mix-blend-luminosity"
+                  className="scale-110 object-cover object-center opacity-30"
                 />
               </Parallax>
               {/* Readability overlay over the photo */}
