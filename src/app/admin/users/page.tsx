@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useLoading } from '@/hooks/use-loading'
@@ -34,7 +34,6 @@ import {
   Crown,
   DollarSign,
   History,
-  UserCheck,
   CircleSlash,
   type LucideIcon,
 } from 'lucide-react'
@@ -45,6 +44,8 @@ import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { AdminPageShell } from '@/components/common/admin-page-shell'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { PaginationControls } from '@/components/common/pagination-controls'
+import { useDebounce } from '@/hooks/use-debounce'
 import {
   Dialog,
   DialogContent,
@@ -55,6 +56,8 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+
+const PAGE_SIZE = 20
 
 interface AdminUser {
   id: number
@@ -77,6 +80,10 @@ export default function AdminUsersPage() {
   const { loading, refreshing, withLoading } = useLoading({ initialLoading: true })
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const debouncedSearch = useDebounce(searchTerm, 400)
+  const firstLoad = useRef(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
@@ -86,42 +93,46 @@ export default function AdminUsersPage() {
   const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
   const [roleChange, setRoleChange] = useState<{ user: AdminUser; toRole: 'BOOSTER' | 'CLIENT' } | null>(null)
-  const [userToActivate, setUserToActivate] = useState<AdminUser | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
-    } else if (user && user.role === 'ADMIN') {
-      fetchUsers(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, authLoading, router])
-
-  const fetchUsers = async (isRefresh = false) => {
+  const fetchUsers = useCallback(async (isRefresh = false) => {
     try {
       await withLoading(async () => {
-        // Carrega a lista completa de uma vez; a filtragem (role + busca) é feita
-        // no cliente sobre estes dados — não dispara novas requisições.
-        const data = await api.get<{ users: AdminUser[] }>('/api/admin/users?limit=100')
+        // Filtragem (role + busca) e paginação são feitas no servidor — a busca
+        // é debounced para não disparar uma requisição a cada tecla.
+        const params = new URLSearchParams()
+        if (filterRole) params.append('role', filterRole)
+        const term = debouncedSearch.trim()
+        if (term) params.append('search', term)
+        params.append('limit', String(PAGE_SIZE))
+        params.append('offset', String((page - 1) * PAGE_SIZE))
+
+        const data = await api.get<{ users: AdminUser[]; pagination: { total: number } }>(
+          `/api/admin/users?${params.toString()}`
+        )
         setUsers(data.users || [])
+        setTotal(data.pagination?.total ?? 0)
       }, isRefresh)
     } catch (error) {
       console.error('Erro ao buscar usuários:', error)
       showError('Erro ao buscar usuários', 'Tente novamente.')
     }
-  }
+  }, [withLoading, filterRole, debouncedSearch, page])
 
-  const filteredUsers = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase()
-    return users.filter((u) => {
-      if (filterRole && u.role !== filterRole) return false
-      if (!term) return true
-      return (
-        u.email.toLowerCase().includes(term) ||
-        (u.name?.toLowerCase().includes(term) ?? false)
-      )
-    })
-  }, [users, searchTerm, filterRole])
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
+    }
+  }, [user?.id, authLoading, router])
+
+  // Busca os dados no primeiro load e sempre que filtros/página mudarem
+  // (fetchUsers muda de identidade quando role/busca/página mudam).
+  useEffect(() => {
+    if (user && user.role === 'ADMIN') {
+      fetchUsers(!firstLoad.current)
+      firstLoad.current = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, fetchUsers])
 
   const handleDeleteClick = (userId: number, userEmail: string) => {
     setUserToDelete({ id: userId, email: userEmail })
@@ -157,19 +168,6 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error('Erro ao alterar cargo:', error)
       showError('Erro ao alterar cargo', error instanceof ApiError ? error.message : 'Tente novamente.')
-    }
-  }
-
-  const handleActivate = async () => {
-    if (!userToActivate) return
-    try {
-      await api.put(`/api/admin/users/${userToActivate.id}`, { active: true })
-      showSuccess('E-mail confirmado! Gerenciamento liberado.')
-      setUserToActivate(null)
-      fetchUsers(true)
-    } catch (error) {
-      console.error('Erro ao ativar usuário:', error)
-      showError('Erro ao ativar usuário', error instanceof ApiError ? error.message : 'Tente novamente.')
     }
   }
 
@@ -228,7 +226,7 @@ export default function AdminUsersPage() {
                     type="text"
                     placeholder="Buscar por email ou nome…"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1) }}
                     className="pl-10 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                   />
                 </div>
@@ -237,6 +235,7 @@ export default function AdminUsersPage() {
                 value={filterRole || undefined}
                 onValueChange={(value) => {
                   setFilterRole(value === 'all' ? '' : value)
+                  setPage(1)
                 }}
               >
                 <SelectTrigger className="w-full md:w-52 bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
@@ -255,7 +254,7 @@ export default function AdminUsersPage() {
 
         {/* Lista de Usuários */}
         <LoadingSwap loading={loading} skeleton={<SkeletonUserList count={8} />}>
-          {filteredUsers.length === 0 ? (
+          {users.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -271,7 +270,7 @@ export default function AdminUsersPage() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {filteredUsers.map((adminUser) => {
+            {users.map((adminUser) => {
               const roleInfo = getRoleBadge(adminUser.role)
               const RoleIcon = roleInfo.icon
 
@@ -335,18 +334,6 @@ export default function AdminUsersPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {!adminUser.active ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-green-500/50 text-foreground dark:text-green-300 hover:bg-green-500/10 font-rajdhani"
-                            onClick={() => setUserToActivate(adminUser)}
-                          >
-                            <UserCheck className="h-4 w-4 mr-2" />
-                            Confirmar e-mail
-                          </Button>
-                        ) : (
-                          <>
                         {adminUser.role === 'BOOSTER' && (
                           <>
                             <Button
@@ -396,7 +383,7 @@ export default function AdminUsersPage() {
                             Profit Share
                           </Button>
                         )}
-                        {adminUser.role === 'CLIENT' && (
+                        {adminUser.role === 'CLIENT' && adminUser.active && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -429,8 +416,6 @@ export default function AdminUsersPage() {
                             Editar
                           </Link>
                         </Button>
-                          </>
-                        )}
                         {adminUser.id !== user.id && (
                           <>
                             <Button
@@ -464,13 +449,13 @@ export default function AdminUsersPage() {
           )}
         </LoadingSwap>
 
-        <div className="mt-4 text-center">
-          <p className="text-muted-foreground font-rajdhani">
-            {filteredUsers.length === users.length
-              ? `Total: ${users.length} usuário${users.length !== 1 ? 's' : ''}`
-              : `Exibindo ${filteredUsers.length} de ${users.length} usuário${users.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
+        <PaginationControls
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          itemLabel="usuário"
+        />
 
       {/* Dialog de promover/rebaixar cargo */}
       <ConfirmDialog
@@ -485,18 +470,6 @@ export default function AdminUsersPage() {
         confirmLabel={roleChange?.toRole === 'BOOSTER' ? 'Promover' : 'Rebaixar'}
         cancelLabel="Cancelar"
         onConfirm={handleRoleChange}
-      />
-
-      {/* Dialog de confirmação manual de e-mail de usuário não confirmado */}
-      <ConfirmDialog
-        open={userToActivate !== null}
-        onOpenChange={(open) => { if (!open) setUserToActivate(null) }}
-        title="Confirmar e-mail"
-        description={`Confirmar manualmente o e-mail de ${userToActivate?.email}? A conta ainda não confirmou o e-mail. Ao confirmar, você ativa a conta e libera a edição, promoção a booster e demais ações de gerenciamento.`}
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-        variant="success"
-        onConfirm={handleActivate}
       />
 
       {/* Dialog para configurar comissão */}

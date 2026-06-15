@@ -115,6 +115,15 @@ export async function PUT(
       updateData.email = email
     }
     if (role !== undefined && ['CLIENT', 'BOOSTER', 'ADMIN'].includes(role)) {
+      // Contas que ainda não confirmaram o e-mail não podem ser promovidas
+      // (BOOSTER/ADMIN). Admin pode editar e-mail e excluir, mas não elevar o
+      // cargo — comparar com o cargo atual para não bloquear edições de e-mail.
+      if (!existingUser.active && role !== existingUser.role && role !== 'CLIENT') {
+        return NextResponse.json(
+          { message: 'Não é possível promover uma conta que ainda não confirmou o e-mail' },
+          { status: HttpStatus.BAD_REQUEST }
+        )
+      }
       updateData.role = role
     }
     if (password !== undefined && password.length >= 8) {
