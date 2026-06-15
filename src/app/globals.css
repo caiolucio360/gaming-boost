@@ -697,6 +697,32 @@
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
 }
 
+/* Rotating conic glow — sits behind a card to draw an animated, living border. */
+@keyframes cta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cta-ring {
+  background: conic-gradient(
+    from 0deg,
+    transparent 8%,
+    rgba(168, 85, 247, 0.55) 24%,
+    transparent 44%,
+    transparent 60%,
+    rgba(124, 58, 237, 0.6) 78%,
+    transparent 94%
+  );
+  animation: cta-spin 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-ring {
+    animation: none;
+  }
+}
+
 /* Diagonal light sweep across a card on hover. Requires the card to clip
    overflow. Purely decorative. */
 .card-shine::before {
