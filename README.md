@@ -17,20 +17,11 @@
 
 ---
 
-## 📸 Overview
+## 🎯 Overview
 
 FlautasBoost is a production-grade SaaS marketplace for video-game boosting services. Players buy rank-up services, professional boosters claim and fulfill them, and the platform handles payments, escrow-style refunds, and an automated revenue split between boosters, admins, and a privileged "dev-admin" — all behind a polished, theme-aware UI.
 
 It was built solo, end to end: data modeling, payment integration, authentication, the design system, the test suite, and the CI/CD-friendly deploy pipeline.
-
-<!-- Drop your screenshots into docs/screenshots/ and they'll render here. -->
-<div align="center">
-
-| Landing | Client dashboard | Admin panel |
-| :---: | :---: | :---: |
-| ![Landing](./docs/screenshots/landing.png) | ![Dashboard](./docs/screenshots/dashboard.png) | ![Admin](./docs/screenshots/admin.png) |
-
-</div>
 
 ---
 
