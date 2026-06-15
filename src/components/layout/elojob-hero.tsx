@@ -79,12 +79,13 @@ export function ElojobHero() {
           {/* Headline */}
           <motion.h1
             variants={item}
-            className="font-orbitron text-4xl font-bold leading-[1.1] tracking-tight text-white text-balance drop-shadow-2xl sm:text-5xl lg:text-6xl xl:text-7xl"
+            className="font-orbitron text-3xl font-bold leading-[1.15] tracking-tight text-white text-balance drop-shadow-2xl sm:text-4xl lg:text-5xl xl:text-6xl"
           >
-            Suba de rank ao lado de um{' '}
+            Jogue, suba e evolua ao lado de quem viveu o CS2 de verdade, experiência com um{' '}
             <span className="bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
-              ex-pro do CS2
+              ex jogador profissional
             </span>
+            .
           </motion.h1>
 
           {/* Subheadline */}
@@ -92,8 +93,7 @@ export function ElojobHero() {
             variants={item}
             className="mt-6 max-w-xl font-rajdhani text-lg leading-relaxed text-white/80 text-pretty md:text-xl"
           >
-            Boosters verificados, gameplay 100% limpo e entrega garantida. Evolua com quem
-            viveu o CS2 no alto nível.
+            Boosters verificados, gameplay 100% limpo e entrega garantida.
           </motion.p>
 
           {/* CTAs */}
