@@ -17,9 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Save, User, Crown, Shield, Loader2, UserCheck, CircleSlash } from 'lucide-react'
+import { Save, User, Crown, Shield, Loader2, CircleSlash } from 'lucide-react'
 import { BackButton } from '@/components/common/back-button'
-import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { api, ApiError } from '@/lib/api-client'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { UserDetailSkeleton } from '@/app/admin/users/[id]/_components/user-detail-skeleton'
@@ -55,7 +54,6 @@ export default function AdminUserDetailPage() {
   const [userData, setUserData] = useState<UserDetail | null>(null)
   const { loading, withLoading } = useLoading({ initialLoading: true })
   const [saving, setSaving] = useState(false)
-  const [activateOpen, setActivateOpen] = useState(false)
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: 'default' | 'destructive' } | null>(null)
 
   // Form fields
@@ -139,17 +137,6 @@ export default function AdminUserDetailPage() {
     }
   }
 
-  const handleActivate = async () => {
-    try {
-      await api.put(`/api/admin/users/${userId}`, { active: true })
-      setActivateOpen(false)
-      showAlert('Sucesso', 'E-mail confirmado! Edição liberada.')
-      fetchUser()
-    } catch (e) {
-      showAlert('Erro', e instanceof ApiError ? e.message : 'Erro ao ativar usuário', 'destructive')
-    }
-  }
-
   if (authLoading) return <LoadingSpinner />
   if (!authUser || authUser.role !== 'ADMIN') return null
 
@@ -202,30 +189,6 @@ export default function AdminUserDetailPage() {
             </div>
           </div>
 
-          {/* Inactive notice — management is locked until the admin activates the account */}
-          {isInactive && (
-            <Alert className="mb-6 bg-amber-500/10 border-amber-500/50">
-              <AlertTitle className="text-amber-500 font-orbitron text-sm flex items-center gap-2">
-                <CircleSlash className="h-4 w-4" />
-                E-mail não confirmado
-              </AlertTitle>
-              <AlertDescription className="text-muted-foreground font-rajdhani text-sm">
-                Este usuário ainda não confirmou o e-mail, então a edição está bloqueada.
-                Ative manualmente para liberar o gerenciamento.
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-600/90 text-white font-rajdhani"
-                    onClick={() => setActivateOpen(true)}
-                  >
-                    <UserCheck className="h-4 w-4 mr-2" />
-                    Confirmar e-mail
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Form */}
           <Card>
             <CardHeader>
@@ -240,7 +203,6 @@ export default function AdminUserDetailPage() {
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    disabled={isInactive}
                     className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="Nome completo"
                   />
@@ -250,7 +212,6 @@ export default function AdminUserDetailPage() {
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={isInactive}
                     className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="email@exemplo.com"
                   />
@@ -260,7 +221,7 @@ export default function AdminUserDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-muted-foreground font-rajdhani">Role</Label>
-                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)} disabled={isInactive}>
+                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
                     <SelectTrigger className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                       <SelectValue />
                     </SelectTrigger>
@@ -277,7 +238,6 @@ export default function AdminUserDetailPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={isInactive}
                     className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="Mínimo 6 caracteres"
                   />
@@ -294,7 +254,6 @@ export default function AdminUserDetailPage() {
                     step="0.1"
                     value={commissionPct}
                     onChange={(e) => setCommissionPct(e.target.value)}
-                    disabled={isInactive}
                     className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="70"
                   />
@@ -311,7 +270,6 @@ export default function AdminUserDetailPage() {
                     step="0.1"
                     value={profitShare}
                     onChange={(e) => setProfitShare(e.target.value)}
-                    disabled={isInactive}
                     className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani"
                     placeholder="1.0"
                   />
@@ -322,7 +280,7 @@ export default function AdminUserDetailPage() {
               <div className="pt-2 flex justify-end">
                 <Button
                   onClick={handleSave}
-                  disabled={saving || isInactive}
+                  disabled={saving}
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -334,17 +292,6 @@ export default function AdminUserDetailPage() {
               </div>
             </CardContent>
           </Card>
-
-          <ConfirmDialog
-            open={activateOpen}
-            onOpenChange={setActivateOpen}
-            title="Confirmar e-mail"
-            description={`Confirmar manualmente o e-mail de ${userData.email}? A conta ainda não confirmou o e-mail. Ao confirmar, você ativa a conta e libera a edição e o gerenciamento.`}
-            confirmLabel="Confirmar"
-            cancelLabel="Cancelar"
-            variant="success"
-            onConfirm={handleActivate}
-          />
         </>
       )}
       </LoadingSwap>
