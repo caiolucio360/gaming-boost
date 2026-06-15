@@ -79,7 +79,7 @@ export function ElojobHero() {
           {/* Headline */}
           <motion.h1
             variants={item}
-            className="font-orbitron text-3xl font-bold leading-[1.15] tracking-tight text-white text-balance drop-shadow-2xl sm:text-4xl lg:text-5xl xl:text-6xl"
+            className="font-orbitron text-2xl font-bold leading-[1.2] tracking-tight text-white text-balance drop-shadow-2xl sm:text-3xl lg:text-4xl xl:text-5xl"
           >
             Jogue, suba e evolua ao lado de quem viveu o CS2 de verdade, experiência com um{' '}
             <span className="animate-text-shimmer bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
