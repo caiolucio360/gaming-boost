@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { animate, useInView, useReducedMotion } from 'framer-motion'
-import { StarIcon } from 'lucide-react'
+// Rating stat disabled for now — re-enable with the rating entry below.
+// import { StarIcon } from 'lucide-react'
 import { Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionFx } from '@/components/home/section-fx'
@@ -16,7 +17,8 @@ import { SectionFx } from '@/components/home/section-fx'
  * never ship fabricated numbers.
  */
 const STATS = [
-  { value: 4.9, decimals: 1, suffix: '', label: 'Avaliação média', isRating: true },
+  // Rating stat hidden until we have real review data:
+  // { value: 4.9, decimals: 1, suffix: '', label: 'Avaliação média', isRating: true },
   { value: 5000, decimals: 0, suffix: '+', label: 'Pedidos concluídos', isRating: false },
   { value: 98, decimals: 0, suffix: '%', label: 'Clientes satisfeitos', isRating: false },
   { value: 50, decimals: 0, suffix: '+', label: 'Boosters verificados', isRating: false },
@@ -60,17 +62,18 @@ export function SocialProof() {
     <section aria-label="Prova social" className="relative overflow-hidden border-y border-border bg-background py-12 md:py-16">
       <SectionFx pattern="grid" />
       <div className="container relative z-10 mx-auto px-4">
-        <RevealStagger className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-4">
+        <RevealStagger className="grid grid-cols-3 gap-4 md:gap-4">
           {STATS.map((stat) => (
             <RevealItem key={stat.label} className="text-center">
               <div className="flex items-baseline justify-center gap-1 font-orbitron text-3xl font-bold text-foreground md:text-5xl">
                 <CountUp to={stat.value} decimals={stat.decimals} suffix={stat.suffix} />
+                {/* Rating star hidden until we have real review data:
                 {stat.isRating && (
                   <StarIcon
                     className="h-5 w-5 fill-brand-purple-light text-brand-purple-light md:h-7 md:w-7"
                     aria-hidden="true"
                   />
-                )}
+                )} */}
               </div>
               <Text className="mt-2 text-xs uppercase tracking-wider md:text-sm">{stat.label}</Text>
             </RevealItem>

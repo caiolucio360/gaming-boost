@@ -5,10 +5,12 @@ import { SocialProof } from "@/components/home/social-proof"
 import { WhyUs } from "@/components/home/why-us"
 import { HowItWorks } from "@/components/home/how-it-works"
 import { Services } from "@/components/home/services"
-import { Testimonials } from "@/components/home/testimonials"
+// Testimonials section hidden until we have real reviews — not in use yet.
+// import { Testimonials } from "@/components/home/testimonials"
 import { Faq } from "@/components/home/faq"
 import { FinalCta } from "@/components/home/final-cta"
-import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
+// Rating-related features are disabled until we have real review data.
+// import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Início - FlautasBoost',
@@ -84,8 +86,8 @@ export default function HomePage() {
     },
   }
 
-  // Only emitted when real Trustpilot rating values are configured (no fake data).
-  const aggregateRatingSchema = getTrustpilotAggregateRating(siteUrl)
+  // Rating schema disabled for now — re-enable once real review data exists.
+  // const aggregateRatingSchema = getTrustpilotAggregateRating(siteUrl)
 
   return (
     <>
@@ -107,6 +109,7 @@ export default function HomePage() {
           __html: JSON.stringify(serviceSchema),
         }}
       />
+      {/* Rating schema disabled until real review data exists.
       {aggregateRatingSchema && (
         <script
           type="application/ld+json"
@@ -114,7 +117,7 @@ export default function HomePage() {
             __html: JSON.stringify(aggregateRatingSchema),
           }}
         />
-      )}
+      )} */}
       <div className="min-h-screen">
         {/*
           Home — long, scroll-driven page. Each section reveals on scroll
@@ -127,7 +130,7 @@ export default function HomePage() {
         <WhyUs />
         <HowItWorks />
         <Services />
-        <Testimonials />
+        {/* Testimonials hidden until we have real reviews. <Testimonials /> */}
         <Faq />
         <FinalCta />
       </div>
