@@ -34,7 +34,6 @@ import {
   Crown,
   DollarSign,
   History,
-  UserCheck,
   CircleSlash,
   type LucideIcon,
 } from 'lucide-react'
@@ -94,7 +93,6 @@ export default function AdminUsersPage() {
   const [profitShareValue, setProfitShareValue] = useState<string>('')
   const [commissionReason, setCommissionReason] = useState<string>('')
   const [roleChange, setRoleChange] = useState<{ user: AdminUser; toRole: 'BOOSTER' | 'CLIENT' } | null>(null)
-  const [userToActivate, setUserToActivate] = useState<AdminUser | null>(null)
 
   const fetchUsers = useCallback(async (isRefresh = false) => {
     try {
@@ -170,19 +168,6 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error('Erro ao alterar cargo:', error)
       showError('Erro ao alterar cargo', error instanceof ApiError ? error.message : 'Tente novamente.')
-    }
-  }
-
-  const handleActivate = async () => {
-    if (!userToActivate) return
-    try {
-      await api.put(`/api/admin/users/${userToActivate.id}`, { active: true })
-      showSuccess('E-mail confirmado! Gerenciamento liberado.')
-      setUserToActivate(null)
-      fetchUsers(true)
-    } catch (error) {
-      console.error('Erro ao ativar usuário:', error)
-      showError('Erro ao ativar usuário', error instanceof ApiError ? error.message : 'Tente novamente.')
     }
   }
 
@@ -349,18 +334,6 @@ export default function AdminUsersPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {!adminUser.active ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-green-500/50 text-foreground dark:text-green-300 hover:bg-green-500/10 font-rajdhani"
-                            onClick={() => setUserToActivate(adminUser)}
-                          >
-                            <UserCheck className="h-4 w-4 mr-2" />
-                            Confirmar e-mail
-                          </Button>
-                        ) : (
-                          <>
                         {adminUser.role === 'BOOSTER' && (
                           <>
                             <Button
@@ -443,8 +416,6 @@ export default function AdminUsersPage() {
                             Editar
                           </Link>
                         </Button>
-                          </>
-                        )}
                         {adminUser.id !== user.id && (
                           <>
                             <Button
@@ -499,18 +470,6 @@ export default function AdminUsersPage() {
         confirmLabel={roleChange?.toRole === 'BOOSTER' ? 'Promover' : 'Rebaixar'}
         cancelLabel="Cancelar"
         onConfirm={handleRoleChange}
-      />
-
-      {/* Dialog de confirmação manual de e-mail de usuário não confirmado */}
-      <ConfirmDialog
-        open={userToActivate !== null}
-        onOpenChange={(open) => { if (!open) setUserToActivate(null) }}
-        title="Confirmar e-mail"
-        description={`Confirmar manualmente o e-mail de ${userToActivate?.email}? A conta ainda não confirmou o e-mail. Ao confirmar, você ativa a conta e libera a edição, promoção a booster e demais ações de gerenciamento.`}
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-        variant="success"
-        onConfirm={handleActivate}
       />
 
       {/* Dialog para configurar comissão */}
