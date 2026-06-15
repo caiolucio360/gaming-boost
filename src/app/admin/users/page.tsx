@@ -383,7 +383,7 @@ export default function AdminUsersPage() {
                             Profit Share
                           </Button>
                         )}
-                        {adminUser.role === 'CLIENT' && (
+                        {adminUser.role === 'CLIENT' && adminUser.active && (
                           <Button
                             variant="outline"
                             size="sm"

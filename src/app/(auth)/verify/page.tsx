@@ -120,6 +120,9 @@ function VerifyContent() {
           Digite o código de 6 dígitos enviado para <br />
           <span className="text-foreground font-medium">{email}</span>
         </p>
+        <p className="mt-2 text-xs text-muted-foreground font-rajdhani">
+          Não encontrou? Verifique a caixa de spam. O código expira em 15 minutos.
+        </p>
       </div>
 
       <Form {...form}>
