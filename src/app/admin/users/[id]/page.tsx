@@ -221,7 +221,7 @@ export default function AdminUserDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-muted-foreground font-rajdhani">Role</Label>
-                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
+                  <Select value={role} onValueChange={(v) => setRole(v as typeof role)} disabled={isInactive}>
                     <SelectTrigger className="bg-background/50 border-brand-purple/50 text-foreground font-rajdhani">
                       <SelectValue />
                     </SelectTrigger>
@@ -231,6 +231,11 @@ export default function AdminUserDetailPage() {
                       <SelectItem value="ADMIN">Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                  {isInactive && (
+                    <p className="text-xs text-amber-500 font-rajdhani">
+                      Confirme o e-mail da conta para alterar o cargo.
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-muted-foreground font-rajdhani">Nova Senha <span className="text-muted-foreground">(opcional)</span></Label>
