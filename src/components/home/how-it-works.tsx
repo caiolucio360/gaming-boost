@@ -63,7 +63,7 @@ export function HowItWorks() {
             {STEPS.map((step, index) => (
             <RevealItem
               key={step.title}
-              className="group relative flex flex-col items-center rounded-2xl border border-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+              className="card-shine group relative flex flex-col items-center overflow-hidden rounded-2xl border border-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
             >
               {/* Step number badge */}
               <span className="absolute right-4 top-3 font-orbitron text-4xl font-bold leading-none text-brand-purple/10 transition-colors duration-300 group-hover:text-brand-purple/25">

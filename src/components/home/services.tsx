@@ -38,7 +38,7 @@ export function Services() {
             return (
               <RevealItem
                 key={type}
-                className="group flex flex-col rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+                className="card-shine group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
               >
                 <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-brand-purple/40 bg-brand-purple/10 transition-all duration-300 group-hover:border-brand-purple group-hover:bg-brand-purple/20">
                   <Icon className="h-7 w-7 text-brand-purple-light" aria-hidden="true" />

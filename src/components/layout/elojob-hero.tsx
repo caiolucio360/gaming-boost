@@ -82,7 +82,7 @@ export function ElojobHero() {
             className="font-orbitron text-3xl font-bold leading-[1.15] tracking-tight text-white text-balance drop-shadow-2xl sm:text-4xl lg:text-5xl xl:text-6xl"
           >
             Jogue, suba e evolua ao lado de quem viveu o CS2 de verdade, experiência com um{' '}
-            <span className="bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
+            <span className="animate-text-shimmer bg-gradient-to-r from-brand-purple-light via-brand-purple to-brand-purple-light bg-clip-text text-transparent drop-shadow-glow">
               ex jogador profissional
             </span>
             .

@@ -651,6 +651,70 @@
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
 }
 
+/* Animated gradient text — slowly sweeps the brand gradient across the glyphs.
+   Pair with a bg-gradient + bg-clip-text + text-transparent span. */
+@keyframes text-shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.animate-text-shimmer {
+  background-size: 200% auto;
+  animation: text-shimmer 5s linear infinite;
+}
+
+/* Horizontal marquee (testimonials). The track holds two copies of the content,
+   so translating -50% loops seamlessly. Pauses on hover. */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-x 45s linear infinite;
+}
+
+.marquee-pause:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+/* Soft fade-out on the left/right edges of a horizontal track. */
+.fade-x-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Diagonal light sweep across a card on hover. Requires the card to clip
+   overflow. Purely decorative. */
+.card-shine::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(168, 85, 247, 0.14) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-shine:hover::before {
+  transform: translateX(120%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+  .card-shine::before {
+    display: none;
+  }
+}
+
 /* Row delete animation */
 @keyframes rowDelete {
   0% {

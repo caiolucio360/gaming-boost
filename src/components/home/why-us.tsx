@@ -38,7 +38,7 @@ export function WhyUs() {
           {DIFFERENTIALS.map((item) => (
             <RevealItem
               key={item.title}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+              className="card-shine group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
             >
               {/* Subtle corner glow */}
               <div
