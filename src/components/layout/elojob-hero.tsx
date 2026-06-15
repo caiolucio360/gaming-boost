@@ -47,7 +47,7 @@ export function ElojobHero() {
             </p>
           </div>
 
-          <div className="mb-8 md:mb-12">
+          <div className="mb-8 md:mb-12 flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
             <Button
               size="lg"
               className="px-6 md:px-12 py-3 md:py-6 text-sm md:text-lg font-bold bg-brand-purple hover:bg-brand-purple-light text-white transition-all duration-500 group relative overflow-hidden shadow-glow-lg hover:shadow-glow-hover rounded-lg"
@@ -57,6 +57,14 @@ export function ElojobHero() {
                 <span className="relative z-10">CONTRATE JÁ!</span>
                 <ArrowRightIcon className="h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform duration-300 relative z-10" aria-hidden="true" />
               </Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-6 md:px-12 py-3 md:py-6 text-sm md:text-lg font-bold border-brand-purple/60 bg-white/5 text-white backdrop-blur-sm hover:bg-white/10 hover:border-brand-purple-light transition-all duration-300 rounded-lg"
+              asChild
+            >
+              <a href="#como-funciona">Como funciona</a>
             </Button>
           </div>
         </div>
