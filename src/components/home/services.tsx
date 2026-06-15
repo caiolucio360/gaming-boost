@@ -4,6 +4,7 @@ import { Heading, Text } from '@/components/common/typography'
 import { Button } from '@/components/ui/button'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { SectionFx } from '@/components/home/section-fx'
 import { getGameConfig, type ServiceType } from '@/lib/games-config'
 
 const SERVICE_ICONS: Partial<Record<ServiceType, LucideIcon>> = {
@@ -18,8 +19,9 @@ export function Services() {
   const services = cs2?.supportedServiceTypes ?? []
 
   return (
-    <section aria-labelledby="services-title" className="bg-muted/30 py-20 md:py-28">
-      <div className="container mx-auto px-4">
+    <section aria-labelledby="services-title" className="relative overflow-hidden bg-muted/30 py-20 md:py-28">
+      <SectionFx pattern="dots" />
+      <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Counter-Strike 2"
           title="Nossos serviços"

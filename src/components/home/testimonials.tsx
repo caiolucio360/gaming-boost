@@ -2,6 +2,7 @@ import { StarIcon, QuoteIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { SectionFx } from '@/components/home/section-fx'
 
 /**
  * TODO(home): PLACEHOLDER testimonials — do NOT ship as real.
@@ -30,8 +31,9 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section aria-labelledby="testimonials-title" className="bg-background py-20 md:py-28">
-      <div className="container mx-auto px-4">
+    <section aria-labelledby="testimonials-title" className="relative overflow-hidden bg-background py-20 md:py-28">
+      <SectionFx pattern="grid" />
+      <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Quem já jogou com a gente"
           title="O que dizem os clientes"

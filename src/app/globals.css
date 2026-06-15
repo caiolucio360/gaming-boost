@@ -628,6 +628,29 @@
   background: linear-gradient(135deg, #7C3AED 0%, #A855F7 50%, #C084FC 100%);
 }
 
+/* =============================================
+   Decorative section background patterns (home).
+   Brand-purple grid / dot textures, faded out at the edges with a radial mask
+   so they read as atmosphere, never as a hard tile. Used by `SectionFx`.
+   ============================================= */
+.fx-grid {
+  background-image:
+    linear-gradient(to right, rgba(124, 58, 237, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(124, 58, 237, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.fx-dots {
+  background-image: radial-gradient(rgba(124, 58, 237, 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.fx-grid,
+.fx-dots {
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
+}
+
 /* Row delete animation */
 @keyframes rowDelete {
   0% {

@@ -1,9 +1,11 @@
 'use client'
 
+import { motion, useReducedMotion } from 'framer-motion'
 import { CrosshairIcon, QrCodeIcon, UserCheckIcon, ActivityIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { SectionFx } from '@/components/home/section-fx'
 
 const STEPS = [
   {
@@ -29,13 +31,16 @@ const STEPS = [
 ] as const
 
 export function HowItWorks() {
+  const reduceMotion = useReducedMotion()
+
   return (
     <section
       id="como-funciona"
       aria-labelledby="como-funciona-title"
-      className="relative scroll-mt-20 bg-background py-20 md:py-28"
+      className="relative scroll-mt-20 overflow-hidden bg-background py-20 md:py-28"
     >
-      <div className="container mx-auto px-4">
+      <SectionFx pattern="dots" />
+      <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Simples assim"
           title="Como funciona"
@@ -43,14 +48,19 @@ export function HowItWorks() {
           titleId="como-funciona-title"
         />
 
-        <RevealStagger className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-          {/* Connecting line behind the cards on desktop */}
-          <div
+        <div className="relative">
+          {/* Connecting line behind the cards on desktop — draws in on scroll */}
+          <motion.div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-12 hidden h-px bg-gradient-to-r from-transparent via-brand-purple/40 to-transparent lg:block"
+            className="pointer-events-none absolute inset-x-0 top-12 hidden h-px origin-left bg-gradient-to-r from-transparent via-brand-purple/50 to-transparent lg:block"
+            initial={reduceMotion ? false : { scaleX: 0, opacity: 0 }}
+            whileInView={{ scaleX: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1], delay: 0.2 }}
           />
 
-          {STEPS.map((step, index) => (
+          <RevealStagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            {STEPS.map((step, index) => (
             <RevealItem
               key={step.title}
               className="group relative flex flex-col items-center rounded-2xl border border-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
@@ -72,8 +82,9 @@ export function HowItWorks() {
               </Heading>
               <Text className="text-sm leading-relaxed">{step.desc}</Text>
             </RevealItem>
-          ))}
-        </RevealStagger>
+            ))}
+          </RevealStagger>
+        </div>
       </div>
     </section>
   )
