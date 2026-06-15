@@ -19,8 +19,8 @@ export function Services() {
   const services = cs2?.supportedServiceTypes ?? []
 
   return (
-    <section aria-labelledby="services-title" className="relative overflow-hidden bg-muted/30 py-20 md:py-28">
-      <SectionFx pattern="dots" />
+    <section aria-labelledby="services-title" className="relative overflow-hidden bg-background py-20 md:py-28">
+      <SectionFx pattern="grid" />
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Counter-Strike 2"

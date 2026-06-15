@@ -4,12 +4,13 @@ import { ArrowRightIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/home/reveal'
-import { Parallax } from '@/components/home/section-fx'
+import { Parallax, SectionFx } from '@/components/home/section-fx'
 
 export function FinalCta() {
   return (
-    <section aria-labelledby="final-cta-title" className="bg-background py-20 md:py-28">
-      <div className="container mx-auto px-4">
+    <section aria-labelledby="final-cta-title" className="relative overflow-hidden bg-background py-20 md:py-28">
+      <SectionFx pattern="grid" />
+      <div className="container relative z-10 mx-auto px-4">
         <Reveal className="relative overflow-hidden rounded-3xl border border-brand-purple/40 bg-gradient-brand px-6 py-16 text-center md:px-12 md:py-20">
           {/* Photo texture with subtle parallax — scaled up so the parallax shift never reveals edges */}
           <Parallax distance={30} className="pointer-events-none absolute inset-0">

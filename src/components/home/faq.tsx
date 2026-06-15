@@ -40,8 +40,8 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section aria-labelledby="faq-title" className="relative overflow-hidden bg-muted/30 py-20 md:py-28">
-      <SectionFx pattern="dots" />
+    <section aria-labelledby="faq-title" className="relative overflow-hidden bg-background py-20 md:py-28">
+      <SectionFx pattern="grid" />
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Tira-dúvidas"

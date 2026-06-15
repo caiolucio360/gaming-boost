@@ -39,7 +39,7 @@ export function HowItWorks() {
       aria-labelledby="como-funciona-title"
       className="relative scroll-mt-20 overflow-hidden bg-background py-20 md:py-28"
     >
-      <SectionFx pattern="dots" />
+      <SectionFx pattern="grid" />
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Simples assim"
