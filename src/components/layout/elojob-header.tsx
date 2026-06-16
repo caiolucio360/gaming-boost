@@ -118,10 +118,14 @@ export function ElojobHeader() {
             </DropdownMenu>
           ) : null}
           
-          <Link href="/how-it-works" className={navLinkClass}>
+          {/* Anchors the home "Como funciona" section — no dedicated page. */}
+          <Link href="/#como-funciona" className={navLinkClass}>
             Como Funciona
           </Link>
-          
+
+          <Link href="/about" className={navLinkClass}>
+            Sobre
+          </Link>
         </nav>
 
         {/* Auth Section - Hidden on mobile */}
