@@ -6,7 +6,6 @@ import { animate, useInView, useReducedMotion } from 'framer-motion'
 // import { StarIcon } from 'lucide-react'
 import { Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
-import { SectionFx } from '@/components/home/section-fx'
 
 /**
  * Social-proof stats bar with count-up on scroll.
@@ -59,8 +58,7 @@ function CountUp({ to, decimals, suffix }: { to: number; decimals: number; suffi
 
 export function SocialProof() {
   return (
-    <section aria-label="Prova social" className="relative overflow-hidden border-y border-border bg-background py-12 md:py-16">
-      <SectionFx pattern="grid" />
+    <section aria-label="Prova social" className="relative py-12 md:py-16">
       <div className="container relative z-10 mx-auto px-4">
         <RevealStagger className="grid grid-cols-3 gap-4 md:gap-4">
           {STATS.map((stat) => (

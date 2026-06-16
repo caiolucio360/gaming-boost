@@ -1,6 +1,7 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { ElojobHero } from "@/components/layout/elojob-hero"
+import { HomeBackground } from "@/components/home/home-background"
 import { SocialProof } from "@/components/home/social-proof"
 import { WhyUs } from "@/components/home/why-us"
 import { HowItWorks } from "@/components/home/how-it-works"
@@ -118,21 +119,24 @@ export default function HomePage() {
           }}
         />
       )} */}
-      <div className="min-h-screen">
-        {/*
-          Home — long, scroll-driven page. Each section reveals on scroll
-          (see `@/components/home/reveal`). Social-proof stats and testimonials
-          still use clearly-marked TODO placeholder data until wired to real
-          sources (Trustpilot / DB) — see the components' header comments.
-        */}
-        <ElojobHero />
-        <SocialProof />
-        <WhyUs />
-        <HowItWorks />
-        <Services />
-        {/* Testimonials hidden until we have real reviews. <Testimonials /> */}
-        <Faq />
-        <FinalCta />
+      {/*
+        Home — long, scroll-driven page. One page-wide HomeBackground sits behind
+        all sections so the colour flows continuously and bleeds across section
+        boundaries (sections are transparent, no separating bars). Each section
+        reveals on scroll (see `@/components/home/reveal`).
+      */}
+      <div className="relative min-h-screen">
+        <HomeBackground />
+        <div className="relative z-10">
+          <ElojobHero />
+          <SocialProof />
+          <WhyUs />
+          <HowItWorks />
+          <Services />
+          {/* Testimonials hidden until we have real reviews. <Testimonials /> */}
+          <Faq />
+          <FinalCta />
+        </div>
       </div>
     </>
   )

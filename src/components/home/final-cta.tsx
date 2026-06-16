@@ -7,14 +7,13 @@ import { ArrowRightIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/home/reveal'
-import { Parallax, SectionFx } from '@/components/home/section-fx'
+import { Parallax } from '@/components/home/section-fx'
 
 export function FinalCta() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section aria-labelledby="final-cta-title" className="relative overflow-hidden bg-background py-20 md:py-28">
-      <SectionFx pattern="grid" />
+    <section aria-labelledby="final-cta-title" className="relative py-20 md:py-28">
       <div className="container relative z-10 mx-auto px-4">
         <Reveal>
           {/* Outer wrapper: the animated conic ring shows only at the 1px border */}
