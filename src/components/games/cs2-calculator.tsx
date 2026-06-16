@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, animate } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -45,6 +45,37 @@ const SERVICE_ICONS: Partial<Record<ServiceType, typeof Sword>> = {
 
 const SERVICE_ORDER: ServiceType[] = ['RANK_BOOST', 'DUO_BOOST', 'COACHING']
 
+/**
+ * Price display that rolls from its current value to the new one whenever `value`
+ * changes, so the number visibly counts up/down in real time instead of flashing
+ * a loading state. Uses `tabular-nums` so the width doesn't jitter mid-animation.
+ * No motion under `prefers-reduced-motion` (snaps to the value).
+ */
+function AnimatedPrice({ value, className }: { value: number; className?: string }) {
+  const reduceMotion = useReducedMotion()
+  const [display, setDisplay] = useState(value)
+  const fromRef = useRef(value)
+
+  useEffect(() => {
+    if (reduceMotion) {
+      fromRef.current = value
+      setDisplay(value)
+      return
+    }
+    const controls = animate(fromRef.current, value, {
+      duration: 0.6,
+      ease: [0.4, 0, 0.2, 1],
+      onUpdate: (v) => {
+        fromRef.current = v
+        setDisplay(v)
+      },
+    })
+    return () => controls.stop()
+  }, [value, reduceMotion])
+
+  return <div className={className}>R$ {display.toFixed(2)}</div>
+}
+
 export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }: GameCalculatorProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(initialService)
   const [price, setPrice] = useState(0)
@@ -63,6 +94,15 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
   const { addItem } = useCart()
   const router = useRouter()
   const reduceMotion = useReducedMotion()
+  // Monotonic id so out-of-order price responses (fast rating changes) can't
+  // overwrite a newer result.
+  const calcSeq = useRef(0)
+  // Latest rating values, read inside the ranges effect without listing them as
+  // deps (so adjusting a slider doesn't re-fetch ranges and reset the selection).
+  const currentRatingRef = useRef(currentRating)
+  const targetRatingRef = useRef(targetRating)
+  currentRatingRef.current = currentRating
+  targetRatingRef.current = targetRating
 
   const gameConfig = getGameConfig(gameId)
   const modeConfig = gameConfig?.modes?.[gameMode]
@@ -109,7 +149,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
             if (points && points.length > 0) {
               setDynamicPoints(points)
-              if (currentRating === 0 && targetRating === 1000) {
+              if (currentRatingRef.current === 0 && targetRatingRef.current === 1000) {
                 setCurrentRating(min ?? 0)
                 setTargetRating(Math.min((min ?? 0) + 1000, max ?? 26000))
               }
@@ -144,10 +184,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
     resetRatings()
     fetchRanges()
-    // currentRating/targetRating são lidos só como guard de "default inicial"; incluí-los nas deps
-    // re-rodaria o effect (resetando a seleção do usuário) a cada ajuste de slider.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId, gameMode, selectedServiceType])
+  }, [gameId, selectedServiceType])
 
   // Check for active orders when user is logged in
   useEffect(() => {
@@ -279,10 +316,9 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     }
   }
 
-  // Obter pontos de rating (dynamic from API or fallback to static)
-  const calculatePrice = async () => {
-    // Disable calculate manual caching if needed
-    // Calculate is handled by effect now
+  // Price calculation (DB-driven via /api/pricing/calculate). Memoized so the
+  // auto-calculate effect can depend on it without re-running every render.
+  const calculatePrice = useCallback(async () => {
     if (!modeConfig || !selectedServiceType) {
       setPrice(0)
       return
@@ -294,6 +330,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
         return
       }
 
+      const seq = ++calcSeq.current
       setIsCalculating(true)
       try {
         const data = await api.post<{ data: { price: number } }>('/api/pricing/calculate', {
@@ -302,13 +339,15 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
           serviceType: selectedServiceType,
           hours: selectedHours,
         })
+        if (seq !== calcSeq.current) return // a newer request superseded this one
         setPrice(data.data.price)
       } catch (error) {
+        if (seq !== calcSeq.current) return
         console.error('Error calculating price:', error)
         showError('Erro ao calcular preço', error instanceof ApiError ? error.message : 'Não foi possível calcular o preço. Tente novamente.')
         setPrice(0)
       } finally {
-        setIsCalculating(false)
+        if (seq === calcSeq.current) setIsCalculating(false)
       }
       return
     }
@@ -324,6 +363,7 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
     const currentValue = current
     const targetValue = target
 
+    const seq = ++calcSeq.current
     setIsCalculating(true)
     try {
       const data = await api.post<{ data: { price: number } }>('/api/pricing/calculate', {
@@ -333,15 +373,17 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
         current: currentValue,
         target: targetValue,
       })
+      if (seq !== calcSeq.current) return // a newer request superseded this one
       setPrice(data.data.price)
     } catch (error) {
+      if (seq !== calcSeq.current) return
       console.error('Error calculating price:', error)
       showError('Erro ao calcular preço', error instanceof ApiError ? error.message : 'Não foi possível calcular o preço. Tente novamente.')
       setPrice(0)
     } finally {
-      setIsCalculating(false)
+      if (seq === calcSeq.current) setIsCalculating(false)
     }
-  }
+  }, [modeConfig, selectedServiceType, selectedHours, currentRating, targetRating, gameId])
 
   const handleCurrentChange = (value: number) => {
     setCurrentRating(Math.min(value, targetRating - 1))
@@ -365,11 +407,10 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
 
     const timer = setTimeout(() => {
       calculatePrice()
-    }, 400)
+    }, 150)
 
     return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentRating, targetRating, selectedHours, selectedServiceType, gameId, gameMode])
+  }, [calculatePrice, currentRating, targetRating, selectedHours, selectedServiceType])
 
   if (!gameConfig || !modeConfig) {
     return (
@@ -599,24 +640,18 @@ export function CS2Calculator({ gameId = 'CS2', initialService = 'RANK_BOOST' }:
                   <p className="font-rajdhani text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Preço estimado
                   </p>
-                  <div className="mt-1 flex min-h-12 items-center">
-                    {isCalculating ? (
-                      <div className="flex items-center gap-3 text-brand-purple-light">
-                        <Spinner size="md" />
-                        <span className="font-rajdhani text-sm font-semibold">Calculando…</span>
-                      </div>
-                    ) : price > 0 ? (
-                      <motion.div
-                        key={price}
-                        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                  <div className="mt-1 flex min-h-12 items-center gap-3">
+                    {price > 0 ? (
+                      <AnimatedPrice
+                        value={price}
                         className="font-orbitron text-4xl font-bold tabular-nums text-brand-purple-light sm:text-5xl"
-                      >
-                        R$ {price.toFixed(2)}
-                      </motion.div>
+                      />
                     ) : (
                       <div className="font-orbitron text-4xl font-bold text-muted-foreground sm:text-5xl">—</div>
+                    )}
+                    {/* Subtle "updating" cue — never blocks the number from showing/animating */}
+                    {isCalculating && price > 0 && (
+                      <span className="h-2 w-2 rounded-full bg-brand-purple-light animate-pulse" aria-hidden="true" />
                     )}
                   </div>
                   <p className="mt-2 font-rajdhani text-sm text-muted-foreground">
