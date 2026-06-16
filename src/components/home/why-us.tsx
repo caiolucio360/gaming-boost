@@ -2,7 +2,6 @@ import { TrophyIcon, ShieldCheckIcon, EyeIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
-import { SectionFx } from '@/components/home/section-fx'
 
 const DIFFERENTIALS = [
   {
@@ -24,8 +23,7 @@ const DIFFERENTIALS = [
 
 export function WhyUs() {
   return (
-    <section aria-labelledby="why-us-title" className="relative overflow-hidden bg-background py-20 md:py-28">
-      <SectionFx pattern="grid" />
+    <section aria-labelledby="why-us-title" className="relative py-20 md:py-28">
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Por que a FlautasBoost"

@@ -653,10 +653,29 @@
     radial-gradient(50% 55% at 100% 100%, rgba(168, 85, 247, 0.12), transparent 72%);
 }
 
+/* Fade the grid/dots only left/right so the texture stays continuous
+   top-to-bottom (a radial vignette would darken edges and create seams). */
 .fx-grid,
 .fx-dots {
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+
+/* Single page-wide colour wash for the home. A continuous vertical purple
+   gradient that flows from one section into the next (no per-section tiles),
+   transparent at the very top/bottom so it blends into the hero and footer.
+   Rendered once by `HomeBackground`. */
+.home-bg-gradient {
+  background:
+    radial-gradient(55% 30% at 50% 0%, rgba(124, 58, 237, 0.10), transparent 70%),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(124, 58, 237, 0.05) 18%,
+      rgba(76, 29, 149, 0.10) 45%,
+      rgba(124, 58, 237, 0.06) 72%,
+      transparent 100%
+    );
 }
 
 /* Animated gradient text — slowly sweeps the brand gradient across the glyphs.

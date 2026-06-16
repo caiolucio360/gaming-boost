@@ -5,7 +5,6 @@ import { CrosshairIcon, QrCodeIcon, UserCheckIcon, ActivityIcon } from 'lucide-r
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
-import { SectionFx } from '@/components/home/section-fx'
 
 const STEPS = [
   {
@@ -37,9 +36,8 @@ export function HowItWorks() {
     <section
       id="como-funciona"
       aria-labelledby="como-funciona-title"
-      className="relative scroll-mt-20 overflow-hidden bg-background py-20 md:py-28"
+      className="relative scroll-mt-20 py-20 md:py-28"
     >
-      <SectionFx pattern="grid" />
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Simples assim"

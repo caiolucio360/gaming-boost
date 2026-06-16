@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/accordion'
 import { Reveal } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
-import { SectionFx } from '@/components/home/section-fx'
 
 const FAQS = [
   {
@@ -40,8 +39,7 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section aria-labelledby="faq-title" className="relative overflow-hidden bg-background py-20 md:py-28">
-      <SectionFx pattern="grid" />
+    <section aria-labelledby="faq-title" className="relative py-20 md:py-28">
       <div className="container relative z-10 mx-auto px-4">
         <SectionHeading
           eyebrow="Tira-dúvidas"
