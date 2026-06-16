@@ -10,10 +10,10 @@ import { motion, useReducedMotion } from 'framer-motion'
  * no pointer events); orbs hold still under `prefers-reduced-motion`.
  */
 const ORBS = [
-  { className: '-left-32 top-[8%] h-[28rem] w-[28rem] bg-brand-purple/20', y: -28, dur: 12, delay: 0 },
-  { className: '-right-32 top-[30%] h-[34rem] w-[34rem] bg-brand-purple-light/14', y: 30, dur: 15, delay: 1 },
-  { className: 'left-1/4 top-[55%] h-[30rem] w-[30rem] bg-brand-purple-dark/22', y: -24, dur: 14, delay: 2 },
-  { className: '-right-24 top-[80%] h-[28rem] w-[28rem] bg-brand-purple/16', y: 26, dur: 16, delay: 1.5 },
+  { className: '-left-32 top-[8%] h-[28rem] w-[28rem] bg-brand-purple/30', y: -28, dur: 12, delay: 0 },
+  { className: '-right-32 top-[30%] h-[34rem] w-[34rem] bg-brand-purple-light/22', y: 30, dur: 15, delay: 1 },
+  { className: 'left-1/4 top-[55%] h-[30rem] w-[30rem] bg-brand-purple-dark/30', y: -24, dur: 14, delay: 2 },
+  { className: '-right-24 top-[80%] h-[28rem] w-[28rem] bg-brand-purple/24', y: 26, dur: 16, delay: 1.5 },
 ] as const
 
 export function HomeBackground() {

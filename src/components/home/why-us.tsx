@@ -2,6 +2,7 @@ import { TrophyIcon, ShieldCheckIcon, EyeIcon } from 'lucide-react'
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { IconTile } from '@/components/home/icon-tile'
 
 const DIFFERENTIALS = [
   {
@@ -36,17 +37,20 @@ export function WhyUs() {
           {DIFFERENTIALS.map((item) => (
             <RevealItem
               key={item.title}
-              className="card-shine group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+              className="card-shine group relative overflow-hidden rounded-2xl border border-brand-purple/20 bg-card/60 p-8 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-purple/60 hover:bg-card/80 hover:shadow-glow"
             >
-              {/* Subtle corner glow */}
+              {/* Top accent bar */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-purple/10 blur-2xl transition-opacity duration-300 group-hover:bg-brand-purple/20"
+                className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-brand-purple to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+              />
+              {/* Corner glow */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-purple/15 blur-2xl transition-opacity duration-300 group-hover:bg-brand-purple/30"
               />
               <div className="relative z-10">
-                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-brand-purple/40 bg-brand-purple/10 transition-all duration-300 group-hover:border-brand-purple group-hover:bg-brand-purple/20">
-                  <item.icon className="h-7 w-7 text-brand-purple-light" aria-hidden="true" />
-                </div>
+                <IconTile icon={item.icon} className="mb-5" />
                 <Heading as="h3" level={3} className="mb-3">
                   {item.title}
                 </Heading>
