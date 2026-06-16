@@ -4,6 +4,7 @@ import { Heading, Text } from '@/components/common/typography'
 import { Button } from '@/components/ui/button'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { IconTile } from '@/components/home/icon-tile'
 import { getGameConfig, type ServiceType } from '@/lib/games-config'
 
 const SERVICE_ICONS: Partial<Record<ServiceType, LucideIcon>> = {
@@ -36,18 +37,26 @@ export function Services() {
             return (
               <RevealItem
                 key={type}
-                className="card-shine group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+                className="card-shine group relative flex flex-col overflow-hidden rounded-2xl border border-brand-purple/20 bg-card/60 p-8 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-purple/60 hover:bg-card/80 hover:shadow-glow"
               >
-                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-brand-purple/40 bg-brand-purple/10 transition-all duration-300 group-hover:border-brand-purple group-hover:bg-brand-purple/20">
-                  <Icon className="h-7 w-7 text-brand-purple-light" aria-hidden="true" />
-                </div>
-                <Heading as="h3" level={3} className="mb-3">
+                {/* Top accent bar */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-brand-purple to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+                />
+                {/* Corner glow */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-purple/15 blur-2xl transition-opacity duration-300 group-hover:bg-brand-purple/30"
+                />
+                <IconTile icon={Icon} className="relative z-10 mb-5" />
+                <Heading as="h3" level={3} className="relative z-10 mb-3">
                   {info.displayName}
                 </Heading>
-                <Text className="mb-6 flex-1 text-sm leading-relaxed md:text-base">{info.description}</Text>
+                <Text className="relative z-10 mb-6 flex-1 text-sm leading-relaxed md:text-base">{info.description}</Text>
                 <Button
                   variant="outline"
-                  className="w-full border-brand-purple/50 hover:border-brand-purple hover:bg-brand-purple/10"
+                  className="relative z-10 w-full border-brand-purple/50 hover:border-brand-purple hover:bg-brand-purple/10"
                   asChild
                 >
                   <Link href={cs2?.href ?? '/games/cs2'} className="flex items-center justify-center gap-2">

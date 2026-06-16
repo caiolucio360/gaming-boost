@@ -5,6 +5,7 @@ import { CrosshairIcon, QrCodeIcon, UserCheckIcon, ActivityIcon } from 'lucide-r
 import { Heading, Text } from '@/components/common/typography'
 import { RevealStagger, RevealItem } from '@/components/home/reveal'
 import { SectionHeading } from '@/components/home/section-heading'
+import { IconTile } from '@/components/home/icon-tile'
 
 const STEPS = [
   {
@@ -61,24 +62,24 @@ export function HowItWorks() {
             {STEPS.map((step, index) => (
             <RevealItem
               key={step.title}
-              className="card-shine group relative flex flex-col items-center overflow-hidden rounded-2xl border border-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-brand-purple/50 hover:shadow-glow"
+              className="card-shine group relative flex flex-col items-center overflow-hidden rounded-2xl border border-brand-purple/20 bg-card/60 p-6 text-center backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-purple/60 hover:bg-card/80 hover:shadow-glow"
             >
+              {/* Top accent bar */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-brand-purple to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+              />
               {/* Step number badge */}
-              <span className="absolute right-4 top-3 font-orbitron text-4xl font-bold leading-none text-brand-purple/10 transition-colors duration-300 group-hover:text-brand-purple/25">
+              <span className="absolute right-4 top-3 font-orbitron text-4xl font-bold leading-none text-brand-purple/15 transition-colors duration-300 group-hover:text-brand-purple/30">
                 {String(index + 1).padStart(2, '0')}
               </span>
 
-              <div className="relative z-10 mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-brand-purple/40 bg-brand-purple/10 transition-all duration-300 group-hover:border-brand-purple group-hover:bg-brand-purple/20">
-                <step.icon
-                  className="h-7 w-7 text-brand-purple-light transition-transform duration-300 group-hover:scale-110"
-                  aria-hidden="true"
-                />
-              </div>
+              <IconTile icon={step.icon} className="relative z-10 mb-5 h-16 w-16" />
 
-              <Heading as="h3" level={4} className="mb-2 text-lg">
+              <Heading as="h3" level={4} className="relative z-10 mb-2 text-lg">
                 {step.title}
               </Heading>
-              <Text className="text-sm leading-relaxed">{step.desc}</Text>
+              <Text className="relative z-10 text-sm leading-relaxed">{step.desc}</Text>
             </RevealItem>
             ))}
           </RevealStagger>
