@@ -646,17 +646,21 @@
 }
 
 /* Soft brand-purple color wash so sections read as lit atmosphere, not flat black.
-   Blooms from the top-left and bottom-right corners in two purple tones. */
+   A continuous vertical tint (same colour at the top and bottom edges) keeps the
+   colour flowing seamlessly from one section into the next — no dark band/seam at
+   the boundaries — with a gentle centre glow on top for life. */
 .fx-bloom {
   background:
-    radial-gradient(55% 50% at 15% 0%, rgba(124, 58, 237, 0.16), transparent 72%),
-    radial-gradient(50% 55% at 100% 100%, rgba(168, 85, 247, 0.12), transparent 72%);
+    radial-gradient(75% 60% at 50% 50%, rgba(124, 58, 237, 0.11), transparent 80%),
+    linear-gradient(180deg, rgba(124, 58, 237, 0.06), rgba(76, 29, 149, 0.06));
 }
 
+/* Fade the grid/dots only on the left/right so the texture stays continuous
+   top-to-bottom (a radial vignette would darken section edges and seam). */
 .fx-grid,
 .fx-dots {
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 0%, transparent 78%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
 
 /* Animated gradient text — slowly sweeps the brand gradient across the glyphs.
