@@ -15,13 +15,21 @@ import { RevealStagger, RevealItem } from '@/components/home/reveal'
  * satisfaction. Render nothing (or hide the stat) when real data is unavailable;
  * never ship fabricated numbers.
  */
-const STATS = [
+type Stat = {
+  value: number
+  decimals: number
+  suffix: string
+  label: string
+  isRating: boolean
+}
+
+const STATS: readonly Stat[] = [
   // Rating stat hidden until we have real review data:
   // { value: 4.9, decimals: 1, suffix: '', label: 'Avaliação média', isRating: true },
   // { value: 5000, decimals: 0, suffix: '+', label: 'Pedidos concluídos', isRating: false },
   // { value: 98, decimals: 0, suffix: '%', label: 'Clientes satisfeitos', isRating: false },
   // { value: 50, decimals: 0, suffix: '+', label: 'Boosters verificados', isRating: false },
-] as const
+]
 
 function CountUp({ to, decimals, suffix }: { to: number; decimals: number; suffix: string }) {
   const ref = useRef<HTMLSpanElement>(null)
