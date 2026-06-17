@@ -18,9 +18,9 @@ import { RevealStagger, RevealItem } from '@/components/home/reveal'
 const STATS = [
   // Rating stat hidden until we have real review data:
   // { value: 4.9, decimals: 1, suffix: '', label: 'Avaliação média', isRating: true },
-  { value: 5000, decimals: 0, suffix: '+', label: 'Pedidos concluídos', isRating: false },
-  { value: 98, decimals: 0, suffix: '%', label: 'Clientes satisfeitos', isRating: false },
-  { value: 50, decimals: 0, suffix: '+', label: 'Boosters verificados', isRating: false },
+  // { value: 5000, decimals: 0, suffix: '+', label: 'Pedidos concluídos', isRating: false },
+  // { value: 98, decimals: 0, suffix: '%', label: 'Clientes satisfeitos', isRating: false },
+  // { value: 50, decimals: 0, suffix: '+', label: 'Boosters verificados', isRating: false },
 ] as const
 
 function CountUp({ to, decimals, suffix }: { to: number; decimals: number; suffix: string }) {
@@ -57,10 +57,14 @@ function CountUp({ to, decimals, suffix }: { to: number; decimals: number; suffi
 }
 
 export function SocialProof() {
+  // All stats are placeholders and currently hidden — render nothing until we
+  // wire real data (see TODO above). Re-enable by uncommenting entries in STATS.
+  if (STATS.length === 0) return null
+
   return (
     <section aria-label="Prova social" className="relative py-12 md:py-16">
       <div className="container relative z-10 mx-auto px-4">
-        <RevealStagger className="grid grid-cols-3 gap-4 md:gap-4">
+        <RevealStagger className="grid grid-cols-2 gap-4 md:gap-4">
           {STATS.map((stat) => (
             <RevealItem key={stat.label} className="text-center">
               <div className="flex items-baseline justify-center gap-1 font-orbitron text-3xl font-bold text-foreground md:text-5xl">
