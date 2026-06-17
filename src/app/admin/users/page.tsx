@@ -122,6 +122,8 @@ export default function AdminUsersPage() {
     if (!authLoading && (!user || user.role !== 'ADMIN')) {
       router.replace(!user ? '/login' : user.role === 'BOOSTER' ? '/booster' : '/dashboard')
     }
+    // user?.id basta como gatilho — não re-rodar a cada recriação do objeto user.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading, router])
 
   // Busca os dados no primeiro load e sempre que filtros/página mudarem
