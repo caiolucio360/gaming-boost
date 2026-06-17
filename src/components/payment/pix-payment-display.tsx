@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Copy, Check, RefreshCw, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { showSuccess, showError } from '@/lib/toast'
 import { api, ApiError } from '@/lib/api-client'
-import { TrustpilotReviewLink } from '@/components/trustpilot/trustpilot-review-link'
+// import { TrustpilotReviewLink } from '@/components/trustpilot/trustpilot-review-link'
 
 interface PixPaymentDisplayProps {
   paymentId: number
@@ -174,7 +174,7 @@ export function PixPaymentDisplay({
             <p className="text-muted-foreground font-rajdhani">
               Seu pedido foi pago e está sendo processado.
             </p>
-            <TrustpilotReviewLink className="mt-2" />
+            {/* <TrustpilotReviewLink className="mt-2" /> */}
           </div>
         </CardContent>
       </Card>
