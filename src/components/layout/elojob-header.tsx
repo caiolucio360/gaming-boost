@@ -23,9 +23,15 @@ import { useAuth } from '@/contexts/auth-context'
 import { useCart } from '@/contexts/cart-context'
 import { getEnabledGames } from '@/lib/games-config'
 import { getAuthToken } from '@/lib/api-client'
+import { cn } from '@/lib/utils'
 
 import { NotificationBell } from '@/components/common/notification-bell'
 import { ThemeToggle } from '@/components/common/theme-toggle'
+
+// Shared style for top-bar nav links and ghost buttons. Compose extras with
+// `cn(navLinkClass, '...')` (e.g. dropdown triggers add flex + open-state bg).
+const navLinkClass =
+  'text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg'
 
 export function ElojobHeader() {
   const { user, logout, loading: authLoading } = useAuth()
@@ -77,19 +83,13 @@ export function ElojobHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-6">
-          <Link
-            href="/"
-            className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
-          >
+          <Link href="/" className={navLinkClass}>
             Início
           </Link>
           
           {/* Links de jogos dinâmicos */}
           {gamesItems.length > 0 && gamesItems.length === 1 ? (
-            <Link
-              href={gamesItems[0].href}
-              className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
-            >
+            <Link href={gamesItems[0].href} className={navLinkClass}>
               {gamesItems[0].name}
             </Link>
           ) : gamesItems.length > 1 ? (
@@ -97,7 +97,7 @@ export function ElojobHeader() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10 flex items-center data-[state=open]:bg-brand-purple/10"
+                  className={cn(navLinkClass, 'flex items-center data-[state=open]:bg-brand-purple/10')}
                 >
                   Jogos
                   <ChevronDownIcon className="ml-2 h-4 w-4" />
@@ -118,13 +118,14 @@ export function ElojobHeader() {
             </DropdownMenu>
           ) : null}
           
-          <Link
-            href="/how-it-works"
-            className="text-foreground font-medium hover:text-brand-purple-light transition-colors duration-300 text-base tracking-wide px-4 py-2 rounded-lg hover:bg-brand-purple/10"
-          >
+          {/* Anchors the home "Como funciona" section — no dedicated page. */}
+          <Link href="/#como-funciona" className={navLinkClass}>
             Como Funciona
           </Link>
-          
+
+          <Link href="/about" className={navLinkClass}>
+            Sobre
+          </Link>
         </nav>
 
         {/* Auth Section - Hidden on mobile */}
@@ -137,11 +138,7 @@ export function ElojobHeader() {
               
               {/* Se está carregando e há token mas ainda não há user, mostrar botão genérico */}
               {authLoading && hasToken && !user ? (
-                <Button
-                  variant="ghost"
-                  className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
-                  disabled
-                >
+                <Button variant="ghost" className={navLinkClass} disabled>
                   <UserIcon className="mr-2 h-4 w-4" />
                   Carregando…
                 </Button>
@@ -180,7 +177,7 @@ export function ElojobHeader() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base flex items-center data-[state=open]:bg-brand-purple/10"
+                        className={cn(navLinkClass, 'flex items-center data-[state=open]:bg-brand-purple/10')}
                       >
                         <UserIcon className="mr-2 h-4 w-4" />
                         Minha Conta
@@ -276,11 +273,7 @@ export function ElojobHeader() {
                 </Button>
               )}
 
-              <Button
-                variant="ghost"
-                className="text-foreground font-medium hover:text-brand-purple-light hover:bg-brand-purple/10 px-4 py-2 rounded-lg transition-colors duration-300 text-base"
-                asChild
-              >
+              <Button variant="ghost" className={navLinkClass} asChild>
                 <Link href="/login">Entrar</Link>
               </Button>
               <Button className="px-6 text-base" asChild>

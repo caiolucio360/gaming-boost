@@ -1,7 +1,17 @@
 import { generateMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { ElojobHero } from "@/components/layout/elojob-hero"
-import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
+import { HomeBackground } from "@/components/home/home-background"
+import { SocialProof } from "@/components/home/social-proof"
+import { WhyUs } from "@/components/home/why-us"
+import { HowItWorks } from "@/components/home/how-it-works"
+import { Services } from "@/components/home/services"
+// Testimonials section hidden until we have real reviews — not in use yet.
+// import { Testimonials } from "@/components/home/testimonials"
+import { Faq } from "@/components/home/faq"
+import { FinalCta } from "@/components/home/final-cta"
+// Rating-related features are disabled until we have real review data.
+// import { getTrustpilotAggregateRating } from '@/lib/trustpilot'
 
 export const metadata: Metadata = generateMetadata({
   title: 'Início - FlautasBoost',
@@ -77,8 +87,8 @@ export default function HomePage() {
     },
   }
 
-  // Only emitted when real Trustpilot rating values are configured (no fake data).
-  const aggregateRatingSchema = getTrustpilotAggregateRating(siteUrl)
+  // Rating schema disabled for now — re-enable once real review data exists.
+  // const aggregateRatingSchema = getTrustpilotAggregateRating(siteUrl)
 
   return (
     <>
@@ -100,6 +110,7 @@ export default function HomePage() {
           __html: JSON.stringify(serviceSchema),
         }}
       />
+      {/* Rating schema disabled until real review data exists.
       {aggregateRatingSchema && (
         <script
           type="application/ld+json"
@@ -107,9 +118,25 @@ export default function HomePage() {
             __html: JSON.stringify(aggregateRatingSchema),
           }}
         />
-      )}
-      <div className="min-h-screen">
-        <ElojobHero />
+      )} */}
+      {/*
+        Home — long, scroll-driven page. One page-wide HomeBackground sits behind
+        all sections so the colour flows continuously and bleeds across section
+        boundaries (sections are transparent, no separating bars). Each section
+        reveals on scroll (see `@/components/home/reveal`).
+      */}
+      <div className="relative min-h-screen">
+        <HomeBackground />
+        <div className="relative z-10">
+          <ElojobHero />
+          <SocialProof />
+          <WhyUs />
+          <HowItWorks />
+          <Services />
+          {/* Testimonials hidden until we have real reviews. <Testimonials /> */}
+          <Faq />
+          <FinalCta />
+        </div>
       </div>
     </>
   )
